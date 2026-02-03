@@ -20,13 +20,23 @@ describe("Mode Manager", () => {
         expect(config.name).toBeTruthy();
         expect(config.description).toBeTruthy();
         expect(config.systemPromptModifier).toBeTruthy();
-        expect(config.icon).toBeTruthy();
+        expect(config.emoji).toBeTruthy();
       }
     });
 
     test("all modes should have non-empty system prompt modifiers", () => {
       for (const mode of modeTypes) {
         expect(MODE_CONFIGS[mode].systemPromptModifier.length).toBeGreaterThan(50);
+      }
+    });
+
+    test("all modes should have settings", () => {
+      for (const mode of modeTypes) {
+        const config = MODE_CONFIGS[mode];
+        expect(config.settings).toBeTruthy();
+        expect(config.settings.verbosity).toBeTruthy();
+        expect(config.settings.humor).toBeTruthy();
+        expect(config.settings.proactivity).toBeTruthy();
       }
     });
   });
@@ -37,13 +47,16 @@ describe("Mode Manager", () => {
       expect(prompt).toContain("concise");
     });
 
-    test("should have task-focused prompt", () => {
-      const prompt = MODE_CONFIGS.productivity.systemPromptModifier.toLowerCase();
-      expect(prompt).toContain("task");
+    test("should have terse verbosity setting", () => {
+      expect(MODE_CONFIGS.productivity.settings.verbosity).toBe("terse");
     });
 
-    test("should have appropriate icon", () => {
-      expect(MODE_CONFIGS.productivity.icon).toBe("⚡");
+    test("should have humor off", () => {
+      expect(MODE_CONFIGS.productivity.settings.humor).toBe("off");
+    });
+
+    test("should have appropriate emoji", () => {
+      expect(MODE_CONFIGS.productivity.emoji).toBe("⚡");
     });
   });
 
@@ -53,7 +66,8 @@ describe("Mode Manager", () => {
       expect(
         prompt.includes("brainstorm") ||
           prompt.includes("idea") ||
-          prompt.includes("creative")
+          prompt.includes("creative") ||
+          prompt.includes("alternative")
       ).toBe(true);
     });
 
@@ -62,12 +76,17 @@ describe("Mode Manager", () => {
       expect(
         prompt.includes("explor") ||
           prompt.includes("unconventional") ||
-          prompt.includes("imaginat")
+          prompt.includes("experimental") ||
+          prompt.includes("playful")
       ).toBe(true);
     });
 
-    test("should have appropriate icon", () => {
-      expect(MODE_CONFIGS.creative.icon).toBe("🎨");
+    test("should have full humor setting", () => {
+      expect(MODE_CONFIGS.creative.settings.humor).toBe("full");
+    });
+
+    test("should have appropriate emoji", () => {
+      expect(MODE_CONFIGS.creative.emoji).toBe("🎨");
     });
   });
 
@@ -77,7 +96,7 @@ describe("Mode Manager", () => {
       expect(
         prompt.includes("thorough") ||
           prompt.includes("detail") ||
-          prompt.includes("comprehensive")
+          prompt.includes("analytical")
       ).toBe(true);
     });
 
@@ -88,8 +107,12 @@ describe("Mode Manager", () => {
       ).toBe(true);
     });
 
-    test("should have appropriate icon", () => {
-      expect(MODE_CONFIGS.research.icon).toBe("🔬");
+    test("should have detailed verbosity", () => {
+      expect(MODE_CONFIGS.research.settings.verbosity).toBe("detailed");
+    });
+
+    test("should have appropriate emoji", () => {
+      expect(MODE_CONFIGS.research.emoji).toBe("🔬");
     });
   });
 
@@ -108,12 +131,16 @@ describe("Mode Manager", () => {
       expect(
         prompt.includes("patient") ||
           prompt.includes("encourag") ||
-          prompt.includes("support")
+          prompt.includes("break down")
       ).toBe(true);
     });
 
-    test("should have appropriate icon", () => {
-      expect(MODE_CONFIGS.learning.icon).toBe("📚");
+    test("should have subtle humor setting", () => {
+      expect(MODE_CONFIGS.learning.settings.humor).toBe("subtle");
+    });
+
+    test("should have appropriate emoji", () => {
+      expect(MODE_CONFIGS.learning.emoji).toBe("📚");
     });
   });
 
@@ -121,12 +148,16 @@ describe("Mode Manager", () => {
     test("should return config for valid mode", () => {
       const config = getModeConfig("productivity");
       expect(config).toBeTruthy();
-      expect(config?.name).toBe("Productivity Mode");
+      expect(config.name).toBe("Productivity Mode");
     });
 
-    test("should return null for invalid mode", () => {
-      const config = getModeConfig("invalid" as any);
-      expect(config).toBeNull();
+    test("should return config with all fields", () => {
+      const config = getModeConfig("creative");
+      expect(config.name).toBeTruthy();
+      expect(config.description).toBeTruthy();
+      expect(config.systemPromptModifier).toBeTruthy();
+      expect(config.emoji).toBeTruthy();
+      expect(config.settings).toBeTruthy();
     });
   });
 
@@ -141,14 +172,19 @@ describe("Mode Manager", () => {
       expect(typeof module.getCurrentMode).toBe("function");
     });
 
-    test("should export deactivateMode function", async () => {
+    test("should export deactivateCurrentMode function", async () => {
       const module = await import("../src/core/molt/mode-manager");
-      expect(typeof module.deactivateMode).toBe("function");
+      expect(typeof module.deactivateCurrentMode).toBe("function");
     });
 
     test("should export getModeHistory function", async () => {
       const module = await import("../src/core/molt/mode-manager");
       expect(typeof module.getModeHistory).toBe("function");
+    });
+
+    test("should export suggestMode function", async () => {
+      const module = await import("../src/core/molt/mode-manager");
+      expect(typeof module.suggestMode).toBe("function");
     });
   });
 });
