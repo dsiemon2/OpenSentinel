@@ -18,12 +18,12 @@ UID:test-event-1
 END:VEVENT
 END:VCALENDAR`;
 
-      const events = parseICalContent(icalContent);
+      const result = parseICalContent(icalContent);
 
-      expect(events.length).toBe(1);
-      expect(events[0].summary).toBe("Team Meeting");
-      expect(events[0].description).toBe("Weekly sync");
-      expect(events[0].uid).toBe("test-event-1");
+      expect(result.events.length).toBe(1);
+      expect(result.events[0].summary).toBe("Team Meeting");
+      expect(result.events[0].description).toBe("Weekly sync");
+      expect(result.events[0].uid).toBe("test-event-1");
     });
 
     test("should parse multiple events", () => {
@@ -43,11 +43,11 @@ UID:event-2
 END:VEVENT
 END:VCALENDAR`;
 
-      const events = parseICalContent(icalContent);
+      const result = parseICalContent(icalContent);
 
-      expect(events.length).toBe(2);
-      expect(events[0].summary).toBe("Event 1");
-      expect(events[1].summary).toBe("Event 2");
+      expect(result.events.length).toBe(2);
+      expect(result.events[0].summary).toBe("Event 1");
+      expect(result.events[1].summary).toBe("Event 2");
     });
 
     test("should handle events without description", () => {
@@ -61,10 +61,10 @@ UID:quick-meeting
 END:VEVENT
 END:VCALENDAR`;
 
-      const events = parseICalContent(icalContent);
+      const result = parseICalContent(icalContent);
 
-      expect(events.length).toBe(1);
-      expect(events[0].description).toBe("");
+      expect(result.events.length).toBe(1);
+      expect(result.events[0].description).toBeUndefined();
     });
 
     test("should handle events with location", () => {
@@ -79,10 +79,10 @@ UID:office-meeting
 END:VEVENT
 END:VCALENDAR`;
 
-      const events = parseICalContent(icalContent);
+      const result = parseICalContent(icalContent);
 
-      expect(events.length).toBe(1);
-      expect(events[0].location).toBe("Conference Room A");
+      expect(result.events.length).toBe(1);
+      expect(result.events[0].location).toBe("Conference Room A");
     });
 
     test("should parse dates correctly", () => {
@@ -96,13 +96,13 @@ UID:test
 END:VEVENT
 END:VCALENDAR`;
 
-      const events = parseICalContent(icalContent);
+      const result = parseICalContent(icalContent);
 
-      expect(events[0].start).toBeInstanceOf(Date);
-      expect(events[0].end).toBeInstanceOf(Date);
-      expect(events[0].start.getFullYear()).toBe(2024);
-      expect(events[0].start.getMonth()).toBe(0); // January is 0
-      expect(events[0].start.getDate()).toBe(15);
+      expect(result.events[0].startDate).toBeInstanceOf(Date);
+      expect(result.events[0].endDate).toBeInstanceOf(Date);
+      expect(result.events[0].startDate.getUTCFullYear()).toBe(2024);
+      expect(result.events[0].startDate.getUTCMonth()).toBe(0); // January is 0
+      expect(result.events[0].startDate.getUTCDate()).toBe(15);
     });
 
     test("should handle empty calendar", () => {
@@ -110,17 +110,17 @@ END:VCALENDAR`;
 VERSION:2.0
 END:VCALENDAR`;
 
-      const events = parseICalContent(icalContent);
+      const result = parseICalContent(icalContent);
 
-      expect(events.length).toBe(0);
+      expect(result.events.length).toBe(0);
     });
 
     test("should handle malformed content gracefully", () => {
       const icalContent = `not valid ical content`;
 
-      const events = parseICalContent(icalContent);
+      const result = parseICalContent(icalContent);
 
-      expect(events.length).toBe(0);
+      expect(result.events.length).toBe(0);
     });
 
     test("should handle all-day events", () => {
@@ -134,10 +134,10 @@ UID:all-day
 END:VEVENT
 END:VCALENDAR`;
 
-      const events = parseICalContent(icalContent);
+      const result = parseICalContent(icalContent);
 
-      expect(events.length).toBe(1);
-      expect(events[0].allDay).toBe(true);
+      expect(result.events.length).toBe(1);
+      expect(result.events[0].isAllDay).toBe(true);
     });
 
     test("should handle recurring events indicator", () => {
@@ -152,11 +152,11 @@ UID:recurring
 END:VEVENT
 END:VCALENDAR`;
 
-      const events = parseICalContent(icalContent);
+      const result = parseICalContent(icalContent);
 
-      expect(events.length).toBeGreaterThanOrEqual(1);
+      expect(result.events.length).toBeGreaterThanOrEqual(1);
       // Should have the recurring rule info
-      expect(events[0].recurrenceRule).toBeTruthy();
+      expect(result.events[0].recurrence).toBeTruthy();
     });
   });
 
@@ -172,13 +172,13 @@ UID:test
 END:VEVENT
 END:VCALENDAR`;
 
-      const events = parseICalContent(icalContent);
-      const event = events[0];
+      const result = parseICalContent(icalContent);
+      const event = result.events[0];
 
       expect(event).toHaveProperty("uid");
       expect(event).toHaveProperty("summary");
-      expect(event).toHaveProperty("start");
-      expect(event).toHaveProperty("end");
+      expect(event).toHaveProperty("startDate");
+      expect(event).toHaveProperty("endDate");
     });
   });
 });

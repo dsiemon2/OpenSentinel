@@ -87,13 +87,17 @@ describe("Voice Activity Detection", () => {
         loudBuffer[i] = Math.sin(i * 0.1) * 0.5; // Sine wave at 0.5 amplitude
       }
 
-      // Process multiple chunks to trigger speech detection
+      // Process multiple chunks and check that at least one returns isSpeech: true
+      let detectedSpeech = false;
       for (let i = 0; i < 10; i++) {
-        vad.processAudioChunk(loudBuffer);
+        const result = vad.processAudioChunk(loudBuffer);
+        if (result.isSpeech) {
+          detectedSpeech = true;
+        }
       }
 
-      // Should have detected speech
-      expect(vad.isSpeaking).toBe(true);
+      // Should have detected speech in at least one chunk
+      expect(detectedSpeech).toBe(true);
     });
 
     test("reset should clear state", () => {

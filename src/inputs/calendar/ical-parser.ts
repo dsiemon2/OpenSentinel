@@ -84,7 +84,8 @@ export function parseICalContent(icalContent: string): ParsedCalendar {
         currentEvent.location = value;
       } else if (key.startsWith("DTSTART")) {
         currentEvent.startDate = parseICalDate(value);
-        currentEvent.isAllDay = !key.includes("T") && value.length === 8;
+        // All-day events use VALUE=DATE or have a date-only value (8 chars, no 'T')
+        currentEvent.isAllDay = key.includes("VALUE=DATE") || (value.length === 8 && !value.includes("T"));
       } else if (key.startsWith("DTEND")) {
         currentEvent.endDate = parseICalDate(value);
       } else if (key === "RRULE") {

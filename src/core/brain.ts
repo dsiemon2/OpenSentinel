@@ -7,6 +7,14 @@ import type {
 import { env } from "../config/env";
 import { TOOLS, executeTool } from "../tools";
 import { buildMemoryContext } from "./memory";
+import { buildModeContext, suggestMode, activateMode } from "./molt/mode-manager";
+import { buildAdaptivePrompt } from "./personality/response-adapter";
+import { getActivePersona } from "./personality/persona-manager";
+import { detectMood } from "./personality/mood-detector";
+import { trackPattern } from "./molt/evolution-tracker";
+import { checkAchievements } from "./molt/achievement-system";
+import { metric } from "./observability/metrics";
+import { audit } from "./security/audit-logger";
 
 const client = new Anthropic({
   apiKey: env.CLAUDE_API_KEY,
@@ -19,6 +27,10 @@ You have access to various tools and capabilities:
 - Manage files (read, write, search)
 - Browse the web and search for information
 - Remember important facts about the user and their preferences
+- Spawn background agents for complex tasks
+- Generate documents, spreadsheets, charts, and diagrams
+- Analyze images and extract text with OCR
+- Take and analyze screenshots
 
 Always be concise but thorough. When executing tasks, explain what you're doing briefly. If you encounter errors, suggest solutions.
 
@@ -67,18 +79,55 @@ export async function chatWithTools(
   userId?: string,
   onToolUse?: (toolName: string, input: unknown) => void
 ): Promise<BrainResponse> {
+  const startTime = Date.now();
+
   // Build memory context from user's query
   const lastUserMessage = messages.filter((m) => m.role === "user").pop();
   let memoryContext = "";
+  let modeContext = "";
+  let personalityContext = "";
+
   if (lastUserMessage && userId) {
     try {
       memoryContext = await buildMemoryContext(lastUserMessage.content, userId);
     } catch {
       // Memory system not available, continue without it
     }
+
+    // Build mode context
+    try {
+      modeContext = await buildModeContext(userId);
+
+      // Check if we should suggest a mode change
+      const suggestedMode = suggestMode(lastUserMessage.content);
+      if (suggestedMode && !modeContext) {
+        // Could auto-activate or notify user
+      }
+    } catch {
+      // Mode system not available
+    }
+
+    // Build personality context (persona + mood)
+    try {
+      const adaptiveContext = await buildAdaptivePrompt({
+        userId,
+        userMessage: lastUserMessage.content,
+        conversationHistory: messages.map((m) => m.content),
+      });
+      personalityContext = adaptiveContext.systemPromptAdditions;
+    } catch {
+      // Personality system not available
+    }
+
+    // Track usage pattern
+    try {
+      await trackPattern(userId, "chat", { messageLength: lastUserMessage.content.length });
+    } catch {
+      // Tracking not available
+    }
   }
 
-  const systemWithMemory = SYSTEM_PROMPT + memoryContext;
+  const systemWithContext = SYSTEM_PROMPT + memoryContext + modeContext + personalityContext;
 
   // Convert messages to Anthropic format
   const anthropicMessages: MessageParam[] = messages.map((m) => ({
@@ -94,7 +143,7 @@ export async function chatWithTools(
   let response = await client.messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 4096,
-    system: systemWithMemory,
+    system: systemWithContext,
     tools: TOOLS,
     messages: anthropicMessages,
   });
@@ -116,10 +165,23 @@ export async function chatWithTools(
         toolsUsed.push(toolUse.name);
 
         console.log(`[Tool] Executing: ${toolUse.name}`);
+        const toolStartTime = Date.now();
+
         const result = await executeTool(
           toolUse.name,
           toolUse.input as Record<string, unknown>
         );
+
+        // Track tool usage
+        if (userId) {
+          try {
+            await trackPattern(userId, "tool_use", { tool: toolUse.name });
+            metric.toolDuration(toolUse.name, Date.now() - toolStartTime);
+            await audit.toolUse(userId, toolUse.name, result.success);
+          } catch {
+            // Tracking/audit not available
+          }
+        }
 
         toolResults.push({
           type: "tool_result",
@@ -144,7 +206,7 @@ export async function chatWithTools(
     response = await client.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 4096,
-      system: systemWithMemory,
+      system: systemWithContext,
       tools: TOOLS,
       messages: anthropicMessages,
     });
@@ -156,6 +218,20 @@ export async function chatWithTools(
   // Extract final text response
   const textContent = response.content.find((c) => c.type === "text");
   const content = textContent && textContent.type === "text" ? textContent.text : "";
+
+  // Record metrics
+  const latency = Date.now() - startTime;
+  metric.latency("chat", latency);
+  metric.tokens(totalInputTokens + totalOutputTokens, userId);
+
+  // Check for achievements
+  if (userId) {
+    try {
+      await checkAchievements(userId);
+    } catch {
+      // Achievement system not available
+    }
+  }
 
   return {
     content,

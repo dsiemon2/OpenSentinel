@@ -28,17 +28,52 @@ const DEFAULT_CONFIG: VADConfig = {
   postSpeechPadding: 300, // 300ms after speech
 };
 
+// Export for tests - maps to the original config with test-friendly names
+export const DEFAULT_VAD_CONFIG = {
+  energyThreshold: 0.01, // Normalized energy threshold (0-1)
+  minSpeechDurationMs: DEFAULT_CONFIG.minSpeechDuration,
+  maxSilenceDurationMs: DEFAULT_CONFIG.maxSilenceDuration,
+  sampleRate: DEFAULT_CONFIG.sampleRate,
+};
+
+// Simplified config for test compatibility
+export interface SimpleVADConfig {
+  energyThreshold?: number;
+  minSpeechDurationMs?: number;
+  maxSilenceDurationMs?: number;
+  sampleRate?: number;
+}
+
 export class VoiceActivityDetector extends EventEmitter {
   private config: VADConfig;
-  private isSpeaking: boolean = false;
+  private _isSpeaking: boolean = false;
   private silenceStart: number = 0;
   private speechStart: number = 0;
   private audioBuffer: Buffer[] = [];
   private ringBuffer: Buffer[] = []; // For pre-speech padding
+  private energyThreshold: number = 0.01;
 
-  constructor(config: Partial<VADConfig> = {}) {
+  constructor(config: Partial<VADConfig> | SimpleVADConfig = {}) {
     super();
-    this.config = { ...DEFAULT_CONFIG, ...config };
+
+    // Support both config formats
+    if ('energyThreshold' in config || 'minSpeechDurationMs' in config) {
+      const simpleConfig = config as SimpleVADConfig;
+      this.energyThreshold = simpleConfig.energyThreshold ?? 0.01;
+      this.config = {
+        ...DEFAULT_CONFIG,
+        sampleRate: simpleConfig.sampleRate ?? DEFAULT_CONFIG.sampleRate,
+        minSpeechDuration: simpleConfig.minSpeechDurationMs ?? DEFAULT_CONFIG.minSpeechDuration,
+        maxSilenceDuration: simpleConfig.maxSilenceDurationMs ?? DEFAULT_CONFIG.maxSilenceDuration,
+      };
+    } else {
+      this.config = { ...DEFAULT_CONFIG, ...config as Partial<VADConfig> };
+    }
+  }
+
+  // Public getter for speaking state
+  get isSpeaking(): boolean {
+    return this._isSpeaking;
   }
 
   // Process a frame of audio data
@@ -61,7 +96,7 @@ export class VoiceActivityDetector extends EventEmitter {
     if (isSpeech) {
       if (!this.isSpeaking) {
         // Speech started
-        this.isSpeaking = true;
+        this._isSpeaking = true;
         this.speechStart = now;
         this.silenceStart = 0;
 
@@ -106,7 +141,7 @@ export class VoiceActivityDetector extends EventEmitter {
       this.emit("speechEnd", segment);
     }
 
-    this.isSpeaking = false;
+    this._isSpeaking = false;
     this.speechStart = 0;
     this.silenceStart = 0;
     this.audioBuffer = [];
@@ -140,11 +175,57 @@ export class VoiceActivityDetector extends EventEmitter {
 
   // Reset detector state
   reset(): void {
-    this.isSpeaking = false;
+    this._isSpeaking = false;
     this.speechStart = 0;
     this.silenceStart = 0;
     this.audioBuffer = [];
     this.ringBuffer = [];
+  }
+
+  // Process audio chunk from Float32Array (for test compatibility)
+  processAudioChunk(samples: Float32Array): { isSpeech: boolean; energy: number } {
+    // Calculate normalized energy (0-1 range)
+    let sum = 0;
+    for (let i = 0; i < samples.length; i++) {
+      sum += samples[i] * samples[i];
+    }
+    const energy = Math.sqrt(sum / samples.length);
+    const isSpeech = energy > this.energyThreshold;
+
+    const now = Date.now();
+
+    if (isSpeech) {
+      if (!this._isSpeaking) {
+        // Check if we've had enough speech duration
+        if (this.speechStart === 0) {
+          this.speechStart = now;
+        }
+        const speechDuration = now - this.speechStart;
+        if (speechDuration >= this.config.minSpeechDuration) {
+          this._isSpeaking = true;
+          this.silenceStart = 0;
+          this.emit("speechStart", { timestamp: now });
+        }
+      } else {
+        this.silenceStart = 0;
+      }
+    } else {
+      if (this._isSpeaking) {
+        if (this.silenceStart === 0) {
+          this.silenceStart = now;
+        }
+        const silenceDuration = now - this.silenceStart;
+        if (silenceDuration >= this.config.maxSilenceDuration) {
+          this._isSpeaking = false;
+          this.speechStart = 0;
+          this.emit("speechEnd", { timestamp: now });
+        }
+      } else {
+        this.speechStart = 0;
+      }
+    }
+
+    return { isSpeech, energy };
   }
 
   // Check if currently detecting speech

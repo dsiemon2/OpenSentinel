@@ -1,7 +1,6 @@
 import { describe, test, expect, beforeEach, mock } from "bun:test";
 import {
   DEFAULT_ACHIEVEMENTS,
-  getAchievementProgress,
 } from "../src/core/molt/achievement-system";
 
 describe("Achievement System", () => {
@@ -21,17 +20,17 @@ describe("Achievement System", () => {
     });
 
     test("should have unique IDs", () => {
-      const ids = DEFAULT_ACHIEVEMENTS.map((a) => a.id);
-      const uniqueIds = new Set(ids);
-      expect(uniqueIds.size).toBe(ids.length);
+      const codes = DEFAULT_ACHIEVEMENTS.map((a) => a.code);
+      const uniqueCodes = new Set(codes);
+      expect(uniqueCodes.size).toBe(codes.length);
     });
 
     test("should have required fields", () => {
       for (const achievement of DEFAULT_ACHIEVEMENTS) {
-        expect(achievement.id).toBeTruthy();
+        expect(achievement.code).toBeTruthy();
         expect(achievement.name).toBeTruthy();
         expect(achievement.description).toBeTruthy();
-        expect(achievement.icon).toBeTruthy();
+        expect(achievement.iconEmoji).toBeTruthy();
         expect(achievement.category).toBeTruthy();
         expect(typeof achievement.points).toBe("number");
       }
@@ -39,19 +38,19 @@ describe("Achievement System", () => {
 
     test("should have valid threshold values", () => {
       for (const achievement of DEFAULT_ACHIEVEMENTS) {
-        if (achievement.threshold !== undefined) {
-          expect(achievement.threshold).toBeGreaterThan(0);
+        if (achievement.criteria?.threshold !== undefined) {
+          expect(achievement.criteria.threshold).toBeGreaterThan(0);
         }
       }
     });
   });
 
   describe("Achievement categories", () => {
-    test("should have usage category achievements", () => {
-      const usageAchievements = DEFAULT_ACHIEVEMENTS.filter(
-        (a) => a.category === "usage"
+    test("should have productivity category achievements", () => {
+      const productivityAchievements = DEFAULT_ACHIEVEMENTS.filter(
+        (a) => a.category === "productivity"
       );
-      expect(usageAchievements.length).toBeGreaterThan(0);
+      expect(productivityAchievements.length).toBeGreaterThan(0);
     });
 
     test("should have exploration category achievements", () => {
@@ -61,42 +60,42 @@ describe("Achievement System", () => {
       expect(explorationAchievements.length).toBeGreaterThan(0);
     });
 
-    test("should have milestone category achievements", () => {
-      const milestoneAchievements = DEFAULT_ACHIEVEMENTS.filter(
-        (a) => a.category === "milestone"
+    test("should have mastery category achievements", () => {
+      const masteryAchievements = DEFAULT_ACHIEVEMENTS.filter(
+        (a) => a.category === "mastery"
       );
-      expect(milestoneAchievements.length).toBeGreaterThan(0);
+      expect(masteryAchievements.length).toBeGreaterThan(0);
     });
   });
 
   describe("Achievement definitions", () => {
-    test("first_chat achievement should exist", () => {
-      const firstChat = DEFAULT_ACHIEVEMENTS.find((a) => a.id === "first_chat");
-      expect(firstChat).toBeTruthy();
-      expect(firstChat?.name).toBe("First Chat");
-      expect(firstChat?.points).toBe(10);
+    test("first_conversation achievement should exist", () => {
+      const firstConversation = DEFAULT_ACHIEVEMENTS.find((a) => a.code === "first_conversation");
+      expect(firstConversation).toBeTruthy();
+      expect(firstConversation?.name).toBe("Hello, World!");
+      expect(firstConversation?.points).toBe(10);
     });
 
-    test("tool_explorer achievement should have threshold", () => {
-      const toolExplorer = DEFAULT_ACHIEVEMENTS.find(
-        (a) => a.id === "tool_explorer"
+    test("first_tool achievement should have threshold", () => {
+      const firstTool = DEFAULT_ACHIEVEMENTS.find(
+        (a) => a.code === "first_tool"
       );
-      expect(toolExplorer).toBeTruthy();
-      expect(toolExplorer?.threshold).toBeGreaterThan(0);
+      expect(firstTool).toBeTruthy();
+      expect(firstTool?.criteria?.threshold).toBeGreaterThan(0);
     });
 
     test("power_user achievement should have high threshold", () => {
-      const powerUser = DEFAULT_ACHIEVEMENTS.find((a) => a.id === "power_user");
+      const powerUser = DEFAULT_ACHIEVEMENTS.find((a) => a.code === "power_user");
       expect(powerUser).toBeTruthy();
-      expect(powerUser?.threshold).toBeGreaterThanOrEqual(100);
+      expect(powerUser?.criteria?.threshold).toBeGreaterThanOrEqual(100);
     });
 
-    test("all_tools_used achievement should award significant points", () => {
-      const allTools = DEFAULT_ACHIEVEMENTS.find(
-        (a) => a.id === "all_tools_used"
+    test("tool_master achievement should award significant points", () => {
+      const toolMaster = DEFAULT_ACHIEVEMENTS.find(
+        (a) => a.code === "tool_master"
       );
-      expect(allTools).toBeTruthy();
-      expect(allTools?.points).toBeGreaterThanOrEqual(50);
+      expect(toolMaster).toBeTruthy();
+      expect(toolMaster?.points).toBeGreaterThanOrEqual(50);
     });
   });
 
@@ -104,13 +103,13 @@ describe("Achievement System", () => {
     test("should use emoji icons", () => {
       for (const achievement of DEFAULT_ACHIEVEMENTS) {
         // Emojis are typically 2+ chars due to UTF-16
-        expect(achievement.icon.length).toBeGreaterThanOrEqual(1);
+        expect(achievement.iconEmoji.length).toBeGreaterThanOrEqual(1);
       }
     });
 
     test("first achievements should have beginner-friendly icons", () => {
-      const firstChat = DEFAULT_ACHIEVEMENTS.find((a) => a.id === "first_chat");
-      expect(firstChat?.icon).toBe("💬");
+      const firstConversation = DEFAULT_ACHIEVEMENTS.find((a) => a.code === "first_conversation");
+      expect(firstConversation?.iconEmoji).toBe("👋");
     });
   });
 });

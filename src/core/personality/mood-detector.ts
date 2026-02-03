@@ -26,7 +26,7 @@ const MOOD_PATTERNS: Record<Mood, RegExp[]> = {
     /\b(yay|woohoo|yes)\b/i,
   ],
   frustrated: [
-    /\b(frustrated|annoying|annoyed|hate|stupid|broken|wrong|doesn't work|not working)\b/i,
+    /\b(frustrated|frustrating|annoying|annoyed|hate|stupid|broken|wrong|doesn't work|not working|nothing works)\b/i,
     /\b(ugh|argh|grr|damn|dammit)\b/i,
     /😤|😠|😡|🤬|💢/,
     /!{3,}/,
@@ -46,10 +46,11 @@ const MOOD_PATTERNS: Record<Mood, RegExp[]> = {
     /!{2,}.*\b(need|help|please)\b/i,
   ],
   curious: [
-    /\b(curious|wondering|interested|tell me more|how does|what if)\b/i,
+    /\b(curious|wondering|interested)\b/i,
+    /\b(tell me more|how does|what if|how does.*work)\b/i,
     /\b(could you explain|can you elaborate|what about)\b/i,
     /🤓|💡|🧐/,
-    /\b(i want to know|i'd like to learn)\b/i,
+    /\b(i want to know|i'd like to learn|i'm curious)\b/i,
   ],
   tired: [
     /\b(tired|exhausted|long day|sleepy|burnout|drained)\b/i,

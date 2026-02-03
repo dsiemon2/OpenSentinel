@@ -16,6 +16,9 @@ import { generateSpreadsheet } from "./file-generation/spreadsheet";
 import { generateChart } from "./file-generation/charts";
 import { generateDiagram, generateStructuredDiagram } from "./file-generation/diagrams";
 import { spawnAgent, getAgent, cancelAgent } from "../core/agents/agent-manager";
+import { renderMath, renderMathDocument } from "./rendering/math-renderer";
+import { highlightCode, renderCode } from "./rendering/code-highlighter";
+import { markdownToHtml, renderMarkdown } from "./rendering/markdown-renderer";
 
 // Define tools for Claude
 export const TOOLS: Tool[] = [
@@ -385,6 +388,134 @@ export const TOOLS: Tool[] = [
       required: ["agent_id"],
     },
   },
+  {
+    name: "render_math",
+    description: "Render a LaTeX mathematical expression to SVG/HTML. Useful for displaying equations, formulas, and mathematical notation.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        latex: {
+          type: "string",
+          description: "LaTeX expression to render (e.g., 'x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}')",
+        },
+        display_mode: {
+          type: "boolean",
+          description: "true for block/display math, false for inline (default: true)",
+        },
+        filename: {
+          type: "string",
+          description: "Optional filename to save the rendered SVG",
+        },
+        font_size: {
+          type: "number",
+          description: "Font size in pixels (default: 20)",
+        },
+        color: {
+          type: "string",
+          description: "Text color (default: black)",
+        },
+      },
+      required: ["latex"],
+    },
+  },
+  {
+    name: "render_math_document",
+    description: "Render multiple LaTeX expressions into an HTML document with MathJax support",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        expressions: {
+          type: "array",
+          description: "Array of expressions with latex and optional label",
+          items: {
+            type: "object",
+            properties: {
+              latex: { type: "string" },
+              label: { type: "string" },
+            },
+            required: ["latex"],
+          },
+        },
+        filename: {
+          type: "string",
+          description: "Output filename for the HTML document",
+        },
+      },
+      required: ["expressions"],
+    },
+  },
+  {
+    name: "render_code",
+    description: "Syntax highlight code with themes. Outputs styled HTML for code display.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        code: {
+          type: "string",
+          description: "The source code to highlight",
+        },
+        language: {
+          type: "string",
+          enum: ["typescript", "javascript", "python", "go", "rust"],
+          description: "Programming language (default: javascript)",
+        },
+        theme: {
+          type: "string",
+          enum: ["light", "dark", "github", "monokai"],
+          description: "Color theme (default: dark)",
+        },
+        line_numbers: {
+          type: "boolean",
+          description: "Show line numbers (default: true)",
+        },
+        highlight_lines: {
+          type: "array",
+          description: "Line numbers to highlight",
+          items: { type: "number" },
+        },
+        title: {
+          type: "string",
+          description: "Optional title/filename to display above the code",
+        },
+        filename: {
+          type: "string",
+          description: "Output filename to save the HTML",
+        },
+      },
+      required: ["code"],
+    },
+  },
+  {
+    name: "render_markdown",
+    description: "Convert markdown to styled HTML. Supports code blocks, tables, images, links, and more.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        markdown: {
+          type: "string",
+          description: "The markdown content to render",
+        },
+        theme: {
+          type: "string",
+          enum: ["light", "dark", "github"],
+          description: "Visual theme (default: github)",
+        },
+        syntax_highlight: {
+          type: "boolean",
+          description: "Enable syntax highlighting in code blocks (default: true)",
+        },
+        table_of_contents: {
+          type: "boolean",
+          description: "Generate a table of contents from headings (default: false)",
+        },
+        filename: {
+          type: "string",
+          description: "Output filename to save the HTML",
+        },
+      },
+      required: ["markdown"],
+    },
+  },
 ];
 
 // Execute a tool by name
@@ -621,6 +752,84 @@ export async function executeTool(
         return {
           success: cancelled,
           result: cancelled ? "Agent cancelled" : "Could not cancel agent",
+        };
+      }
+
+      case "render_math": {
+        const result = await renderMath(
+          input.latex as string,
+          input.filename as string | undefined,
+          {
+            displayMode: input.display_mode as boolean | undefined,
+            fontSize: input.font_size as number | undefined,
+            color: input.color as string | undefined,
+          }
+        );
+        return {
+          success: result.success,
+          result: {
+            svg: result.svg,
+            html: result.html,
+            filePath: result.filePath,
+          },
+          error: result.error,
+        };
+      }
+
+      case "render_math_document": {
+        const result = await renderMathDocument(
+          input.expressions as Array<{ latex: string; label?: string }>,
+          input.filename as string | undefined
+        );
+        return {
+          success: result.success,
+          result: {
+            html: result.html,
+            filePath: result.filePath,
+          },
+          error: result.error,
+        };
+      }
+
+      case "render_code": {
+        const result = await renderCode(
+          input.code as string,
+          input.filename as string | undefined,
+          {
+            language: input.language as string | undefined,
+            theme: input.theme as "light" | "dark" | "github" | "monokai" | undefined,
+            lineNumbers: input.line_numbers as boolean | undefined,
+            highlightLines: input.highlight_lines as number[] | undefined,
+            title: input.title as string | undefined,
+          }
+        );
+        return {
+          success: result.success,
+          result: {
+            html: result.html,
+            filePath: result.filePath,
+          },
+          error: result.error,
+        };
+      }
+
+      case "render_markdown": {
+        const result = await renderMarkdown(
+          input.markdown as string,
+          input.filename as string | undefined,
+          {
+            theme: input.theme as "light" | "dark" | "github" | undefined,
+            syntaxHighlight: input.syntax_highlight as boolean | undefined,
+            tableOfContents: input.table_of_contents as boolean | undefined,
+          }
+        );
+        return {
+          success: result.success,
+          result: {
+            html: result.html,
+            filePath: result.filePath,
+          },
+          error: result.error,
         };
       }
 

@@ -29,7 +29,7 @@ export type Permission =
   | "agents:manage";
 
 // Permission mappings by role
-const ROLE_PERMISSIONS: Record<PermissionLevel, Permission[]> = {
+export const ROLE_PERMISSIONS: Record<PermissionLevel, Permission[]> = {
   owner: [
     "org:manage",
     "org:invite",
