@@ -6,8 +6,16 @@ import {
   writeFileContent,
   searchFiles,
 } from "./files";
-import { navigateTo, searchGoogle, takeScreenshot } from "./browser";
+import { navigateTo, searchGoogle, takeScreenshot as browserScreenshot } from "./browser";
 import { webSearch, research } from "./web-search";
+import { analyzeImage } from "./image-analysis";
+import { performOCR, extractStructuredData } from "./ocr";
+import { screenshotAndAnalyze, takeScreenshot as systemScreenshot } from "./screenshot";
+import { generatePDF } from "./file-generation/pdf";
+import { generateSpreadsheet } from "./file-generation/spreadsheet";
+import { generateChart } from "./file-generation/charts";
+import { generateDiagram, generateStructuredDiagram } from "./file-generation/diagrams";
+import { spawnAgent, getAgent, cancelAgent } from "../core/agents/agent-manager";
 
 // Define tools for Claude
 export const TOOLS: Tool[] = [
@@ -131,6 +139,252 @@ export const TOOLS: Tool[] = [
       required: [],
     },
   },
+  {
+    name: "analyze_image",
+    description: "Analyze an image using AI vision. Can describe, extract information, or answer questions about images.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        image_url: {
+          type: "string",
+          description: "URL of the image to analyze",
+        },
+        image_path: {
+          type: "string",
+          description: "Local file path of the image to analyze",
+        },
+        prompt: {
+          type: "string",
+          description: "What to analyze or ask about the image",
+        },
+      },
+      required: ["prompt"],
+    },
+  },
+  {
+    name: "ocr_document",
+    description: "Extract text from an image or document using OCR",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        file_path: {
+          type: "string",
+          description: "Path to the image or PDF file",
+        },
+        language: {
+          type: "string",
+          description: "Expected language of the text (default: English)",
+        },
+      },
+      required: ["file_path"],
+    },
+  },
+  {
+    name: "extract_document_data",
+    description: "Extract structured data from documents like receipts, invoices, forms, or tables",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        file_path: {
+          type: "string",
+          description: "Path to the document image",
+        },
+        data_type: {
+          type: "string",
+          enum: ["table", "form", "receipt", "invoice"],
+          description: "Type of data to extract",
+        },
+      },
+      required: ["file_path"],
+    },
+  },
+  {
+    name: "screenshot_analyze",
+    description: "Take a screenshot of the desktop and analyze it with AI",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        prompt: {
+          type: "string",
+          description: "What to analyze or look for in the screenshot",
+        },
+        region: {
+          type: "string",
+          description: "Screen region: 'full', 'active_window', or coordinates 'x,y,width,height'",
+        },
+      },
+      required: ["prompt"],
+    },
+  },
+  {
+    name: "generate_pdf",
+    description: "Generate a PDF document from markdown or HTML content",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        content: {
+          type: "string",
+          description: "The markdown or HTML content for the PDF",
+        },
+        filename: {
+          type: "string",
+          description: "Output filename for the PDF",
+        },
+        content_type: {
+          type: "string",
+          enum: ["markdown", "html"],
+          description: "Type of content (default: markdown)",
+        },
+        title: {
+          type: "string",
+          description: "Document title",
+        },
+      },
+      required: ["content", "filename"],
+    },
+  },
+  {
+    name: "generate_spreadsheet",
+    description: "Generate a spreadsheet (Excel or CSV) from data",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        data: {
+          type: "array",
+          description: "Data rows (2D array or array of objects)",
+        },
+        filename: {
+          type: "string",
+          description: "Output filename (.xlsx or .csv)",
+        },
+        headers: {
+          type: "array",
+          description: "Column headers",
+          items: { type: "string" },
+        },
+        sheet_name: {
+          type: "string",
+          description: "Name of the worksheet",
+        },
+      },
+      required: ["data", "filename"],
+    },
+  },
+  {
+    name: "generate_chart",
+    description: "Generate a chart as SVG",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        type: {
+          type: "string",
+          enum: ["bar", "line", "pie", "doughnut", "scatter", "area"],
+          description: "Type of chart",
+        },
+        labels: {
+          type: "array",
+          description: "Labels for data points",
+          items: { type: "string" },
+        },
+        values: {
+          type: "array",
+          description: "Numeric values",
+          items: { type: "number" },
+        },
+        title: {
+          type: "string",
+          description: "Chart title",
+        },
+        filename: {
+          type: "string",
+          description: "Output filename for the SVG",
+        },
+      },
+      required: ["type", "labels", "values"],
+    },
+  },
+  {
+    name: "generate_diagram",
+    description: "Generate a diagram using Mermaid syntax",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        type: {
+          type: "string",
+          enum: ["flowchart", "sequence", "class", "state", "er", "gantt", "mindmap"],
+          description: "Type of diagram",
+        },
+        mermaid_code: {
+          type: "string",
+          description: "Mermaid diagram code (if providing raw code)",
+        },
+        data: {
+          type: "object",
+          description: "Structured data for the diagram (alternative to mermaid_code)",
+        },
+        filename: {
+          type: "string",
+          description: "Output filename",
+        },
+      },
+      required: ["type"],
+    },
+  },
+  {
+    name: "spawn_agent",
+    description: "Spawn a background agent to work on a task autonomously",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        type: {
+          type: "string",
+          enum: ["research", "coding", "writing", "analysis"],
+          description: "Type of agent to spawn",
+        },
+        objective: {
+          type: "string",
+          description: "The objective/task for the agent",
+        },
+        context: {
+          type: "object",
+          description: "Additional context for the agent",
+        },
+        token_budget: {
+          type: "number",
+          description: "Maximum tokens the agent can use",
+        },
+      },
+      required: ["type", "objective"],
+    },
+  },
+  {
+    name: "check_agent",
+    description: "Check the status and progress of a running agent",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        agent_id: {
+          type: "string",
+          description: "The ID of the agent to check",
+        },
+      },
+      required: ["agent_id"],
+    },
+  },
+  {
+    name: "cancel_agent",
+    description: "Cancel a running agent",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        agent_id: {
+          type: "string",
+          description: "The ID of the agent to cancel",
+        },
+      },
+      required: ["agent_id"],
+    },
+  },
 ];
 
 // Execute a tool by name
@@ -190,10 +444,183 @@ export async function executeTool(
       }
 
       case "take_screenshot": {
-        const screenshot = await takeScreenshot();
+        const screenshot = await browserScreenshot();
         return {
           success: true,
           result: { screenshot: `data:image/png;base64,${screenshot}` },
+        };
+      }
+
+      case "analyze_image": {
+        const result = await analyzeImage({
+          imageUrl: input.image_url as string | undefined,
+          imagePath: input.image_path as string | undefined,
+          prompt: input.prompt as string,
+        });
+        return {
+          success: result.success,
+          result: result.analysis,
+          error: result.error,
+        };
+      }
+
+      case "ocr_document": {
+        const result = await performOCR(
+          input.file_path as string,
+          { language: input.language as string | undefined }
+        );
+        return {
+          success: result.success,
+          result: result.text,
+          error: result.error,
+        };
+      }
+
+      case "extract_document_data": {
+        const result = await extractStructuredData(
+          input.file_path as string,
+          input.data_type as "table" | "form" | "receipt" | "invoice" | undefined
+        );
+        return {
+          success: result.success,
+          result: result.data,
+          error: result.error,
+        };
+      }
+
+      case "screenshot_analyze": {
+        let region: "full" | "active_window" | { x: number; y: number; width: number; height: number } = "full";
+
+        if (input.region === "active_window") {
+          region = "active_window";
+        } else if (typeof input.region === "string" && input.region.includes(",")) {
+          const [x, y, width, height] = input.region.split(",").map(Number);
+          region = { x, y, width, height };
+        }
+
+        const result = await screenshotAndAnalyze(
+          input.prompt as string,
+          { region }
+        );
+        return {
+          success: result.success,
+          result: result.analysis,
+          error: result.error,
+        };
+      }
+
+      case "generate_pdf": {
+        const result = await generatePDF(
+          input.content as string,
+          input.filename as string,
+          {
+            contentType: input.content_type as "markdown" | "html" | undefined,
+            title: input.title as string | undefined,
+          }
+        );
+        return {
+          success: result.success,
+          result: result.filePath,
+          error: result.error,
+        };
+      }
+
+      case "generate_spreadsheet": {
+        const result = await generateSpreadsheet(
+          input.data as unknown[][],
+          input.filename as string,
+          {
+            headers: input.headers as string[] | undefined,
+            sheetName: input.sheet_name as string | undefined,
+          }
+        );
+        return {
+          success: result.success,
+          result: result.filePath,
+          error: result.error,
+        };
+      }
+
+      case "generate_chart": {
+        const { quickChart } = await import("./file-generation/charts");
+        const result = await quickChart(
+          input.type as "bar" | "line" | "pie" | "doughnut" | "scatter" | "area",
+          input.labels as string[],
+          input.values as number[],
+          input.title as string | undefined,
+          input.filename as string | undefined
+        );
+        return {
+          success: result.success,
+          result: result.filePath,
+          error: result.error,
+        };
+      }
+
+      case "generate_diagram": {
+        if (input.mermaid_code) {
+          const result = await generateDiagram(
+            input.mermaid_code as string,
+            input.filename as string | undefined
+          );
+          return {
+            success: result.success,
+            result: result.filePath,
+            error: result.error,
+          };
+        } else if (input.data) {
+          const result = await generateStructuredDiagram(
+            input.type as "flowchart" | "sequence" | "class" | "state" | "er" | "gantt" | "mindmap",
+            input.data,
+            input.filename as string | undefined
+          );
+          return {
+            success: result.success,
+            result: result.filePath,
+            error: result.error,
+          };
+        }
+        return { success: false, result: null, error: "Must provide mermaid_code or data" };
+      }
+
+      case "spawn_agent": {
+        const agentId = await spawnAgent({
+          userId: "system", // Would come from context in real usage
+          type: input.type as "research" | "coding" | "writing" | "analysis",
+          objective: input.objective as string,
+          context: input.context as Record<string, unknown> | undefined,
+          tokenBudget: input.token_budget as number | undefined,
+        });
+        return {
+          success: true,
+          result: { agentId, message: "Agent spawned successfully" },
+        };
+      }
+
+      case "check_agent": {
+        const agent = await getAgent(input.agent_id as string);
+        if (!agent) {
+          return { success: false, result: null, error: "Agent not found" };
+        }
+        return {
+          success: true,
+          result: {
+            id: agent.id,
+            type: agent.type,
+            status: agent.status,
+            objective: agent.objective,
+            tokensUsed: agent.tokensUsed,
+            progress: agent.progress.slice(-5),
+            result: agent.result,
+          },
+        };
+      }
+
+      case "cancel_agent": {
+        const cancelled = await cancelAgent(input.agent_id as string);
+        return {
+          success: cancelled,
+          result: cancelled ? "Agent cancelled" : "Could not cancel agent",
         };
       }
 

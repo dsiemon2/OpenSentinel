@@ -1,33 +1,114 @@
+# Moltbot Docker Compose Configuration
+# Usage: docker-compose up -d
+
+version: "3.8"
+
 services:
+  # Main Moltbot application
+  moltbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: moltbot
+    restart: unless-stopped
+    ports:
+      - "8030:8030"
+    environment:
+      - NODE_ENV=production
+      - PORT=8030
+      - DATABASE_URL=postgresql://moltbot:${DB_PASSWORD:-moltbot}@postgres:5432/moltbot
+      - REDIS_URL=redis://redis:6379
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID}
+    volumes:
+      - moltbot_data:/app/data
+      - moltbot_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - moltbot-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8030/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # PostgreSQL with pgvector
   postgres:
     image: pgvector/pgvector:pg16
     container_name: moltbot-postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: moltbot
-      POSTGRES_PASSWORD: moltbot
-      POSTGRES_DB: moltbot
+      - POSTGRES_USER=moltbot
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-moltbot}
+      - POSTGRES_DB=moltbot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "5445:5432"
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - moltbot-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U moltbot"]
+      test: ["CMD-SHELL", "pg_isready -U moltbot -d moltbot"]
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
 
+  # Redis for caching and job queues
   redis:
     image: redis:7-alpine
     container_name: moltbot-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
     ports:
       - "6379:6379"
-    volumes:
-      - ./data/redis:/data
-    command: redis-server --appendonly yes
+    networks:
+      - moltbot-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Nginx reverse proxy (optional, for production)
+  nginx:
+    image: nginx:alpine
+    container_name: moltbot-nginx
     restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - moltbot
+    networks:
+      - moltbot-network
+    profiles:
+      - production
+
+networks:
+  moltbot-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  moltbot_data:
+    driver: local
+  moltbot_logs:
+    driver: local
