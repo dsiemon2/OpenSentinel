@@ -23,6 +23,22 @@ const envSchema = z.object({
   // Redis
   REDIS_URL: z.string().default("redis://localhost:6379"),
 
+  // Discord (optional)
+  DISCORD_BOT_TOKEN: z.string().optional(),
+  DISCORD_CLIENT_ID: z.string().optional(),
+  DISCORD_GUILD_ID: z.string().optional(),
+  DISCORD_ALLOWED_USER_IDS: z.string().optional(), // Comma-separated list
+  DISCORD_ALLOWED_ROLE_IDS: z.string().optional(), // Comma-separated list
+
+  // Slack (optional)
+  SLACK_BOT_TOKEN: z.string().optional(),
+  SLACK_SIGNING_SECRET: z.string().optional(),
+  SLACK_APP_TOKEN: z.string().optional(),
+  SLACK_SOCKET_MODE: z.coerce.boolean().optional().default(false),
+  SLACK_PORT: z.coerce.number().optional().default(3000),
+  SLACK_ALLOWED_USER_IDS: z.string().optional(), // Comma-separated list
+  SLACK_ALLOWED_CHANNEL_IDS: z.string().optional(), // Comma-separated list
+
   // Optional
   HUGGINGFACE_ACCESS_TOKEN: z.string().optional(),
   TWILIO_ACCOUNT_SID: z.string().optional(),

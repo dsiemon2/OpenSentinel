@@ -26,6 +26,13 @@ Moltbot is your own personal AI assistant that runs on your computer. Think of i
 - Noise cancellation
 - Voice note summarization
 
+### Communication Platforms
+- Telegram bot with voice support
+- Discord bot with slash commands and voice channels
+- Slack bot with app mentions and threads
+- Web dashboard
+- REST API
+
 ### Device Triggers
 - iOS/macOS Shortcuts integration
 - Bluetooth proximity activation

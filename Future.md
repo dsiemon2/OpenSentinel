@@ -67,6 +67,13 @@ Leaning into the transformation/growth theme:
 - [x] Video summarization - `src/tools/video-summarization.ts`
 - [x] Audio file transcription - `src/outputs/stt.ts`
 
+### Communication Platforms ✅
+- [x] Telegram bot - `src/inputs/telegram/`
+- [x] Discord bot - `src/inputs/discord/`
+- [x] Slack bot - `src/inputs/slack/`
+- [x] Web dashboard - `src/web/`
+- [x] REST API - `src/inputs/api/`
+
 ---
 
 ## Sub-Agent System ✅ COMPLETE

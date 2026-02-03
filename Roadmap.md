@@ -130,9 +130,11 @@
 - [x] Calendar triggers - `src/inputs/calendar/trigger-processor.ts`
 
 ### Communication
-- [x] Telegram bot (primary)
-- [x] Web dashboard
-- [x] REST API
+- [x] Telegram bot (primary) - `src/inputs/telegram/`
+- [x] Discord bot - `src/inputs/discord/`
+- [x] Slack bot - `src/inputs/slack/`
+- [x] Web dashboard - `src/web/`
+- [x] REST API - `src/inputs/api/`
 - [x] Webhook integrations - `src/inputs/triggers/`
 
 ### Device Triggers
@@ -194,7 +196,7 @@
 - Claude Brain with tool execution
 - RAG memory system with pgvector
 - BullMQ task scheduler
-- Multi-channel input (Telegram, Web, API)
+- Multi-channel input (Telegram, Discord, Slack, Web, API)
 
 **Advanced Features:**
 - 20+ tools (shell, files, browser, search, OCR, screenshots, video, etc.)
