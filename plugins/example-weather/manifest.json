@@ -1,0 +1,16 @@
+{
+  "id": "example-weather",
+  "name": "Example Weather Plugin",
+  "version": "1.0.0",
+  "description": "An example plugin that provides weather information tools",
+  "author": "Moltbot Team",
+  "main": "index.ts",
+  "permissions": [
+    "tools:register",
+    "storage:read",
+    "storage:write",
+    "http:outbound",
+    "events:subscribe"
+  ],
+  "dependencies": []
+}

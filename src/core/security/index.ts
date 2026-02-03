@@ -2,3 +2,8 @@ export * from "./session-manager";
 export * from "./audit-logger";
 export * from "./rate-limiter";
 export * from "./api-key-manager";
+export * from "./two-factor-auth";
+export * from "./biometric-handler";
+export * from "./memory-vault";
+export * from "./data-retention";
+export * from "./gdpr-compliance";

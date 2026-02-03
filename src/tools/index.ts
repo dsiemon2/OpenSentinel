@@ -19,6 +19,13 @@ import { spawnAgent, getAgent, cancelAgent } from "../core/agents/agent-manager"
 import { renderMath, renderMathDocument } from "./rendering/math-renderer";
 import { highlightCode, renderCode } from "./rendering/code-highlighter";
 import { markdownToHtml, renderMarkdown } from "./rendering/markdown-renderer";
+import {
+  summarizeVideo,
+  quickSummarizeVideo,
+  detailedSummarizeVideo,
+  extractKeyMoments,
+  getVideoInfo,
+} from "./video-summarization";
 
 // Define tools for Claude
 export const TOOLS: Tool[] = [
@@ -516,6 +523,74 @@ export const TOOLS: Tool[] = [
       required: ["markdown"],
     },
   },
+  {
+    name: "summarize_video",
+    description: "Summarize a video file by extracting frames, transcribing audio, and generating a comprehensive summary with key moments.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        video_path: {
+          type: "string",
+          description: "Path to the video file to summarize",
+        },
+        frame_count: {
+          type: "number",
+          description: "Number of frames to extract and analyze (default: 8, max: 20)",
+        },
+        include_transcript: {
+          type: "boolean",
+          description: "Whether to transcribe audio (default: true if video has audio)",
+        },
+        analysis_depth: {
+          type: "string",
+          enum: ["quick", "standard", "detailed"],
+          description: "Depth of analysis (default: standard)",
+        },
+        language: {
+          type: "string",
+          description: "Language for transcription (default: en)",
+        },
+        focus_areas: {
+          type: "array",
+          description: "Specific aspects to focus on in the analysis",
+          items: { type: "string" },
+        },
+      },
+      required: ["video_path"],
+    },
+  },
+  {
+    name: "video_info",
+    description: "Get basic information about a video file (duration, resolution, codec, etc.) without full analysis.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        video_path: {
+          type: "string",
+          description: "Path to the video file",
+        },
+      },
+      required: ["video_path"],
+    },
+  },
+  {
+    name: "extract_video_moments",
+    description: "Extract and analyze key moments from a video without generating a full summary.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        video_path: {
+          type: "string",
+          description: "Path to the video file",
+        },
+        frame_count: {
+          type: "number",
+          description: "Number of key moments to extract (default: 8)",
+        },
+      },
+      required: ["video_path"],
+    },
+  },
 ];
 
 // Execute a tool by name
@@ -829,6 +904,45 @@ export async function executeTool(
             html: result.html,
             filePath: result.filePath,
           },
+          error: result.error,
+        };
+      }
+
+      case "summarize_video": {
+        const result = await summarizeVideo(
+          input.video_path as string,
+          {
+            frameCount: input.frame_count as number | undefined,
+            includeTranscript: input.include_transcript as boolean | undefined,
+            analysisDepth: input.analysis_depth as "quick" | "standard" | "detailed" | undefined,
+            language: input.language as string | undefined,
+            focusAreas: input.focus_areas as string[] | undefined,
+          }
+        );
+        return {
+          success: result.success,
+          result: result.summary,
+          error: result.error,
+        };
+      }
+
+      case "video_info": {
+        const result = await getVideoInfo(input.video_path as string);
+        return {
+          success: result.success,
+          result: result.info,
+          error: result.error,
+        };
+      }
+
+      case "extract_video_moments": {
+        const result = await extractKeyMoments(
+          input.video_path as string,
+          input.frame_count as number | undefined
+        );
+        return {
+          success: result.success,
+          result: result.moments,
           error: result.error,
         };
       }

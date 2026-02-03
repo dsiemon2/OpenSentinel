@@ -15,6 +15,11 @@ export type MetricName =
   | "memory_store"
   | "agent_spawn"
   | "agent_complete"
+  | "plugin_enable"
+  | "plugin_disable"
+  | "plugin_load"
+  | "plugin_unload"
+  | "plugin_tool_execute"
   | "error_count";
 
 export type MetricUnit = "ms" | "tokens" | "count" | "bytes" | "percent";
@@ -120,6 +125,14 @@ export const metric = {
       value: 1,
       unit: "count",
       tags: { type: agentType },
+    }),
+
+  pluginOperation: (operation: "enable" | "disable" | "load" | "unload" | "tool_execute", pluginId: string) =>
+    recordMetric({
+      name: `plugin_${operation}` as MetricName,
+      value: 1,
+      unit: "count",
+      tags: { plugin: pluginId },
     }),
 
   error: (source: string) =>
