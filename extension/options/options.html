@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moltbot Settings</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-primary: #0f0f23;
+      --bg-secondary: #1a1a2e;
+      --bg-tertiary: #16213e;
+      --text-primary: #ffffff;
+      --text-secondary: #b0bec5;
+      --text-muted: #78909c;
+      --accent-primary: #4fc3f7;
+      --accent-secondary: #7c4dff;
+      --accent-gradient: linear-gradient(135deg, #4fc3f7 0%, #7c4dff 100%);
+      --border-color: rgba(255, 255, 255, 0.1);
+      --error-color: #ef5350;
+      --success-color: #66bb6a;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      background: var(--accent-gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 24px;
+      color: var(--bg-primary);
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title svg {
+      width: 20px;
+      height: 20px;
+      color: var(--accent-primary);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="url"] {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .input-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: var(--bg-primary);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(79, 195, 247, 0.3);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status-message {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .status-message.success {
+      display: block;
+      background: rgba(102, 187, 106, 0.1);
+      border: 1px solid var(--success-color);
+      color: var(--success-color);
+    }
+
+    .status-message.error {
+      display: block;
+      background: rgba(239, 83, 80, 0.1);
+      border: 1px solid var(--error-color);
+      color: var(--error-color);
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--error-color);
+    }
+
+    .status-dot.connected {
+      background: var(--success-color);
+    }
+
+    .status-dot.checking {
+      background: #ffa726;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .shortcuts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+    }
+
+    .shortcut-name {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .shortcut-key {
+      display: flex;
+      gap: 4px;
+    }
+
+    .key {
+      padding: 4px 8px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      color: var(--accent-primary);
+    }
+
+    .footer {
+      text-align: center;
+      padding-top: 24px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .footer a {
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

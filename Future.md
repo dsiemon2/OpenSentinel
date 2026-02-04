@@ -246,3 +246,77 @@ Leaning into the transformation/growth theme:
 - [ ] Custom model fine-tuning (future)
 - [ ] Training on personal data (opt-in) (future)
 - [ ] Community support forums (external)
+
+---
+
+## Integrations ✅ COMPLETE
+
+### Communication ✅
+- [x] Email (IMAP/SMTP) - `src/integrations/email/`
+- [x] SMS/Phone (Twilio) - `src/integrations/twilio/`
+- [x] Telegram - `src/inputs/telegram/`
+- [x] Discord - `src/inputs/discord/`
+- [x] Slack - `src/inputs/slack/`
+
+### Productivity ✅
+- [x] GitHub (repos, issues, PRs, code review) - `src/integrations/github/`
+- [x] Notion (pages, databases, search) - `src/integrations/notion/`
+- [x] Google Calendar - `src/inputs/calendar/google-calendar.ts`
+- [x] Outlook Calendar - `src/inputs/calendar/outlook-calendar.ts`
+
+### Smart Home ✅
+- [x] Home Assistant - `src/integrations/homeassistant/`
+
+### Entertainment ✅
+- [x] Spotify - `src/integrations/spotify/`
+
+### Cloud Storage ✅
+- [x] Google Drive - `src/integrations/cloud-storage/google-drive.ts`
+- [x] Dropbox - `src/integrations/cloud-storage/dropbox.ts`
+
+### Finance ✅
+- [x] Crypto prices (CoinGecko) - `src/integrations/finance/crypto.ts`
+- [x] Stock prices (Yahoo/Alpha Vantage) - `src/integrations/finance/stocks.ts`
+- [x] Currency exchange - `src/integrations/finance/currency.ts`
+- [x] Portfolio tracking - `src/integrations/finance/portfolio.ts`
+- [x] Price alerts - `src/integrations/finance/alerts.ts`
+
+### Vision ✅
+- [x] Screen capture - `src/integrations/vision/screen-capture.ts`
+- [x] Webcam capture - `src/integrations/vision/webcam-capture.ts`
+- [x] Image analysis (Claude Vision) - `src/integrations/vision/image-analyzer.ts`
+- [x] Enhanced OCR - `src/integrations/vision/ocr-enhanced.ts`
+- [x] Continuous monitoring - `src/integrations/vision/continuous-monitor.ts`
+
+### Knowledge Base ✅
+- [x] Document ingestion (PDF, DOCX, TXT, etc.) - `src/integrations/documents/`
+- [x] Semantic chunking - `src/integrations/documents/chunker.ts`
+- [x] Vector search - `src/integrations/documents/knowledge-base.ts`
+
+### Automation ✅
+- [x] Workflow engine - `src/core/workflows/workflow-engine.ts`
+- [x] Triggers (time, webhook, event) - `src/core/workflows/triggers.ts`
+- [x] Actions (message, HTTP, tool) - `src/core/workflows/actions.ts`
+- [x] Conditions - `src/core/workflows/conditions.ts`
+- [x] Workflow templates - `src/core/workflows/index.ts`
+
+---
+
+## Desktop & Browser ✅ COMPLETE
+
+### Desktop App (Electron) ✅
+- [x] System tray with menu - `desktop/tray.ts`
+- [x] Global hotkeys (Ctrl+Shift+M) - `desktop/shortcuts.ts`
+- [x] Quick input popup - `desktop/renderer/components/QuickInput.tsx`
+- [x] Auto-launch on boot - `desktop/autolaunch.ts`
+- [x] Windows and Linux support
+- **Location**: `desktop/`
+
+### Browser Extension ✅
+- [x] Chrome extension (Manifest V3) - `extension/`
+- [x] Firefox extension - `extension/`
+- [x] Popup chat interface - `extension/popup/`
+- [x] Right-click context menu
+- [x] Page summarization
+- [x] Quick capture (Alt+Shift+M)
+- **Location**: `extension/`

@@ -2,6 +2,8 @@ import { env } from "./config/env";
 import { createBot } from "./inputs/telegram/bot";
 import { app } from "./inputs/api/server";
 import { startWorker, stopWorker } from "./core/scheduler";
+import { DiscordBot } from "./inputs/discord";
+import { SlackBot } from "./inputs/slack";
 
 console.log(`
 ╔══════════════════════════════════════════╗
@@ -37,6 +39,38 @@ async function main() {
     },
   });
 
+  // Start Discord bot if configured
+  let discordBot: DiscordBot | null = null;
+  if (env.DISCORD_BOT_TOKEN) {
+    console.log("[Discord] Starting bot...");
+    discordBot = new DiscordBot({
+      token: env.DISCORD_BOT_TOKEN,
+      clientId: env.DISCORD_CLIENT_ID || "",
+      guildId: env.DISCORD_GUILD_ID,
+      allowedUserIds: env.DISCORD_ALLOWED_USER_IDS?.split(",") || [],
+      allowedRoleIds: env.DISCORD_ALLOWED_ROLE_IDS?.split(",") || [],
+    });
+    await discordBot.start();
+    console.log("[Discord] Bot started");
+  }
+
+  // Start Slack bot if configured
+  let slackBot: SlackBot | null = null;
+  if (env.SLACK_BOT_TOKEN && env.SLACK_SIGNING_SECRET) {
+    console.log("[Slack] Starting bot...");
+    slackBot = new SlackBot({
+      token: env.SLACK_BOT_TOKEN,
+      signingSecret: env.SLACK_SIGNING_SECRET,
+      appToken: env.SLACK_APP_TOKEN,
+      socketMode: env.SLACK_SOCKET_MODE === "true",
+      port: parseInt(env.SLACK_PORT || "3000"),
+      allowedUserIds: env.SLACK_ALLOWED_USER_IDS?.split(",") || [],
+      allowedChannelIds: env.SLACK_ALLOWED_CHANNEL_IDS?.split(",") || [],
+    });
+    await slackBot.start();
+    console.log("[Slack] Bot started");
+  }
+
   // Start API server
   console.log(`[API] Starting server on port ${env.PORT}...`);
   const server = Bun.serve({
@@ -47,13 +81,16 @@ async function main() {
   console.log(`[API] Server running at http://localhost:${server.port}`);
   console.log(`[Web] Dashboard available at http://localhost:${server.port}`);
   console.log("");
-  console.log("Moltbot is ready! Send a message via Telegram or the API.");
+  const channels = ["Telegram", discordBot ? "Discord" : null, slackBot ? "Slack" : null, "API"].filter(Boolean).join(", ");
+  console.log(`Moltbot is ready! Send a message via ${channels}.`);
 
   // Graceful shutdown
   const shutdown = async () => {
     console.log("\nShutting down...");
     stopWorker();
     await bot.stop();
+    if (discordBot) await discordBot.stop();
+    if (slackBot) await slackBot.stop();
     server.stop();
     process.exit(0);
   };

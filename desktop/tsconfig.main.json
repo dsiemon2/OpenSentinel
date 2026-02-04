@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "moduleResolution": "node"
+  },
+  "include": [
+    "main.ts",
+    "preload.ts",
+    "tray.ts",
+    "shortcuts.ts",
+    "autolaunch.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "renderer"
+  ]
+}

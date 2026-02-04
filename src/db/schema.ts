@@ -528,6 +528,58 @@ export const usageQuotas = pgTable(
 );
 
 // ============================================
+// DOCUMENT KNOWLEDGE BASE TABLES
+// ============================================
+
+export const documents = pgTable(
+  "documents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    filename: text("filename"),
+    mimeType: text("mime_type"),
+    fileSize: integer("file_size"),
+    source: text("source"), // 'upload', 'url', 'api'
+    sourceUrl: text("source_url"),
+    metadata: jsonb("metadata"),
+    status: text("status")
+      .notNull()
+      .$type<"pending" | "processing" | "completed" | "failed">()
+      .default("pending"),
+    errorMessage: text("error_message"),
+    chunkCount: integer("chunk_count").default(0),
+    totalTokens: integer("total_tokens").default(0),
+    userId: uuid("user_id").references(() => users.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    processedAt: timestamp("processed_at"),
+  },
+  (table) => [
+    index("documents_user_idx").on(table.userId),
+    index("documents_status_idx").on(table.status),
+  ]
+);
+
+export const documentChunks = pgTable(
+  "document_chunks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    documentId: uuid("document_id")
+      .references(() => documents.id, { onDelete: "cascade" })
+      .notNull(),
+    chunkIndex: integer("chunk_index").notNull(),
+    content: text("content").notNull(),
+    embedding: vector("embedding", { dimensions: 1536 }),
+    tokenCount: integer("token_count"),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("document_chunks_document_idx").on(table.documentId),
+  ]
+);
+
+// ============================================
 // TYPE EXPORTS
 // ============================================
 
@@ -577,3 +629,9 @@ export type NewPersona = typeof personas.$inferInsert;
 export type Organization = typeof organizations.$inferSelect;
 export type NewOrganization = typeof organizations.$inferInsert;
 export type OrganizationMember = typeof organizationMembers.$inferSelect;
+
+// Document knowledge base types
+export type Document = typeof documents.$inferSelect;
+export type NewDocument = typeof documents.$inferInsert;
+export type DocumentChunk = typeof documentChunks.$inferSelect;
+export type NewDocumentChunk = typeof documentChunks.$inferInsert;

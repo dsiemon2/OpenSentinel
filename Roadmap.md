@@ -190,16 +190,48 @@
 
 ## Feature Summary
 
-### Total Features Implemented: 150+
+### Total Features Implemented: 250+
 
 **Core Systems:**
 - Claude Brain with tool execution
 - RAG memory system with pgvector
 - BullMQ task scheduler
 - Multi-channel input (Telegram, Discord, Slack, Web, API)
+- Workflow automation engine
+
+**Communication Integrations:**
+- Email (IMAP/SMTP with AI summarization)
+- SMS/Phone calls (Twilio)
+- Telegram, Discord, Slack bots
+
+**Productivity Integrations:**
+- GitHub (repos, issues, PRs, AI code review)
+- Notion (pages, databases, search)
+- Google/Outlook Calendar
+- Google Drive, Dropbox
+
+**Smart Home & Entertainment:**
+- Home Assistant (full device control)
+- Spotify (playback, playlists, search)
+
+**Finance:**
+- Crypto prices (CoinGecko)
+- Stock prices (Yahoo/Alpha Vantage)
+- Currency exchange
+- Portfolio tracking with alerts
+
+**Vision & Documents:**
+- Screen/webcam capture and analysis
+- Document ingestion (PDF, DOCX, etc.)
+- Knowledge base with vector search
+- Enhanced OCR with layout detection
+
+**Desktop & Browser:**
+- Electron desktop app (Windows/Linux)
+- Browser extension (Chrome/Firefox)
 
 **Advanced Features:**
-- 20+ tools (shell, files, browser, search, OCR, screenshots, video, etc.)
+- 30+ tools (shell, files, browser, search, OCR, video, etc.)
 - 15 domain expert personalities
 - 4 specialized sub-agents (research, coding, writing, analysis)
 - Agent collaboration system

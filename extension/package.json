@@ -1,0 +1,29 @@
+{
+  "name": "moltbot-extension",
+  "version": "1.0.0",
+  "description": "Moltbot browser extension - Personal AI assistant powered by Claude",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run build --watch",
+    "build": "bun run build:clean && bun run build:bundle && bun run build:copy",
+    "build:clean": "rm -rf dist",
+    "build:bundle": "bun build popup/popup.tsx options/options.tsx background.ts content.ts --outdir=dist --splitting --target=browser --minify",
+    "build:copy": "cp manifest.json dist/ && mkdir -p dist/popup && cp popup/popup.html popup/popup.css dist/popup/ && mkdir -p dist/options && cp options/options.html dist/options/ && mkdir -p dist/icons && cp icons/*.svg dist/icons/ && (cp icons/*.png dist/icons/ 2>/dev/null || bun run scripts/generate-icons.js)",
+    "build:firefox": "bun run build && node scripts/firefox-manifest.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.10.0",
+    "@types/chrome": "^0.0.260",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "sharp": "^0.34.5",
+    "typescript": "^5.3.3"
+  }
+}

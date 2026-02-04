@@ -1,0 +1,5 @@
+# Place icon files here:
+# - icon.png (256x256 or larger for Linux/general)
+# - icon.ico (Windows)
+# - tray.png (22x22 for Linux tray)
+# - tray.ico (16x16 for Windows tray)

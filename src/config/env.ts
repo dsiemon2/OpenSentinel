@@ -39,11 +39,54 @@ const envSchema = z.object({
   SLACK_ALLOWED_USER_IDS: z.string().optional(), // Comma-separated list
   SLACK_ALLOWED_CHANNEL_IDS: z.string().optional(), // Comma-separated list
 
+  // Notion (optional)
+  NOTION_API_KEY: z.string().optional(),
+  NOTION_ROOT_PAGE_ID: z.string().optional(),
+
+  // Email (optional)
+  EMAIL_IMAP_HOST: z.string().optional(),
+  EMAIL_IMAP_PORT: z.coerce.number().optional().default(993),
+  EMAIL_IMAP_SECURE: z.coerce.boolean().optional().default(true),
+  EMAIL_SMTP_HOST: z.string().optional(),
+  EMAIL_SMTP_PORT: z.coerce.number().optional().default(587),
+  EMAIL_SMTP_SECURE: z.coerce.boolean().optional().default(false),
+  EMAIL_USER: z.string().optional(),
+  EMAIL_PASSWORD: z.string().optional(),
+  EMAIL_PROVIDER: z.enum(["gmail", "outlook", "yahoo", "custom"]).optional(),
+
+  // GitHub (optional)
+  GITHUB_TOKEN: z.string().optional(),
+  GITHUB_WEBHOOK_SECRET: z.string().optional(),
+
+  // Google Drive (optional)
+  GOOGLE_DRIVE_CLIENT_ID: z.string().optional(),
+  GOOGLE_DRIVE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_DRIVE_REDIRECT_URI: z.string().optional(),
+  GOOGLE_DRIVE_REFRESH_TOKEN: z.string().optional(),
+
+  // Dropbox (optional)
+  DROPBOX_APP_KEY: z.string().optional(),
+  DROPBOX_APP_SECRET: z.string().optional(),
+  DROPBOX_ACCESS_TOKEN: z.string().optional(),
+  DROPBOX_REFRESH_TOKEN: z.string().optional(),
+
+  // Finance (optional)
+  ALPHA_VANTAGE_API_KEY: z.string().optional(),
+
   // Optional
   HUGGINGFACE_ACCESS_TOKEN: z.string().optional(),
   TWILIO_ACCOUNT_SID: z.string().optional(),
   TWILIO_AUTH_TOKEN: z.string().optional(),
   TWILIO_PHONE_NUMBER: z.string().optional(),
+
+  // Home Assistant (optional)
+  HOME_ASSISTANT_URL: z.string().url().optional(),
+  HOME_ASSISTANT_TOKEN: z.string().optional(),
+
+  // Spotify (optional)
+  SPOTIFY_CLIENT_ID: z.string().optional(),
+  SPOTIFY_CLIENT_SECRET: z.string().optional(),
+  SPOTIFY_REDIRECT_URI: z.string().url().optional(),
 
   // Server
   PORT: z.coerce.number().default(8030),

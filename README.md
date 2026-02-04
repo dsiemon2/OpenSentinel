@@ -90,6 +90,31 @@ Moltbot is your own personal AI assistant that runs on your computer. Think of i
 - Prompt inspector
 - Alerting (anomaly, cost, errors)
 
+### Integrations
+- **Email**: IMAP/SMTP with AI inbox summarization
+- **SMS/Phone**: Twilio for calls and texts
+- **GitHub**: Repos, issues, PRs, AI code review
+- **Notion**: Pages, databases, search, sync
+- **Home Assistant**: Smart home device control
+- **Spotify**: Playback, playlists, search
+- **Cloud Storage**: Google Drive, Dropbox
+- **Finance**: Crypto, stocks, currency, portfolio tracking
+
+### Vision & Documents
+- Screen capture and webcam analysis
+- Document ingestion (PDF, DOCX, TXT, etc.)
+- Knowledge base with vector search
+- Enhanced OCR with layout detection
+
+### Workflow Automation
+- IFTTT-like trigger → action workflows
+- Time, webhook, and event triggers
+- Built-in workflow templates
+
+### Desktop & Browser Apps
+- **Electron Desktop App**: System tray, global hotkeys (Ctrl+Shift+M)
+- **Browser Extension**: Chrome/Firefox popup chat, context menu
+
 ## Quick Start
 
 ### Prerequisites
@@ -201,37 +226,45 @@ src/
 │   ├── memory.ts               # RAG memory system
 │   ├── scheduler.ts            # BullMQ task scheduler
 │   ├── agents/                 # Sub-agent system
-│   │   ├── agent-manager.ts
-│   │   ├── agent-worker.ts
-│   │   ├── specialized/        # Research, coding, writing, analysis
-│   │   └── collaboration/      # Inter-agent communication
 │   ├── enterprise/             # Multi-user, SSO, quotas
 │   ├── intelligence/           # Predictive, relationship, temporal
 │   ├── molt/                   # Evolution, achievements, modes
 │   ├── observability/          # Metrics, replay, alerting
-│   ├── permissions/            # Permission manager
 │   ├── personality/            # Personas, mood, domain experts
 │   ├── plugins/                # Plugin system
-│   └── security/               # 2FA, vault, GDPR, audit
+│   ├── security/               # 2FA, vault, GDPR, audit
+│   └── workflows/              # Automation engine
 ├── inputs/
 │   ├── telegram/               # Telegram bot
+│   ├── discord/                # Discord bot
+│   ├── slack/                  # Slack bot
 │   ├── api/                    # REST API
 │   ├── calendar/               # Google, Outlook, iCal
 │   ├── triggers/               # Shortcuts, Bluetooth, NFC, Geofence
 │   └── voice/                  # Wake word, VAD, diarization
+├── integrations/
+│   ├── email/                  # IMAP/SMTP email
+│   ├── twilio/                 # SMS/Phone calls
+│   ├── github/                 # GitHub API
+│   ├── notion/                 # Notion API
+│   ├── homeassistant/          # Home Assistant
+│   ├── spotify/                # Spotify API
+│   ├── cloud-storage/          # Google Drive, Dropbox
+│   ├── finance/                # Crypto, stocks, currency
+│   ├── documents/              # Document ingestion
+│   └── vision/                 # Screen/webcam capture
 ├── tools/
-│   ├── shell.ts, files.ts, browser.ts, web-search.ts
-│   ├── image-analysis.ts, ocr.ts, screenshot.ts
-│   ├── video-summarization.ts
 │   ├── file-generation/        # PDF, Word, Excel, PPT, images
 │   └── rendering/              # Math, code, markdown
 ├── outputs/
 │   ├── stt.ts                  # Speech-to-text
 │   └── tts.ts                  # Text-to-speech
 ├── db/
-│   ├── schema.ts               # Drizzle ORM schema
-│   └── index.ts                # Database connection
+│   └── schema.ts               # Drizzle ORM schema
 └── web/                        # React dashboard
+
+desktop/                        # Electron desktop app
+extension/                      # Browser extension
 ```
 
 ## Ports
