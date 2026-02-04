@@ -1,12 +1,49 @@
 # CLAUDE.md - AI Assistant Instructions
 
 ## Project Overview
-Moltbot is a self-hosted personal AI assistant powered by Claude, with Telegram and web interfaces.
+Moltbot is a self-hosted personal AI assistant powered by Claude, with Telegram, Discord, Slack, and web interfaces. It includes 250+ features including smart home control, productivity integrations, and workflow automation.
+
+## API Keys & Credentials (PRESERVE THESE)
+
+### Core AI Services
+| Service | Variable | Value |
+|---------|----------|-------|
+| Claude API | `CLAUDE_API_KEY` | `REDACTED` |
+| OpenAI | `OPENAI_API_KEY` | `REDACTED` |
+| ElevenLabs | `ELEVENLABS_API_KEY` | `REDACTED` |
+| ElevenLabs Voice | `ELEVENLABS_VOICE_ID` | `REDACTED` |
+| HuggingFace | `HUGGINGFACE_ACCESS_TOKEN` | `REDACTED` |
+
+### Communication Platforms
+| Service | Variable | Value |
+|---------|----------|-------|
+| Telegram Token | `TELEGRAM_BOT_TOKEN` | `REDACTED` |
+| Telegram Chat | `TELEGRAM_CHAT_ID` | `REDACTED` |
+| Discord Token | `DISCORD_BOT_TOKEN` | `REDACTED` |
+| Discord Client | `DISCORD_CLIENT_ID` | `your-client-id` |
+| Discord Guild | `DISCORD_GUILD_ID` | `your-server-id` |
+| Discord User | `DISCORD_ALLOWED_USER_IDS` | `your-user-id` |
+| Twilio SID | `TWILIO_ACCOUNT_SID` | `REDACTED` |
+| Twilio Auth | `TWILIO_AUTH_TOKEN` | `REDACTED` |
+| Twilio Phone | `TWILIO_PHONE_NUMBER` | `REDACTED` |
+
+### Payments (Not Active Yet)
+| Service | Variable | Value |
+|---------|----------|-------|
+| Stripe Key | `STRIPE_KEY` | `REDACTED` |
+| Stripe Secret | `STRIPE_SECRET` | `REDACTED` |
+| Stripe API Key | `STRIPE_API_KEY_ID` | `REDACTED` |
+
+### Database & Cache
+| Service | Variable | Value |
+|---------|----------|-------|
+| PostgreSQL | `DATABASE_URL` | `postgresql://moltbot:moltbot@localhost:5445/moltbot` |
+| Redis | `REDIS_URL` | `redis://localhost:6379` |
 
 ## Tech Stack
 - **Runtime**: Bun (not Node.js)
 - **Language**: TypeScript
-- **Framework**: Hono (API), grammY (Telegram)
+- **Framework**: Hono (API), grammY (Telegram), discord.js, @slack/bolt
 - **Database**: PostgreSQL 16 + pgvector (port 5445)
 - **Cache/Queue**: Redis 7 (port 6379)
 - **Frontend**: React + Vite
@@ -16,6 +53,7 @@ Moltbot is a self-hosted personal AI assistant powered by Claude, with Telegram 
 # Development
 bun run dev          # Start with hot reload
 bun run start        # Production start
+bun test             # Run all tests (1733 tests)
 
 # Database
 bun run db:generate  # Generate migrations
@@ -23,51 +61,73 @@ bun run db:migrate   # Run migrations
 
 # Web frontend
 cd src/web && bun run build  # Build dashboard
+
+# Desktop app
+cd desktop && npm install && npm run build
+
+# Browser extension
+cd extension && bun install && bun run build
 ```
 
 ## Project Structure
 ```
 src/
-├── index.ts              # Entry point
-├── config/env.ts         # Environment config (Zod validated)
+├── index.ts                    # Entry point
+├── config/env.ts               # Environment config
 ├── core/
-│   ├── brain.ts          # Claude API wrapper + tool execution
-│   ├── memory.ts         # RAG memory system
-│   └── scheduler.ts      # BullMQ task scheduler
+│   ├── brain.ts                # Claude API + tool execution
+│   ├── memory.ts               # RAG memory system
+│   ├── scheduler.ts            # BullMQ task scheduler
+│   ├── agents/                 # Sub-agent system
+│   ├── enterprise/             # Multi-user, SSO, quotas
+│   ├── intelligence/           # Predictive, relationship, temporal
+│   ├── molt/                   # Evolution, achievements, modes
+│   ├── observability/          # Metrics, replay, alerting
+│   ├── personality/            # Personas, mood, domain experts
+│   ├── plugins/                # Plugin system
+│   ├── security/               # 2FA, vault, GDPR, audit
+│   └── workflows/              # Automation engine
 ├── inputs/
-│   ├── telegram/         # Telegram bot (grammY)
-│   └── api/server.ts     # Hono REST API
-├── tools/
-│   ├── index.ts          # Tool definitions + router
-│   ├── shell.ts          # Command execution
-│   ├── files.ts          # File operations
-│   ├── browser.ts        # Playwright automation
-│   └── web-search.ts     # Web search
-├── outputs/
-│   ├── stt.ts            # OpenAI Whisper transcription
-│   └── tts.ts            # ElevenLabs text-to-speech
-├── db/
-│   ├── schema.ts         # Drizzle ORM schema
-│   └── index.ts          # Database connection
-└── web/                  # React dashboard
+│   ├── telegram/               # Telegram bot
+│   ├── discord/                # Discord bot
+│   ├── slack/                  # Slack bot
+│   ├── api/                    # REST API
+│   ├── calendar/               # Google, Outlook, iCal
+│   ├── triggers/               # Shortcuts, Bluetooth, NFC, Geofence
+│   └── voice/                  # Wake word, VAD, diarization
+├── integrations/
+│   ├── email/                  # IMAP/SMTP email
+│   ├── twilio/                 # SMS/Phone calls
+│   ├── github/                 # GitHub API
+│   ├── notion/                 # Notion API
+│   ├── homeassistant/          # Home Assistant
+│   ├── spotify/                # Spotify API
+│   ├── cloud-storage/          # Google Drive, Dropbox
+│   ├── finance/                # Crypto, stocks, currency
+│   ├── documents/              # Document ingestion
+│   └── vision/                 # Screen/webcam capture
+├── tools/                      # Tool implementations
+├── outputs/                    # STT, TTS
+├── db/                         # Database schema
+└── web/                        # React dashboard
+
+desktop/                        # Electron desktop app
+extension/                      # Browser extension
 ```
 
-## Environment Variables
-Required in `.env`:
-- `CLAUDE_API_KEY` - Anthropic API key
-- `TELEGRAM_BOT_TOKEN` - Telegram bot token
-- `TELEGRAM_CHAT_ID` - Authorized chat ID
-- `OPENAI_API_KEY` - For Whisper STT
-- `ELEVENLABS_API_KEY` - For TTS
-- `ELEVENLABS_VOICE_ID` - Voice ID for TTS
-- `DATABASE_URL` - PostgreSQL connection string
-- `REDIS_URL` - Redis connection string
+## Discord Setup (IMPORTANT)
+1. Go to https://discord.com/developers/applications
+2. Click "MoltBot" → "Bot"
+3. Enable ALL three "Privileged Gateway Intents":
+   - Presence Intent ✅
+   - Server Members Intent ✅
+   - Message Content Intent ✅
+4. Click Save Changes
 
-## Architecture Notes
-- Claude tool_use is implemented in `src/core/brain.ts` with a loop that executes tools until completion
-- Memory system uses pgvector for semantic similarity search
-- Telegram bot only responds to the configured `TELEGRAM_CHAT_ID` for security
-- Shell commands are sandboxed with an allowlist/blocklist system
+## Ports
+- 8030: Moltbot API + Web Dashboard
+- 5445: PostgreSQL
+- 6379: Redis
 
 ## Common Tasks
 
@@ -83,13 +143,18 @@ Required in `.env`:
 
 ### Building the web frontend
 ```bash
-cd src/web
-bun install
-bun run build
+cd src/web && bun install && bun run build
 ```
-Dashboard is served from `src/web/dist/` by the Hono server.
 
-## Ports
-- 8030: Moltbot API + Web Dashboard
-- 5445: PostgreSQL
-- 6379: Redis
+### Building the desktop app
+```bash
+cd desktop && npm install && npm run build
+npm run dist:linux  # Linux packages
+npm run dist:win    # Windows installer
+```
+
+### Building the browser extension
+```bash
+cd extension && bun install && bun run build
+# Load extension/dist in Chrome at chrome://extensions
+```
