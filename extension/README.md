@@ -1,5 +1,7 @@
 # Moltbot Browser Extension
 
+**Status: IMPLEMENTED** (v2.0.0)
+
 A Chrome/Firefox browser extension for interacting with your Moltbot personal AI assistant.
 
 ## Features

@@ -1,25 +1,59 @@
 # Moltbot Technical Implementation
 
-## Architecture Overview
+**Status: COMPLETE** (v2.0.0)
 
-Moltbot follows a modular architecture with clear separation of concerns:
+## Architecture Overview
 
 ```
 src/
-├── config/       # Configuration and environment
-├── core/         # Brain, memory, scheduling logic
-├── inputs/       # Telegram bot, API server
-├── outputs/      # TTS, STT services
-├── tools/        # Executable tools for Claude
-├── db/           # Database schema and migrations
-└── web/          # React frontend
+├── config/           # Configuration and environment
+├── core/             # Brain, memory, agents, security
+│   ├── agents/       # Sub-agent system
+│   ├── enterprise/   # Multi-user, SSO, quotas
+│   ├── intelligence/ # Predictive, relationship graph
+│   ├── molt/         # Evolution, achievements, modes
+│   ├── observability/# Metrics, replay, alerting
+│   ├── personality/  # Personas, mood, domain experts
+│   ├── plugins/      # Plugin system
+│   ├── security/     # 2FA, vault, GDPR, audit
+│   └── workflows/    # Automation engine
+├── inputs/           # Telegram, Discord, Slack, API, voice
+│   ├── telegram/     # Telegram bot
+│   ├── discord/      # Discord bot
+│   ├── slack/        # Slack bot
+│   ├── api/          # REST API
+│   ├── voice/        # Wake word, VAD, diarization
+│   ├── calendar/     # Google, Outlook, iCal
+│   └── triggers/     # Shortcuts, BT, NFC, geofence
+├── integrations/     # External services
+│   ├── email/        # IMAP/SMTP
+│   ├── twilio/       # SMS/Phone
+│   ├── github/       # Repos, issues, PRs
+│   ├── notion/       # Pages, databases
+│   ├── homeassistant/# Smart home
+│   ├── spotify/      # Music control
+│   ├── cloud-storage/# GDrive, Dropbox
+│   ├── finance/      # Crypto, stocks
+│   ├── documents/    # PDF, DOCX ingestion
+│   └── vision/       # Screen/webcam capture
+├── tools/            # Executable tools
+│   ├── file-generation/ # PDF, Word, Excel, PPT
+│   └── rendering/    # Math, code, markdown
+├── outputs/          # TTS, STT services
+├── db/               # Database schema and migrations
+└── web/              # React frontend
+
+desktop/              # Electron desktop app
+extension/            # Browser extension
 ```
+
+---
 
 ## Core Components
 
 ### 1. Brain (`src/core/brain.ts`)
 
-The brain is the central intelligence layer that interfaces with Claude API.
+Central intelligence layer interfacing with Claude API.
 
 **Key Functions:**
 - `chat()` - Simple conversation without tools
@@ -47,31 +81,14 @@ RAG-based memory using PostgreSQL with pgvector.
 - `buildMemoryContext()` - Inject memories into prompts
 
 **Memory Types:**
-- Episodic: Specific events ("On Jan 15, user asked about X")
-- Semantic: Facts ("User's dog is named Luna")
-- Procedural: Preferences ("User prefers TypeScript")
+- Episodic: Specific events
+- Semantic: Facts about the user
+- Procedural: User preferences
 
 ### 3. Tool System (`src/tools/`)
 
-Tools are defined using Claude's tool_use format:
+30+ tools defined using Claude's tool_use format:
 
-```typescript
-const TOOLS: Tool[] = [
-  {
-    name: "execute_command",
-    description: "Execute a shell command",
-    input_schema: {
-      type: "object",
-      properties: {
-        command: { type: "string" }
-      },
-      required: ["command"]
-    }
-  }
-];
-```
-
-**Available Tools:**
 | Tool | File | Purpose |
 |------|------|---------|
 | execute_command | shell.ts | Run shell commands |
@@ -80,54 +97,63 @@ const TOOLS: Tool[] = [
 | write_file | files.ts | Write to files |
 | search_files | files.ts | Glob pattern search |
 | web_search | web-search.ts | Search the internet |
-| browse_url | browser.ts | Navigate and extract content |
-| take_screenshot | browser.ts | Screenshot current page |
+| browse_url | browser.ts | Navigate and extract |
+| take_screenshot | browser.ts | Screenshot page |
+| analyze_image | image-analysis.ts | Claude Vision |
+| ocr_document | ocr.ts | Extract text |
+| generate_pdf | file-generation/ | Create PDF |
+| generate_docx | file-generation/ | Create Word doc |
+| generate_xlsx | file-generation/ | Create spreadsheet |
+| generate_pptx | file-generation/ | Create presentation |
 
-### 4. Telegram Bot (`src/inputs/telegram/`)
+### 4. Input Channels
 
-Built with grammY framework.
+**Telegram (`src/inputs/telegram/`):**
+- grammY framework
+- Chat ID whitelist security
+- Voice transcription
+- File handling
 
-**Security:**
-- Only responds to configured `TELEGRAM_CHAT_ID`
-- Unauthorized access attempts are logged and ignored
+**Discord (`src/inputs/discord/`):**
+- discord.js library
+- Slash commands (7)
+- Voice channel support
+- User/role authorization
 
-**Message Flow:**
-1. User sends message
-2. Bot adds to session history
-3. `chatWithTools()` processes with Claude
-4. Response sent back (split if >4096 chars)
-5. Voice messages transcribed via Whisper first
+**Slack (`src/inputs/slack/`):**
+- @slack/bolt library
+- App mentions
+- Thread context
+- Socket mode
 
-### 5. API Server (`src/inputs/api/server.ts`)
+### 5. Agent System (`src/core/agents/`)
 
-Hono-based REST API.
+**Specialized Agents:**
+- Research agent - Web search, synthesis
+- Coding agent - Implementation, debugging
+- Writing agent - Drafts, editing
+- Analysis agent - Data processing
 
-**Endpoints:**
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | /health | Health check |
-| GET | /api/system/status | System info |
-| POST | /api/ask | Simple chat |
-| POST | /api/chat/tools | Chat with tools |
-| GET | /api/conversations | List conversations |
-| GET | /api/memories | List memories |
-| POST | /api/memories/search | Semantic search |
+**Collaboration:**
+- Agent messenger for inter-agent communication
+- Shared context and memory
+- Task coordinator for delegation
 
 ### 6. Scheduler (`src/core/scheduler.ts`)
 
-BullMQ-based task scheduling.
-
-**Features:**
+BullMQ-based task scheduling:
 - One-time delayed tasks
 - Recurring tasks (cron patterns)
-- Task cancellation
-- Worker processes tasks and sends Telegram notifications
+- Task chaining
+- Failure handling with retries
+
+---
 
 ## Database Schema
 
 ```sql
 -- Users
-users (id, telegram_id, name, preferences, created_at, updated_at)
+users (id, telegram_id, discord_id, slack_id, name, preferences, created_at, updated_at)
 
 -- Conversations
 conversations (id, user_id, title, source, metadata, created_at, updated_at)
@@ -143,34 +169,57 @@ scheduled_tasks (id, user_id, name, description, cron_expression, next_run_at, l
 
 -- Tool Logs
 tool_logs (id, conversation_id, tool_name, input, output, success, duration_ms, created_at)
+
+-- Workflows
+workflows (id, user_id, name, triggers, conditions, actions, enabled, created_at)
 ```
 
-## Security Considerations
+---
 
-### Shell Execution
-- Allowlist of safe commands
-- Blocklist of dangerous commands (rm, sudo, etc.)
-- Output size limits (10KB stdout, 2KB stderr)
-- Timeout limits (30 seconds default)
-
-### File Operations
-- Restricted to allowed paths ($HOME, /tmp)
-- File size limits for reading (100KB)
-- Path traversal protection
+## Security
 
 ### Authentication
 - Telegram: Chat ID whitelist
-- API: Currently open (add auth for production)
+- Discord: User ID + role allowlists
+- Slack: User + channel allowlists
+- API: Token-based auth
+- 2FA: TOTP for sensitive operations
+- Biometric: Mobile verification
+
+### Sandboxing
+- Shell command allowlist/blocklist
+- File path restrictions
+- Output size limits
+- Timeout limits
+- Plugin isolation
+
+### Data Protection
+- Memory vault encryption
+- Audit logging
+- GDPR compliance (export, delete)
+- Rate limiting
+
+---
 
 ## Performance
 
 ### Optimizations
 - Connection pooling for PostgreSQL
 - Redis for caching and queues
-- Lazy browser initialization (Playwright)
-- Message history trimming (last 20 messages)
+- Lazy browser initialization
+- Message history trimming
 
 ### Resource Usage
-- Memory: ~150-200MB base
+- Memory: ~200-300MB base
 - CPU: Minimal except during tool execution
 - Storage: Depends on conversation/memory volume
+
+---
+
+## Ports Configuration
+
+| Service | Port |
+|---------|------|
+| Moltbot API + Dashboard | 8030 |
+| PostgreSQL | 5445 |
+| Redis | 6379 |

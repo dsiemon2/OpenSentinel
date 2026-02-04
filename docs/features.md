@@ -1,150 +1,193 @@
 # Moltbot Features
 
+**Status: ALL FEATURES IMPLEMENTED** (v2.0.0)
+
 ## Input Methods
 
-### Telegram Bot
+### Telegram Bot ✅
 - Text messages
 - Voice notes (auto-transcribed)
-- Commands (/start, /help, /clear, /remind)
-- Inline responses
+- Images (Claude Vision)
+- Documents (PDF, text files)
+- Commands (/start, /help, /clear, /remind, /mode, /expert)
+- Inline keyboard responses
+- Reaction-based commands
 
-### Web Dashboard
+### Discord Bot ✅
+- Slash commands (/ask, /clear, /remind, /mode, /expert, /status, /voice)
+- Direct messages
+- Channel @mentions
+- Voice channel support (join, leave, speak TTS)
+- File attachments with transcription
+
+### Slack Bot ✅
+- App mentions
+- Direct messages
+- Thread replies
+- File attachments
+- Slash commands
+
+### Web Dashboard ✅
 - Real-time chat interface
 - Markdown rendering
 - Memory explorer
 - System status
+- File upload/download
+- Task queue monitor
 
-### REST API
+### Voice Interface ✅
+- Wake word ("Hey Molt")
+- Continuous conversation mode
+- Voice activity detection
+- Speaker diarization
+- Noise cancellation
+- Voice summarization
+
+### REST API ✅
 - `/api/ask` - Simple queries
 - `/api/chat/tools` - Full tool-enabled chat
 - `/api/memories` - Memory management
+- `/health` - Health check
 
 ---
 
 ## AI Capabilities
 
-### Conversation
-- Context-aware responses (remembers conversation history)
+### Conversation ✅
+- Context-aware responses
 - Markdown formatting
 - Code syntax highlighting
 - Multi-turn conversations
+- Multiple reasoning modes
 
-### Memory (RAG)
+### Memory (RAG) ✅
 - Automatic fact extraction
 - Semantic similarity search
 - Memory types: episodic, semantic, procedural
 - Importance scoring (1-10)
+- Memory decay and consolidation
+- Contradiction detection
 
-### Personality
-- JARVIS-like professional yet friendly tone
-- Concise but thorough responses
-- Subtle humor
-- Proactive suggestions
+### Personality ✅
+- 15 domain expert modes
+- Mood detection and adaptation
+- Configurable personas (formal, casual, snarky)
+- Verbosity and humor controls
 
 ---
 
-## Tools
+## Tools (30+)
 
-### Shell Execution
-Execute commands on the host system:
-- "List files in my Downloads folder"
-- "Check disk space"
-- "Run git status"
+### Shell Execution ✅
+- Sandboxed command execution
+- Allowlist/blocklist security
+- Output streaming
 
-**Sandboxed**: Dangerous commands blocked, output limited.
+### File Operations ✅
+- Read/write files
+- File search
+- Template filling
+- Git operations
 
-### File Operations
-- **Read**: "Show me the contents of config.json"
-- **Write**: "Create a new file called notes.txt with..."
-- **Search**: "Find all Python files in my projects"
-- **List**: "What's in my Documents folder?"
+### Web Browsing ✅
+- Natural language navigation
+- Screenshot capture
+- Data extraction
+- Form filling
 
-### Web Browsing
-- **Search**: "Search for the latest AI news"
-- **Navigate**: "Go to github.com and show me the trending repos"
-- **Extract**: "Get the main content from this URL"
-- **Screenshot**: "Take a screenshot of the current page"
+### Vision & OCR ✅
+- Image analysis (Claude Vision)
+- Document OCR
+- Screenshot interpretation
+- Video summarization
+
+### File Generation ✅
+- PDF documents
+- Word documents (.docx)
+- Excel spreadsheets
+- PowerPoint presentations
+- Charts and diagrams
+- AI image generation
 
 ---
 
 ## Voice
 
-### Speech-to-Text (STT)
+### Speech-to-Text (STT) ✅
 - OpenAI Whisper API
+- Local faster-whisper (GPU)
 - Automatic language detection
-- Works with Telegram voice notes
 
-### Text-to-Speech (TTS)
+### Text-to-Speech (TTS) ✅
 - ElevenLabs API
-- JARVIS voice (configurable)
-- Automatic for short responses to voice messages
+- Local Piper TTS
+- JARVIS voice
 
 ---
 
-## Scheduling
+## Scheduling ✅
 
 ### Reminders
 ```
 /remind 5m Take a break
 /remind 1h Check the oven
-/remind 30s Test reminder
 ```
 
-### Supported Time Units
-- `s` - seconds
-- `m` - minutes
-- `h` - hours
+### Workflow Automation
+- Time-based triggers
+- Webhook triggers
+- Event triggers
+- Conditional execution
 
 ---
 
-## Dashboard Features
+## Integrations ✅
 
-### Chat View
-- Send messages
-- View conversation history
-- See which tools were used
-- Markdown/code rendering
-
-### Memory Explorer
-- Browse all memories
-- Semantic search
-- View importance scores
-- Filter by type
-
-### Settings
-- System status (uptime, memory)
-- Connected services status
-- API endpoint reference
+| Category | Services |
+|----------|----------|
+| Communication | Email (IMAP/SMTP), Twilio (SMS/Phone) |
+| Productivity | GitHub, Notion, Google/Outlook Calendar |
+| Smart Home | Home Assistant |
+| Entertainment | Spotify |
+| Cloud Storage | Google Drive, Dropbox |
+| Finance | Crypto, Stocks, Currency, Portfolio |
 
 ---
 
-## Security Features
+## Security Features ✅
 
 ### Authentication
-- Telegram: Only responds to whitelisted chat ID
-- Unauthorized attempts logged
-
-### Sandboxing
-- Shell commands filtered
-- File access restricted to safe paths
-- Network requests controlled
+- Telegram: Chat ID whitelist
+- Discord: User ID + role allowlists
+- Slack: User + channel allowlists
+- API: Token-based auth
+- 2FA for sensitive operations
+- Biometric verification
 
 ### Data Protection
 - All data stored locally
-- No external data sharing (except API calls)
-- Conversation history in PostgreSQL
+- Memory vault encryption
+- Audit logging
+- GDPR compliance tools
+
+### Sandboxing
+- Shell commands filtered
+- File access restricted
+- Network requests controlled
+- Rate limiting
 
 ---
 
-## Integration Points
+## Desktop & Browser ✅
 
-### Incoming
-- Telegram messages
-- HTTP API calls
-- Webhooks (planned)
+### Electron Desktop App
+- System tray integration
+- Global hotkey (Ctrl+Shift+M)
+- Quick input popup
+- Auto-start on boot
 
-### Outgoing
-- Telegram responses
-- Voice audio
-- File outputs
-- Browser automation
+### Browser Extension
+- Chrome/Firefox support
+- Popup chat interface
+- Right-click context menu
+- Page summarization

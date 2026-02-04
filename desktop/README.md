@@ -1,5 +1,7 @@
 # Moltbot Desktop
 
+**Status: IMPLEMENTED** (v2.0.0)
+
 Electron-based desktop application for Moltbot - your personal AI assistant.
 
 ## Features
