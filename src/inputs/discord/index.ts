@@ -81,14 +81,16 @@ export class DiscordBot {
   constructor(config: DiscordBotConfig) {
     this.config = config;
 
+    // Note: MessageContent requires Privileged Gateway Intents
+    // Enable at: https://discord.com/developers/applications/{APP_ID}/bot
     this.client = new Client({
       intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
         GatewayIntentBits.DirectMessages,
         GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.MessageContent, // Privileged - must be enabled in Developer Portal
+        // GatewayIntentBits.GuildMembers, // Optional - enable for role-based authorization
       ],
     });
 
@@ -546,17 +548,22 @@ export class DiscordBot {
       return true;
     }
 
-    // Check user ID allowlist
+    // Check user ID allowlist (primary authorization method)
     if (this.config.allowedUserIds?.includes(userId)) {
       return true;
     }
 
-    // Check role allowlist
+    // Check role allowlist (requires GuildMembers intent to be enabled)
+    // Note: Role checks may fail silently if GuildMembers intent is not enabled
     if (member && this.config.allowedRoleIds?.length) {
-      for (const roleId of this.config.allowedRoleIds) {
-        if (member.roles.cache.has(roleId)) {
-          return true;
+      try {
+        for (const roleId of this.config.allowedRoleIds) {
+          if (member.roles?.cache?.has(roleId)) {
+            return true;
+          }
         }
+      } catch {
+        // Role cache not available - GuildMembers intent not enabled
       }
     }
 
