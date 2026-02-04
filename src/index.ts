@@ -43,15 +43,28 @@ async function main() {
   let discordBot: DiscordBot | null = null;
   if (env.DISCORD_BOT_TOKEN) {
     console.log("[Discord] Starting bot...");
-    discordBot = new DiscordBot({
-      token: env.DISCORD_BOT_TOKEN,
-      clientId: env.DISCORD_CLIENT_ID || "",
-      guildId: env.DISCORD_GUILD_ID,
-      allowedUserIds: env.DISCORD_ALLOWED_USER_IDS?.split(",") || [],
-      allowedRoleIds: env.DISCORD_ALLOWED_ROLE_IDS?.split(",") || [],
-    });
-    await discordBot.start();
-    console.log("[Discord] Bot started");
+    try {
+      discordBot = new DiscordBot({
+        token: env.DISCORD_BOT_TOKEN,
+        clientId: env.DISCORD_CLIENT_ID || "",
+        guildId: env.DISCORD_GUILD_ID,
+        allowedUserIds: env.DISCORD_ALLOWED_USER_IDS?.split(",") || [],
+        allowedRoleIds: env.DISCORD_ALLOWED_ROLE_IDS?.split(",") || [],
+      });
+      await discordBot.start();
+      console.log("[Discord] Bot started");
+    } catch (err: any) {
+      console.warn("[Discord] Failed to start bot:", err.message);
+      if (err.message?.includes("disallowed intents") || err.message?.includes("Disallowed")) {
+        console.warn("[Discord] ⚠️  Enable Privileged Gateway Intents in Discord Developer Portal:");
+        console.warn("[Discord]    1. Go to https://discord.com/developers/applications");
+        console.warn("[Discord]    2. Select your bot application");
+        console.warn("[Discord]    3. Go to Bot → Privileged Gateway Intents");
+        console.warn("[Discord]    4. Enable: Presence Intent, Server Members Intent, Message Content Intent");
+        console.warn("[Discord]    5. Save and restart Moltbot");
+      }
+      discordBot = null;
+    }
   }
 
   // Start Slack bot if configured
