@@ -33,7 +33,7 @@ describe("Slack Bot Integration", () => {
     test("should export askCommand", async () => {
       const { askCommand } = await import("../src/inputs/slack/commands");
       expect(askCommand).toBeTruthy();
-      expect(askCommand.command).toBe("/sentinel-ask");
+      expect(askCommand.command).toBe("/opensentinel-ask");
       expect(askCommand.description).toBeTruthy();
       expect(askCommand.usage).toBeTruthy();
       expect(typeof askCommand.handler).toBe("function");
@@ -42,7 +42,7 @@ describe("Slack Bot Integration", () => {
     test("should export chatCommand", async () => {
       const { chatCommand } = await import("../src/inputs/slack/commands");
       expect(chatCommand).toBeTruthy();
-      expect(chatCommand.command).toBe("/sentinel-chat");
+      expect(chatCommand.command).toBe("/opensentinel-chat");
       expect(chatCommand.description).toBeTruthy();
       expect(typeof chatCommand.handler).toBe("function");
     });
@@ -50,7 +50,7 @@ describe("Slack Bot Integration", () => {
     test("should export clearCommand", async () => {
       const { clearCommand } = await import("../src/inputs/slack/commands");
       expect(clearCommand).toBeTruthy();
-      expect(clearCommand.command).toBe("/sentinel-clear");
+      expect(clearCommand.command).toBe("/opensentinel-clear");
       expect(clearCommand.description).toBeTruthy();
       expect(typeof clearCommand.handler).toBe("function");
     });
@@ -58,7 +58,7 @@ describe("Slack Bot Integration", () => {
     test("should export remindCommand", async () => {
       const { remindCommand } = await import("../src/inputs/slack/commands");
       expect(remindCommand).toBeTruthy();
-      expect(remindCommand.command).toBe("/sentinel-remind");
+      expect(remindCommand.command).toBe("/opensentinel-remind");
       expect(remindCommand.description).toBeTruthy();
       expect(typeof remindCommand.handler).toBe("function");
     });
@@ -66,21 +66,21 @@ describe("Slack Bot Integration", () => {
     test("should export statusCommand", async () => {
       const { statusCommand } = await import("../src/inputs/slack/commands");
       expect(statusCommand).toBeTruthy();
-      expect(statusCommand.command).toBe("/sentinel-status");
+      expect(statusCommand.command).toBe("/opensentinel-status");
       expect(typeof statusCommand.handler).toBe("function");
     });
 
     test("should export helpCommand", async () => {
       const { helpCommand } = await import("../src/inputs/slack/commands");
       expect(helpCommand).toBeTruthy();
-      expect(helpCommand.command).toBe("/sentinel-help");
+      expect(helpCommand.command).toBe("/opensentinel-help");
       expect(typeof helpCommand.handler).toBe("function");
     });
 
     test("should export mainCommand", async () => {
       const { mainCommand } = await import("../src/inputs/slack/commands");
       expect(mainCommand).toBeTruthy();
-      expect(mainCommand.command).toBe("/sentinel");
+      expect(mainCommand.command).toBe("/opensentinel");
       expect(typeof mainCommand.handler).toBe("function");
     });
   });
@@ -190,13 +190,13 @@ describe("Slack Bot Integration", () => {
     test("getCommand should return command by name", async () => {
       const { getCommand } = await import("../src/inputs/slack/commands");
 
-      const askCmd = getCommand("/sentinel-ask");
+      const askCmd = getCommand("/opensentinel-ask");
       expect(askCmd).toBeTruthy();
-      expect(askCmd?.command).toBe("/sentinel-ask");
+      expect(askCmd?.command).toBe("/opensentinel-ask");
 
-      const chatCmd = getCommand("/sentinel-chat");
+      const chatCmd = getCommand("/opensentinel-chat");
       expect(chatCmd).toBeTruthy();
-      expect(chatCmd?.command).toBe("/sentinel-chat");
+      expect(chatCmd?.command).toBe("/opensentinel-chat");
     });
 
     test("getCommand should return undefined for unknown command", async () => {

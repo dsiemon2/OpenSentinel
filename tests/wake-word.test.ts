@@ -24,7 +24,7 @@ describe("Wake Word Detection", () => {
 
     test("should have correct default wake word", () => {
       const detector = new AdvancedWakeWordDetector();
-      expect(detector.getWakeWord()).toBe("hey molt");
+      expect(detector.getWakeWord()).toBe("hey opensentinel");
     });
 
     test("should allow changing wake word", () => {
@@ -76,19 +76,19 @@ describe("Wake Word Detection", () => {
 
   describe("containsWakeWord", () => {
     test("should detect exact wake word", () => {
-      expect(containsWakeWord("hey molt what time is it")).toBe(true);
+      expect(containsWakeWord("hey opensentinel what time is it")).toBe(true);
     });
 
     test("should detect wake word case insensitively", () => {
-      expect(containsWakeWord("Hey Molt please help me")).toBe(true);
+      expect(containsWakeWord("Hey Opensentinel please help me")).toBe(true);
     });
 
     test("should detect wake word at start", () => {
-      expect(containsWakeWord("hey molt")).toBe(true);
+      expect(containsWakeWord("hey opensentinel")).toBe(true);
     });
 
     test("should detect wake word at end", () => {
-      expect(containsWakeWord("I said hey molt")).toBe(true);
+      expect(containsWakeWord("I said hey opensentinel")).toBe(true);
     });
 
     test("should not detect when wake word is absent", () => {
@@ -100,7 +100,7 @@ describe("Wake Word Detection", () => {
     });
 
     test("should detect phonetically similar phrases", () => {
-      // "hey melt" is phonetically similar to "hey molt"
+      // "hey melt" is phonetically similar to "hey opensentinel"
       const result = containsWakeWord("hey melt what is this");
       expect(typeof result).toBe("boolean");
     });
