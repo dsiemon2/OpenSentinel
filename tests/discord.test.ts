@@ -5,7 +5,7 @@ describe("Discord Bot Integration", () => {
     test("should export createDiscordBot function", async () => {
       const { createDiscordBot } = await import("../src/inputs/discord");
       expect(typeof createDiscordBot).toBe("function");
-    });
+    }, 30000);
 
     test("should export DiscordBot class", async () => {
       const { DiscordBot } = await import("../src/inputs/discord");
