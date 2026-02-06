@@ -17,6 +17,8 @@ import { trackPattern } from "./molt/evolution-tracker";
 import { checkAchievements } from "./molt/achievement-system";
 import { metric } from "./observability/metrics";
 import { audit } from "./security/audit-logger";
+import { thinkingLevelManager } from "./intelligence/thinking-levels";
+import { hookManager, soulHookManager } from "./hooks";
 
 const client = new Anthropic({
   apiKey: env.CLAUDE_API_KEY,
@@ -139,7 +141,29 @@ export async function chatWithTools(
     }
   }
 
-  const systemWithContext = SYSTEM_PROMPT + memoryContext + modeContext + personalityContext;
+  // Apply SOUL hook personality if active
+  let soulContext = "";
+  const activeSoul = soulHookManager.getActiveSoul();
+  if (activeSoul && activeSoul.enabled) {
+    soulContext = soulHookManager.buildSoulPrompt(activeSoul);
+  }
+
+  const systemWithContext = SYSTEM_PROMPT + memoryContext + modeContext + personalityContext + soulContext;
+
+  // Run before hooks
+  const hookResult = await hookManager.runBefore("message:process", {
+    messages,
+    systemPrompt: systemWithContext,
+    userId: userId ?? "unknown",
+  }, userId);
+
+  if (!hookResult.proceed) {
+    return {
+      content: hookResult.reason ?? "Message processing was blocked by a hook.",
+      inputTokens: 0,
+      outputTokens: 0,
+    };
+  }
 
   // Convert messages to Anthropic format
   const anthropicMessages: MessageParam[] = messages.map((m) => ({
@@ -151,14 +175,18 @@ export async function chatWithTools(
   let totalOutputTokens = 0;
   const toolsUsed: string[] = [];
 
+  // Get thinking level API params
+  const thinkingParams = thinkingLevelManager.buildApiParams(userId ?? "default");
+
   // Tool use loop
   let response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 4096,
+    model: thinkingParams.model,
+    max_tokens: thinkingParams.max_tokens,
     system: systemWithContext,
     tools: getAllTools(),
     messages: anthropicMessages,
-  });
+    ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking } : {}),
+  } as any);
 
   totalInputTokens += response.usage.input_tokens;
   totalOutputTokens += response.usage.output_tokens;
@@ -176,13 +204,32 @@ export async function chatWithTools(
         onToolUse?.(toolUse.name, toolUse.input);
         toolsUsed.push(toolUse.name);
 
+        // Run before-tool hook
+        const toolHook = await hookManager.runBefore("tool:execute", {
+          toolName: toolUse.name,
+          toolInput: toolUse.input,
+        }, userId);
+
         console.log(`[Tool] Executing: ${toolUse.name}`);
         const toolStartTime = Date.now();
 
-        const result = await executeTool(
-          toolUse.name,
-          toolUse.input as Record<string, unknown>
-        );
+        let result;
+        if (toolHook.proceed) {
+          result = await executeTool(
+            toolUse.name,
+            toolUse.input as Record<string, unknown>
+          );
+        } else {
+          result = { success: false, result: null, error: toolHook.reason ?? "Blocked by hook" };
+        }
+
+        // Run after-tool hook
+        await hookManager.runAfter("tool:execute", {
+          toolName: toolUse.name,
+          toolInput: toolUse.input,
+          toolResult: result,
+          duration: Date.now() - toolStartTime,
+        }, userId);
 
         // Track tool usage
         if (userId) {
@@ -216,12 +263,13 @@ export async function chatWithTools(
 
     // Continue conversation
     response = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4096,
+      model: thinkingParams.model,
+      max_tokens: thinkingParams.max_tokens,
       system: systemWithContext,
       tools: getAllTools(),
       messages: anthropicMessages,
-    });
+      ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking } : {}),
+    } as any);
 
     totalInputTokens += response.usage.input_tokens;
     totalOutputTokens += response.usage.output_tokens;
@@ -244,6 +292,14 @@ export async function chatWithTools(
       // Achievement system not available
     }
   }
+
+  // Run after-message hook
+  await hookManager.runAfter("message:process", {
+    response: content,
+    inputTokens: totalInputTokens,
+    outputTokens: totalOutputTokens,
+    toolsUsed,
+  }, userId);
 
   return {
     content,

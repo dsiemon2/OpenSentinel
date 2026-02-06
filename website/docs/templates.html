@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Templates - OpenSentinel Docs</title>
+  <meta name="description" content="20 ready-to-run agent templates. Each is a standalone project that uses OpenSentinel as a library.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="../" class="header-logo">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#hlg)" stroke-width="2.5"/><circle cx="14" cy="14" r="5" fill="url(#hlg)"/><line x1="14" y1="2" x2="14" y2="8" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="20" x2="14" y2="26" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="14" x2="8" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="14" x2="26" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="hlg" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs></svg>
+          OpenSentinel
+          <span class="header-badge">Docs</span>
+        </a>
+        <nav class="header-nav">
+          <a href="getting-started.html">Get Started</a>
+          <a href="channels.html">Channels</a>
+          <a href="agents.html">Agents</a>
+          <a href="tools.html">Tools</a>
+          <a href="integrations.html">Integrations</a>
+          <a href="enterprise.html">Enterprise</a>
+          <a href="templates.html" class="active">Templates</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search docs...
+          <kbd>Ctrl K</kbd>
+        </div>
+        <a href="https://github.com/dsiemon2/OpenSentinel" class="header-github" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="header-mobile-toggle" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="doc-layout">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Getting Started</div>
+        <a href="getting-started.html" class="sidebar-link"><span class="ico">&#x1F680;</span> Quick Start</a>
+        <a href="getting-started.html#prerequisites" class="sidebar-link"><span class="ico">&#x2699;</span> Prerequisites</a>
+        <a href="getting-started.html#library" class="sidebar-link"><span class="ico">&#x1F4E6;</span> Use as Library</a>
+        <a href="getting-started.html#platform" class="sidebar-link"><span class="ico">&#x1F433;</span> Full Platform</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Core Concepts</div>
+        <a href="channels.html" class="sidebar-link"><span class="ico">&#x1F4AC;</span> Channels</a>
+        <a href="agents.html" class="sidebar-link"><span class="ico">&#x1F916;</span> Agents</a>
+        <a href="tools.html" class="sidebar-link"><span class="ico">&#x1F6E0;</span> Tools</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Integrations</div>
+        <a href="integrations.html" class="sidebar-link"><span class="ico">&#x1F50C;</span> Overview</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Enterprise</div>
+        <a href="enterprise.html" class="sidebar-link"><span class="ico">&#x1F3E2;</span> Overview</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Templates</div>
+        <a href="templates.html" class="sidebar-link active"><span class="ico">&#x1F4CB;</span> Overview</a>
+        <a href="templates.html#quick-start" class="sidebar-link"><span class="ico">&#x26A1;</span> Quick Start</a>
+        <a href="templates.html#full-list" class="sidebar-link"><span class="ico">&#x1F4CA;</span> Full Template List</a>
+        <a href="templates.html#creating-your-own" class="sidebar-link"><span class="ico">&#x1F528;</span> Create Your Own</a>
+        <a href="templates.html#structure" class="sidebar-link"><span class="ico">&#x1F4C2;</span> Template Structure</a>
+      </div>
+    </aside>
+
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="doc-main">
+      <div class="breadcrumb">
+        <a href="index.html">Docs</a>
+        <span>/</span>
+        <span>Templates</span>
+      </div>
+
+      <div class="content">
+        <h1>Templates</h1>
+        <p class="lead">20 ready-to-run agent templates. Each is a standalone project that uses OpenSentinel as a library. Clone, add your API key, and run.</p>
+
+
+        <!-- ========== Overview ========== -->
+        <h2 id="overview">Overview</h2>
+        <p>Templates are the fastest way to go from zero to a working AI agent. Each template is a <strong>standalone project under 200 lines</strong> that demonstrates a specific use case. They serve as both acquisition channels (discover OpenSentinel through a use case you care about) and starting points for custom agents.</p>
+
+        <ul>
+          <li><strong>20 templates</strong> covering sales, recruiting, DevOps, trading, support, content, security, and more</li>
+          <li>Each template is a <strong>complete, runnable project</strong> with its own <code>package.json</code> and README</li>
+          <li>Uses <code>opensentinel</code> as an NPM dependency &mdash; all the power, none of the complexity</li>
+          <li>Clone, add your API key, and run in under 60 seconds</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x26A1;</span>
+          <div><strong>No database required.</strong> Templates use OpenSentinel in library mode by default. They need only a <code>CLAUDE_API_KEY</code>. Add a <code>DATABASE_URL</code> if you want persistent memory.</div>
+        </div>
+
+
+        <!-- ========== Quick Start ========== -->
+        <h2 id="quick-start">Quick Start</h2>
+        <p>Pick any template and have it running in four commands:</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cp">$</span> git clone https://github.com/dsiemon2/OpenSentinel.git
+<span class="cp">$</span> cd OpenSentinel/templates/ai-sales-agent
+<span class="cp">$</span> bun install
+<span class="cp">$</span> CLAUDE_API_KEY=sk-ant-... bun run start</code></pre>
+        </div>
+
+        <div class="callout callout-success">
+          <span class="callout-ico">&#x2705;</span>
+          <div><strong>That's it.</strong> The agent is now running. Replace <code>ai-sales-agent</code> with any template name from the list below.</div>
+        </div>
+
+
+        <!-- ========== Full Template List ========== -->
+        <h2 id="full-list">Full Template List</h2>
+        <p>All 20 templates with descriptions and key features:</p>
+
+        <table>
+          <thead><tr><th>Template</th><th>Description</th><th>Key Features</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><code>ai-web-monitor</code></td>
+              <td>Monitor web pages for changes with intelligent alerts</td>
+              <td>URL tracking, diff detection, smart notifications</td>
+            </tr>
+            <tr>
+              <td><code>ai-sales-agent</code></td>
+              <td>Lead research, scoring, and outreach drafting</td>
+              <td>Company research, lead scoring, email drafts</td>
+            </tr>
+            <tr>
+              <td><code>ai-recruiter</code></td>
+              <td>Candidate screening, ranking, and interview prep</td>
+              <td>Resume parsing, skill matching, interview questions</td>
+            </tr>
+            <tr>
+              <td><code>ai-devops-agent</code></td>
+              <td>Server monitoring, log analysis, incident response</td>
+              <td>Log parsing, alerting, runbook execution</td>
+            </tr>
+            <tr>
+              <td><code>ai-trading-researcher</code></td>
+              <td>Market research, sentiment scoring, trend detection</td>
+              <td>News analysis, price tracking, sentiment scoring</td>
+            </tr>
+            <tr>
+              <td><code>ai-customer-support</code></td>
+              <td>Ticket triage, response drafting, escalation</td>
+              <td>Auto-categorize, draft replies, SLA tracking</td>
+            </tr>
+            <tr>
+              <td><code>ai-content-creator</code></td>
+              <td>Multi-platform content from a single brief</td>
+              <td>Blog posts, tweets, LinkedIn, email newsletters</td>
+            </tr>
+            <tr>
+              <td><code>ai-security-monitor</code></td>
+              <td>Auth log analysis, network audit, file integrity</td>
+              <td>Failed login detection, port scanning, hash checks</td>
+            </tr>
+            <tr>
+              <td><code>ai-code-reviewer</code></td>
+              <td>PR review, bug detection, test coverage</td>
+              <td>Line-by-line review, security flags, suggestions</td>
+            </tr>
+            <tr>
+              <td><code>ai-data-analyst</code></td>
+              <td>Dataset profiling, insights, anomaly detection</td>
+              <td>CSV/JSON parsing, statistical analysis, charts</td>
+            </tr>
+            <tr>
+              <td><code>ai-email-assistant</code></td>
+              <td>Inbox triage, reply drafting, action extraction</td>
+              <td>Priority sorting, draft replies, calendar parsing</td>
+            </tr>
+            <tr>
+              <td><code>ai-meeting-assistant</code></td>
+              <td>Transcript summaries, action items, weekly digests</td>
+              <td>Meeting notes, task extraction, follow-up tracking</td>
+            </tr>
+            <tr>
+              <td><code>ai-competitor-tracker</code></td>
+              <td>Product monitoring, pricing changes, hiring signals</td>
+              <td>Website monitoring, price alerts, job board tracking</td>
+            </tr>
+            <tr>
+              <td><code>ai-seo-optimizer</code></td>
+              <td>Page scoring, meta optimization, content outlines</td>
+              <td>SEO audit, keyword analysis, meta tag generation</td>
+            </tr>
+            <tr>
+              <td><code>ai-legal-reviewer</code></td>
+              <td>Contract review, risk flagging, amendments</td>
+              <td>Clause analysis, risk scoring, redline suggestions</td>
+            </tr>
+            <tr>
+              <td><code>ai-social-listener</code></td>
+              <td>Brand monitoring, sentiment, trend detection</td>
+              <td>Mention tracking, sentiment analysis, trend alerts</td>
+            </tr>
+            <tr>
+              <td><code>ai-documentation-writer</code></td>
+              <td>Auto-generate API refs, guides, changelogs</td>
+              <td>Code analysis, JSDoc parsing, markdown generation</td>
+            </tr>
+            <tr>
+              <td><code>ai-onboarding-agent</code></td>
+              <td>Personalized onboarding plans, Q&amp;A, tracking</td>
+              <td>Custom checklists, progress tracking, FAQ answers</td>
+            </tr>
+            <tr>
+              <td><code>ai-inventory-manager</code></td>
+              <td>Stock tracking, demand forecasting, PO generation</td>
+              <td>Inventory levels, reorder alerts, purchase orders</td>
+            </tr>
+            <tr>
+              <td><code>ai-real-estate-analyst</code></td>
+              <td>Property analysis, market research, ROI estimation</td>
+              <td>Comps analysis, rental yield, market trends</td>
+            </tr>
+          </tbody>
+        </table>
+
+
+        <!-- ========== Creating Your Own ========== -->
+        <h2 id="creating-your-own">Creating Your Own Template</h2>
+        <p>Build a custom agent in four steps:</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Copy an existing template</div>
+            <p>Start from the template closest to your use case:</p>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> cp -r templates/ai-sales-agent templates/my-custom-agent
+<span class="cp">$</span> cd templates/my-custom-agent</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Install OpenSentinel as a dependency</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> bun add opensentinel</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Configure and write your agent logic</div>
+            <p>Edit <code>index.ts</code> with your custom system prompt and tool usage:</p>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">index.ts</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="ck">import</span> { configure, chatWithTools } <span class="ck">from</span> <span class="cs">'opensentinel'</span>;
+
+<span class="cf">configure</span>({
+  <span class="cv">CLAUDE_API_KEY</span>: process.env.<span class="cv">CLAUDE_API_KEY</span>,
+});
+
+<span class="ck">const</span> <span class="cv">systemPrompt</span> = <span class="cs">`You are a specialized AI agent for [your use case].
+Your responsibilities:
+1. [Task one]
+2. [Task two]
+3. [Task three]`</span>;
+
+<span class="ck">const</span> result = <span class="ck">await</span> <span class="cf">chatWithTools</span>([
+  { <span class="cv">role</span>: <span class="cs">'system'</span>, <span class="cv">content</span>: <span class="cv">systemPrompt</span> },
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'Start your first task'</span> }
+]);
+
+console.<span class="cf">log</span>(result.text);</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Run your agent</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> CLAUDE_API_KEY=sk-ant-... bun run start</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Use <code>chatWithTools()</code> for full power.</strong> This gives your agent access to all 30+ built-in tools: shell execution, web browsing, file operations, search, code analysis, and more. The AI decides which tools to use based on the task.</div>
+        </div>
+
+
+        <!-- ========== Template Structure ========== -->
+        <h2 id="structure">Template Structure</h2>
+        <p>Every template follows the same minimal structure:</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">File Tree</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>templates/ai-sales-agent/
+<span class="cv">index.ts</span>          <span class="cc"># Main agent logic (under 200 lines)</span>
+<span class="cv">package.json</span>      <span class="cc"># Dependencies (opensentinel + any extras)</span>
+<span class="cv">README.md</span>         <span class="cc"># Usage docs, configuration, examples</span></code></pre>
+        </div>
+
+        <h3>index.ts</h3>
+        <p>The main file contains the agent's system prompt, configuration, and core loop. It imports <code>configure</code> and <code>chatWithTools</code> from <code>opensentinel</code> and defines the agent's behavior in a single file.</p>
+
+        <h3>package.json</h3>
+        <p>Minimal dependencies. Every template lists <code>opensentinel</code> as its primary dependency, plus any use-case-specific packages (e.g., a CSV parser for the data analyst template).</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">package.json</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>{
+  <span class="cv">"name"</span>: <span class="cs">"ai-sales-agent"</span>,
+  <span class="cv">"version"</span>: <span class="cs">"1.0.0"</span>,
+  <span class="cv">"scripts"</span>: {
+    <span class="cv">"start"</span>: <span class="cs">"bun run index.ts"</span>
+  },
+  <span class="cv">"dependencies"</span>: {
+    <span class="cv">"opensentinel"</span>: <span class="cs">"latest"</span>
+  }
+}</code></pre>
+        </div>
+
+        <h3>README.md</h3>
+        <p>Each template includes documentation covering what the agent does, how to configure it, example conversations, and ideas for customization.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x2139;&#xFE0F;</span>
+          <div><strong>Templates are starting points, not limits.</strong> Feel free to add persistent memory (<code>DATABASE_URL</code>), connect messaging channels (<code>TELEGRAM_BOT_TOKEN</code>), or add integrations. A template can grow into a full OpenSentinel deployment.</div>
+        </div>
+
+
+        <!-- ========== Page Nav ========== -->
+        <div class="page-nav">
+          <a href="enterprise.html" class="page-nav-link">
+            <span class="page-nav-label">&larr; Previous</span>
+            <span class="page-nav-title">Enterprise</span>
+          </a>
+          <a href="getting-started.html" class="page-nav-link page-nav-link--next">
+            <span class="page-nav-label">Next &rarr;</span>
+            <span class="page-nav-title">Getting Started</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function copyCode(btn) {
+      const block = btn.closest('.codeblock');
+      const pre = block.querySelector('pre');
+      const text = pre.textContent.replace(/^\$ /gm, '');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

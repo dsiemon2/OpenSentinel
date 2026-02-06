@@ -13,6 +13,7 @@ export * from "./predictive-suggestions";
 export * from "./relationship-graph";
 export * from "./temporal-reasoning";
 export * from "./multi-lingual";
+export * from "./thinking-levels";
 
 // Import for building combined context
 import {

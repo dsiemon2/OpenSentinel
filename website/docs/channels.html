@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Channels - OpenSentinel Docs</title>
+  <meta name="description" content="Connect OpenSentinel to any messaging platform. Each channel runs independently — enable only what you need.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="../" class="header-logo">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#hlg)" stroke-width="2.5"/><circle cx="14" cy="14" r="5" fill="url(#hlg)"/><line x1="14" y1="2" x2="14" y2="8" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="20" x2="14" y2="26" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="14" x2="8" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="14" x2="26" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="hlg" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs></svg>
+          OpenSentinel
+          <span class="header-badge">Docs</span>
+        </a>
+        <nav class="header-nav">
+          <a href="getting-started.html">Get Started</a>
+          <a href="channels.html" class="active">Channels</a>
+          <a href="agents.html">Agents</a>
+          <a href="tools.html">Tools</a>
+          <a href="integrations.html">Integrations</a>
+          <a href="enterprise.html">Enterprise</a>
+          <a href="templates.html">Templates</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search docs...
+          <kbd>Ctrl K</kbd>
+        </div>
+        <a href="https://github.com/dsiemon2/OpenSentinel" class="header-github" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="header-mobile-toggle" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="doc-layout">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Getting Started</div>
+        <a href="getting-started.html" class="sidebar-link"><span class="ico">&#x1F680;</span> Quick Start</a>
+        <a href="getting-started.html#prerequisites" class="sidebar-link"><span class="ico">&#x2699;</span> Prerequisites</a>
+        <a href="getting-started.html#library" class="sidebar-link"><span class="ico">&#x1F4E6;</span> Use as Library</a>
+        <a href="getting-started.html#platform" class="sidebar-link"><span class="ico">&#x1F433;</span> Full Platform</a>
+        <a href="getting-started.html#template" class="sidebar-link"><span class="ico">&#x1F4CB;</span> From Template</a>
+        <a href="getting-started.html#configuration" class="sidebar-link"><span class="ico">&#x1F527;</span> Configuration</a>
+        <a href="getting-started.html#first-message" class="sidebar-link"><span class="ico">&#x1F4AC;</span> First Message</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Channels</div>
+        <a href="channels.html" class="sidebar-link active"><span class="ico">&#x1F4E1;</span> Overview</a>
+        <a href="channels.html#telegram" class="sidebar-link"><span class="ico">&#x1F4AC;</span> Telegram</a>
+        <a href="channels.html#discord" class="sidebar-link"><span class="ico">&#x1F3AE;</span> Discord</a>
+        <a href="channels.html#slack" class="sidebar-link"><span class="ico">&#x1F4E8;</span> Slack</a>
+        <a href="channels.html#whatsapp" class="sidebar-link"><span class="ico">&#x1F4F1;</span> WhatsApp</a>
+        <a href="channels.html#signal" class="sidebar-link"><span class="ico">&#x1F512;</span> Signal</a>
+        <a href="channels.html#imessage" class="sidebar-link"><span class="ico">&#x1F34E;</span> iMessage</a>
+        <a href="channels.html#websocket" class="sidebar-link"><span class="ico">&#x1F50C;</span> WebSocket</a>
+        <a href="channels.html#web-dashboard" class="sidebar-link"><span class="ico">&#x1F310;</span> Web Dashboard</a>
+        <a href="channels.html#rest-api" class="sidebar-link"><span class="ico">&#x1F6E0;</span> REST API</a>
+        <a href="channels.html#voice" class="sidebar-link"><span class="ico">&#x1F3A4;</span> Voice</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Core Concepts</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F9E0;</span> Brain & Memory</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F6E0;</span> Tools</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F916;</span> Sub-Agents</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x26A1;</span> Workflows</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F50C;</span> Plugins & MCP</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Integrations</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4E7;</span> Email</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F419;</span> GitHub</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4D3;</span> Notion</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F3E0;</span> Home Assistant</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F3B5;</span> Spotify</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4B0;</span> Finance</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Library Usage</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4E6;</span> NPM Package</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4D6;</span> API Reference</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4CB;</span> Templates</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Enterprise</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F465;</span> Multi-User</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F512;</span> Security</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x2638;</span> Kubernetes</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Apps</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F5A5;</span> Desktop App</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F30D;</span> Browser Extension</a>
+      </div>
+    </aside>
+
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="doc-main">
+      <div class="breadcrumb">
+        <a href="index.html">Docs</a>
+        <span>/</span>
+        <span>Channels</span>
+      </div>
+
+      <div class="content">
+        <h1>Channels</h1>
+        <p class="lead">Connect OpenSentinel to any messaging platform. Each channel runs independently &mdash; enable only what you need.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x26A1;</span>
+          <div><strong>Zero-config channels.</strong> Every channel is opt-in. Set its environment variable and OpenSentinel will start listening automatically. No channel? No problem &mdash; unconfigured services are silently skipped at startup.</div>
+        </div>
+
+
+        <!-- ========== Overview ========== -->
+        <h2 id="overview">Overview</h2>
+
+        <p>OpenSentinel supports 10+ input channels. Each channel is activated by setting the corresponding environment variable in your <code>.env</code> file. All channels run in parallel on a single instance and share the same brain, memory, and tool system.</p>
+
+        <table>
+          <thead><tr><th>Channel</th><th>Env Variable</th><th>Protocol</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Telegram</strong></td><td><code>TELEGRAM_BOT_TOKEN</code></td><td>Bot API (grammY)</td><td>Stable</td></tr>
+            <tr><td><strong>Discord</strong></td><td><code>DISCORD_BOT_TOKEN</code></td><td>Gateway (discord.js)</td><td>Stable</td></tr>
+            <tr><td><strong>Slack</strong></td><td><code>SLACK_BOT_TOKEN</code></td><td>Bolt / Socket Mode</td><td>Stable</td></tr>
+            <tr><td><strong>WhatsApp</strong></td><td><code>WHATSAPP_ENABLED</code></td><td>Baileys (Web)</td><td>Stable</td></tr>
+            <tr><td><strong>Signal</strong></td><td><code>SIGNAL_ENABLED</code></td><td>signal-cli JSON-RPC</td><td>Stable</td></tr>
+            <tr><td><strong>iMessage</strong></td><td><code>IMESSAGE_ENABLED</code></td><td>BlueBubbles / AppleScript</td><td>macOS only</td></tr>
+            <tr><td><strong>WebSocket</strong></td><td>Always on</td><td>ws:// (Bun native)</td><td>Stable</td></tr>
+            <tr><td><strong>Web Dashboard</strong></td><td>Always on</td><td>HTTP + React</td><td>Stable</td></tr>
+            <tr><td><strong>REST API</strong></td><td>Always on</td><td>HTTP (Hono)</td><td>Stable</td></tr>
+            <tr><td><strong>Voice</strong></td><td><code>VOICE_ENABLED</code></td><td>Microphone + STT</td><td>Linux</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Multiple channels at once.</strong> You can enable Telegram, Discord, Slack, and every other channel simultaneously. Each maintains its own session history per user, but they all share the same Claude-powered brain and tool execution engine.</div>
+        </div>
+
+
+        <!-- ========== Telegram ========== -->
+        <h2 id="telegram">Telegram</h2>
+
+        <p>Telegram is the primary and most feature-rich channel for OpenSentinel. It uses the <a href="https://grammy.dev/" target="_blank" rel="noopener">grammY framework</a> and supports text messages, voice notes with automatic transcription, inline keyboards, and full tool execution.</p>
+
+        <h3>Setup</h3>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Create a bot with BotFather</div>
+            <p>Open Telegram, search for <code>@BotFather</code>, and send <code>/newbot</code>. Follow the prompts to choose a name and username. BotFather will give you a bot token.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Configure your environment</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cv">TELEGRAM_BOT_TOKEN</span>=<span class="cs">your-telegram-bot-token</span>
+<span class="cv">TELEGRAM_CHAT_ID</span>=<span class="cs">REDACTED</span>  <span class="cc"># Your personal chat ID (restricts access)</span></code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Start OpenSentinel</div>
+            <p>The Telegram bot starts automatically when <code>TELEGRAM_BOT_TOKEN</code> is set. Find your bot in Telegram and send <code>/start</code>.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x2139;&#xFE0F;</span>
+          <div><strong>Access control.</strong> Set <code>TELEGRAM_CHAT_ID</code> to restrict the bot to your personal chat. Any message from a different chat ID is silently ignored. To find your chat ID, send a message to the bot and check the server logs.</div>
+        </div>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>Text messages</strong> &mdash; Full conversational AI with Claude, including tool execution (shell, web search, file operations, etc.)</li>
+          <li><strong>Voice messages</strong> &mdash; Automatic STT transcription via OpenAI Whisper, processes the transcription as a text query, and optionally replies with TTS audio via ElevenLabs</li>
+          <li><strong>Markdown formatting</strong> &mdash; Responses are sent with Telegram Markdown, with automatic plaintext fallback on parse errors</li>
+          <li><strong>Long message splitting</strong> &mdash; Messages exceeding Telegram's 4096-character limit are automatically split at natural break points</li>
+          <li><strong>Session history</strong> &mdash; Last 20 messages per user are maintained for multi-turn conversations</li>
+          <li><strong>Tool usage display</strong> &mdash; Shows which tools were used (e.g., "Used: shell, web_search") above the response</li>
+        </ul>
+
+        <h3>Commands</h3>
+        <table>
+          <thead><tr><th>Command</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>/start</code></td><td>Welcome message with capabilities overview</td></tr>
+            <tr><td><code>/help</code></td><td>Show all available commands and usage examples</td></tr>
+            <tr><td><code>/clear</code></td><td>Clear conversation history for the current session</td></tr>
+            <tr><td><code>/remind &lt;time&gt; &lt;message&gt;</code></td><td>Set a reminder (e.g., <code>/remind 5m Check the oven</code>). Supports <code>s</code>, <code>m</code>, <code>h</code> units</td></tr>
+            <tr><td><code>/mode &lt;name&gt;</code></td><td>Switch personality mode (e.g., concise, creative, technical)</td></tr>
+            <tr><td><code>/expert &lt;domain&gt;</code></td><td>Activate a domain expert persona (e.g., /expert python)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>How it works</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">src/inputs/telegram/bot.ts</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { Bot, session } <span class="ck">from</span> <span class="cs">"grammy"</span>;
+<span class="ck">import</span> { handleMessage, handleVoice } <span class="ck">from</span> <span class="cs">"./handlers"</span>;
+
+<span class="ck">const</span> bot = <span class="ck">new</span> <span class="cf">Bot</span>(env.<span class="cv">TELEGRAM_BOT_TOKEN</span>);
+
+<span class="cc">// Session middleware maintains per-user conversation history</span>
+bot.<span class="cf">use</span>(<span class="cf">session</span>({ <span class="cv">initial</span>: () => ({ <span class="cv">messages</span>: [] }) }));
+
+<span class="cc">// Restrict to your personal chat</span>
+bot.<span class="cf">use</span>(<span class="ck">async</span> (ctx, next) => {
+  <span class="ck">if</span> (ctx.chat?.id?.toString() !== env.<span class="cv">TELEGRAM_CHAT_ID</span>) <span class="ck">return</span>;
+  <span class="ck">await</span> <span class="cf">next</span>();
+});
+
+<span class="cc">// Route text and voice messages to handlers</span>
+bot.<span class="cf">on</span>(<span class="cs">"message:text"</span>, handleMessage);
+bot.<span class="cf">on</span>(<span class="cs">"message:voice"</span>, handleVoice);</code></pre>
+        </div>
+
+        <p>Voice messages are downloaded, transcribed with Whisper, and processed as text. If the response is short enough (under 1000 characters), a voice reply is also generated via ElevenLabs TTS and sent back as an <code>.ogg</code> file.</p>
+
+
+        <!-- ========== Discord ========== -->
+        <h2 id="discord">Discord</h2>
+
+        <p>The Discord channel uses <a href="https://discord.js.org/" target="_blank" rel="noopener">discord.js</a> and supports slash commands, direct messages, server mentions, and voice channel operations. Per-user sessions are maintained with the last 20 messages of context.</p>
+
+        <h3>Setup</h3>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Create a Discord application</div>
+            <p>Go to <a href="https://discord.com/developers/applications" target="_blank" rel="noopener">discord.com/developers/applications</a>, click <strong>New Application</strong>, then navigate to <strong>Bot</strong> and click <strong>Reset Token</strong> to get your bot token.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Enable Privileged Gateway Intents</div>
+            <p>In the Bot settings, enable all three Privileged Gateway Intents:</p>
+            <ul>
+              <li>Presence Intent</li>
+              <li>Server Members Intent</li>
+              <li>Message Content Intent</li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Configure your environment</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cv">DISCORD_BOT_TOKEN</span>=<span class="cs">your-discord-bot-token</span>
+<span class="cv">DISCORD_CLIENT_ID</span>=<span class="cs">your-client-id</span>
+<span class="cv">DISCORD_GUILD_ID</span>=<span class="cs">your-server-id</span>         <span class="cc"># Your server ID</span>
+<span class="cv">DISCORD_ALLOWED_USER_IDS</span>=<span class="cs">your-user-id</span>  <span class="cc"># Comma-separated</span></code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Invite the bot to your server</div>
+            <p>Use the OAuth2 URL generator in the developer portal. Select <code>bot</code> and <code>applications.commands</code> scopes, then grant <code>Send Messages</code>, <code>Read Message History</code>, <code>Use Slash Commands</code>, and <code>Connect</code> (for voice) permissions.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-warning">
+          <span class="callout-ico">&#x26A0;&#xFE0F;</span>
+          <div><strong>Privileged Intents are required.</strong> If you skip enabling Privileged Gateway Intents, OpenSentinel will fail to connect and log a detailed error message with instructions. The bot will still start but Discord will be unavailable.</div>
+        </div>
+
+        <h3>Slash Commands</h3>
+        <table>
+          <thead><tr><th>Command</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>/ask &lt;question&gt;</code></td><td>Ask a single question with full tool execution</td></tr>
+            <tr><td><code>/chat &lt;message&gt;</code></td><td>Continue a multi-turn conversation with context</td></tr>
+            <tr><td><code>/clear</code></td><td>Clear your conversation history (ephemeral reply)</td></tr>
+            <tr><td><code>/remind &lt;time&gt; &lt;unit&gt; &lt;message&gt;</code></td><td>Set a reminder with dropdown unit selection (seconds, minutes, hours)</td></tr>
+            <tr><td><code>/status</code></td><td>Check bot status and your session message count</td></tr>
+            <tr><td><code>/help</code></td><td>Show all available commands and tips</td></tr>
+            <tr><td><code>/voice join</code></td><td>Join your current voice channel</td></tr>
+            <tr><td><code>/voice leave</code></td><td>Leave the voice channel</td></tr>
+            <tr><td><code>/voice speak &lt;text&gt;</code></td><td>Speak text aloud in the voice channel via TTS</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>Slash commands</strong> &mdash; All commands are registered as Discord slash commands with proper descriptions and option types</li>
+          <li><strong>DM support</strong> &mdash; Message the bot directly for private conversations</li>
+          <li><strong>Deferred replies</strong> &mdash; Long-running tool executions use Discord's deferred reply system so the interaction never times out</li>
+          <li><strong>Message splitting</strong> &mdash; Responses exceeding Discord's 2000-character limit are automatically split into follow-up messages</li>
+          <li><strong>User restriction</strong> &mdash; Set <code>DISCORD_ALLOWED_USER_IDS</code> to restrict access to specific Discord users</li>
+          <li><strong>Voice channels</strong> &mdash; Join voice, speak with TTS, and leave via slash commands</li>
+        </ul>
+
+
+        <!-- ========== Slack ========== -->
+        <h2 id="slack">Slack</h2>
+
+        <p>The Slack channel uses <a href="https://tools.slack.dev/bolt-js/" target="_blank" rel="noopener">Bolt for JavaScript</a> and supports both HTTP receiver mode and Socket Mode for deployments behind firewalls. It handles app mentions, DMs, file sharing, threaded conversations, and slash commands.</p>
+
+        <h3>Setup</h3>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Create a Slack app</div>
+            <p>Go to <a href="https://api.slack.com/apps" target="_blank" rel="noopener">api.slack.com/apps</a> and click <strong>Create New App</strong>. Choose <strong>From scratch</strong>, name it "OpenSentinel", and select your workspace.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Configure bot permissions</div>
+            <p>Under <strong>OAuth &amp; Permissions</strong>, add these Bot Token Scopes: <code>app_mentions:read</code>, <code>chat:write</code>, <code>commands</code>, <code>files:read</code>, <code>im:history</code>, <code>im:read</code>, <code>im:write</code>, <code>reactions:read</code>, <code>reactions:write</code>, <code>users:read</code>.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Install to workspace and configure</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cv">SLACK_BOT_TOKEN</span>=<span class="cs">xoxb-your-bot-token</span>
+<span class="cv">SLACK_SIGNING_SECRET</span>=<span class="cs">your-signing-secret</span>
+<span class="cv">SLACK_APP_TOKEN</span>=<span class="cs">xapp-your-app-token</span>     <span class="cc"># For Socket Mode</span>
+<span class="cv">SLACK_SOCKET_MODE</span>=<span class="cs">true</span>                   <span class="cc"># Use Socket Mode (recommended)</span></code></pre>
+            </div>
+          </div>
+        </div>
+
+        <h3>Slash Commands</h3>
+        <table>
+          <thead><tr><th>Command</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>/opensentinel ask &lt;question&gt;</code></td><td>Ask a single question</td></tr>
+            <tr><td><code>/opensentinel chat &lt;message&gt;</code></td><td>Continue a multi-turn conversation</td></tr>
+            <tr><td><code>/opensentinel clear</code></td><td>Clear your conversation history</td></tr>
+            <tr><td><code>/opensentinel remind &lt;time&gt; &lt;message&gt;</code></td><td>Set a reminder (e.g., <code>/opensentinel remind 5m Stand up</code>)</td></tr>
+            <tr><td><code>/opensentinel status</code></td><td>Check bot status and capabilities</td></tr>
+            <tr><td><code>/opensentinel help</code></td><td>Show all available commands</td></tr>
+          </tbody>
+        </table>
+
+        <p>Individual slash commands are also available: <code>/opensentinel-ask</code>, <code>/opensentinel-chat</code>, <code>/opensentinel-clear</code>, <code>/opensentinel-remind</code>, <code>/opensentinel-status</code>, <code>/opensentinel-help</code>.</p>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>App mentions</strong> &mdash; @mention the bot in any channel to ask a question; replies are threaded</li>
+          <li><strong>Direct messages</strong> &mdash; Chat privately with the bot in DMs</li>
+          <li><strong>Threaded conversations</strong> &mdash; Thread-aware session tracking preserves context across a full thread</li>
+          <li><strong>File handling</strong> &mdash; Shared audio files are automatically transcribed</li>
+          <li><strong>Processing indicators</strong> &mdash; An hourglass reaction is added while processing and removed on completion</li>
+          <li><strong>Socket Mode</strong> &mdash; No public URL needed; works behind firewalls and NAT</li>
+          <li><strong>User/channel restrictions</strong> &mdash; Set <code>SLACK_ALLOWED_USER_IDS</code> or <code>SLACK_ALLOWED_CHANNEL_IDS</code> to control access</li>
+        </ul>
+
+
+        <!-- ========== WhatsApp ========== -->
+        <h2 id="whatsapp">WhatsApp</h2>
+
+        <p>The WhatsApp channel uses the <a href="https://github.com/WhiskeySockets/Baileys" target="_blank" rel="noopener">Baileys library</a> to connect to WhatsApp Web. It authenticates via QR code scan, supports multi-device mode, and persists authentication state across restarts.</p>
+
+        <h3>Setup</h3>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Enable WhatsApp and start</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cv">WHATSAPP_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">WHATSAPP_AUTH_DIR</span>=<span class="cs">./whatsapp-auth</span>          <span class="cc"># Credential storage path</span>
+<span class="cv">WHATSAPP_ALLOWED_NUMBERS</span>=<span class="cs">+1234567890</span>     <span class="cc"># Comma-separated allowed numbers</span></code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Scan the QR code</div>
+            <p>On first launch, a QR code is printed to the terminal. Open WhatsApp on your phone, go to <strong>Linked Devices</strong>, and scan it. Authentication persists in the <code>whatsapp-auth</code> directory, so you only need to scan once.</p>
+          </div>
+        </div>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>Text messages</strong> &mdash; Full AI conversations with tool execution</li>
+          <li><strong>Typing indicators</strong> &mdash; Shows "composing" while processing, then "paused" when done</li>
+          <li><strong>Auto-reconnect</strong> &mdash; Automatically reconnects on disconnect (unless logged out)</li>
+          <li><strong>Number allowlist</strong> &mdash; Set <code>WHATSAPP_ALLOWED_NUMBERS</code> to restrict access</li>
+          <li><strong>Per-conversation context</strong> &mdash; Last 10 messages are maintained per contact</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Persistent auth.</strong> After the first QR scan, credentials are stored in the <code>whatsapp-auth</code> directory. Subsequent restarts reconnect automatically without rescanning.</div>
+        </div>
+
+
+        <!-- ========== Signal ========== -->
+        <h2 id="signal">Signal</h2>
+
+        <p>The Signal channel uses <a href="https://github.com/AsamK/signal-cli" target="_blank" rel="noopener">signal-cli</a> in JSON-RPC mode to send and receive encrypted messages. All messages remain end-to-end encrypted through Signal's protocol.</p>
+
+        <h3>Setup</h3>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Install and link signal-cli</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cc"># Install signal-cli (Linux)</span>
+<span class="cp">$</span> wget https://github.com/AsamK/signal-cli/releases/latest/download/signal-cli-0.13.2-Linux.tar.gz
+<span class="cp">$</span> tar xf signal-cli-*.tar.gz -C /opt/
+<span class="cp">$</span> ln -s /opt/signal-cli-*/bin/signal-cli /usr/local/bin/
+
+<span class="cc"># Link to your existing Signal account</span>
+<span class="cp">$</span> signal-cli link -n <span class="cs">"OpenSentinel"</span></code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Configure your environment</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cv">SIGNAL_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">SIGNAL_PHONE_NUMBER</span>=<span class="cs">+1234567890</span>
+<span class="cv">SIGNAL_CLI_PATH</span>=<span class="cs">signal-cli</span>              <span class="cc"># Path to binary (default: signal-cli)</span>
+<span class="cv">SIGNAL_ALLOWED_NUMBERS</span>=<span class="cs">+1234567890</span>    <span class="cc"># Comma-separated allowed numbers</span></code></pre>
+            </div>
+          </div>
+        </div>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>End-to-end encryption</strong> &mdash; All messages use Signal's encryption protocol</li>
+          <li><strong>JSON-RPC interface</strong> &mdash; OpenSentinel spawns signal-cli as a child process and communicates via JSON-RPC over stdin/stdout</li>
+          <li><strong>Number allowlist</strong> &mdash; Restrict access to specific phone numbers</li>
+          <li><strong>Per-contact context</strong> &mdash; Last 10 messages maintained per sender</li>
+        </ul>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Architecture</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc">// Signal-cli runs as a subprocess in JSON-RPC mode</span>
+<span class="cc">// OpenSentinel reads incoming messages from stdout</span>
+<span class="cc">// and writes outgoing messages to stdin</span>
+
+signal-cli -u +1234567890 jsonRpc
+  stdout &rarr; OpenSentinel (receives messages)
+  stdin  &larr; OpenSentinel (sends replies)</code></pre>
+        </div>
+
+
+        <!-- ========== iMessage ========== -->
+        <h2 id="imessage">iMessage</h2>
+
+        <p>The iMessage channel supports two modes: <strong>BlueBubbles</strong> (requires a BlueBubbles server running on macOS) and <strong>AppleScript</strong> (direct macOS integration via the Messages app). Both modes provide full AI conversation capabilities.</p>
+
+        <h3>Setup</h3>
+
+        <div class="codeblock">
+          <div class="codeblock-tabs">
+            <button class="codeblock-tab active" onclick="switchCodeTab(this, 'imsg-bluebubbles')">BlueBubbles</button>
+            <button class="codeblock-tab" onclick="switchCodeTab(this, 'imsg-applescript')">AppleScript</button>
+          </div>
+          <div id="imsg-bluebubbles" class="tab-panel active">
+            <pre><code><span class="cc"># .env - BlueBubbles mode (any platform, Mac server required)</span>
+<span class="cv">IMESSAGE_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">IMESSAGE_MODE</span>=<span class="cs">bluebubbles</span>
+<span class="cv">IMESSAGE_BLUEBUBBLES_URL</span>=<span class="cs">http://192.168.1.100:1234</span>
+<span class="cv">IMESSAGE_BLUEBUBBLES_PASSWORD</span>=<span class="cs">your-password</span>
+<span class="cv">IMESSAGE_ALLOWED_NUMBERS</span>=<span class="cs">+1234567890</span></code></pre>
+          </div>
+          <div id="imsg-applescript" class="tab-panel" style="display:none">
+            <pre><code><span class="cc"># .env - AppleScript mode (macOS only, no server needed)</span>
+<span class="cv">IMESSAGE_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">IMESSAGE_MODE</span>=<span class="cs">applescript</span>
+<span class="cv">IMESSAGE_ALLOWED_NUMBERS</span>=<span class="cs">+1234567890</span></code></pre>
+          </div>
+        </div>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>BlueBubbles mode</strong> &mdash; Connects to a BlueBubbles server via REST API. Run OpenSentinel on any platform while the Mac server handles iMessage</li>
+          <li><strong>AppleScript mode</strong> &mdash; Direct integration with the Messages app on macOS. Requires Full Disk Access permission for the terminal/process</li>
+          <li><strong>Polling</strong> &mdash; Both modes use configurable polling intervals (default: 5 seconds) to check for new messages</li>
+          <li><strong>Number restriction</strong> &mdash; Set <code>IMESSAGE_ALLOWED_NUMBERS</code> to control who can interact with the bot</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x2139;&#xFE0F;</span>
+          <div><strong>macOS required.</strong> AppleScript mode only works on macOS. BlueBubbles mode lets you run OpenSentinel on Linux while a Mac Mini or similar device handles the iMessage bridge via <a href="https://bluebubbles.app/" target="_blank" rel="noopener">BlueBubbles</a>.</div>
+        </div>
+
+
+        <!-- ========== WebSocket ========== -->
+        <h2 id="websocket">WebSocket</h2>
+
+        <p>The WebSocket channel provides real-time, bidirectional communication for custom integrations. It is always available at <code>ws://localhost:8030/ws</code> and uses Bun's native WebSocket implementation for high performance.</p>
+
+        <h3>Message Protocol</h3>
+        <p>The WebSocket interface uses a JSON-based message protocol. Clients send typed messages and receive streamed responses including text chunks, tool execution events, and completion signals.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Client &rarr; Server</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc">// Send a message with tool execution</span>
+{
+  <span class="cv">"type"</span>: <span class="cs">"chat_with_tools"</span>,
+  <span class="cv">"id"</span>: <span class="cs">"msg-123"</span>,
+  <span class="cv">"payload"</span>: {
+    <span class="cv">"messages"</span>: [
+      { <span class="cv">"role"</span>: <span class="cs">"user"</span>, <span class="cv">"content"</span>: <span class="cs">"What files are in my Downloads?"</span> }
+    ],
+    <span class="cv">"userId"</span>: <span class="cs">"user-1"</span>
+  }
+}</code></pre>
+        </div>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Server &rarr; Client (streamed)</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc">// Text chunks arrive in real-time</span>
+{ <span class="cv">"type"</span>: <span class="cs">"chunk"</span>, <span class="cv">"id"</span>: <span class="cs">"msg-123"</span>, <span class="cv">"payload"</span>: { <span class="cv">"text"</span>: <span class="cs">"Let me check "</span> } }
+{ <span class="cv">"type"</span>: <span class="cs">"tool_start"</span>, <span class="cv">"id"</span>: <span class="cs">"msg-123"</span>, <span class="cv">"payload"</span>: { <span class="cv">"toolName"</span>: <span class="cs">"shell"</span> } }
+{ <span class="cv">"type"</span>: <span class="cs">"tool_result"</span>, <span class="cv">"id"</span>: <span class="cs">"msg-123"</span>, <span class="cv">"payload"</span>: { <span class="cv">"toolName"</span>: <span class="cs">"shell"</span>, <span class="cv">"toolResult"</span>: <span class="cs">"..."</span> } }
+{ <span class="cv">"type"</span>: <span class="cs">"complete"</span>, <span class="cv">"id"</span>: <span class="cs">"msg-123"</span>, <span class="cv">"payload"</span>: { <span class="cv">"content"</span>: <span class="cs">"..."</span> } }</code></pre>
+        </div>
+
+        <h3>Supported Message Types</h3>
+        <table>
+          <thead><tr><th>Client Message</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>chat</code></td><td>Simple chat without tool execution, streamed response</td></tr>
+            <tr><td><code>chat_with_tools</code></td><td>Full chat with tool execution, streams chunks + tool events</td></tr>
+            <tr><td><code>ping</code></td><td>Keepalive ping; server responds with <code>pong</code></td></tr>
+            <tr><td><code>cancel</code></td><td>Cancel an in-flight request by message ID</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>Streaming responses</strong> &mdash; Text arrives token-by-token in real-time</li>
+          <li><strong>Tool execution events</strong> &mdash; Observe tool_start and tool_result events as they happen</li>
+          <li><strong>Request cancellation</strong> &mdash; Cancel long-running requests mid-stream</li>
+          <li><strong>Connection tracking</strong> &mdash; Each connection gets a unique ID and activity timestamp</li>
+          <li><strong>Broadcast support</strong> &mdash; Server can broadcast messages to all connected clients</li>
+        </ul>
+
+
+        <!-- ========== Web Dashboard ========== -->
+        <h2 id="web-dashboard">Web Dashboard</h2>
+
+        <p>OpenSentinel includes a built-in React web dashboard accessible at <code>http://localhost:8030</code>. It provides a full chat interface, memory explorer, and settings management. The dashboard is always available when the server is running.</p>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>Chat interface</strong> &mdash; Full-featured chat UI with markdown rendering, code highlighting, and file attachments</li>
+          <li><strong>Memory explorer</strong> &mdash; Browse and search the RAG vector memory system</li>
+          <li><strong>Settings panel</strong> &mdash; Configure personality, active tools, and channel preferences</li>
+          <li><strong>Real-time streaming</strong> &mdash; Uses the WebSocket channel under the hood for token-by-token streaming</li>
+          <li><strong>Mobile responsive</strong> &mdash; Works on phones and tablets</li>
+        </ul>
+
+        <h3>Building the Dashboard</h3>
+        <p>The dashboard is pre-built in production. For development:</p>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cp">$</span> cd src/web && bun install && bun run build</code></pre>
+        </div>
+
+
+        <!-- ========== REST API ========== -->
+        <h2 id="rest-api">REST API</h2>
+
+        <p>The REST API is built on <a href="https://hono.dev/" target="_blank" rel="noopener">Hono</a> and provides full programmatic access to OpenSentinel. It is always available at <code>http://localhost:8030</code> alongside the web dashboard.</p>
+
+        <h3>Primary Endpoint</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cp">$</span> curl -X POST http://localhost:8030/api/ask \
+    -H <span class="cs">"Content-Type: application/json"</span> \
+    -d <span class="cs">'{"message": "What is the weather in NYC?"}'</span></code></pre>
+        </div>
+
+        <h3>Response Format</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">JSON Response</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>{
+  <span class="cv">"content"</span>: <span class="cs">"The current weather in New York City is..."</span>,
+  <span class="cv">"inputTokens"</span>: <span class="cs">1250</span>,
+  <span class="cv">"outputTokens"</span>: <span class="cs">340</span>,
+  <span class="cv">"toolsUsed"</span>: [<span class="cs">"web_search"</span>]
+}</code></pre>
+        </div>
+
+        <h3>Multi-turn Conversations</h3>
+        <p>Pass a message array for multi-turn conversations:</p>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cp">$</span> curl -X POST http://localhost:8030/api/ask \
+    -H <span class="cs">"Content-Type: application/json"</span> \
+    -d <span class="cs">'{
+      "messages": [
+        {"role": "user", "content": "Remember that my name is Alex"},
+        {"role": "assistant", "content": "Got it! I will remember that your name is Alex."},
+        {"role": "user", "content": "What is my name?"}
+      ]
+    }'</span></code></pre>
+        </div>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>Full tool execution</strong> &mdash; The API has access to all tools (shell, search, files, etc.)</li>
+          <li><strong>Conversation context</strong> &mdash; Pass full message arrays for multi-turn dialogue</li>
+          <li><strong>Token usage</strong> &mdash; Every response includes input and output token counts</li>
+          <li><strong>Tool reporting</strong> &mdash; The <code>toolsUsed</code> field lists all tools invoked during the response</li>
+        </ul>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Pair with WebSocket for streaming.</strong> The REST API returns the full response at once. If you need token-by-token streaming, use the <a href="#websocket">WebSocket channel</a> instead. The web dashboard uses WebSocket for its streaming chat UI.</div>
+        </div>
+
+
+        <!-- ========== Voice ========== -->
+        <h2 id="voice">Voice</h2>
+
+        <p>The Voice channel enables hands-free interaction with OpenSentinel through wake word detection, voice activity detection (VAD), and continuous conversation mode. It uses local audio capture with <code>arecord</code> (Linux) and processes speech through OpenAI Whisper for transcription.</p>
+
+        <h3>Setup</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">VOICE_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">OPENAI_API_KEY</span>=<span class="cs">sk-proj-...</span>             <span class="cc"># Required for Whisper STT</span>
+<span class="cv">ELEVENLABS_API_KEY</span>=<span class="cs">your-elevenlabs-key</span>      <span class="cc"># Optional, for TTS responses</span></code></pre>
+        </div>
+
+        <h3>Wake Word Detection</h3>
+        <p>Say <strong>"Hey OpenSentinel"</strong> to activate the assistant. The detector uses a hybrid approach combining local MFCC-based keyword spotting with cloud-based STT for high accuracy and low latency.</p>
+
+        <table>
+          <thead><tr><th>Feature</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Default wake word</strong></td><td><code>hey opensentinel</code></td></tr>
+            <tr><td><strong>Accepted variations</strong></td><td><code>hey open sentinel</code>, <code>hey opensentinal</code>, <code>hey open sentimental</code>, and more</td></tr>
+            <tr><td><strong>Matching</strong></td><td>Levenshtein distance + phonetic encoding for fuzzy matching</td></tr>
+            <tr><td><strong>Confidence threshold</strong></td><td>0.6 minimum (configurable)</td></tr>
+            <tr><td><strong>Detection timeout</strong></td><td>5 seconds of inactivity returns to sleep</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Processing Pipeline</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Pipeline</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>Microphone &rarr; 16kHz PCM &rarr; VAD (speech detection)
+  &rarr; MFCC local spotting (pre-filter)
+  &rarr; Whisper STT (transcription)
+  &rarr; Wake word matching (fuzzy + phonetic)
+  &rarr; Command extraction
+  &rarr; Claude AI (processing)
+  &rarr; ElevenLabs TTS (voice reply)</code></pre>
+        </div>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>Wake word detection</strong> &mdash; Hybrid MFCC + STT approach filters audio locally before sending to cloud, reducing API calls</li>
+          <li><strong>Voice Activity Detection</strong> &mdash; Detects speech start/end to segment audio accurately. Configured for -35 dB silence threshold with 200ms minimum speech duration</li>
+          <li><strong>Continuous conversation</strong> &mdash; After wake word activation, the assistant stays awake for 5 seconds of inactivity, allowing natural multi-turn voice conversations</li>
+          <li><strong>Command extraction</strong> &mdash; Text after the wake word is automatically extracted as a command (e.g., "Hey OpenSentinel, what time is it?" extracts "what time is it?")</li>
+          <li><strong>Customizable wake word</strong> &mdash; Change the wake word at runtime. New phonetic variations are added automatically</li>
+          <li><strong>TTS responses</strong> &mdash; Replies under 1000 characters are automatically spoken aloud via ElevenLabs</li>
+        </ul>
+
+        <div class="callout callout-warning">
+          <span class="callout-ico">&#x26A0;&#xFE0F;</span>
+          <div><strong>Linux only.</strong> Voice input currently requires <code>arecord</code> (ALSA utils) which is available on Linux. macOS and Windows support is planned for a future release.</div>
+        </div>
+
+
+        <!-- ========== Page Nav ========== -->
+        <div class="page-nav">
+          <a href="getting-started.html" class="page-nav-link">
+            <span class="page-nav-label">&larr; Previous</span>
+            <span class="page-nav-title">Getting Started</span>
+          </a>
+          <a href="agents.html" class="page-nav-link page-nav-link--next">
+            <span class="page-nav-label">Next &rarr;</span>
+            <span class="page-nav-title">Agents</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function copyCode(btn) {
+      const block = btn.closest('.codeblock');
+      const pre = block.querySelector('pre');
+      const text = pre.textContent.replace(/^\$ /gm, '');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+
+    function switchCodeTab(clickedTab, panelId) {
+      const parent = clickedTab.closest('.codeblock') || clickedTab.closest('.content');
+      const tabs = clickedTab.parentElement;
+      const allTabs = tabs.querySelectorAll('.codeblock-tab');
+      allTabs.forEach(t => t.classList.remove('active'));
+      clickedTab.classList.add('active');
+
+      // Hide all sibling panels
+      let sibling = tabs.nextElementSibling;
+      while (sibling && sibling.classList.contains('tab-panel')) {
+        sibling.style.display = 'none';
+        sibling.classList.remove('active');
+        sibling = sibling.nextElementSibling;
+      }
+
+      const panel = document.getElementById(panelId);
+      if (panel) {
+        panel.style.display = 'block';
+        panel.classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>

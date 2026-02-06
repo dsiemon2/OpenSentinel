@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenSentinel - The AI Agent Operating System</title>
+  <meta name="description" content="Deploy autonomous AI agents with persistent memory, workflow automation, and enterprise security. Self-hosted, open source, production-grade.">
+  <meta name="keywords" content="AI agent, open source AI, self-hosted AI assistant, AI automation, AI memory, enterprise AI">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="OpenSentinel - The AI Agent Operating System">
+  <meta property="og:description" content="Deploy autonomous AI agents with persistent memory, workflow automation, and enterprise security.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/og-image.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OpenSentinel - The AI Agent Operating System">
+  <meta name="twitter:description" content="Deploy autonomous AI agents with persistent memory, workflow automation, and enterprise security.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+
+  <!-- ============================================================ -->
+  <!-- NAVIGATION                                                    -->
+  <!-- ============================================================ -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <div class="nav-logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="12" stroke="url(#logo-grad)" stroke-width="2.5"/>
+            <circle cx="14" cy="14" r="5" fill="url(#logo-grad)"/>
+            <line x1="14" y1="2" x2="14" y2="8" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="14" y1="20" x2="14" y2="26" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="2" y1="14" x2="8" y2="14" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="20" y1="14" x2="26" y2="14" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="logo-grad" x1="0" y1="0" x2="28" y2="28">
+                <stop offset="0%" stop-color="#10b981"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span>OpenSentinel</span>
+      </a>
+
+      <div class="nav-links" id="nav-links">
+        <a href="#features">Features</a>
+        <a href="#templates">Templates</a>
+        <a href="#integrations">Integrations</a>
+        <a href="#enterprise">Enterprise</a>
+        <a href="docs/">Docs</a>
+      </div>
+
+      <div class="nav-actions">
+        <a href="https://github.com/dsiemon2/OpenSentinel" class="nav-github" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <a href="#quickstart" class="btn btn-primary btn-sm">Get Started</a>
+      </div>
+
+      <button class="nav-mobile-toggle" id="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+
+  <!-- ============================================================ -->
+  <!-- HERO                                                          -->
+  <!-- ============================================================ -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="hero-glow"></div>
+      <div class="hero-grid"></div>
+    </div>
+
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge" data-animate>
+          <span class="hero-badge-dot"></span>
+          Open Source &middot; Self-Hosted &middot; Production-Grade
+        </div>
+
+        <h1 class="hero-title" data-animate>
+          The AI that <span class="gradient-text">remembers</span>,<br>
+          <span class="gradient-text">automates</span>, and <span class="gradient-text">scales</span>.
+        </h1>
+
+        <p class="hero-subtitle" data-animate>
+          OpenSentinel is the open-source AI agent platform with persistent memory, workflow automation, 4 specialist sub-agents, and enterprise security. Deploy on your infrastructure in minutes.
+        </p>
+
+        <div class="hero-actions" data-animate>
+          <a href="#quickstart" class="btn btn-primary btn-lg">
+            Get Started Free
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="https://github.com/dsiemon2/OpenSentinel" class="btn btn-ghost btn-lg" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            View on GitHub
+          </a>
+        </div>
+
+        <div class="hero-install" data-animate>
+          <div class="install-box">
+            <span class="install-label">Install</span>
+            <code class="install-command">npm install opensentinel</code>
+            <button class="install-copy" onclick="copyInstall(this)" aria-label="Copy to clipboard">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 11V3a2 2 0 012-2h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual" data-animate>
+        <div class="terminal">
+          <div class="terminal-header">
+            <div class="terminal-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <span class="terminal-title">opensentinel</span>
+          </div>
+          <div class="terminal-body">
+            <div class="terminal-line">
+              <span class="terminal-prompt">$</span>
+              <span class="terminal-text" id="typed-command"></span>
+              <span class="terminal-cursor">|</span>
+            </div>
+            <div class="terminal-output" id="terminal-output"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- STATS BAR                                                     -->
+  <!-- ============================================================ -->
+  <section class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat" data-animate>
+          <span class="stat-value">250+</span>
+          <span class="stat-label">Features</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat" data-animate>
+          <span class="stat-value">30+</span>
+          <span class="stat-label">Built-in Tools</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat" data-animate>
+          <span class="stat-value">15+</span>
+          <span class="stat-label">Integrations</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat" data-animate>
+          <span class="stat-value">20</span>
+          <span class="stat-label">Agent Templates</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat" data-animate>
+          <span class="stat-value">1,733</span>
+          <span class="stat-label">Unit Tests</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- PROBLEM / SOLUTION                                            -->
+  <!-- ============================================================ -->
+  <section class="problem" id="why">
+    <div class="container">
+      <div class="section-header" data-animate>
+        <span class="section-tag">The Problem</span>
+        <h2>AI assistants today are <span class="gradient-text">half-built</span>.</h2>
+        <p class="section-desc">They chat. They forget. They can't automate. They can't scale. They can't pass a security review. You deserve more than a chatbot with a GitHub repo.</p>
+      </div>
+
+      <div class="problem-grid">
+        <div class="problem-card problem-card--bad" data-animate>
+          <div class="problem-card-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#ef4444" stroke-width="2"/><path d="M15 9l-6 6M9 9l6 6" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/></svg>
+            <h3>Typical AI Assistants</h3>
+          </div>
+          <ul>
+            <li>Memory lost after every session</li>
+            <li>Manual chat only &mdash; no automation</li>
+            <li>Single agent, sequential tasks</li>
+            <li>No security controls or audit trail</li>
+            <li>Single user, personal device only</li>
+            <li>Prompt templates as "plugins"</li>
+            <li>No observability &mdash; flying blind</li>
+          </ul>
+        </div>
+
+        <div class="problem-card problem-card--good" data-animate>
+          <div class="problem-card-header">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2"/><path d="M8 12l3 3 5-5" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <h3>OpenSentinel</h3>
+          </div>
+          <ul>
+            <li>Persistent memory with pgvector RAG</li>
+            <li>Workflow engine with triggers &amp; schedules</li>
+            <li>4 specialist sub-agents in parallel</li>
+            <li>2FA, audit logs, GDPR, encrypted vault</li>
+            <li>Multi-user with SSO and quotas</li>
+            <li>Sandboxed plugins + MCP servers</li>
+            <li>Metrics, replay, alerting, dry-run</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- FEATURES                                                      -->
+  <!-- ============================================================ -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header" data-animate>
+        <span class="section-tag">Capabilities</span>
+        <h2>Everything you need to deploy <span class="gradient-text">production AI agents</span>.</h2>
+        <p class="section-desc">Not a framework. Not a wrapper. A complete platform with memory, tools, automation, and security built in.</p>
+      </div>
+
+      <div class="features-grid">
+
+        <div class="feature-card feature-card--highlight" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Persistent Memory</h3>
+          <p>PostgreSQL + pgvector RAG system with automatic extraction, importance scoring, semantic search, memory consolidation, and decay. Your AI genuinely learns over time.</p>
+          <div class="feature-tag">Core Differentiator</div>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Workflow Automation</h3>
+          <p>IFTTT-like engine with time, webhook, and event triggers. BullMQ scheduler for reliable execution. Build once, run forever.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Sub-Agent System</h3>
+          <p>Four specialized agents &mdash; Research, Coding, Writing, Analysis &mdash; with task coordination, shared context, and parallel execution.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>
+          </div>
+          <h3>Enterprise Security</h3>
+          <p>2FA, biometric verification, encrypted vault, command sandboxing, GDPR compliance, comprehensive audit logging, and rate limiting.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>15 Domain Experts</h3>
+          <p>Coding, legal, medical, finance, marketing, design, data, security, DevOps, and more. Mood detection and tone adaptation built in.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>File Generation</h3>
+          <p>Generate PDFs, Word docs, Excel spreadsheets, PowerPoint presentations, charts, diagrams, and AI images on demand.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <h3>Multi-Channel Input</h3>
+          <p>Telegram, Discord, Slack, WhatsApp, Signal, iMessage, WebSocket, web dashboard, REST API, voice wake word, and device triggers.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Full Observability</h3>
+          <p>Metrics dashboard, conversation replay, tool dry-run mode, prompt inspector, cost alerting, error tracking, and anomaly detection.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Plugin & MCP Support</h3>
+          <p>Sandboxed plugin system with lifecycle management plus Model Context Protocol server support for connecting to external tool ecosystems.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- CODE EXAMPLE                                                  -->
+  <!-- ============================================================ -->
+  <section class="code-section">
+    <div class="container">
+      <div class="code-layout">
+        <div class="code-text" data-animate>
+          <span class="section-tag">Developer Experience</span>
+          <h2>Use as a library.<br>Build <span class="gradient-text">anything</span>.</h2>
+          <p>OpenSentinel isn't just a running application &mdash; it's an NPM package you can import into your own projects. Persistent memory, 30+ tools, and enterprise security in one <code>npm install</code>.</p>
+          <ul class="code-features">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#10b981" stroke-width="1.5"/><path d="M6 9l2 2 4-4" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Full TypeScript types included
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#10b981" stroke-width="1.5"/><path d="M6 9l2 2 4-4" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Works with Node.js and Bun
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#10b981" stroke-width="1.5"/><path d="M6 9l2 2 4-4" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Tree-shakeable ESM exports
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="#10b981" stroke-width="1.5"/><path d="M6 9l2 2 4-4" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Lazy initialization &mdash; no env vars needed at import
+            </li>
+          </ul>
+        </div>
+
+        <div class="code-block" data-animate>
+          <div class="code-header">
+            <div class="code-tab active">app.ts</div>
+          </div>
+          <pre class="code-content"><code><span class="code-keyword">import</span> { configure, chat, chatWithTools } <span class="code-keyword">from</span> <span class="code-string">'opensentinel'</span>;
+
+<span class="code-comment">// Configure with your API key</span>
+<span class="code-fn">configure</span>({
+  <span class="code-prop">CLAUDE_API_KEY</span>: process.env.<span class="code-prop">CLAUDE_API_KEY</span>,
+});
+
+<span class="code-comment">// Simple conversation</span>
+<span class="code-keyword">const</span> response = <span class="code-keyword">await</span> <span class="code-fn">chat</span>([
+  { <span class="code-prop">role</span>: <span class="code-string">'user'</span>, <span class="code-prop">content</span>: <span class="code-string">'Summarize my inbox'</span> }
+]);
+
+<span class="code-comment">// With tools (browser, shell, files, search...)</span>
+<span class="code-keyword">const</span> result = <span class="code-keyword">await</span> <span class="code-fn">chatWithTools</span>([
+  { <span class="code-prop">role</span>: <span class="code-string">'user'</span>, <span class="code-prop">content</span>: <span class="code-string">'Research competitors and create a report'</span> }
+]);
+
+<span class="code-comment">// Full platform with all services</span>
+<span class="code-keyword">import</span> { OpenSentinel } <span class="code-keyword">from</span> <span class="code-string">'opensentinel'</span>;
+
+<span class="code-keyword">const</span> sentinel = <span class="code-keyword">new</span> <span class="code-fn">OpenSentinel</span>({
+  <span class="code-prop">claudeApiKey</span>: process.env.<span class="code-prop">CLAUDE_API_KEY</span>,
+  <span class="code-prop">telegram</span>: <span class="code-keyword">true</span>,
+  <span class="code-prop">discord</span>: <span class="code-keyword">true</span>,
+  <span class="code-prop">workflows</span>: <span class="code-keyword">true</span>,
+});
+
+<span class="code-keyword">await</span> sentinel.<span class="code-fn">start</span>();</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- TEMPLATES                                                     -->
+  <!-- ============================================================ -->
+  <section class="templates" id="templates">
+    <div class="container">
+      <div class="section-header" data-animate>
+        <span class="section-tag">Ready-to-Run</span>
+        <h2><span class="gradient-text">20 agent templates</span>. Pick one. Ship today.</h2>
+        <p class="section-desc">Each template is a standalone project that uses OpenSentinel as a library. Clone, configure your API key, and run.</p>
+      </div>
+
+      <div class="templates-grid">
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F310;</div>
+          <h4>Web Monitor</h4>
+          <p>Monitor pages for changes, get intelligent alerts</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F4BC;</div>
+          <h4>Sales Agent</h4>
+          <p>Research leads, draft outreach, track pipeline</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F465;</div>
+          <h4>Recruiter</h4>
+          <p>Screen candidates, rank applicants, draft outreach</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F5A5;</div>
+          <h4>DevOps Agent</h4>
+          <p>Server monitoring, log analysis, incident response</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F4C8;</div>
+          <h4>Trading Researcher</h4>
+          <p>Market research, sentiment scoring, shift detection</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F3A7;</div>
+          <h4>Customer Support</h4>
+          <p>Ticket triage, response drafting, escalation routing</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x270D;&#xFE0F;</div>
+          <h4>Content Creator</h4>
+          <p>Multi-platform content from a single brief</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F6E1;</div>
+          <h4>Security Monitor</h4>
+          <p>Auth log analysis, network audit, file integrity</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F50D;</div>
+          <h4>Code Reviewer</h4>
+          <p>PR review, bug detection, test coverage analysis</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F4CA;</div>
+          <h4>Data Analyst</h4>
+          <p>Dataset profiling, insights, anomaly detection</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F4E7;</div>
+          <h4>Email Assistant</h4>
+          <p>Inbox triage, reply drafting, action extraction</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F4DD;</div>
+          <h4>Meeting Assistant</h4>
+          <p>Transcript summaries, action items, weekly digests</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F50E;</div>
+          <h4>Competitor Tracker</h4>
+          <p>Product monitoring, pricing changes, hiring signals</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F680;</div>
+          <h4>SEO Optimizer</h4>
+          <p>Page scoring, meta optimization, content outlines</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x2696;&#xFE0F;</div>
+          <h4>Legal Reviewer</h4>
+          <p>Contract review, risk flagging, amendment suggestions</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F4E2;</div>
+          <h4>Social Listener</h4>
+          <p>Brand monitoring, sentiment analysis, trend detection</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F4D6;</div>
+          <h4>Docs Writer</h4>
+          <p>Auto-generate API refs, guides, changelogs</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F44B;</div>
+          <h4>Onboarding Agent</h4>
+          <p>Personalized plans, Q&amp;A, progress tracking</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F4E6;</div>
+          <h4>Inventory Manager</h4>
+          <p>Stock tracking, demand forecasting, purchase orders</p>
+        </div>
+        <div class="template-card" data-animate>
+          <div class="template-icon">&#x1F3E0;</div>
+          <h4>Real Estate Analyst</h4>
+          <p>Property analysis, market research, ROI estimation</p>
+        </div>
+      </div>
+
+      <div class="templates-cta" data-animate>
+        <a href="https://github.com/dsiemon2/OpenSentinel/tree/main/templates" class="btn btn-ghost btn-lg" target="_blank" rel="noopener">Browse All Templates on GitHub</a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- INTEGRATIONS                                                  -->
+  <!-- ============================================================ -->
+  <section class="integrations" id="integrations">
+    <div class="container">
+      <div class="section-header" data-animate>
+        <span class="section-tag">Ecosystem</span>
+        <h2>Connects to <span class="gradient-text">everything you use</span>.</h2>
+        <p class="section-desc">Built-in integrations for communication, productivity, smart home, finance, cloud storage, and more.</p>
+      </div>
+
+      <div class="integrations-grid" data-animate>
+        <div class="integration-item"><span class="integration-icon">&#x1F916;</span><span>Claude</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4AC;</span><span>Telegram</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F3AE;</span><span>Discord</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4E8;</span><span>Slack</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4F1;</span><span>WhatsApp</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F512;</span><span>Signal</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4AD;</span><span>iMessage</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4E7;</span><span>Email</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x260E;&#xFE0F;</span><span>Twilio</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F419;</span><span>GitHub</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4D3;</span><span>Notion</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4C5;</span><span>Google Cal</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4C6;</span><span>Outlook</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F3E0;</span><span>Home Assistant</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F3B5;</span><span>Spotify</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4C1;</span><span>Google Drive</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4E6;</span><span>Dropbox</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4B0;</span><span>Crypto</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4C8;</span><span>Stocks</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F30D;</span><span>OpenAI</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F3A4;</span><span>ElevenLabs</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F9E0;</span><span>Ollama</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F50C;</span><span>MCP Servers</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F517;</span><span>Webhooks</span></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- ARCHITECTURE                                                  -->
+  <!-- ============================================================ -->
+  <section class="architecture">
+    <div class="container">
+      <div class="section-header" data-animate>
+        <span class="section-tag">Under the Hood</span>
+        <h2>Built for <span class="gradient-text">production</span>, not demos.</h2>
+        <p class="section-desc">PostgreSQL for persistent vector memory. Redis for reliable task queues. Docker and Kubernetes for deployment at any scale.</p>
+      </div>
+
+      <div class="arch-diagram" data-animate>
+        <div class="arch-row">
+          <div class="arch-col">
+            <h4>Inputs</h4>
+            <div class="arch-items">
+              <span>Telegram</span>
+              <span>Discord</span>
+              <span>Slack</span>
+              <span>WhatsApp</span>
+              <span>Signal</span>
+              <span>iMessage</span>
+              <span>Web UI</span>
+              <span>REST API</span>
+              <span>Voice</span>
+              <span>WebSocket</span>
+            </div>
+          </div>
+          <div class="arch-arrow">&#x2192;</div>
+          <div class="arch-col arch-col--core">
+            <h4>OpenSentinel Core</h4>
+            <div class="arch-items">
+              <span class="arch-highlight">Claude Brain</span>
+              <span class="arch-highlight">Memory / RAG</span>
+              <span>Tool Router</span>
+              <span>Sub-Agents (4)</span>
+              <span>Workflow Engine</span>
+              <span>Plugin System</span>
+              <span>Scheduler</span>
+            </div>
+          </div>
+          <div class="arch-arrow">&#x2192;</div>
+          <div class="arch-col">
+            <h4>Outputs</h4>
+            <div class="arch-items">
+              <span>Text</span>
+              <span>Voice (TTS)</span>
+              <span>PDF / Word</span>
+              <span>Excel / PPT</span>
+              <span>Charts</span>
+              <span>AI Images</span>
+              <span>Diagrams</span>
+            </div>
+          </div>
+        </div>
+        <div class="arch-bottom">
+          <div class="arch-data">
+            <span>PostgreSQL + pgvector</span>
+            <span>Redis + BullMQ</span>
+            <span>Docker / Kubernetes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- ENTERPRISE                                                    -->
+  <!-- ============================================================ -->
+  <section class="enterprise" id="enterprise">
+    <div class="container">
+      <div class="enterprise-layout">
+        <div class="enterprise-text" data-animate>
+          <span class="section-tag">Enterprise Ready</span>
+          <h2>The AI assistant your <span class="gradient-text">security team</span> will approve.</h2>
+          <p>Self-hosted on your infrastructure. No data leaves your network. Full audit trail, SSO integration, and compliance tools built in.</p>
+
+          <div class="enterprise-features">
+            <div class="enterprise-feature">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="9" width="16" height="9" rx="2" stroke="#10b981" stroke-width="1.5"/><path d="M6 9V6a4 4 0 018 0v3" stroke="#10b981" stroke-width="1.5"/></svg>
+              <div>
+                <strong>2FA & Biometric Auth</strong>
+                <span>TOTP for sensitive operations, mobile biometric support</span>
+              </div>
+            </div>
+            <div class="enterprise-feature">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L2 6l8 4 8-4-8-4zM2 14l8 4 8-4M2 10l8 4 8-4" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div>
+                <strong>SSO Integration</strong>
+                <span>SAML, OAuth 2.0, and OpenID Connect</span>
+              </div>
+            </div>
+            <div class="enterprise-feature">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M16 4H4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2z" stroke="#10b981" stroke-width="1.5"/><path d="M6 10h8M6 13h4" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <div>
+                <strong>Audit Logging</strong>
+                <span>Complete action history with configurable retention</span>
+              </div>
+            </div>
+            <div class="enterprise-feature">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#10b981" stroke-width="1.5"/><path d="M10 6v4l3 3" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <div>
+                <strong>GDPR Compliance</strong>
+                <span>Data export, deletion tools, retention policies</span>
+              </div>
+            </div>
+            <div class="enterprise-feature">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4h12M4 10h12M4 16h12" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="4" r="1.5" fill="#10b981"/><circle cx="13" cy="10" r="1.5" fill="#10b981"/><circle cx="9" cy="16" r="1.5" fill="#10b981"/></svg>
+              <div>
+                <strong>Usage Quotas & Rate Limiting</strong>
+                <span>Per-user controls, cost tracking, anomaly alerts</span>
+              </div>
+            </div>
+            <div class="enterprise-feature">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="6" cy="6" r="3" stroke="#10b981" stroke-width="1.5"/><circle cx="14" cy="6" r="3" stroke="#10b981" stroke-width="1.5"/><circle cx="10" cy="14" r="3" stroke="#10b981" stroke-width="1.5"/><path d="M8 8l2 4M12 8l-2 4" stroke="#10b981" stroke-width="1"/></svg>
+              <div>
+                <strong>Kubernetes Native</strong>
+                <span>Helm charts, horizontal scaling, health checks</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="enterprise-visual" data-animate>
+          <div class="enterprise-card">
+            <div class="enterprise-card-header">
+              <span class="enterprise-card-badge">Security Dashboard</span>
+            </div>
+            <div class="enterprise-card-row">
+              <span>2FA Status</span>
+              <span class="enterprise-status enterprise-status--on">Enabled</span>
+            </div>
+            <div class="enterprise-card-row">
+              <span>Memory Vault</span>
+              <span class="enterprise-status enterprise-status--on">Encrypted</span>
+            </div>
+            <div class="enterprise-card-row">
+              <span>Audit Trail</span>
+              <span class="enterprise-status enterprise-status--on">Recording</span>
+            </div>
+            <div class="enterprise-card-row">
+              <span>Command Sandbox</span>
+              <span class="enterprise-status enterprise-status--on">Active</span>
+            </div>
+            <div class="enterprise-card-row">
+              <span>Plugin Isolation</span>
+              <span class="enterprise-status enterprise-status--on">Enforced</span>
+            </div>
+            <div class="enterprise-card-row">
+              <span>GDPR Compliance</span>
+              <span class="enterprise-status enterprise-status--on">Compliant</span>
+            </div>
+            <div class="enterprise-card-row">
+              <span>Threats Blocked (24h)</span>
+              <span class="enterprise-status enterprise-status--count">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- QUICK START                                                   -->
+  <!-- ============================================================ -->
+  <section class="quickstart" id="quickstart">
+    <div class="container">
+      <div class="section-header" data-animate>
+        <span class="section-tag">Get Started</span>
+        <h2>Running in <span class="gradient-text">under a minute</span>.</h2>
+        <p class="section-desc">Choose your path. Use OpenSentinel as a library in your project, or deploy the full platform.</p>
+      </div>
+
+      <div class="quickstart-grid">
+        <div class="quickstart-card" data-animate>
+          <div class="quickstart-card-badge">Library</div>
+          <h3>Use in Your Project</h3>
+          <p>Add AI capabilities to any Node.js or Bun application.</p>
+          <div class="quickstart-code">
+            <pre><code><span class="code-prompt">$</span> npm install opensentinel</code></pre>
+          </div>
+          <div class="quickstart-code">
+            <pre><code><span class="code-keyword">import</span> { configure, chat } <span class="code-keyword">from</span> <span class="code-string">'opensentinel'</span>;
+<span class="code-fn">configure</span>({ <span class="code-prop">CLAUDE_API_KEY</span>: <span class="code-string">'sk-ant-...'</span> });
+<span class="code-keyword">const</span> res = <span class="code-keyword">await</span> <span class="code-fn">chat</span>([...]);</code></pre>
+          </div>
+        </div>
+
+        <div class="quickstart-card" data-animate>
+          <div class="quickstart-card-badge">Full Platform</div>
+          <h3>Deploy Everything</h3>
+          <p>Run the complete platform with all services, dashboard, and integrations.</p>
+          <div class="quickstart-code">
+            <pre><code><span class="code-prompt">$</span> git clone https://github.com/dsiemon2/OpenSentinel.git
+<span class="code-prompt">$</span> cd OpenSentinel
+<span class="code-prompt">$</span> cp .env.example .env   <span class="code-comment"># add your API keys</span>
+<span class="code-prompt">$</span> docker compose up -d   <span class="code-comment"># start Postgres + Redis</span>
+<span class="code-prompt">$</span> bun install
+<span class="code-prompt">$</span> bun run start          <span class="code-comment"># launch OpenSentinel</span></code></pre>
+          </div>
+        </div>
+
+        <div class="quickstart-card" data-animate>
+          <div class="quickstart-card-badge">Template</div>
+          <h3>Start From a Template</h3>
+          <p>Pick a use case, clone the template, and customize.</p>
+          <div class="quickstart-code">
+            <pre><code><span class="code-prompt">$</span> git clone https://github.com/dsiemon2/OpenSentinel.git
+<span class="code-prompt">$</span> cd OpenSentinel/templates/ai-sales-agent
+<span class="code-prompt">$</span> bun install
+<span class="code-prompt">$</span> CLAUDE_API_KEY=sk-ant-... bun run start</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- CTA                                                           -->
+  <!-- ============================================================ -->
+  <section class="cta">
+    <div class="container">
+      <div class="cta-box" data-animate>
+        <h2>Ready to deploy AI agents that <span class="gradient-text">actually work</span>?</h2>
+        <p>Open source. Self-hosted. Production-grade. Start building today.</p>
+        <div class="cta-actions">
+          <a href="https://github.com/dsiemon2/OpenSentinel" class="btn btn-primary btn-lg" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            Star on GitHub
+          </a>
+          <a href="#quickstart" class="btn btn-ghost btn-lg">Get Started</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- FOOTER                                                        -->
+  <!-- ============================================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo">
+            <div class="nav-logo-icon">
+              <svg width="24" height="24" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="14" cy="14" r="12" stroke="url(#logo-grad2)" stroke-width="2.5"/>
+                <circle cx="14" cy="14" r="5" fill="url(#logo-grad2)"/>
+                <line x1="14" y1="2" x2="14" y2="8" stroke="url(#logo-grad2)" stroke-width="2" stroke-linecap="round"/>
+                <line x1="14" y1="20" x2="14" y2="26" stroke="url(#logo-grad2)" stroke-width="2" stroke-linecap="round"/>
+                <line x1="2" y1="14" x2="8" y2="14" stroke="url(#logo-grad2)" stroke-width="2" stroke-linecap="round"/>
+                <line x1="20" y1="14" x2="26" y2="14" stroke="url(#logo-grad2)" stroke-width="2" stroke-linecap="round"/>
+                <defs>
+                  <linearGradient id="logo-grad2" x1="0" y1="0" x2="28" y2="28">
+                    <stop offset="0%" stop-color="#10b981"/>
+                    <stop offset="100%" stop-color="#06b6d4"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <span>OpenSentinel</span>
+          </a>
+          <p>The AI Agent Operating System. Self-hosted, open source, production-grade.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#templates">Templates</a>
+          <a href="#integrations">Integrations</a>
+          <a href="#enterprise">Enterprise</a>
+          <a href="#quickstart">Quick Start</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="https://github.com/dsiemon2/OpenSentinel" target="_blank" rel="noopener">Documentation</a>
+          <a href="https://github.com/dsiemon2/OpenSentinel" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://github.com/dsiemon2/OpenSentinel/tree/main/templates" target="_blank" rel="noopener">Templates</a>
+          <a href="https://github.com/dsiemon2/OpenSentinel/issues" target="_blank" rel="noopener">Report a Bug</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Community</h4>
+          <a href="#">Discord</a>
+          <a href="https://github.com/dsiemon2/OpenSentinel/discussions" target="_blank" rel="noopener">Discussions</a>
+          <a href="#">Twitter / X</a>
+          <a href="#">LinkedIn</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 OpenSentinel. MIT License. Built with purpose.</p>
+      </div>
+    </div>
+  </footer>
+
+
+  <script src="script.js"></script>
+</body>
+</html>

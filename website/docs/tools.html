@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tools - OpenSentinel Docs</title>
+  <meta name="description" content="OpenSentinel includes 30+ built-in tools that Claude can use to interact with your system, the web, and external services.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="../" class="header-logo">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#hlg)" stroke-width="2.5"/><circle cx="14" cy="14" r="5" fill="url(#hlg)"/><line x1="14" y1="2" x2="14" y2="8" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="20" x2="14" y2="26" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="14" x2="8" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="14" x2="26" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="hlg" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs></svg>
+          OpenSentinel
+          <span class="header-badge">Docs</span>
+        </a>
+        <nav class="header-nav">
+          <a href="getting-started.html">Get Started</a>
+          <a href="channels.html">Channels</a>
+          <a href="agents.html">Agents</a>
+          <a href="tools.html" class="active">Tools</a>
+          <a href="integrations.html">Integrations</a>
+          <a href="enterprise.html">Enterprise</a>
+          <a href="templates.html">Templates</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search docs...
+          <kbd>Ctrl K</kbd>
+        </div>
+        <a href="https://github.com/dsiemon2/OpenSentinel" class="header-github" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="header-mobile-toggle" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="doc-layout">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Getting Started</div>
+        <a href="getting-started.html" class="sidebar-link"><span class="ico">&#x1F680;</span> Quick Start</a>
+        <a href="getting-started.html#prerequisites" class="sidebar-link"><span class="ico">&#x2699;</span> Prerequisites</a>
+        <a href="getting-started.html#library" class="sidebar-link"><span class="ico">&#x1F4E6;</span> Use as Library</a>
+        <a href="getting-started.html#platform" class="sidebar-link"><span class="ico">&#x1F433;</span> Full Platform</a>
+        <a href="getting-started.html#template" class="sidebar-link"><span class="ico">&#x1F4CB;</span> From Template</a>
+        <a href="getting-started.html#configuration" class="sidebar-link"><span class="ico">&#x1F527;</span> Configuration</a>
+        <a href="getting-started.html#first-message" class="sidebar-link"><span class="ico">&#x1F4AC;</span> First Message</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Core Concepts</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F9E0;</span> Brain & Memory</a>
+        <a href="tools.html" class="sidebar-link active"><span class="ico">&#x1F6E0;</span> Tools</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F916;</span> Sub-Agents</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x26A1;</span> Workflows</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F50C;</span> Plugins & MCP</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Channels</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4AC;</span> Telegram</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F3AE;</span> Discord</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4E8;</span> Slack</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4F1;</span> WhatsApp</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F310;</span> Web & API</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F3A4;</span> Voice</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Integrations</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4E7;</span> Email</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F419;</span> GitHub</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4D3;</span> Notion</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F3E0;</span> Home Assistant</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F3B5;</span> Spotify</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4B0;</span> Finance</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Library Usage</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4E6;</span> NPM Package</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4D6;</span> API Reference</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4CB;</span> Templates</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Enterprise</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F465;</span> Multi-User</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F512;</span> Security</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x2638;</span> Kubernetes</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Apps</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F5A5;</span> Desktop App</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F30D;</span> Browser Extension</a>
+      </div>
+    </aside>
+
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="doc-main">
+      <div class="breadcrumb">
+        <a href="index.html">Docs</a>
+        <span>/</span>
+        <span>Tools</span>
+      </div>
+
+      <div class="content">
+        <h1>Tools</h1>
+        <p class="lead">OpenSentinel includes 30+ built-in tools that Claude can use to interact with your system, the web, and external services.</p>
+
+
+        <!-- ========== Overview ========== -->
+        <h2 id="overview">Overview</h2>
+        <p>Tools are the capabilities that Claude can invoke to take action in the real world. They are defined in <code>src/tools/index.ts</code> and automatically registered when OpenSentinel starts. Claude selects and executes the right tools based on context &mdash; no manual routing required.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x26A1;</span>
+          <div><strong>Automatic tool selection.</strong> When a user sends a message, Claude analyzes the request and decides which tools to call, in what order, and how to combine their results. You never need to specify which tools to use.</div>
+        </div>
+
+        <p>Key characteristics of the tool system:</p>
+        <ul>
+          <li><strong>Sandboxed execution</strong> &mdash; All tools run in isolated contexts with configurable timeouts</li>
+          <li><strong>Allowlist / Blocklist</strong> &mdash; Configure which tools are available per user or per environment</li>
+          <li><strong>Extensible</strong> &mdash; Add custom tools with a simple definition format</li>
+          <li><strong>Composable</strong> &mdash; Claude can chain multiple tools together to complete complex tasks</li>
+        </ul>
+
+        <table>
+          <thead><tr><th>Category</th><th>Tools</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Shell</strong></td><td>2</td><td>Execute commands and scripts</td></tr>
+            <tr><td><strong>File</strong></td><td>4</td><td>Read, write, list, and search files</td></tr>
+            <tr><td><strong>Browser</strong></td><td>3</td><td>Navigate, capture, and interact with web pages</td></tr>
+            <tr><td><strong>Search</strong></td><td>2</td><td>Web search and deep research</td></tr>
+            <tr><td><strong>Vision</strong></td><td>4</td><td>Image analysis, OCR, screenshots, webcam</td></tr>
+            <tr><td><strong>File Generation</strong></td><td>7</td><td>PDF, Word, Excel, PowerPoint, charts, diagrams, images</td></tr>
+            <tr><td><strong>Rendering</strong></td><td>3</td><td>Math, code highlighting, markdown</td></tr>
+            <tr><td><strong>Media</strong></td><td>1</td><td>Video summarization</td></tr>
+          </tbody>
+        </table>
+
+
+        <!-- ========== Shell Tools ========== -->
+        <h2 id="shell-tools">Shell Tools</h2>
+        <p>Execute system commands and scripts directly from the AI assistant. Shell tools run in a sandboxed environment with configurable permissions.</p>
+
+        <h3><code>execute_command</code></h3>
+        <p>Run a single shell command and return its output. Commands are executed in a sandboxed shell with configurable timeout and working directory.</p>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Example prompt</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cs">"List all running Docker containers"</span>
+<span class="cc">// Claude executes: docker ps</span></code></pre>
+        </div>
+
+        <h3><code>run_script</code></h3>
+        <p>Execute a multi-line script. Supports bash, Python, and other interpreters. Useful for complex operations that require multiple sequential commands.</p>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Example prompt</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cs">"Check disk usage, find the largest files, and clean up temp directories"</span>
+<span class="cc">// Claude generates and executes a multi-line bash script</span></code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Security note:</strong> Shell tools respect the configured allowlist. You can restrict which commands are permitted by setting <code>ALLOWED_COMMANDS</code> in your environment. By default, destructive commands like <code>rm -rf /</code> are blocked.</div>
+        </div>
+
+
+        <!-- ========== File Tools ========== -->
+        <h2 id="file-tools">File Tools</h2>
+        <p>Full filesystem access with configurable boundaries. Claude can read, write, list, and search files within the allowed directories.</p>
+
+        <table>
+          <thead><tr><th>Tool</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>read_file</code></td><td>Read the contents of a file. Supports text files, JSON, YAML, and more. Returns content with line numbers.</td></tr>
+            <tr><td><code>write_file</code></td><td>Write or overwrite a file with new contents. Creates parent directories if they don't exist.</td></tr>
+            <tr><td><code>list_files</code></td><td>List files and directories at a given path. Supports recursive listing and glob pattern filtering.</td></tr>
+            <tr><td><code>search_files</code></td><td>Search file contents using regular expressions. Returns matching lines with file paths and line numbers.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Example prompt</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cs">"Find all TODO comments in the src/ directory and write a summary to todos.md"</span>
+<span class="cc">// Claude uses search_files to find TODOs, then write_file to create the summary</span></code></pre>
+        </div>
+
+
+        <!-- ========== Browser Tools ========== -->
+        <h2 id="browser-tools">Browser Tools</h2>
+        <p>Navigate the web, extract content, and interact with pages using headless browser automation powered by <strong>Playwright</strong>.</p>
+
+        <h3><code>browse_web</code></h3>
+        <p>Navigate to a URL and extract its content. Returns cleaned text, metadata, and optionally a screenshot. Handles JavaScript-rendered pages, cookie banners, and infinite scroll.</p>
+
+        <h3><code>screenshot_page</code></h3>
+        <p>Capture a full-page or viewport screenshot of any URL. Returns the image for analysis or inclusion in generated documents.</p>
+
+        <h3><code>fill_form</code></h3>
+        <p>Interact with web forms &mdash; fill inputs, select dropdowns, click buttons, and submit forms. Useful for automation workflows.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Example prompt</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cs">"Take a screenshot of the Hacker News front page and list the top 5 stories"</span>
+<span class="cc">// Claude uses browse_web + screenshot_page, then summarizes</span></code></pre>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x2139;&#xFE0F;</span>
+          <div><strong>Playwright is optional.</strong> Browser tools require Playwright to be installed. Run <code>bunx playwright install chromium</code> to set it up. If Playwright is not available, browse_web falls back to HTTP fetching with content extraction.</div>
+        </div>
+
+
+        <!-- ========== Search Tools ========== -->
+        <h2 id="search-tools">Search Tools</h2>
+        <p>Search the web using multiple engines and perform deep multi-query research with automatic synthesis.</p>
+
+        <h3><code>web_search</code></h3>
+        <p>Perform a web search using Google, DuckDuckGo, or Brave Search. Returns titles, URLs, and snippets from the top results. The search engine is configurable via environment variables.</p>
+
+        <h3><code>research_mode</code></h3>
+        <p>Deep research mode that executes multiple search queries, visits the most relevant pages, extracts key information, and synthesizes findings into a comprehensive summary. Ideal for competitive analysis, market research, or any topic requiring multiple sources.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Example prompt</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cs">"Research the current state of WebAssembly adoption and create a brief report"</span>
+<span class="cc">// Claude uses research_mode: runs 3-5 queries, visits top results, synthesizes</span></code></pre>
+        </div>
+
+
+        <!-- ========== Vision Tools ========== -->
+        <h2 id="vision-tools">Vision Tools</h2>
+        <p>AI-powered image understanding, text extraction, and visual capture from screens and cameras.</p>
+
+        <table>
+          <thead><tr><th>Tool</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>analyze_image</code></td><td>Send an image to Claude's vision model for understanding. Describe contents, answer questions about the image, extract structured data from charts or diagrams.</td></tr>
+            <tr><td><code>ocr</code></td><td>Extract text from images with layout detection. Handles documents, receipts, screenshots, handwriting, and multi-column layouts. Returns structured text with position data.</td></tr>
+            <tr><td><code>screenshot</code></td><td>Capture a screenshot of the current desktop or a specific window. Works on Linux (X11/Wayland), macOS, and Windows.</td></tr>
+            <tr><td><code>webcam_capture</code></td><td>Capture an image from the connected webcam. Useful for visual check-ins, environment monitoring, or real-time analysis.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Example prompt</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cs">"Take a screenshot of my desktop and tell me what apps are open"</span>
+<span class="cc">// Claude uses screenshot + analyze_image to describe the desktop</span></code></pre>
+        </div>
+
+
+        <!-- ========== File Generation Tools ========== -->
+        <h2 id="file-generation-tools">File Generation Tools</h2>
+        <p>Generate professional documents, charts, diagrams, and images. All generated files are saved to the configured output directory and can be sent back through any channel.</p>
+
+        <table>
+          <thead><tr><th>Tool</th><th>Output</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>generate_pdf</code></td><td>.pdf</td><td>Create PDF documents with text, tables, images, headers/footers, and custom styling. Supports multi-page layouts.</td></tr>
+            <tr><td><code>generate_word</code></td><td>.docx</td><td>Create Word documents with formatted text, tables, images, and styles. Compatible with Microsoft Word and Google Docs.</td></tr>
+            <tr><td><code>generate_spreadsheet</code></td><td>.xlsx</td><td>Create Excel spreadsheets with multiple sheets, formulas, formatting, charts, and data validation.</td></tr>
+            <tr><td><code>generate_presentation</code></td><td>.pptx</td><td>Create PowerPoint presentations with slides, text, images, charts, and speaker notes.</td></tr>
+            <tr><td><code>generate_chart</code></td><td>.png / .svg</td><td>Create charts and graphs: bar, line, pie, scatter, area, radar, and more. Uses Chart.js for rendering.</td></tr>
+            <tr><td><code>generate_diagram</code></td><td>.png / .svg</td><td>Create diagrams: flowcharts, sequence diagrams, class diagrams, state machines, ER diagrams, and Gantt charts. Uses Mermaid.js.</td></tr>
+            <tr><td><code>generate_image</code></td><td>.png</td><td>AI image generation via OpenAI's DALL-E. Create illustrations, icons, backgrounds, and concept art from text descriptions.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Example prompt</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cs">"Create a PDF report about Q4 sales with a bar chart comparing monthly revenue"</span>
+<span class="cc">// Claude uses generate_chart for the bar chart, then generate_pdf for the report</span></code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Tool chaining:</strong> Claude often combines generation tools. For example, asking for "a presentation about market trends" may trigger <code>web_search</code> + <code>research_mode</code> + <code>generate_chart</code> + <code>generate_presentation</code> in sequence.</div>
+        </div>
+
+
+        <!-- ========== Rendering Tools ========== -->
+        <h2 id="rendering-tools">Rendering Tools</h2>
+        <p>Render structured content into visual or formatted output for display or inclusion in documents.</p>
+
+        <table>
+          <thead><tr><th>Tool</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>render_math</code></td><td>Render LaTeX mathematical expressions to PNG or SVG images. Supports equations, matrices, integrals, and all standard LaTeX math notation. Uses KaTeX for fast server-side rendering.</td></tr>
+            <tr><td><code>highlight_code</code></td><td>Apply syntax highlighting to code snippets. Supports 100+ languages. Returns HTML with theme-aware styling. Uses Shiki for accurate tokenization.</td></tr>
+            <tr><td><code>render_markdown</code></td><td>Convert Markdown to styled HTML. Supports GFM (GitHub Flavored Markdown), tables, task lists, footnotes, and embedded media.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Example prompt</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cs">"Render the quadratic formula as an image"</span>
+<span class="cc">// Claude uses render_math with LaTeX: x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}</span></code></pre>
+        </div>
+
+
+        <!-- ========== Media Tools ========== -->
+        <h2 id="media-tools">Media Tools</h2>
+        <p>Process and analyze media content including video files and streams.</p>
+
+        <h3><code>summarize_video</code></h3>
+        <p>Transcribe and summarize video content. Supports local files and YouTube URLs. Extracts audio, runs speech-to-text via Whisper, and generates a structured summary with timestamps, key points, and action items.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Example prompt</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cs">"Summarize this YouTube video: https://youtube.com/watch?v=..."</span>
+<span class="cc">// Claude downloads audio, transcribes with Whisper, and generates a summary</span></code></pre>
+        </div>
+
+
+        <!-- ========== Using Tools via Library ========== -->
+        <h2 id="library-usage">Using Tools via Library</h2>
+        <p>When using OpenSentinel as an NPM library, tools are available through the <code>chatWithTools()</code> function. Claude automatically selects and executes tools based on the user's request.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { configure, chatWithTools } <span class="ck">from</span> <span class="cs">'opensentinel'</span>;
+
+<span class="cf">configure</span>({ <span class="cv">CLAUDE_API_KEY</span>: process.env.<span class="cv">CLAUDE_API_KEY</span> });
+
+<span class="ck">const</span> result = <span class="ck">await</span> <span class="cf">chatWithTools</span>([
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'Take a screenshot of hackernews.com and summarize the top stories'</span> }
+]);
+
+console.<span class="cf">log</span>(result.text);
+<span class="cc">// "Here are today's top Hacker News stories: ..."</span>
+
+console.<span class="cf">log</span>(result.toolCalls);
+<span class="cc">// [{ tool: 'browse_web', ... }, { tool: 'screenshot_page', ... }]</span></code></pre>
+        </div>
+
+        <p>You can also restrict which tools are available:</p>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc">// Only allow search and file tools (no shell access)</span>
+<span class="ck">const</span> result = <span class="ck">await</span> <span class="cf">chatWithTools</span>(messages, {
+  <span class="cv">allowedTools</span>: [<span class="cs">'web_search'</span>, <span class="cs">'read_file'</span>, <span class="cs">'write_file'</span>, <span class="cs">'search_files'</span>]
+});
+
+<span class="cc">// Block specific tools</span>
+<span class="ck">const</span> result = <span class="ck">await</span> <span class="cf">chatWithTools</span>(messages, {
+  <span class="cv">blockedTools</span>: [<span class="cs">'execute_command'</span>, <span class="cs">'run_script'</span>]
+});</code></pre>
+        </div>
+
+
+        <!-- ========== Adding Custom Tools ========== -->
+        <h2 id="custom-tools">Adding Custom Tools</h2>
+        <p>You can extend OpenSentinel with your own tools. Each tool is a simple object with a name, description, parameters schema, and an execution function.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Add tool definition to the TOOLS array</div>
+            <p>Open <code>src/tools/index.ts</code> and add your tool definition to the <code>TOOLS</code> array:</p>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">src/tools/index.ts</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="ck">export const</span> <span class="cv">TOOLS</span> = [
+  <span class="cc">// ... existing tools ...</span>
+  {
+    <span class="cv">name</span>: <span class="cs">'check_weather'</span>,
+    <span class="cv">description</span>: <span class="cs">'Get current weather for a location'</span>,
+    <span class="cv">input_schema</span>: {
+      <span class="cv">type</span>: <span class="cs">'object'</span>,
+      <span class="cv">properties</span>: {
+        <span class="cv">location</span>: {
+          <span class="cv">type</span>: <span class="cs">'string'</span>,
+          <span class="cv">description</span>: <span class="cs">'City name or coordinates'</span>
+        }
+      },
+      <span class="cv">required</span>: [<span class="cs">'location'</span>]
+    }
+  }
+];</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Add execution case in executeTool()</div>
+            <p>Add a case for your tool in the <code>executeTool()</code> function in the same file:</p>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">src/tools/index.ts</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="ck">case</span> <span class="cs">'check_weather'</span>: {
+  <span class="ck">const</span> { <span class="cv">location</span> } = input;
+  <span class="ck">const</span> response = <span class="ck">await</span> <span class="cf">fetch</span>(
+    <span class="cs">`https://wttr.in/</span>${<span class="cv">location</span>}<span class="cs">?format=j1`</span>
+  );
+  <span class="ck">const</span> data = <span class="ck">await</span> response.<span class="cf">json</span>();
+  <span class="ck">return</span> {
+    <span class="cv">temperature</span>: data.current_condition[0].temp_C,
+    <span class="cv">description</span>: data.current_condition[0].weatherDesc[0].value,
+    <span class="cv">humidity</span>: data.current_condition[0].humidity
+  };
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Tool is automatically available to Claude</div>
+            <p>That's it. Restart OpenSentinel and your tool will be registered with Claude. When a user asks about weather, Claude will automatically select your <code>check_weather</code> tool.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-success">
+          <span class="callout-ico">&#x2705;</span>
+          <div><strong>No routing needed.</strong> Claude reads the tool name, description, and parameter schema to decide when and how to use each tool. Write a clear description and Claude will invoke it at the right time.</div>
+        </div>
+
+
+        <!-- ========== Page Nav ========== -->
+        <div class="page-nav">
+          <a href="agents.html" class="page-nav-link">
+            <span class="page-nav-label">&larr; Previous</span>
+            <span class="page-nav-title">Agents</span>
+          </a>
+          <a href="integrations.html" class="page-nav-link page-nav-link--next">
+            <span class="page-nav-label">Next &rarr;</span>
+            <span class="page-nav-title">Integrations</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function copyCode(btn) {
+      const block = btn.closest('.codeblock');
+      const pre = block.querySelector('pre');
+      const text = pre.textContent.replace(/^\$ /gm, '');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+
+    function switchCodeTab(clickedTab, panelId) {
+      const parent = clickedTab.closest('.codeblock') || clickedTab.closest('.content');
+      const tabs = clickedTab.parentElement;
+      const allTabs = tabs.querySelectorAll('.codeblock-tab');
+      allTabs.forEach(t => t.classList.remove('active'));
+      clickedTab.classList.add('active');
+
+      // Hide all sibling panels
+      let sibling = tabs.nextElementSibling;
+      while (sibling && sibling.classList.contains('tab-panel')) {
+        sibling.style.display = 'none';
+        sibling.classList.remove('active');
+        sibling = sibling.nextElementSibling;
+      }
+
+      const panel = document.getElementById(panelId);
+      if (panel) {
+        panel.style.display = 'block';
+        panel.classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>

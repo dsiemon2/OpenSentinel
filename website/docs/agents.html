@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sub-Agent System - OpenSentinel Docs</title>
+  <meta name="description" content="OpenSentinel decomposes complex tasks across four specialist agents that work in parallel with shared context and coordination.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="../" class="header-logo">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#hlg)" stroke-width="2.5"/><circle cx="14" cy="14" r="5" fill="url(#hlg)"/><line x1="14" y1="2" x2="14" y2="8" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="20" x2="14" y2="26" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="14" x2="8" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="14" x2="26" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="hlg" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs></svg>
+          OpenSentinel
+          <span class="header-badge">Docs</span>
+        </a>
+        <nav class="header-nav">
+          <a href="getting-started.html">Get Started</a>
+          <a href="channels.html">Channels</a>
+          <a href="agents.html" class="active">Agents</a>
+          <a href="tools.html">Tools</a>
+          <a href="integrations.html">Integrations</a>
+          <a href="enterprise.html">Enterprise</a>
+          <a href="templates.html">Templates</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search docs...
+          <kbd>Ctrl K</kbd>
+        </div>
+        <a href="https://github.com/dsiemon2/OpenSentinel" class="header-github" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="header-mobile-toggle" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="doc-layout">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Getting Started</div>
+        <a href="getting-started.html" class="sidebar-link"><span class="ico">&#x1F680;</span> Quick Start</a>
+        <a href="getting-started.html#prerequisites" class="sidebar-link"><span class="ico">&#x2699;</span> Prerequisites</a>
+        <a href="getting-started.html#library" class="sidebar-link"><span class="ico">&#x1F4E6;</span> Use as Library</a>
+        <a href="getting-started.html#platform" class="sidebar-link"><span class="ico">&#x1F433;</span> Full Platform</a>
+        <a href="getting-started.html#template" class="sidebar-link"><span class="ico">&#x1F4CB;</span> From Template</a>
+        <a href="getting-started.html#configuration" class="sidebar-link"><span class="ico">&#x1F527;</span> Configuration</a>
+        <a href="getting-started.html#first-message" class="sidebar-link"><span class="ico">&#x1F4AC;</span> First Message</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Core Concepts</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F9E0;</span> Brain & Memory</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F6E0;</span> Tools</a>
+        <a href="agents.html" class="sidebar-link active"><span class="ico">&#x1F916;</span> Sub-Agents</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x26A1;</span> Workflows</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F50C;</span> Plugins & MCP</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Channels</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4AC;</span> Telegram</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F3AE;</span> Discord</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4E8;</span> Slack</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4F1;</span> WhatsApp</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F310;</span> Web & API</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F3A4;</span> Voice</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Integrations</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4E7;</span> Email</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F419;</span> GitHub</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4D3;</span> Notion</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F3E0;</span> Home Assistant</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F3B5;</span> Spotify</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4B0;</span> Finance</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Library Usage</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4E6;</span> NPM Package</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4D6;</span> API Reference</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F4CB;</span> Templates</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Enterprise</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F465;</span> Multi-User</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F512;</span> Security</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x2638;</span> Kubernetes</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Apps</div>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F5A5;</span> Desktop App</a>
+        <a href="#" class="sidebar-link"><span class="ico">&#x1F30D;</span> Browser Extension</a>
+      </div>
+    </aside>
+
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="doc-main">
+      <div class="breadcrumb">
+        <a href="index.html">Docs</a>
+        <span>/</span>
+        <a href="agents.html">Core Concepts</a>
+        <span>/</span>
+        <span>Sub-Agent System</span>
+      </div>
+
+      <div class="content">
+        <h1>Sub-Agent System</h1>
+        <p class="lead">OpenSentinel decomposes complex tasks across four specialist agents that work in parallel with shared context and coordination.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x26A1;</span>
+          <div><strong>Automatic routing.</strong> You don't need to specify which agent to use. When you send a complex request via <code>chatWithTools()</code>, the task coordinator automatically decomposes it and assigns subtasks to the right agents.</div>
+        </div>
+
+
+        <!-- ========== Overview ========== -->
+        <h2 id="overview">Overview</h2>
+        <p>Unlike single-agent systems that funnel every request through one prompt, OpenSentinel routes complex tasks to specialized sub-agents. Each agent has its own system prompt, tool permissions, token budget, and execution context.</p>
+        <p>The <strong>Task Coordinator</strong> receives a request, breaks the work into parallel streams, and assigns each stream to the appropriate agent. Agents communicate via a <strong>SharedContext</strong> key-value store and an <strong>AgentMessenger</strong> pub/sub system, so each agent can build on the others' outputs without blocking.</p>
+        <p>This architecture delivers faster results on multi-step tasks (research + analysis + writing, for example) because independent subtasks run concurrently, up to 5 at a time, while a dependency graph ensures ordering when one subtask depends on another.</p>
+
+
+        <!-- ========== The Four Agents ========== -->
+        <h2 id="agents">The Four Agents</h2>
+        <p>Each agent type has a dedicated system prompt, a restricted set of tool permissions, and a defined process for completing its objective.</p>
+
+        <h3 id="research-agent">Research Agent</h3>
+        <p>The Research Agent investigates topics and produces well-sourced information. It breaks research questions into sub-questions, searches multiple sources, cross-references findings, and synthesizes results into a coherent report.</p>
+        <table>
+          <thead><tr><th>Attribute</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Capabilities</strong></td><td>Web search, information gathering, source synthesis, fact verification</td></tr>
+            <tr><td><strong>Allowed Tools</strong></td><td><code>web_search</code>, <code>browse_url</code>, <code>read_file</code>, <code>list_directory</code>, <code>search_files</code></td></tr>
+            <tr><td><strong>Process</strong></td><td>Decompose question &rarr; Search sources &rarr; Cross-reference &rarr; Synthesize report</td></tr>
+            <tr><td><strong>Best For</strong></td><td>Competitive analysis, topic deep-dives, market research, fact-checking</td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="coding-agent">Coding Agent</h3>
+        <p>The Coding Agent implements, debugs, and improves code. It reads existing source files, plans an implementation approach, writes clean and documented code, and verifies the solution.</p>
+        <table>
+          <thead><tr><th>Attribute</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Capabilities</strong></td><td>Code generation, debugging, code review, refactoring, test writing</td></tr>
+            <tr><td><strong>Allowed Tools</strong></td><td><code>read_file</code>, <code>write_file</code>, <code>list_directory</code>, <code>search_files</code>, <code>execute_command</code></td></tr>
+            <tr><td><strong>Process</strong></td><td>Understand requirements &rarr; Explore code &rarr; Plan &rarr; Implement &rarr; Test</td></tr>
+            <tr><td><strong>Best For</strong></td><td>Feature implementation, bug fixes, PR reviews, test scaffolding</td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="writing-agent">Writing Agent</h3>
+        <p>The Writing Agent creates high-quality written content. It analyzes the purpose and audience, outlines the piece, drafts the content, and refines it for tone and clarity.</p>
+        <table>
+          <thead><tr><th>Attribute</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Capabilities</strong></td><td>Drafts, editing, content creation, tone adjustment, summarization</td></tr>
+            <tr><td><strong>Allowed Tools</strong></td><td><code>read_file</code>, <code>write_file</code>, <code>web_search</code>, <code>browse_url</code></td></tr>
+            <tr><td><strong>Process</strong></td><td>Understand audience &rarr; Research &rarr; Outline &rarr; Draft &rarr; Refine</td></tr>
+            <tr><td><strong>Best For</strong></td><td>Reports, blog posts, documentation, emails, proposals</td></tr>
+          </tbody>
+        </table>
+
+        <h3 id="analysis-agent">Analysis Agent</h3>
+        <p>The Analysis Agent processes data and information to produce actionable insights. It gathers and organizes data, applies analytical methods, identifies patterns, and delivers findings with recommendations.</p>
+        <table>
+          <thead><tr><th>Attribute</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Capabilities</strong></td><td>Data processing, pattern detection, insights generation, statistical analysis</td></tr>
+            <tr><td><strong>Allowed Tools</strong></td><td><code>read_file</code>, <code>web_search</code>, <code>browse_url</code>, <code>list_directory</code>, <code>search_files</code></td></tr>
+            <tr><td><strong>Process</strong></td><td>Define objective &rarr; Gather data &rarr; Analyze &rarr; Identify patterns &rarr; Recommend</td></tr>
+            <tr><td><strong>Best For</strong></td><td>Data analysis, competitor comparisons, trend detection, code quality audits</td></tr>
+          </tbody>
+        </table>
+
+
+        <!-- ========== How It Works ========== -->
+        <h2 id="how-it-works">How It Works</h2>
+        <p>The agent system follows a structured pipeline from request to result. Here is the architecture at a high level:</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">1. Task Coordinator receives the request</div>
+            <p>A complex user message arrives via any channel (Telegram, API, web). The coordinator evaluates whether the task requires multiple agents or can be handled by a single agent.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-title">2. Decompose into subtasks</div>
+            <p>The coordinator breaks the objective into discrete subtasks. Each subtask gets an <code>id</code>, an <code>objective</code>, a <code>requiredAgentType</code>, a <code>priority</code> (1-5), and optionally a list of <code>dependencies</code> (other task IDs that must finish first).</p>
+          </div>
+
+          <div class="step">
+            <div class="step-title">3. Assign to agents</div>
+            <p>The coordinator spawns agents via <code>spawnAgent()</code>. Each agent is queued into a BullMQ job on the <code>sentinel-agents</code> queue with its own token budget (default 50,000) and time budget (default 1 hour). Up to 3 agent workers run concurrently.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-title">4. Agents share context via SharedContext</div>
+            <p>Each workflow creates a <code>SharedContext</code> backed by Redis. Agents store artifacts, findings, decisions, and references as they work. Any agent in the workflow can read entries from any other agent.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-title">5. AgentMessenger handles inter-agent communication</div>
+            <p>Agents communicate in real time via Redis pub/sub channels. Message types include <code>request</code>, <code>response</code>, <code>broadcast</code>, <code>handoff</code>, <code>status_update</code>, and <code>notification</code>. Agents can request assistance from a specific agent type or hand off tasks entirely.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-title">6. Results are merged</div>
+            <p>When all subtasks complete (or fail), the coordinator aggregates outputs from the <code>taskResults</code> map, stores the final result in the shared context, and persists important findings/decisions to long-term vector memory.</p>
+          </div>
+        </div>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Architecture flow</span></div>
+          <pre><code><span class="cc">User Request</span>
+    <span class="ck">|</span>
+    v
+<span class="cc">Task Coordinator</span>  &mdash;&mdash;&gt;  <span class="cc">Decompose into subtasks</span>
+    <span class="ck">|</span>
+    <span class="ck">|</span>&mdash;&mdash; <span class="cs">Research Agent</span>  &mdash;&mdash;  web_search, browse_url
+    <span class="ck">|</span>&mdash;&mdash; <span class="cs">Coding Agent</span>    &mdash;&mdash;  write_file, execute_command
+    <span class="ck">|</span>&mdash;&mdash; <span class="cs">Writing Agent</span>   &mdash;&mdash;  read_file, write_file
+    <span class="ck">|</span>&mdash;&mdash; <span class="cs">Analysis Agent</span>  &mdash;&mdash;  read_file, search_files
+    <span class="ck">|</span>
+    v
+<span class="cc">SharedContext</span> (Redis key-value store)
+<span class="cc">AgentMessenger</span> (Redis pub/sub)
+    <span class="ck">|</span>
+    v
+<span class="cc">Merged Result</span>  &mdash;&mdash;&gt;  <span class="cc">Long-term Memory</span></code></pre>
+        </div>
+
+
+        <!-- ========== Agent Collaboration ========== -->
+        <h2 id="collaboration">Agent Collaboration</h2>
+        <p>Three components enable agents to work together effectively:</p>
+
+        <h3 id="shared-context">Shared Context</h3>
+        <p>A Redis-backed key-value store accessible by all agents in a workflow. Each entry has a <code>type</code> (artifact, finding, decision, reference, state, error, metadata), <code>tags</code> for filtering, and the ID of the agent that created it.</p>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc">// Store a finding from the Research Agent</span>
+<span class="ck">await</span> sharedContext.<span class="cf">recordFinding</span>(<span class="cs">'competitor-pricing'</span>, {
+  <span class="cv">summary</span>: <span class="cs">'Competitor A charges $49/mo for the base tier'</span>,
+  <span class="cv">confidence</span>: <span class="cs">'high'</span>,
+  <span class="cv">sources</span>: [<span class="cs">'https://competitor-a.com/pricing'</span>],
+}, { <span class="cv">agentId</span>, <span class="cv">agentType</span>: <span class="cs">'research'</span> });
+
+<span class="cc">// Analysis Agent reads it later</span>
+<span class="ck">const</span> findings = <span class="ck">await</span> sharedContext.<span class="cf">query</span>({
+  <span class="cv">type</span>: <span class="cs">'finding'</span>,
+  <span class="cv">tags</span>: [<span class="cs">'competitor-pricing'</span>],
+});</code></pre>
+        </div>
+
+        <h3 id="agent-messenger">Agent Messenger</h3>
+        <p>A pub/sub system built on Redis channels. Each agent subscribes to three channels: its own direct channel, its agent-type channel, and the global broadcast channel. Message types include:</p>
+        <table>
+          <thead><tr><th>Message Type</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>request</code></td><td>Request assistance or information from another agent</td></tr>
+            <tr><td><code>response</code></td><td>Response to a request (paired via correlation ID)</td></tr>
+            <tr><td><code>broadcast</code></td><td>Broadcast to all agents in the workflow</td></tr>
+            <tr><td><code>handoff</code></td><td>Hand off a task to another agent entirely</td></tr>
+            <tr><td><code>status_update</code></td><td>Progress notification (non-blocking)</td></tr>
+            <tr><td><code>notification</code></td><td>Non-blocking informational message</td></tr>
+            <tr><td><code>heartbeat</code></td><td>Agent health check (expires after 10 seconds)</td></tr>
+          </tbody>
+        </table>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc">// Request help from the Coding Agent</span>
+<span class="ck">const</span> response = <span class="ck">await</span> messenger.<span class="cf">request</span>(codingAgentId, <span class="cs">'review_code'</span>, {
+  <span class="cv">file</span>: <span class="cs">'src/core/brain.ts'</span>,
+  <span class="cv">focus</span>: <span class="cs">'performance'</span>,
+}, { <span class="cv">timeout</span>: <span class="cv">30000</span> });
+
+<span class="cc">// Broadcast a status update to all agents</span>
+<span class="ck">await</span> messenger.<span class="cf">sendStatusUpdate</span>({
+  <span class="cv">state</span>: <span class="cs">'working'</span>,
+  <span class="cv">progress</span>: <span class="cv">65</span>,
+  <span class="cv">currentTask</span>: <span class="cs">'Analyzing pricing data'</span>,
+});</code></pre>
+        </div>
+
+        <h3 id="task-coordinator">Task Coordinator</h3>
+        <p>The orchestration layer that manages the full lifecycle. Key features:</p>
+        <ul>
+          <li><strong>Dependency tracking</strong> &mdash; Tasks with <code>dependencies</code> are marked as <code>blocked</code> until those dependencies complete. Tasks without dependencies start immediately.</li>
+          <li><strong>Parallel execution</strong> &mdash; Up to 5 tasks run concurrently (<code>MAX_CONCURRENT_TASKS</code>). The coordinator fills available slots with the highest-priority ready tasks.</li>
+          <li><strong>Retry logic</strong> &mdash; Failed tasks are retried up to 2 times (<code>DEFAULT_MAX_RETRIES</code>) before being marked as failed.</li>
+          <li><strong>Deadlock detection</strong> &mdash; If no tasks are running or ready but some remain pending, the coordinator identifies failed dependencies and circular references.</li>
+          <li><strong>Three execution strategies</strong>: <code>sequential</code> (one at a time), <code>parallel</code> (all independent tasks at once), and <code>adaptive</code> (dynamically adjusted based on results).</li>
+        </ul>
+
+
+        <!-- ========== Configuration ========== -->
+        <h2 id="configuration">Configuration</h2>
+        <p>The sub-agent system requires the full platform (PostgreSQL + Redis) because agents are queued via BullMQ and share state via Redis.</p>
+
+        <h3>Environment Variables</h3>
+        <table>
+          <thead><tr><th>Variable</th><th>Description</th><th>Default</th></tr></thead>
+          <tbody>
+            <tr><td><code>CLAUDE_API_KEY</code></td><td>Required for agent Claude API calls</td><td>&mdash;</td></tr>
+            <tr><td><code>REDIS_URL</code></td><td>Redis connection for BullMQ queue, shared context, and messaging</td><td><code>redis://localhost:6379</code></td></tr>
+            <tr><td><code>DATABASE_URL</code></td><td>PostgreSQL connection for agent records and progress tracking</td><td>&mdash;</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Programmatic Configuration</h3>
+        <p>When using OpenSentinel as a library, configure the agent system via <code>configure()</code>:</p>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { configure } <span class="ck">from</span> <span class="cs">'opensentinel'</span>;
+
+<span class="cf">configure</span>({
+  <span class="cv">CLAUDE_API_KEY</span>: process.env.<span class="cv">CLAUDE_API_KEY</span>,
+  <span class="cv">DATABASE_URL</span>: <span class="cs">'postgresql://user:pass@localhost:5445/opensentinel'</span>,
+  <span class="cv">REDIS_URL</span>: <span class="cs">'redis://localhost:6379'</span>,
+});</code></pre>
+        </div>
+
+        <h3>Agent Defaults</h3>
+        <table>
+          <thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>Token budget per agent</td><td>50,000</td><td>Maximum tokens an agent can consume before stopping</td></tr>
+            <tr><td>Time budget per agent</td><td>1 hour</td><td>Maximum wall-clock time before an agent is cancelled</td></tr>
+            <tr><td>Max steps per agent</td><td>20</td><td>Maximum Claude API call iterations per agent run</td></tr>
+            <tr><td>Worker concurrency</td><td>3</td><td>Number of agents that can run simultaneously</td></tr>
+            <tr><td>Max concurrent tasks</td><td>5</td><td>Maximum tasks the coordinator runs in parallel</td></tr>
+            <tr><td>Task timeout</td><td>30 minutes</td><td>Default timeout for a single coordinated task</td></tr>
+            <tr><td>Max retries</td><td>2</td><td>Number of times a failed task is retried</td></tr>
+          </tbody>
+        </table>
+
+
+        <!-- ========== Using Agents via Library ========== -->
+        <h2 id="usage">Using Agents via Library</h2>
+        <p>Complex tasks are automatically routed to sub-agents when you use <code>chatWithTools()</code>. You can also spawn agents directly for fine-grained control.</p>
+
+        <h3>Automatic Routing</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { chatWithTools } <span class="ck">from</span> <span class="cs">'opensentinel'</span>;
+
+<span class="cc">// Complex task automatically routed to sub-agents</span>
+<span class="ck">const</span> result = <span class="ck">await</span> <span class="cf">chatWithTools</span>([
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'Research our competitors, analyze their pricing, and draft a report'</span> }
+]);
+
+console.<span class="cf">log</span>(result.text);
+<span class="cc">// The coordinator splits this into:</span>
+<span class="cc">//   1. Research Agent  -> gather competitor information</span>
+<span class="cc">//   2. Analysis Agent  -> analyze pricing data (depends on #1)</span>
+<span class="cc">//   3. Writing Agent   -> draft the report (depends on #2)</span></code></pre>
+        </div>
+
+        <h3>Spawning Agents Directly</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { spawnAgent, getAgent } <span class="ck">from</span> <span class="cs">'opensentinel/agents'</span>;
+
+<span class="cc">// Spawn a research agent with custom budget</span>
+<span class="ck">const</span> agentId = <span class="ck">await</span> <span class="cf">spawnAgent</span>({
+  <span class="cv">userId</span>: <span class="cs">'user_123'</span>,
+  <span class="cv">type</span>: <span class="cs">'research'</span>,
+  <span class="cv">objective</span>: <span class="cs">'Find the top 5 competitors in the AI assistant market'</span>,
+  <span class="cv">tokenBudget</span>: <span class="cv">30000</span>,
+  <span class="cv">timeBudgetMs</span>: <span class="cv">600000</span>, <span class="cc">// 10 minutes</span>
+});
+
+<span class="cc">// Check progress</span>
+<span class="ck">const</span> agent = <span class="ck">await</span> <span class="cf">getAgent</span>(agentId);
+console.<span class="cf">log</span>(agent.status);      <span class="cc">// 'pending' | 'running' | 'completed' | 'failed'</span>
+console.<span class="cf">log</span>(agent.progress);    <span class="cc">// Array of step descriptions</span>
+console.<span class="cf">log</span>(agent.result);      <span class="cc">// Final result when completed</span></code></pre>
+        </div>
+
+        <h3>Running Workflows</h3>
+        <p>Use the workflow API for multi-agent pipelines with dependency management:</p>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { createWorkflow, runWorkflow } <span class="ck">from</span> <span class="cs">'opensentinel/agents'</span>;
+
+<span class="ck">const</span> workflow = <span class="cf">createWorkflow</span>(
+  <span class="cs">'Competitor Report'</span>,
+  <span class="cs">'Research competitors and produce a pricing analysis report'</span>,
+  [
+    {
+      <span class="cv">id</span>: <span class="cs">'research'</span>,
+      <span class="cv">name</span>: <span class="cs">'Competitor Research'</span>,
+      <span class="cv">description</span>: <span class="cs">'Gather competitor data'</span>,
+      <span class="cv">objective</span>: <span class="cs">'Research top 5 competitors and their pricing models'</span>,
+      <span class="cv">agentType</span>: <span class="cs">'research'</span>,
+      <span class="cv">priority</span>: <span class="cv">1</span>,
+    },
+    {
+      <span class="cv">id</span>: <span class="cs">'analyze'</span>,
+      <span class="cv">name</span>: <span class="cs">'Pricing Analysis'</span>,
+      <span class="cv">description</span>: <span class="cs">'Analyze pricing data'</span>,
+      <span class="cv">objective</span>: <span class="cs">'Compare pricing tiers and identify market positioning'</span>,
+      <span class="cv">agentType</span>: <span class="cs">'analysis'</span>,
+      <span class="cv">dependencies</span>: [<span class="cs">'research'</span>],
+      <span class="cv">priority</span>: <span class="cv">2</span>,
+    },
+    {
+      <span class="cv">id</span>: <span class="cs">'write'</span>,
+      <span class="cv">name</span>: <span class="cs">'Draft Report'</span>,
+      <span class="cv">description</span>: <span class="cs">'Write the final report'</span>,
+      <span class="cv">objective</span>: <span class="cs">'Produce a comprehensive pricing analysis report'</span>,
+      <span class="cv">agentType</span>: <span class="cs">'writing'</span>,
+      <span class="cv">dependencies</span>: [<span class="cs">'analyze'</span>],
+      <span class="cv">priority</span>: <span class="cv">3</span>,
+    },
+  ],
+  { <span class="cv">strategy</span>: <span class="cs">'parallel'</span> }
+);
+
+<span class="ck">const</span> coordinator = <span class="ck">await</span> <span class="cf">runWorkflow</span>(workflow, <span class="cs">'user_123'</span>);
+
+<span class="cc">// Monitor progress</span>
+coordinator.<span class="cf">on</span>(<span class="cs">'task:completed'</span>, ({ <span class="cv">taskId</span>, <span class="cv">result</span> }) =&gt; {
+  console.<span class="cf">log</span>(<span class="cs">`Task ${taskId} done:`</span>, result.summary);
+});
+
+coordinator.<span class="cf">on</span>(<span class="cs">'workflow:completed'</span>, ({ <span class="cv">results</span> }) =&gt; {
+  console.<span class="cf">log</span>(<span class="cs">'All done!'</span>, results);
+});</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Built-in workflow templates.</strong> OpenSentinel ships with pre-built workflow templates for common patterns: <code>researchReport(topic)</code>, <code>codeReview(description)</code>, and <code>parallelResearch(topics)</code>. Import them from <code>opensentinel/agents</code>.</div>
+        </div>
+
+
+        <!-- ========== Domain Experts ========== -->
+        <h2 id="domain-experts">Domain Experts</h2>
+        <p>In addition to the four agent types, OpenSentinel supports 15 domain expert personalities. When activated, the domain expert modifies the system prompt, response style, preferred tools, and terminology for a specific field. You can activate a domain expert for any conversation or agent.</p>
+
+        <table>
+          <thead><tr><th>Expert</th><th>Domain</th><th>Response Style</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Coding</strong></td><td>Software development, architecture, debugging</td><td>Technical, detailed, with code examples</td></tr>
+            <tr><td><strong>Legal</strong></td><td>Contract review, compliance, regulations</td><td>Professional, precise, with citations</td></tr>
+            <tr><td><strong>Medical</strong></td><td>Health information, clinical analysis</td><td>Academic, comprehensive, evidence-based</td></tr>
+            <tr><td><strong>Finance</strong></td><td>Investment, accounting, financial analysis</td><td>Professional, data-driven, with tables</td></tr>
+            <tr><td><strong>Writing</strong></td><td>Content creation, editing, copywriting</td><td>Moderate formality, creative, with examples</td></tr>
+            <tr><td><strong>Research</strong></td><td>Academic research, literature review</td><td>Academic, comprehensive, with citations</td></tr>
+            <tr><td><strong>Marketing</strong></td><td>Campaigns, brand strategy, analytics</td><td>Professional, concise, data-informed</td></tr>
+            <tr><td><strong>Design</strong></td><td>UI/UX, visual design, prototyping</td><td>Technical, moderate detail, with diagrams</td></tr>
+            <tr><td><strong>Data Science</strong></td><td>ML, statistics, data pipelines</td><td>Technical, detailed, with code and tables</td></tr>
+            <tr><td><strong>Security</strong></td><td>Cybersecurity, auditing, compliance</td><td>Technical, precise, risk-focused</td></tr>
+            <tr><td><strong>DevOps</strong></td><td>CI/CD, infrastructure, monitoring</td><td>Technical, concise, with code</td></tr>
+            <tr><td><strong>Product</strong></td><td>Product strategy, roadmaps, prioritization</td><td>Professional, moderate, with bullet points</td></tr>
+            <tr><td><strong>HR</strong></td><td>Recruiting, employee relations, policy</td><td>Professional, empathetic, structured</td></tr>
+            <tr><td><strong>Education</strong></td><td>Teaching, curriculum, learning design</td><td>Moderate, detailed, with examples</td></tr>
+            <tr><td><strong>General</strong></td><td>Default all-purpose assistant</td><td>Casual, moderate detail, flexible format</td></tr>
+          </tbody>
+        </table>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { chat } <span class="ck">from</span> <span class="cs">'opensentinel'</span>;
+
+<span class="cc">// Activate the Finance domain expert for this conversation</span>
+<span class="ck">const</span> result = <span class="ck">await</span> <span class="cf">chat</span>([
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'Analyze Q3 revenue trends for SaaS companies'</span> }
+], {
+  <span class="cv">domainExpert</span>: <span class="cs">'finance'</span>,
+});</code></pre>
+        </div>
+
+
+        <!-- ========== Page Nav ========== -->
+        <div class="page-nav">
+          <a href="channels.html" class="page-nav-link">
+            <span class="page-nav-label">&larr; Previous</span>
+            <span class="page-nav-title">Channels</span>
+          </a>
+          <a href="tools.html" class="page-nav-link page-nav-link--next">
+            <span class="page-nav-label">Next &rarr;</span>
+            <span class="page-nav-title">Tools</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function copyCode(btn) {
+      const block = btn.closest('.codeblock');
+      const pre = block.querySelector('pre');
+      const text = pre.textContent.replace(/^\$ /gm, '');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+
+    function switchCodeTab(clickedTab, panelId) {
+      const parent = clickedTab.closest('.codeblock') || clickedTab.closest('.content');
+      const tabs = clickedTab.parentElement;
+      const allTabs = tabs.querySelectorAll('.codeblock-tab');
+      allTabs.forEach(t => t.classList.remove('active'));
+      clickedTab.classList.add('active');
+
+      // Hide all sibling panels
+      let sibling = tabs.nextElementSibling;
+      while (sibling && sibling.classList.contains('tab-panel')) {
+        sibling.style.display = 'none';
+        sibling.classList.remove('active');
+        sibling = sibling.nextElementSibling;
+      }
+
+      const panel = document.getElementById(panelId);
+      if (panel) {
+        panel.style.display = 'block';
+        panel.classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>
