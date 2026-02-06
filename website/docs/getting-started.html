@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started - OpenSentinel Docs</title>
+  <meta name="description" content="Install OpenSentinel and send your first message in under a minute. Use as an NPM library or deploy the full platform.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="../" class="header-logo">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#hlg)" stroke-width="2.5"/><circle cx="14" cy="14" r="5" fill="url(#hlg)"/><line x1="14" y1="2" x2="14" y2="8" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="20" x2="14" y2="26" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="14" x2="8" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="14" x2="26" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="hlg" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs></svg>
+          OpenSentinel
+          <span class="header-badge">Docs</span>
+        </a>
+        <nav class="header-nav">
+          <a href="getting-started.html" class="active">Get Started</a>
+          <a href="channels.html">Channels</a>
+          <a href="agents.html">Agents</a>
+          <a href="tools.html">Tools</a>
+          <a href="integrations.html">Integrations</a>
+          <a href="templates.html">Templates</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search docs...
+          <kbd>Ctrl K</kbd>
+        </div>
+        <a href="https://github.com/dsiemon2/OpenSentinel" class="header-github" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="header-mobile-toggle" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="doc-layout">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Getting Started</div>
+        <a href="getting-started.html" class="sidebar-link active"><span class="ico">&#x1F680;</span> Quick Start</a>
+        <a href="getting-started.html#prerequisites" class="sidebar-link"><span class="ico">&#x2699;</span> Prerequisites</a>
+        <a href="getting-started.html#library" class="sidebar-link"><span class="ico">&#x1F4E6;</span> Use as Library</a>
+        <a href="getting-started.html#platform" class="sidebar-link"><span class="ico">&#x1F433;</span> Full Platform</a>
+        <a href="getting-started.html#template" class="sidebar-link"><span class="ico">&#x1F4CB;</span> From Template</a>
+        <a href="getting-started.html#configuration" class="sidebar-link"><span class="ico">&#x1F527;</span> Configuration</a>
+        <a href="getting-started.html#first-message" class="sidebar-link"><span class="ico">&#x1F4AC;</span> First Message</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Core Concepts</div>
+        <a href="tools.html#memory" class="sidebar-link"><span class="ico">&#x1F9E0;</span> Brain & Memory</a>
+        <a href="tools.html" class="sidebar-link"><span class="ico">&#x1F6E0;</span> Tools</a>
+        <a href="agents.html" class="sidebar-link"><span class="ico">&#x1F916;</span> Sub-Agents</a>
+        <a href="tools.html#workflows" class="sidebar-link"><span class="ico">&#x26A1;</span> Workflows</a>
+        <a href="integrations.html#mcp" class="sidebar-link"><span class="ico">&#x1F50C;</span> Plugins & MCP</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Channels</div>
+        <a href="channels.html#telegram" class="sidebar-link"><span class="ico">&#x1F4AC;</span> Telegram</a>
+        <a href="channels.html#discord" class="sidebar-link"><span class="ico">&#x1F3AE;</span> Discord</a>
+        <a href="channels.html#slack" class="sidebar-link"><span class="ico">&#x1F4E8;</span> Slack</a>
+        <a href="channels.html#whatsapp" class="sidebar-link"><span class="ico">&#x1F4F1;</span> WhatsApp</a>
+        <a href="channels.html#web-api" class="sidebar-link"><span class="ico">&#x1F310;</span> Web & API</a>
+        <a href="channels.html#voice" class="sidebar-link"><span class="ico">&#x1F3A4;</span> Voice</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Integrations</div>
+        <a href="integrations.html#email" class="sidebar-link"><span class="ico">&#x1F4E7;</span> Email</a>
+        <a href="integrations.html#github" class="sidebar-link"><span class="ico">&#x1F419;</span> GitHub</a>
+        <a href="integrations.html#notion" class="sidebar-link"><span class="ico">&#x1F4D3;</span> Notion</a>
+        <a href="integrations.html#homeassistant" class="sidebar-link"><span class="ico">&#x1F3E0;</span> Home Assistant</a>
+        <a href="integrations.html#spotify" class="sidebar-link"><span class="ico">&#x1F3B5;</span> Spotify</a>
+        <a href="integrations.html#finance" class="sidebar-link"><span class="ico">&#x1F4B0;</span> Finance</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Library Usage</div>
+        <a href="getting-started.html#library" class="sidebar-link"><span class="ico">&#x1F4E6;</span> NPM Package</a>
+        <a href="tools.html" class="sidebar-link"><span class="ico">&#x1F4D6;</span> API Reference</a>
+        <a href="templates.html" class="sidebar-link"><span class="ico">&#x1F4CB;</span> Templates</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Enterprise</div>
+        <a href="enterprise.html#multi-user" class="sidebar-link"><span class="ico">&#x1F465;</span> Multi-User</a>
+        <a href="enterprise.html#security" class="sidebar-link"><span class="ico">&#x1F512;</span> Security</a>
+        <a href="enterprise.html#kubernetes" class="sidebar-link"><span class="ico">&#x2638;</span> Kubernetes</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Apps</div>
+        <a href="enterprise.html#desktop" class="sidebar-link"><span class="ico">&#x1F5A5;</span> Desktop App</a>
+        <a href="enterprise.html#extension" class="sidebar-link"><span class="ico">&#x1F30D;</span> Browser Extension</a>
+      </div>
+    </aside>
+
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="doc-main">
+      <div class="breadcrumb">
+        <a href="index.html">Docs</a>
+        <span>/</span>
+        <span>Getting Started</span>
+      </div>
+
+      <div class="content">
+        <h1>Getting Started</h1>
+        <p class="lead">Get OpenSentinel running and send your first AI-powered message. Choose the path that fits your use case: NPM library, full platform, or ready-made template.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x26A1;</span>
+          <div><strong>Fastest path to a chat:</strong> Run <code>npm install opensentinel</code>, add your Claude API key, and call <code>chat()</code>. No database, no Docker. <a href="#library">Jump to library setup &rarr;</a></div>
+        </div>
+
+
+        <!-- ========== Prerequisites ========== -->
+        <h2 id="prerequisites">Prerequisites</h2>
+
+        <table>
+          <thead><tr><th>Requirement</th><th>Version</th><th>Required For</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Bun</strong> or <strong>Node.js</strong></td><td>Bun 1.0+ / Node 20+</td><td>Runtime</td></tr>
+            <tr><td><strong>Docker</strong></td><td>20+</td><td>Full platform only (PostgreSQL + Redis)</td></tr>
+            <tr><td><strong>Claude API Key</strong></td><td>&mdash;</td><td>Always required</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Library mode needs only a Claude API key.</strong> PostgreSQL and Redis are needed when running the full platform with persistent memory and task scheduling. Start simple and add infrastructure as needed.</div>
+        </div>
+
+        <p>Check your versions:</p>
+        <div class="codeblock">
+          <div class="codeblock-tabs">
+            <button class="codeblock-tab active" onclick="switchCodeTab(this, 'prereq-bun')">Bun</button>
+            <button class="codeblock-tab" onclick="switchCodeTab(this, 'prereq-node')">Node.js</button>
+          </div>
+          <div id="prereq-bun" class="tab-panel active">
+            <pre><code><span class="cp">$</span> bun --version
+<span class="cc"># Should output 1.x.x or higher</span></code></pre>
+          </div>
+          <div id="prereq-node" class="tab-panel" style="display:none">
+            <pre><code><span class="cp">$</span> node --version
+<span class="cc"># Should output v20.x.x or higher</span></code></pre>
+          </div>
+        </div>
+
+
+        <!-- ========== Library Install ========== -->
+        <h2 id="library">Option A: Use as an NPM Library</h2>
+        <p>The simplest way to use OpenSentinel. Add AI capabilities to any existing project.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Install the package</div>
+            <div class="codeblock">
+              <div class="codeblock-tabs">
+                <button class="codeblock-tab active" onclick="switchCodeTab(this, 'lib-npm')">npm</button>
+                <button class="codeblock-tab" onclick="switchCodeTab(this, 'lib-bun')">Bun</button>
+                <button class="codeblock-tab" onclick="switchCodeTab(this, 'lib-pnpm')">pnpm</button>
+              </div>
+              <div id="lib-npm" class="tab-panel active">
+                <pre><code><span class="cp">$</span> npm install opensentinel</code></pre>
+              </div>
+              <div id="lib-bun" class="tab-panel" style="display:none">
+                <pre><code><span class="cp">$</span> bun add opensentinel</code></pre>
+              </div>
+              <div id="lib-pnpm" class="tab-panel" style="display:none">
+                <pre><code><span class="cp">$</span> pnpm add opensentinel</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Configure and chat</div>
+            <p>Create a file and add your API key:</p>
+            <div class="codeblock">
+              <div class="codeblock-header">
+                <span class="codeblock-lang">app.ts</span>
+                <button class="codeblock-copy" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code><span class="ck">import</span> { configure, chat } <span class="ck">from</span> <span class="cs">'opensentinel'</span>;
+
+<span class="cf">configure</span>({
+  <span class="cv">CLAUDE_API_KEY</span>: process.env.<span class="cv">CLAUDE_API_KEY</span>,
+});
+
+<span class="ck">const</span> response = <span class="ck">await</span> <span class="cf">chat</span>([
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'Hello! What can you do?'</span> }
+]);
+
+console.<span class="cf">log</span>(response.text);</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Run it</div>
+            <div class="codeblock">
+              <div class="codeblock-header">
+                <span class="codeblock-lang">Terminal</span>
+                <button class="codeblock-copy" onclick="copyCode(this)">Copy</button>
+              </div>
+              <pre><code><span class="cp">$</span> CLAUDE_API_KEY=sk-ant-... npx tsx app.ts</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-success">
+          <span class="callout-ico">&#x2705;</span>
+          <div>That's it. You now have a working AI assistant with access to Claude's full capabilities. Add <code>chatWithTools()</code> to enable tool use (shell, browser, files, search, etc.).</div>
+        </div>
+
+
+        <!-- ========== Full Platform ========== -->
+        <h2 id="platform">Option B: Deploy the Full Platform</h2>
+        <p>Run OpenSentinel with all services: persistent vector memory, task scheduler, web dashboard, and all messaging channels.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Clone the repository</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> git clone https://github.com/dsiemon2/OpenSentinel.git
+<span class="cp">$</span> cd OpenSentinel</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Install dependencies</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> bun install</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Configure environment variables</div>
+            <p>Copy the example and add your API keys:</p>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> cp .env.example .env
+<span class="cp">$</span> nano .env  <span class="cc"># Add CLAUDE_API_KEY at minimum</span></code></pre>
+            </div>
+            <div class="callout callout-tip">
+              <span class="callout-ico">&#x1F4A1;</span>
+              <div>Only <code>CLAUDE_API_KEY</code> is required. Add <code>TELEGRAM_BOT_TOKEN</code>, <code>DISCORD_BOT_TOKEN</code>, etc. to enable specific channels. OpenSentinel gracefully skips any unconfigured service.</div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Start infrastructure</div>
+            <p>Launch PostgreSQL (with pgvector) and Redis:</p>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> docker compose up -d</code></pre>
+            </div>
+            <p>This starts:</p>
+            <ul>
+              <li><strong>PostgreSQL 16</strong> with pgvector on port <code>5445</code></li>
+              <li><strong>Redis 7</strong> on port <code>6379</code></li>
+            </ul>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Run database migrations</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> bun run db:migrate</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Launch OpenSentinel</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> bun run start</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-success">
+          <span class="callout-ico">&#x2705;</span>
+          <div><strong>OpenSentinel is running!</strong> Open <a href="http://localhost:8030">http://localhost:8030</a> to access the web dashboard. All configured channels (Telegram, Discord, Slack, etc.) are now listening.</div>
+        </div>
+
+
+        <!-- ========== Template ========== -->
+        <h2 id="template">Option C: Start from a Template</h2>
+        <p>Pick a use case, clone the template, and customize. Each template is a standalone project under 200 lines.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cp">$</span> git clone https://github.com/dsiemon2/OpenSentinel.git
+<span class="cp">$</span> cd OpenSentinel/templates/ai-sales-agent  <span class="cc"># pick any template</span>
+<span class="cp">$</span> bun install
+<span class="cp">$</span> CLAUDE_API_KEY=sk-ant-... bun run start</code></pre>
+        </div>
+
+        <h3>Available Templates (20)</h3>
+        <table>
+          <thead><tr><th>Template</th><th>Use Case</th></tr></thead>
+          <tbody>
+            <tr><td><code>ai-web-monitor</code></td><td>Monitor web pages for changes with intelligent alerts</td></tr>
+            <tr><td><code>ai-sales-agent</code></td><td>Lead research, scoring, and outreach drafting</td></tr>
+            <tr><td><code>ai-recruiter</code></td><td>Candidate screening, ranking, and interview prep</td></tr>
+            <tr><td><code>ai-devops-agent</code></td><td>Server monitoring, log analysis, incident response</td></tr>
+            <tr><td><code>ai-trading-researcher</code></td><td>Market research, sentiment scoring, trend detection</td></tr>
+            <tr><td><code>ai-customer-support</code></td><td>Ticket triage, response drafting, escalation</td></tr>
+            <tr><td><code>ai-content-creator</code></td><td>Multi-platform content from a single brief</td></tr>
+            <tr><td><code>ai-security-monitor</code></td><td>Auth log analysis, network audit, file integrity</td></tr>
+            <tr><td><code>ai-code-reviewer</code></td><td>PR review, bug detection, test coverage</td></tr>
+            <tr><td><code>ai-data-analyst</code></td><td>Dataset profiling, insights, anomaly detection</td></tr>
+            <tr><td><code>ai-email-assistant</code></td><td>Inbox triage, reply drafting, action extraction</td></tr>
+            <tr><td><code>ai-meeting-assistant</code></td><td>Transcript summaries, action items, weekly digests</td></tr>
+            <tr><td><code>ai-competitor-tracker</code></td><td>Product monitoring, pricing changes, hiring signals</td></tr>
+            <tr><td><code>ai-seo-optimizer</code></td><td>Page scoring, meta optimization, content outlines</td></tr>
+            <tr><td><code>ai-legal-reviewer</code></td><td>Contract review, risk flagging, amendments</td></tr>
+            <tr><td><code>ai-social-listener</code></td><td>Brand monitoring, sentiment, trend detection</td></tr>
+            <tr><td><code>ai-documentation-writer</code></td><td>Auto-generate API refs, guides, changelogs</td></tr>
+            <tr><td><code>ai-onboarding-agent</code></td><td>Personalized onboarding plans, Q&A, tracking</td></tr>
+            <tr><td><code>ai-inventory-manager</code></td><td>Stock tracking, demand forecasting, PO generation</td></tr>
+            <tr><td><code>ai-real-estate-analyst</code></td><td>Property analysis, market research, ROI estimation</td></tr>
+          </tbody>
+        </table>
+
+
+        <!-- ========== Configuration ========== -->
+        <h2 id="configuration">Configuration</h2>
+
+        <h3>Environment Variables</h3>
+        <p>OpenSentinel uses environment variables for configuration. Only <code>CLAUDE_API_KEY</code> is always required &mdash; everything else enables optional features.</p>
+
+        <table>
+          <thead><tr><th>Variable</th><th>Description</th><th>Required</th></tr></thead>
+          <tbody>
+            <tr><td><code>CLAUDE_API_KEY</code></td><td>Anthropic API key</td><td>Always</td></tr>
+            <tr><td><code>DATABASE_URL</code></td><td>PostgreSQL connection string</td><td>Full platform</td></tr>
+            <tr><td><code>REDIS_URL</code></td><td>Redis connection string</td><td>Full platform</td></tr>
+            <tr><td><code>OPENAI_API_KEY</code></td><td>For embeddings, STT, image generation</td><td>For memory/voice</td></tr>
+            <tr><td><code>TELEGRAM_BOT_TOKEN</code></td><td>Telegram bot token</td><td>For Telegram</td></tr>
+            <tr><td><code>DISCORD_BOT_TOKEN</code></td><td>Discord bot token</td><td>For Discord</td></tr>
+            <tr><td><code>SLACK_BOT_TOKEN</code></td><td>Slack bot token</td><td>For Slack</td></tr>
+            <tr><td><code>ELEVENLABS_API_KEY</code></td><td>Text-to-speech</td><td>For voice output</td></tr>
+            <tr><td><code>TWILIO_ACCOUNT_SID</code></td><td>SMS and phone calls</td><td>For Twilio</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Library Configuration (Programmatic)</h3>
+        <p>When using OpenSentinel as a library, use <code>configure()</code> instead of environment variables:</p>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { configure } <span class="ck">from</span> <span class="cs">'opensentinel'</span>;
+
+<span class="cc">// Minimal</span>
+<span class="cf">configure</span>({ <span class="cv">CLAUDE_API_KEY</span>: <span class="cs">'sk-ant-...'</span> });
+
+<span class="cc">// With persistent memory</span>
+<span class="cf">configure</span>({
+  <span class="cv">CLAUDE_API_KEY</span>: <span class="cs">'sk-ant-...'</span>,
+  <span class="cv">OPENAI_API_KEY</span>: <span class="cs">'sk-proj-...'</span>,
+  <span class="cv">DATABASE_URL</span>: <span class="cs">'postgresql://user:pass@localhost:5432/db'</span>,
+});</code></pre>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x2139;&#xFE0F;</span>
+          <div><strong>Lazy initialization.</strong> OpenSentinel doesn't connect to any service at import time. Database, Redis, and API connections are created only when you first use a feature that needs them.</div>
+        </div>
+
+
+        <!-- ========== First Message ========== -->
+        <h2 id="first-message">Send Your First Message</h2>
+
+        <h3>Web Dashboard</h3>
+        <p>Open <a href="http://localhost:8030">http://localhost:8030</a> in your browser. Type a message and press Enter.</p>
+
+        <h3>REST API</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cp">$</span> curl -X POST http://localhost:8030/api/ask \
+    -H <span class="cs">"Content-Type: application/json"</span> \
+    -d <span class="cs">'{"message": "Hello! What can you do?"}'</span></code></pre>
+        </div>
+
+        <h3>Telegram</h3>
+        <p>Open Telegram, find your bot, and send <code>/start</code>.</p>
+
+        <h3>Code (Library)</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { configure, chat, chatWithTools } <span class="ck">from</span> <span class="cs">'opensentinel'</span>;
+
+<span class="cf">configure</span>({ <span class="cv">CLAUDE_API_KEY</span>: process.env.<span class="cv">CLAUDE_API_KEY</span> });
+
+<span class="cc">// Simple conversation</span>
+<span class="ck">const</span> res = <span class="ck">await</span> <span class="cf">chat</span>([
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'Summarize the top 3 HN stories'</span> }
+]);
+console.<span class="cf">log</span>(res.text);
+
+<span class="cc">// With tools (browser, shell, files, search, etc.)</span>
+<span class="ck">const</span> result = <span class="ck">await</span> <span class="cf">chatWithTools</span>([
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'Research my competitors and create a PDF report'</span> }
+]);
+console.<span class="cf">log</span>(result.text);</code></pre>
+        </div>
+
+
+        <!-- ========== What's Next ========== -->
+        <h2 id="whats-next">What's Next</h2>
+
+        <div class="go-deeper">
+          <h3>Go Deeper</h3>
+          <div class="go-deeper-cards">
+            <a href="#" class="go-deeper-card">
+              <span class="ico">&#x1F9E0;</span>
+              <div><strong>Brain & Memory</strong><span>Learn how pgvector RAG memory works</span></div>
+            </a>
+            <a href="#" class="go-deeper-card">
+              <span class="ico">&#x1F6E0;</span>
+              <div><strong>Tools Reference</strong><span>All 30+ tools and how to use them</span></div>
+            </a>
+            <a href="#" class="go-deeper-card">
+              <span class="ico">&#x1F916;</span>
+              <div><strong>Sub-Agents</strong><span>Research, Coding, Writing, Analysis</span></div>
+            </a>
+            <a href="#" class="go-deeper-card">
+              <span class="ico">&#x26A1;</span>
+              <div><strong>Workflows</strong><span>Automate with triggers and actions</span></div>
+            </a>
+            <a href="#" class="go-deeper-card">
+              <span class="ico">&#x1F4CB;</span>
+              <div><strong>Templates Guide</strong><span>Deep dive into all 20 templates</span></div>
+            </a>
+            <a href="#" class="go-deeper-card">
+              <span class="ico">&#x1F512;</span>
+              <div><strong>Security</strong><span>2FA, vault, audit, GDPR compliance</span></div>
+            </a>
+          </div>
+        </div>
+
+
+        <!-- ========== Page Nav ========== -->
+        <div class="page-nav">
+          <a href="index.html" class="page-nav-link">
+            <span class="page-nav-label">&larr; Previous</span>
+            <span class="page-nav-title">Documentation Home</span>
+          </a>
+          <a href="#" class="page-nav-link page-nav-link--next">
+            <span class="page-nav-label">Next &rarr;</span>
+            <span class="page-nav-title">Brain & Memory</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function copyCode(btn) {
+      const block = btn.closest('.codeblock');
+      const pre = block.querySelector('pre');
+      const text = pre.textContent.replace(/^\$ /gm, '');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+
+    function switchCodeTab(clickedTab, panelId) {
+      const parent = clickedTab.closest('.codeblock') || clickedTab.closest('.content');
+      const tabs = clickedTab.parentElement;
+      const allTabs = tabs.querySelectorAll('.codeblock-tab');
+      allTabs.forEach(t => t.classList.remove('active'));
+      clickedTab.classList.add('active');
+
+      // Hide all sibling panels
+      let sibling = tabs.nextElementSibling;
+      while (sibling && sibling.classList.contains('tab-panel')) {
+        sibling.style.display = 'none';
+        sibling.classList.remove('active');
+        sibling = sibling.nextElementSibling;
+      }
+
+      const panel = document.getElementById(panelId);
+      if (panel) {
+        panel.style.display = 'block';
+        panel.classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>

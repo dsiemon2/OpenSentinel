@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integrations - OpenSentinel Docs</title>
+  <meta name="description" content="Connect OpenSentinel to email, GitHub, Notion, smart home, music, cloud storage, finance, and more.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="../" class="header-logo">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#hlg)" stroke-width="2.5"/><circle cx="14" cy="14" r="5" fill="url(#hlg)"/><line x1="14" y1="2" x2="14" y2="8" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="20" x2="14" y2="26" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="14" x2="8" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="14" x2="26" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="hlg" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs></svg>
+          OpenSentinel
+          <span class="header-badge">Docs</span>
+        </a>
+        <nav class="header-nav">
+          <a href="getting-started.html">Get Started</a>
+          <a href="channels.html">Channels</a>
+          <a href="agents.html">Agents</a>
+          <a href="tools.html">Tools</a>
+          <a href="integrations.html" class="active">Integrations</a>
+          <a href="enterprise.html">Enterprise</a>
+          <a href="templates.html">Templates</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search docs...
+          <kbd>Ctrl K</kbd>
+        </div>
+        <a href="https://github.com/dsiemon2/OpenSentinel" class="header-github" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="header-mobile-toggle" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="doc-layout">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Getting Started</div>
+        <a href="getting-started.html" class="sidebar-link"><span class="ico">&#x1F680;</span> Quick Start</a>
+        <a href="getting-started.html#prerequisites" class="sidebar-link"><span class="ico">&#x2699;</span> Prerequisites</a>
+        <a href="getting-started.html#library" class="sidebar-link"><span class="ico">&#x1F4E6;</span> Use as Library</a>
+        <a href="getting-started.html#platform" class="sidebar-link"><span class="ico">&#x1F433;</span> Full Platform</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Core Concepts</div>
+        <a href="channels.html" class="sidebar-link"><span class="ico">&#x1F4AC;</span> Channels</a>
+        <a href="agents.html" class="sidebar-link"><span class="ico">&#x1F916;</span> Agents</a>
+        <a href="tools.html" class="sidebar-link"><span class="ico">&#x1F6E0;</span> Tools</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Integrations</div>
+        <a href="integrations.html" class="sidebar-link active"><span class="ico">&#x1F50C;</span> Overview</a>
+        <a href="integrations.html#email" class="sidebar-link"><span class="ico">&#x1F4E7;</span> Email</a>
+        <a href="integrations.html#twilio" class="sidebar-link"><span class="ico">&#x260E;</span> Twilio</a>
+        <a href="integrations.html#github" class="sidebar-link"><span class="ico">&#x1F419;</span> GitHub</a>
+        <a href="integrations.html#notion" class="sidebar-link"><span class="ico">&#x1F4D3;</span> Notion</a>
+        <a href="integrations.html#homeassistant" class="sidebar-link"><span class="ico">&#x1F3E0;</span> Home Assistant</a>
+        <a href="integrations.html#spotify" class="sidebar-link"><span class="ico">&#x1F3B5;</span> Spotify</a>
+        <a href="integrations.html#cloud-storage" class="sidebar-link"><span class="ico">&#x1F4C1;</span> Cloud Storage</a>
+        <a href="integrations.html#finance" class="sidebar-link"><span class="ico">&#x1F4B0;</span> Finance</a>
+        <a href="integrations.html#vision-documents" class="sidebar-link"><span class="ico">&#x1F441;</span> Vision &amp; Documents</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Enterprise</div>
+        <a href="enterprise.html" class="sidebar-link"><span class="ico">&#x1F465;</span> Multi-User</a>
+        <a href="enterprise.html#security" class="sidebar-link"><span class="ico">&#x1F512;</span> Security</a>
+        <a href="enterprise.html#kubernetes" class="sidebar-link"><span class="ico">&#x2638;</span> Kubernetes</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Templates</div>
+        <a href="templates.html" class="sidebar-link"><span class="ico">&#x1F4CB;</span> Template Gallery</a>
+      </div>
+    </aside>
+
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="doc-main">
+      <div class="breadcrumb">
+        <a href="index.html">Docs</a>
+        <span>/</span>
+        <span>Integrations</span>
+      </div>
+
+      <div class="content">
+        <h1>Integrations</h1>
+        <p class="lead">Connect OpenSentinel to email, GitHub, Notion, smart home, music, cloud storage, finance, and more.</p>
+
+
+        <!-- ========== Overview ========== -->
+        <h2 id="overview">Overview</h2>
+        <p>OpenSentinel ships with <strong>15+ built-in integrations</strong> that connect your AI assistant to the services you already use. Each integration is enabled by adding the relevant API key or configuration to your <code>.env</code> file. If a key is missing, the integration is silently skipped &mdash; no errors, no crashes.</p>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Enable what you need.</strong> Every integration is optional. OpenSentinel gracefully skips any service that lacks credentials. Start with one or two integrations and add more as needed.</div>
+        </div>
+
+        <table>
+          <thead><tr><th>Integration</th><th>Category</th><th>Key Features</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Email</strong></td><td>Communication</td><td>Read inbox, send, AI summarization</td></tr>
+            <tr><td><strong>Twilio</strong></td><td>Communication</td><td>SMS, phone calls, voice messages</td></tr>
+            <tr><td><strong>GitHub</strong></td><td>Developer</td><td>Repos, issues, PRs, code review</td></tr>
+            <tr><td><strong>Notion</strong></td><td>Productivity</td><td>Pages, databases, search, sync</td></tr>
+            <tr><td><strong>Home Assistant</strong></td><td>Smart Home</td><td>Device control, automations</td></tr>
+            <tr><td><strong>Spotify</strong></td><td>Media</td><td>Playback, playlists, search</td></tr>
+            <tr><td><strong>Google Drive</strong></td><td>Cloud Storage</td><td>Upload, download, search</td></tr>
+            <tr><td><strong>Dropbox</strong></td><td>Cloud Storage</td><td>Upload, download, sync</td></tr>
+            <tr><td><strong>Finance</strong></td><td>Data</td><td>Crypto, stocks, currency, alerts</td></tr>
+            <tr><td><strong>Vision</strong></td><td>AI</td><td>Screen capture, webcam, OCR</td></tr>
+            <tr><td><strong>Documents</strong></td><td>Knowledge</td><td>PDF, DOCX, vector search</td></tr>
+          </tbody>
+        </table>
+
+
+        <!-- ========== Email ========== -->
+        <h2 id="email">Email (IMAP/SMTP)</h2>
+        <p>Read your inbox, send emails, and get AI-powered summaries of threads. OpenSentinel connects to any IMAP/SMTP provider including Gmail, Outlook, Fastmail, and self-hosted mail servers.</p>
+
+        <h3>Capabilities</h3>
+        <ul>
+          <li><strong>Read inbox</strong> &mdash; fetch recent emails, filter by sender, subject, or date</li>
+          <li><strong>Send emails</strong> &mdash; compose and send with optional attachments</li>
+          <li><strong>AI summarization</strong> &mdash; get summaries of long threads or daily digests</li>
+          <li><strong>Action extraction</strong> &mdash; automatically identify action items from emails</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">EMAIL_HOST</span>=<span class="cs">imap.gmail.com</span>
+<span class="cv">EMAIL_USER</span>=<span class="cs">you@gmail.com</span>
+<span class="cv">EMAIL_PASS</span>=<span class="cs">your-app-password</span>
+<span class="cv">EMAIL_SMTP_HOST</span>=<span class="cs">smtp.gmail.com</span>
+<span class="cv">EMAIL_SMTP_PORT</span>=<span class="cs">587</span></code></pre>
+        </div>
+
+        <h3>Example Usage</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { configure, chatWithTools } <span class="ck">from</span> <span class="cs">'opensentinel'</span>;
+
+<span class="cf">configure</span>({
+  <span class="cv">CLAUDE_API_KEY</span>: process.env.<span class="cv">CLAUDE_API_KEY</span>,
+  <span class="cv">EMAIL_HOST</span>: <span class="cs">'imap.gmail.com'</span>,
+  <span class="cv">EMAIL_USER</span>: <span class="cs">'you@gmail.com'</span>,
+  <span class="cv">EMAIL_PASS</span>: <span class="cs">'your-app-password'</span>,
+});
+
+<span class="cc">// Ask the AI to summarize your inbox</span>
+<span class="ck">const</span> result = <span class="ck">await</span> <span class="cf">chatWithTools</span>([
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'Summarize my unread emails from today'</span> }
+]);
+console.<span class="cf">log</span>(result.text);</code></pre>
+        </div>
+
+
+        <!-- ========== Twilio ========== -->
+        <h2 id="twilio">Twilio (SMS &amp; Voice)</h2>
+        <p>Send and receive SMS messages, make and receive phone calls, and deliver voice messages. Twilio integration turns OpenSentinel into a phone-capable assistant.</p>
+
+        <h3>Capabilities</h3>
+        <ul>
+          <li><strong>Send SMS</strong> &mdash; send text messages to any phone number worldwide</li>
+          <li><strong>Receive SMS</strong> &mdash; incoming messages trigger the AI brain for auto-replies</li>
+          <li><strong>Make phone calls</strong> &mdash; initiate outbound calls with TTS messages</li>
+          <li><strong>Receive phone calls</strong> &mdash; answer inbound calls with AI-generated responses</li>
+          <li><strong>Voice messages</strong> &mdash; record and transcribe voicemail</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">TWILIO_ACCOUNT_SID</span>=<span class="cs">ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
+<span class="cv">TWILIO_AUTH_TOKEN</span>=<span class="cs">your-auth-token</span>
+<span class="cv">TWILIO_PHONE_NUMBER</span>=<span class="cs">+15551234567</span></code></pre>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x2139;&#xFE0F;</span>
+          <div><strong>Webhook setup.</strong> For receiving SMS and phone calls, configure your Twilio phone number to forward webhooks to <code>https://your-domain.com/api/twilio/webhook</code>. OpenSentinel handles the rest.</div>
+        </div>
+
+        <h3>Example: Send an SMS</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Chat</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">You:</span> <span class="cs">Send an SMS to +15559876543 saying "Meeting moved to 3pm"</span>
+<span class="cv">AI:</span>  Done. SMS sent to +15559876543.</code></pre>
+        </div>
+
+
+        <!-- ========== GitHub ========== -->
+        <h2 id="github">GitHub</h2>
+        <p>Interact with your GitHub repositories, issues, pull requests, and get AI-powered code reviews. OpenSentinel becomes your intelligent development assistant.</p>
+
+        <h3>Capabilities</h3>
+        <ul>
+          <li><strong>Repository management</strong> &mdash; list repos, view files, search code</li>
+          <li><strong>Issues</strong> &mdash; create, update, close, and comment on issues</li>
+          <li><strong>Pull requests</strong> &mdash; create PRs, review diffs, merge</li>
+          <li><strong>AI code review</strong> &mdash; automated code review with suggestions and bug detection</li>
+          <li><strong>Webhooks</strong> &mdash; listen for push, PR, and issue events</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">GITHUB_TOKEN</span>=<span class="cs">ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span></code></pre>
+        </div>
+
+        <h3>Example: AI Code Review</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">const</span> result = <span class="ck">await</span> <span class="cf">chatWithTools</span>([
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'Review the latest PR on dsiemon2/OpenSentinel'</span> }
+]);
+<span class="cc">// Returns detailed code review with line-by-line comments</span></code></pre>
+        </div>
+
+
+        <!-- ========== Notion ========== -->
+        <h2 id="notion">Notion</h2>
+        <p>Read and write Notion pages, query databases, search across your workspace, and keep content in sync. Great for knowledge management and project tracking.</p>
+
+        <h3>Capabilities</h3>
+        <ul>
+          <li><strong>Pages</strong> &mdash; create, read, update, and archive pages</li>
+          <li><strong>Databases</strong> &mdash; query databases with filters and sorts</li>
+          <li><strong>Search</strong> &mdash; full-text search across your entire workspace</li>
+          <li><strong>Content sync</strong> &mdash; keep OpenSentinel's knowledge base in sync with Notion</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">NOTION_TOKEN</span>=<span class="cs">ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span></code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Notion integration setup.</strong> Create an internal integration at <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a>, then share the pages or databases you want OpenSentinel to access with the integration.</div>
+        </div>
+
+
+        <!-- ========== Home Assistant ========== -->
+        <h2 id="homeassistant">Home Assistant</h2>
+        <p>Control your smart home through natural language. Toggle lights, adjust thermostats, check sensors, and trigger automations &mdash; all from a chat message.</p>
+
+        <h3>Capabilities</h3>
+        <ul>
+          <li><strong>Device control</strong> &mdash; toggle lights, switches, fans, and covers</li>
+          <li><strong>Climate</strong> &mdash; adjust thermostat temperature, HVAC mode, and fan speed</li>
+          <li><strong>Automation triggers</strong> &mdash; fire Home Assistant automations and scripts</li>
+          <li><strong>Entity monitoring</strong> &mdash; check sensor readings, device states, and battery levels</li>
+          <li><strong>Scene activation</strong> &mdash; activate pre-configured scenes by name</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">HOMEASSISTANT_URL</span>=<span class="cs">http://homeassistant.local:8123</span>
+<span class="cv">HOMEASSISTANT_TOKEN</span>=<span class="cs">your-long-lived-access-token</span></code></pre>
+        </div>
+
+        <h3>Example</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Chat</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">You:</span> <span class="cs">Turn off all the lights in the living room and set the thermostat to 72</span>
+<span class="cv">AI:</span>  Done. Turned off 3 lights in the living room. Thermostat set to 72&deg;F.</code></pre>
+        </div>
+
+
+        <!-- ========== Spotify ========== -->
+        <h2 id="spotify">Spotify</h2>
+        <p>Control music playback, manage playlists, and search the Spotify catalog. OpenSentinel acts as a voice/chat-controlled music assistant.</p>
+
+        <h3>Capabilities</h3>
+        <ul>
+          <li><strong>Playback control</strong> &mdash; play, pause, skip, seek, adjust volume</li>
+          <li><strong>Playlist management</strong> &mdash; create playlists, add/remove tracks</li>
+          <li><strong>Search</strong> &mdash; find tracks, albums, artists, and playlists</li>
+          <li><strong>Recommendations</strong> &mdash; get AI-curated song recommendations based on mood or activity</li>
+          <li><strong>Now playing</strong> &mdash; see what's currently playing across devices</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">SPOTIFY_CLIENT_ID</span>=<span class="cs">your-spotify-client-id</span>
+<span class="cv">SPOTIFY_CLIENT_SECRET</span>=<span class="cs">your-spotify-client-secret</span>
+<span class="cv">SPOTIFY_REDIRECT_URI</span>=<span class="cs">http://localhost:8030/api/spotify/callback</span></code></pre>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x2139;&#xFE0F;</span>
+          <div><strong>Spotify Premium required.</strong> Playback control features require a Spotify Premium account. Search and playlist management work with free accounts.</div>
+        </div>
+
+
+        <!-- ========== Cloud Storage ========== -->
+        <h2 id="cloud-storage">Cloud Storage</h2>
+        <p>Upload, download, search, and sync files with Google Drive and Dropbox. Access your cloud files directly from chat.</p>
+
+        <h3>Google Drive</h3>
+        <ul>
+          <li>Upload and download files</li>
+          <li>Search by name, type, or content</li>
+          <li>Create and manage folders</li>
+          <li>Share files and manage permissions</li>
+        </ul>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">GOOGLE_CLIENT_ID</span>=<span class="cs">your-client-id.apps.googleusercontent.com</span>
+<span class="cv">GOOGLE_CLIENT_SECRET</span>=<span class="cs">your-client-secret</span>
+<span class="cv">GOOGLE_REDIRECT_URI</span>=<span class="cs">http://localhost:8030/api/google/callback</span></code></pre>
+        </div>
+
+        <h3>Dropbox</h3>
+        <ul>
+          <li>Upload and download files</li>
+          <li>Search across your Dropbox</li>
+          <li>Sync folders with local storage</li>
+          <li>Get shared links for files</li>
+        </ul>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">DROPBOX_ACCESS_TOKEN</span>=<span class="cs">your-dropbox-access-token</span></code></pre>
+        </div>
+
+
+        <!-- ========== Finance ========== -->
+        <h2 id="finance">Finance</h2>
+        <p>Track cryptocurrency prices, stock market data, currency exchange rates, and manage portfolio alerts. OpenSentinel keeps you informed about your financial interests.</p>
+
+        <h3>Capabilities</h3>
+        <ul>
+          <li><strong>Crypto prices</strong> &mdash; real-time prices from CoinGecko for thousands of tokens</li>
+          <li><strong>Stock data</strong> &mdash; quotes, historical data, and company info via Yahoo Finance and Alpha Vantage</li>
+          <li><strong>Currency exchange</strong> &mdash; convert between 170+ fiat currencies</li>
+          <li><strong>Portfolio tracking</strong> &mdash; define holdings and get real-time portfolio value</li>
+          <li><strong>Price alerts</strong> &mdash; set alerts for price thresholds on any asset</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># Optional - CoinGecko works without an API key (rate limited)</span>
+<span class="cv">COINGECKO_API_KEY</span>=<span class="cs">your-api-key</span>
+
+<span class="cc"># Optional - for stock data beyond Yahoo Finance</span>
+<span class="cv">ALPHA_VANTAGE_API_KEY</span>=<span class="cs">your-api-key</span></code></pre>
+        </div>
+
+        <h3>Example</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Chat</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">You:</span> <span class="cs">What's the price of Bitcoin and Ethereum? Also check AAPL stock.</span>
+<span class="cv">AI:</span>  BTC: $67,432.18 (+2.3% 24h)
+     ETH: $3,521.45 (+1.8% 24h)
+     AAPL: $189.72 (+0.4% today)
+
+<span class="cv">You:</span> <span class="cs">Alert me if BTC drops below $65,000</span>
+<span class="cv">AI:</span>  Price alert set. I'll notify you when BTC drops below $65,000.</code></pre>
+        </div>
+
+
+        <!-- ========== Vision & Documents ========== -->
+        <h2 id="vision-documents">Vision &amp; Documents</h2>
+        <p>Ingest documents into a searchable knowledge base, capture and analyze screen content, and use your webcam for visual AI tasks.</p>
+
+        <h3>Document Ingestion</h3>
+        <p>OpenSentinel can parse and index documents for RAG-powered retrieval:</p>
+        <ul>
+          <li><strong>PDF parsing</strong> &mdash; extract text, tables, and metadata from PDFs</li>
+          <li><strong>DOCX parsing</strong> &mdash; extract content from Word documents</li>
+          <li><strong>Text extraction</strong> &mdash; process TXT, Markdown, CSV, and other text files</li>
+          <li><strong>Chunking</strong> &mdash; intelligent document splitting for optimal vector search</li>
+          <li><strong>Knowledge base</strong> &mdash; vector search across all ingested documents using pgvector</li>
+        </ul>
+
+        <h3>Vision Capabilities</h3>
+        <ul>
+          <li><strong>Screen capture</strong> &mdash; take screenshots and analyze on-screen content</li>
+          <li><strong>Webcam capture</strong> &mdash; capture images from connected cameras</li>
+          <li><strong>Enhanced OCR</strong> &mdash; extract text from images with AI-powered recognition</li>
+          <li><strong>Visual analysis</strong> &mdash; describe images, identify objects, read handwriting</li>
+        </ul>
+
+        <h3>Example: Knowledge Base</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="ck">import</span> { configure, chatWithTools } <span class="ck">from</span> <span class="cs">'opensentinel'</span>;
+
+<span class="cf">configure</span>({
+  <span class="cv">CLAUDE_API_KEY</span>: process.env.<span class="cv">CLAUDE_API_KEY</span>,
+  <span class="cv">DATABASE_URL</span>: process.env.<span class="cv">DATABASE_URL</span>,
+  <span class="cv">OPENAI_API_KEY</span>: process.env.<span class="cv">OPENAI_API_KEY</span>, <span class="cc">// for embeddings</span>
+});
+
+<span class="cc">// Ingest a document</span>
+<span class="ck">const</span> result = <span class="ck">await</span> <span class="cf">chatWithTools</span>([
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'Ingest ./docs/handbook.pdf into the knowledge base'</span> }
+]);
+
+<span class="cc">// Later, query it</span>
+<span class="ck">const</span> answer = <span class="ck">await</span> <span class="cf">chatWithTools</span>([
+  { <span class="cv">role</span>: <span class="cs">'user'</span>, <span class="cv">content</span>: <span class="cs">'What does the handbook say about vacation policy?'</span> }
+]);</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Embedding model.</strong> Document ingestion requires an <code>OPENAI_API_KEY</code> for generating embeddings (text-embedding-3-small). A PostgreSQL database with pgvector is also required for vector storage and search.</div>
+        </div>
+
+
+        <!-- ========== Page Nav ========== -->
+        <div class="page-nav">
+          <a href="tools.html" class="page-nav-link">
+            <span class="page-nav-label">&larr; Previous</span>
+            <span class="page-nav-title">Tools</span>
+          </a>
+          <a href="enterprise.html" class="page-nav-link page-nav-link--next">
+            <span class="page-nav-label">Next &rarr;</span>
+            <span class="page-nav-title">Enterprise</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function copyCode(btn) {
+      const block = btn.closest('.codeblock');
+      const pre = block.querySelector('pre');
+      const text = pre.textContent.replace(/^\$ /gm, '');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

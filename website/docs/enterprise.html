@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise - OpenSentinel Docs</title>
+  <meta name="description" content="OpenSentinel enterprise features: multi-user, SSO, audit logging, GDPR compliance, and Kubernetes deployment.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="../" class="header-logo">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#hlg)" stroke-width="2.5"/><circle cx="14" cy="14" r="5" fill="url(#hlg)"/><line x1="14" y1="2" x2="14" y2="8" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="20" x2="14" y2="26" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="14" x2="8" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="14" x2="26" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="hlg" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs></svg>
+          OpenSentinel
+          <span class="header-badge">Docs</span>
+        </a>
+        <nav class="header-nav">
+          <a href="getting-started.html">Get Started</a>
+          <a href="channels.html">Channels</a>
+          <a href="agents.html">Agents</a>
+          <a href="tools.html">Tools</a>
+          <a href="integrations.html">Integrations</a>
+          <a href="enterprise.html" class="active">Enterprise</a>
+          <a href="templates.html">Templates</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search docs...
+          <kbd>Ctrl K</kbd>
+        </div>
+        <a href="https://github.com/dsiemon2/OpenSentinel" class="header-github" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="header-mobile-toggle" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="doc-layout">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Getting Started</div>
+        <a href="getting-started.html" class="sidebar-link"><span class="ico">&#x1F680;</span> Quick Start</a>
+        <a href="getting-started.html#prerequisites" class="sidebar-link"><span class="ico">&#x2699;</span> Prerequisites</a>
+        <a href="getting-started.html#library" class="sidebar-link"><span class="ico">&#x1F4E6;</span> Use as Library</a>
+        <a href="getting-started.html#platform" class="sidebar-link"><span class="ico">&#x1F433;</span> Full Platform</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Core Concepts</div>
+        <a href="channels.html" class="sidebar-link"><span class="ico">&#x1F4AC;</span> Channels</a>
+        <a href="agents.html" class="sidebar-link"><span class="ico">&#x1F916;</span> Agents</a>
+        <a href="tools.html" class="sidebar-link"><span class="ico">&#x1F6E0;</span> Tools</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Integrations</div>
+        <a href="integrations.html" class="sidebar-link"><span class="ico">&#x1F50C;</span> Overview</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Enterprise</div>
+        <a href="enterprise.html" class="sidebar-link active"><span class="ico">&#x1F3E2;</span> Overview</a>
+        <a href="enterprise.html#multi-user" class="sidebar-link"><span class="ico">&#x1F465;</span> Multi-User</a>
+        <a href="enterprise.html#sso" class="sidebar-link"><span class="ico">&#x1F511;</span> SSO</a>
+        <a href="enterprise.html#security" class="sidebar-link"><span class="ico">&#x1F512;</span> Security</a>
+        <a href="enterprise.html#audit-logging" class="sidebar-link"><span class="ico">&#x1F4DC;</span> Audit Logging</a>
+        <a href="enterprise.html#gdpr" class="sidebar-link"><span class="ico">&#x1F6E1;</span> GDPR</a>
+        <a href="enterprise.html#quotas" class="sidebar-link"><span class="ico">&#x1F4CA;</span> Usage Quotas</a>
+        <a href="enterprise.html#observability" class="sidebar-link"><span class="ico">&#x1F50D;</span> Observability</a>
+        <a href="enterprise.html#kubernetes" class="sidebar-link"><span class="ico">&#x2638;</span> Kubernetes</a>
+        <a href="enterprise.html#docker" class="sidebar-link"><span class="ico">&#x1F433;</span> Docker</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Templates</div>
+        <a href="templates.html" class="sidebar-link"><span class="ico">&#x1F4CB;</span> Template Gallery</a>
+      </div>
+    </aside>
+
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="doc-main">
+      <div class="breadcrumb">
+        <a href="index.html">Docs</a>
+        <span>/</span>
+        <span>Enterprise</span>
+      </div>
+
+      <div class="content">
+        <h1>Enterprise</h1>
+        <p class="lead">OpenSentinel is built for teams and organizations. Multi-user, SSO, audit logging, GDPR compliance, and Kubernetes deployment.</p>
+
+
+        <!-- ========== Overview ========== -->
+        <h2 id="overview">Overview</h2>
+        <p>OpenSentinel includes a comprehensive set of enterprise features that make it production-ready for organizations of any size. Unlike consumer AI assistants, OpenSentinel runs on <strong>your infrastructure</strong>, giving you complete control over data, access, and compliance.</p>
+
+        <table>
+          <thead><tr><th>Feature</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Multi-User</strong></td><td>RBAC, per-user sessions, team knowledge base</td></tr>
+            <tr><td><strong>SSO</strong></td><td>SAML 2.0, OAuth 2.0, OpenID Connect</td></tr>
+            <tr><td><strong>Security</strong></td><td>2FA, biometric, vault, sandboxing, isolation</td></tr>
+            <tr><td><strong>Audit Logging</strong></td><td>Complete action history, exportable logs</td></tr>
+            <tr><td><strong>GDPR</strong></td><td>Data export, deletion, retention, consent</td></tr>
+            <tr><td><strong>Quotas</strong></td><td>Per-user limits, cost tracking, alerting</td></tr>
+            <tr><td><strong>Observability</strong></td><td>Metrics, replay, dry-run, cost alerting</td></tr>
+            <tr><td><strong>Kubernetes</strong></td><td>Helm charts, horizontal scaling, health checks</td></tr>
+            <tr><td><strong>Docker</strong></td><td>Production-ready docker-compose</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x26A1;</span>
+          <div><strong>All enterprise features are included.</strong> There is no separate enterprise tier. Every feature listed here is available in the open-source version of OpenSentinel.</div>
+        </div>
+
+
+        <!-- ========== Multi-User ========== -->
+        <h2 id="multi-user">Multi-User Support</h2>
+        <p>Unlike single-user AI assistants, OpenSentinel is designed for teams from the ground up. Every user gets their own session, memory space, and permissions &mdash; while sharing a common organizational knowledge base.</p>
+
+        <h3>Key Features</h3>
+        <ul>
+          <li><strong>Role-Based Access Control (RBAC)</strong> &mdash; define roles (admin, user, viewer) with granular permissions for tools, integrations, and workflows</li>
+          <li><strong>Per-user sessions</strong> &mdash; each user has isolated conversation history and memory</li>
+          <li><strong>Team knowledge base</strong> &mdash; shared documents and context accessible to all team members</li>
+          <li><strong>User management</strong> &mdash; create, disable, and manage users via the admin dashboard or API</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">MULTI_USER_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">DEFAULT_USER_ROLE</span>=<span class="cs">user</span>
+<span class="cv">MAX_USERS</span>=<span class="cs">100</span></code></pre>
+        </div>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc">// Create a new user via the API</span>
+<span class="cp">$</span> curl -X POST http://localhost:8030/api/admin/users \
+    -H <span class="cs">"Content-Type: application/json"</span> \
+    -H <span class="cs">"Authorization: Bearer ADMIN_TOKEN"</span> \
+    -d <span class="cs">'{"email": "alice@company.com", "role": "user"}'</span></code></pre>
+        </div>
+
+
+        <!-- ========== SSO ========== -->
+        <h2 id="sso">SSO Integration</h2>
+        <p>Integrate OpenSentinel with your organization's identity provider. Users authenticate through your existing SSO system &mdash; no separate passwords to manage.</p>
+
+        <h3>Supported Protocols</h3>
+        <ul>
+          <li><strong>SAML 2.0</strong> &mdash; Okta, OneLogin, Azure AD, ADFS</li>
+          <li><strong>OAuth 2.0</strong> &mdash; Google Workspace, GitHub, custom providers</li>
+          <li><strong>OpenID Connect</strong> &mdash; Auth0, Keycloak, AWS Cognito</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># SAML 2.0</span>
+<span class="cv">SSO_PROVIDER</span>=<span class="cs">saml</span>
+<span class="cv">SAML_ENTRY_POINT</span>=<span class="cs">https://idp.company.com/sso/saml</span>
+<span class="cv">SAML_ISSUER</span>=<span class="cs">opensentinel</span>
+<span class="cv">SAML_CERT</span>=<span class="cs">./certs/idp-cert.pem</span>
+
+<span class="cc"># Or OAuth 2.0 / OIDC</span>
+<span class="cv">SSO_PROVIDER</span>=<span class="cs">oidc</span>
+<span class="cv">OIDC_CLIENT_ID</span>=<span class="cs">your-client-id</span>
+<span class="cv">OIDC_CLIENT_SECRET</span>=<span class="cs">your-client-secret</span>
+<span class="cv">OIDC_DISCOVERY_URL</span>=<span class="cs">https://auth.company.com/.well-known/openid-configuration</span></code></pre>
+        </div>
+
+
+        <!-- ========== Security ========== -->
+        <h2 id="security">Security</h2>
+        <p>OpenSentinel includes multiple layers of security to protect your data and infrastructure. Every security feature can be enabled independently.</p>
+
+        <h3>Two-Factor Authentication (2FA)</h3>
+        <p>TOTP-based 2FA compatible with Google Authenticator, Authy, and other authenticator apps. Required for admin accounts by default.</p>
+
+        <h3>Biometric Verification</h3>
+        <p>Optional biometric verification for sensitive operations using WebAuthn/FIDO2. Supports fingerprint readers, Face ID, and hardware security keys.</p>
+
+        <h3>Encrypted Memory Vault</h3>
+        <p>Sensitive data (API keys, passwords, personal notes) stored in an encrypted vault. AES-256-GCM encryption at rest with per-user encryption keys.</p>
+
+        <h3>Command Sandboxing</h3>
+        <p>Control which shell commands and tools the AI can execute:</p>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># Allowlist mode - only these commands are permitted</span>
+<span class="cv">COMMAND_ALLOWLIST</span>=<span class="cs">ls,cat,grep,curl,git</span>
+
+<span class="cc"># Or blocklist mode - block specific dangerous commands</span>
+<span class="cv">COMMAND_BLOCKLIST</span>=<span class="cs">rm,sudo,chmod,chown,dd</span></code></pre>
+        </div>
+
+        <h3>Plugin Isolation</h3>
+        <p>Third-party plugins run in sandboxed environments with limited filesystem, network, and memory access. Plugins cannot access other plugins' data or the host system.</p>
+
+        <h3>Rate Limiting</h3>
+        <p>Configurable rate limits per user, per API endpoint, and per tool. Prevents abuse and controls cost.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">RATE_LIMIT_REQUESTS_PER_MINUTE</span>=<span class="cs">30</span>
+<span class="cv">RATE_LIMIT_TOKENS_PER_DAY</span>=<span class="cs">1000000</span></code></pre>
+        </div>
+
+
+        <!-- ========== Audit Logging ========== -->
+        <h2 id="audit-logging">Audit Logging</h2>
+        <p>Every action in OpenSentinel is logged with full context: who did it, what they did, when, and the result. Essential for compliance and incident investigation.</p>
+
+        <h3>What Gets Logged</h3>
+        <ul>
+          <li>User authentication events (login, logout, failed attempts)</li>
+          <li>Tool executions (command, parameters, result)</li>
+          <li>Configuration changes (env vars, user roles, integrations)</li>
+          <li>Data access (memory queries, document reads, API calls)</li>
+          <li>Workflow triggers and completions</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">AUDIT_LOG_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">AUDIT_LOG_RETENTION_DAYS</span>=<span class="cs">365</span>
+<span class="cv">AUDIT_LOG_EXPORT_FORMAT</span>=<span class="cs">json</span>  <span class="cc"># json, csv, or syslog</span></code></pre>
+        </div>
+
+        <h3>Exporting Logs</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># Export audit logs for a date range</span>
+<span class="cp">$</span> curl http://localhost:8030/api/admin/audit-logs \
+    -H <span class="cs">"Authorization: Bearer ADMIN_TOKEN"</span> \
+    -d <span class="cs">'{"from": "2025-01-01", "to": "2025-12-31", "format": "csv"}'</span> \
+    -o audit-logs.csv</code></pre>
+        </div>
+
+
+        <!-- ========== GDPR ========== -->
+        <h2 id="gdpr">GDPR Compliance</h2>
+        <p>OpenSentinel includes built-in tools for GDPR and privacy regulation compliance. Since all data stays on your infrastructure, you maintain full control.</p>
+
+        <h3>Compliance Features</h3>
+        <ul>
+          <li><strong>Data export</strong> &mdash; export all data associated with a user in machine-readable format (JSON)</li>
+          <li><strong>Right to deletion</strong> &mdash; permanently delete all user data, memory, and conversation history</li>
+          <li><strong>Retention policies</strong> &mdash; automatically purge data older than a configurable threshold</li>
+          <li><strong>Consent management</strong> &mdash; track and enforce user consent for data processing activities</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">GDPR_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">DATA_RETENTION_DAYS</span>=<span class="cs">730</span>         <span class="cc"># 2 years</span>
+<span class="cv">MEMORY_RETENTION_DAYS</span>=<span class="cs">365</span>       <span class="cc"># 1 year for AI memory</span>
+<span class="cv">CONSENT_REQUIRED</span>=<span class="cs">true</span></code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Self-hosted advantage.</strong> Because OpenSentinel runs on your infrastructure, your data never leaves your network. This simplifies GDPR compliance significantly compared to cloud-hosted AI services.</div>
+        </div>
+
+
+        <!-- ========== Usage Quotas ========== -->
+        <h2 id="quotas">Usage Quotas</h2>
+        <p>Control costs and resource usage with per-user quotas. Set limits on API calls, storage, and tool usage to prevent runaway costs.</p>
+
+        <h3>Configurable Limits</h3>
+        <table>
+          <thead><tr><th>Quota</th><th>Description</th><th>Default</th></tr></thead>
+          <tbody>
+            <tr><td><code>API calls/day</code></td><td>Claude API requests per user per day</td><td>100</td></tr>
+            <tr><td><code>Tokens/day</code></td><td>Total tokens consumed per user per day</td><td>500,000</td></tr>
+            <tr><td><code>Storage (MB)</code></td><td>Document and file storage per user</td><td>500</td></tr>
+            <tr><td><code>Tool calls/day</code></td><td>Shell, browser, and other tool executions</td><td>200</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">QUOTA_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">QUOTA_API_CALLS_PER_DAY</span>=<span class="cs">100</span>
+<span class="cv">QUOTA_TOKENS_PER_DAY</span>=<span class="cs">500000</span>
+<span class="cv">QUOTA_STORAGE_MB</span>=<span class="cs">500</span>
+<span class="cv">QUOTA_TOOL_CALLS_PER_DAY</span>=<span class="cs">200</span>
+<span class="cv">COST_ALERT_THRESHOLD_USD</span>=<span class="cs">50</span>  <span class="cc"># Alert when daily cost exceeds this</span></code></pre>
+        </div>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x2139;&#xFE0F;</span>
+          <div><strong>Cost tracking.</strong> OpenSentinel automatically tracks Claude API costs per user and per team. View real-time cost data in the admin dashboard or export via the API.</div>
+        </div>
+
+
+        <!-- ========== Observability ========== -->
+        <h2 id="observability">Observability</h2>
+        <p>Full visibility into how OpenSentinel is being used, what it's doing, and how it's performing. Essential for debugging, optimization, and cost management.</p>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>Metrics dashboard</strong> &mdash; real-time charts for request volume, latency, token usage, error rates, and cost</li>
+          <li><strong>Conversation replay</strong> &mdash; replay any conversation step-by-step, including tool calls and AI reasoning</li>
+          <li><strong>Tool dry-run mode</strong> &mdash; test tool executions without side effects (no actual file writes, no real API calls)</li>
+          <li><strong>Prompt inspector</strong> &mdash; view the exact prompts sent to Claude, including system messages and tool definitions</li>
+          <li><strong>Cost alerting</strong> &mdash; receive notifications when spending exceeds configurable thresholds</li>
+          <li><strong>Error tracking</strong> &mdash; automatic error capture with stack traces, context, and frequency analysis</li>
+          <li><strong>Anomaly detection</strong> &mdash; AI-powered detection of unusual patterns in usage, errors, or cost</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">OBSERVABILITY_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">METRICS_RETENTION_DAYS</span>=<span class="cs">90</span>
+<span class="cv">CONVERSATION_REPLAY</span>=<span class="cs">true</span>
+<span class="cv">TOOL_DRY_RUN</span>=<span class="cs">false</span>           <span class="cc"># Enable for testing environments</span>
+<span class="cv">PROMPT_INSPECTOR</span>=<span class="cs">true</span>
+<span class="cv">COST_ALERT_EMAIL</span>=<span class="cs">admin@company.com</span></code></pre>
+        </div>
+
+
+        <!-- ========== Kubernetes ========== -->
+        <h2 id="kubernetes">Kubernetes Deployment</h2>
+        <p>Deploy OpenSentinel to Kubernetes for horizontal scaling, high availability, and seamless rolling updates. Helm charts are included for quick deployment.</p>
+
+        <h3>Features</h3>
+        <ul>
+          <li><strong>Helm charts</strong> &mdash; production-ready charts with sensible defaults</li>
+          <li><strong>Horizontal scaling</strong> &mdash; scale worker pods based on queue depth or CPU</li>
+          <li><strong>Health checks</strong> &mdash; liveness and readiness probes for reliable orchestration</li>
+          <li><strong>Resource limits</strong> &mdash; configurable CPU and memory limits per pod</li>
+          <li><strong>Secrets management</strong> &mdash; Kubernetes secrets for API keys and credentials</li>
+        </ul>
+
+        <h3>Quick Start with Helm</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># Add the OpenSentinel Helm repository</span>
+<span class="cp">$</span> helm repo add opensentinel https://charts.opensentinel.dev
+<span class="cp">$</span> helm repo update
+
+<span class="cc"># Install with default configuration</span>
+<span class="cp">$</span> helm install opensentinel opensentinel/opensentinel \
+    --set env.CLAUDE_API_KEY=sk-ant-... \
+    --set env.DATABASE_URL=postgresql://user:pass@db:5432/opensentinel \
+    --set env.REDIS_URL=redis://redis:6379 \
+    --namespace opensentinel \
+    --create-namespace
+
+<span class="cc"># Or use a values file for full configuration</span>
+<span class="cp">$</span> helm install opensentinel opensentinel/opensentinel \
+    -f values.yaml \
+    --namespace opensentinel \
+    --create-namespace</code></pre>
+        </div>
+
+        <h3>Scaling</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># Scale the worker pods</span>
+<span class="cp">$</span> kubectl scale deployment opensentinel-worker --replicas=5 -n opensentinel
+
+<span class="cc"># Or use Horizontal Pod Autoscaler</span>
+<span class="cp">$</span> kubectl autoscale deployment opensentinel-worker \
+    --min=2 --max=10 --cpu-percent=70 -n opensentinel</code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Managed databases recommended.</strong> For production Kubernetes deployments, use managed PostgreSQL (AWS RDS, GCP Cloud SQL) and Redis (ElastiCache, Memorystore) instead of running databases in pods.</div>
+        </div>
+
+
+        <!-- ========== Docker ========== -->
+        <h2 id="docker">Docker Deployment</h2>
+        <p>The simplest way to deploy OpenSentinel in production. The included <code>docker-compose.yml</code> bundles everything you need: the application, PostgreSQL with pgvector, and Redis.</p>
+
+        <h3>Production Setup</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># Clone and configure</span>
+<span class="cp">$</span> git clone https://github.com/dsiemon2/OpenSentinel.git
+<span class="cp">$</span> cd OpenSentinel
+<span class="cp">$</span> cp .env.example .env
+<span class="cp">$</span> nano .env  <span class="cc"># Add your API keys</span>
+
+<span class="cc"># Start all services</span>
+<span class="cp">$</span> docker compose up -d
+
+<span class="cc"># Check status</span>
+<span class="cp">$</span> docker compose ps
+<span class="cp">$</span> docker compose logs -f opensentinel</code></pre>
+        </div>
+
+        <h3>Services</h3>
+        <table>
+          <thead><tr><th>Service</th><th>Image</th><th>Port</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>opensentinel</code></td><td>Custom Dockerfile</td><td>8030</td><td>Main application + web dashboard</td></tr>
+            <tr><td><code>postgres</code></td><td>pgvector/pgvector:16</td><td>5445</td><td>Database with vector search</td></tr>
+            <tr><td><code>redis</code></td><td>redis:7-alpine</td><td>6379</td><td>Cache, queues, pub/sub</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-warn">
+          <span class="callout-ico">&#x26A0;&#xFE0F;</span>
+          <div><strong>Production checklist.</strong> Before deploying to production: change default database passwords, enable SSL/TLS, configure proper backups, set up a reverse proxy (nginx/Caddy) for HTTPS, and restrict network access to ports 5445 and 6379.</div>
+        </div>
+
+
+        <!-- ========== Page Nav ========== -->
+        <div class="page-nav">
+          <a href="integrations.html" class="page-nav-link">
+            <span class="page-nav-label">&larr; Previous</span>
+            <span class="page-nav-title">Integrations</span>
+          </a>
+          <a href="templates.html" class="page-nav-link page-nav-link--next">
+            <span class="page-nav-label">Next &rarr;</span>
+            <span class="page-nav-title">Templates</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function copyCode(btn) {
+      const block = btn.closest('.codeblock');
+      const pre = block.querySelector('pre');
+      const text = pre.textContent.replace(/^\$ /gm, '');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

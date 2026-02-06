@@ -27,6 +27,11 @@ import {
   extractKeyMoments,
   getVideoInfo,
 } from "./video-summarization";
+import { applyPatch } from "./patch";
+import { pollManager } from "../core/polls";
+import { skillRegistry } from "../core/skills/skill-registry";
+import { skillExecutor } from "../core/skills/skill-executor";
+import { sentinelHub } from "../core/hub";
 
 // Define tools for Claude
 export const TOOLS: Tool[] = [
@@ -592,6 +597,165 @@ export const TOOLS: Tool[] = [
       required: ["video_path"],
     },
   },
+  {
+    name: "apply_patch",
+    description: "Apply a unified diff patch to a file. Useful for making targeted code changes with context-aware matching.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        file_path: {
+          type: "string",
+          description: "Path to the file to patch",
+        },
+        patch: {
+          type: "string",
+          description: "Unified diff patch content (with @@ hunk headers, +/- lines)",
+        },
+        create_backup: {
+          type: "boolean",
+          description: "Create a .bak backup before patching (default: true)",
+        },
+      },
+      required: ["file_path", "patch"],
+    },
+  },
+  {
+    name: "create_poll",
+    description: "Create a poll for users to vote on. Supports multiple choice and timed auto-close.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        question: {
+          type: "string",
+          description: "The poll question",
+        },
+        options: {
+          type: "array",
+          description: "List of answer options (2-10)",
+          items: { type: "string" },
+        },
+        multi_select: {
+          type: "boolean",
+          description: "Allow multiple selections (default: false)",
+        },
+        duration: {
+          type: "number",
+          description: "Auto-close after this many minutes (optional)",
+        },
+      },
+      required: ["question", "options"],
+    },
+  },
+  {
+    name: "teach_skill",
+    description: "Create a new reusable skill that OpenSentinel can execute on demand. Skills are user-teachable workflows with custom instructions.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        name: {
+          type: "string",
+          description: "Skill name",
+        },
+        description: {
+          type: "string",
+          description: "What the skill does",
+        },
+        instructions: {
+          type: "string",
+          description: "Detailed instructions for executing the skill (system prompt)",
+        },
+        tools: {
+          type: "array",
+          description: "List of tool names this skill can use",
+          items: { type: "string" },
+        },
+      },
+      required: ["name", "description", "instructions"],
+    },
+  },
+  {
+    name: "run_skill",
+    description: "Execute a previously created skill by name or trigger",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        skill: {
+          type: "string",
+          description: "Skill name, ID, or trigger (e.g., 'Code Review' or '/review')",
+        },
+        input: {
+          type: "string",
+          description: "User input to pass to the skill",
+        },
+      },
+      required: ["skill"],
+    },
+  },
+  {
+    name: "hub_browse",
+    description: "Browse the Sentinel Hub marketplace for skills, plugins, templates, and workflows",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        category: {
+          type: "string",
+          enum: ["skills", "plugins", "templates", "workflows"],
+          description: "Filter by category",
+        },
+        search: {
+          type: "string",
+          description: "Search query",
+        },
+      },
+      required: [],
+    },
+  },
+  {
+    name: "hub_install",
+    description: "Install an item from the Sentinel Hub marketplace",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        item_id: {
+          type: "string",
+          description: "The hub item ID to install",
+        },
+      },
+      required: ["item_id"],
+    },
+  },
+  {
+    name: "hub_publish",
+    description: "Publish a skill, plugin, or workflow to the Sentinel Hub for sharing",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        name: {
+          type: "string",
+          description: "Item name",
+        },
+        description: {
+          type: "string",
+          description: "Item description",
+        },
+        category: {
+          type: "string",
+          enum: ["skills", "plugins", "templates", "workflows"],
+          description: "Item category",
+        },
+        data: {
+          type: "string",
+          description: "JSON-serialized item content",
+        },
+        tags: {
+          type: "array",
+          description: "Tags for discovery",
+          items: { type: "string" },
+        },
+      },
+      required: ["name", "description", "category", "data"],
+    },
+  },
 ];
 
 // MCP registry reference (set by brain.ts after initialization)
@@ -966,6 +1130,137 @@ export async function executeTool(
           success: result.success,
           result: result.moments,
           error: result.error,
+        };
+      }
+
+      case "apply_patch": {
+        const result = await applyPatch(
+          input.file_path as string,
+          input.patch as string,
+          input.create_backup as boolean | undefined
+        );
+        return {
+          success: result.applied,
+          result: {
+            linesChanged: result.linesChanged,
+            backup: result.backup,
+          },
+          error: result.error,
+        };
+      }
+
+      case "create_poll": {
+        const poll = pollManager.createPoll({
+          question: input.question as string,
+          options: input.options as string[],
+          multiSelect: input.multi_select as boolean | undefined,
+          duration: input.duration as number | undefined,
+          channelType: "system",
+          channelId: "system",
+          createdBy: "assistant",
+        });
+        return {
+          success: true,
+          result: {
+            pollId: poll.id,
+            question: poll.question,
+            options: poll.options.map((o) => o.text),
+            message: pollManager.formatPollMessage(poll.id),
+          },
+        };
+      }
+
+      case "teach_skill": {
+        const result = await skillExecutor.teachSkill({
+          name: input.name as string,
+          description: input.description as string,
+          instructions: input.instructions as string,
+          tools: input.tools as string[] | undefined,
+          userId: "system",
+        });
+        return {
+          success: result.success,
+          result: {
+            skillId: result.skillId,
+            skillName: result.skillName,
+            message: result.output,
+          },
+          error: result.error,
+        };
+      }
+
+      case "run_skill": {
+        const result = await skillExecutor.execute(
+          input.skill as string,
+          input.input as string ?? "",
+          "system"
+        );
+        return {
+          success: result.success,
+          result: {
+            skillId: result.skillId,
+            skillName: result.skillName,
+            systemPrompt: result.output,
+          },
+          error: result.error,
+        };
+      }
+
+      case "hub_browse": {
+        await sentinelHub.initialize();
+        const results = sentinelHub.browseHub({
+          category: input.category as any,
+          search: input.search as string | undefined,
+        });
+        return {
+          success: true,
+          result: {
+            items: results.items.map((i) => ({
+              id: i.id,
+              name: i.name,
+              description: i.description,
+              category: i.category,
+              author: i.author,
+              rating: i.rating,
+              downloads: i.downloads,
+              tags: i.tags,
+            })),
+            total: results.total,
+          },
+        };
+      }
+
+      case "hub_install": {
+        await sentinelHub.initialize();
+        const result = await sentinelHub.installFromHub(
+          input.item_id as string,
+          "system"
+        );
+        return {
+          success: result.success,
+          result: {
+            message: result.message,
+            skillId: result.skillId,
+          },
+        };
+      }
+
+      case "hub_publish": {
+        await sentinelHub.initialize();
+        const result = await sentinelHub.publishToHub({
+          name: input.name as string,
+          description: input.description as string,
+          category: input.category as any,
+          data: input.data as string,
+          author: "user",
+          tags: input.tags as string[] | undefined,
+        });
+        return {
+          success: result.success,
+          result: {
+            itemId: result.itemId,
+            message: result.message,
+          },
         };
       }
 

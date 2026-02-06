@@ -3,7 +3,7 @@ import { moltModes, users } from "../../db/schema";
 import { eq, and, isNull, desc } from "drizzle-orm";
 import { audit } from "../security/audit-logger";
 
-export type MoltMode = "productivity" | "creative" | "research" | "learning";
+export type MoltMode = "productivity" | "creative" | "research" | "learning" | "elevated";
 
 export interface ModeConfig {
   name: string;
@@ -89,6 +89,25 @@ export const MODE_CONFIGS: Record<MoltMode, ModeConfig> = {
       verbosity: "detailed",
       humor: "subtle",
       proactivity: "proactive",
+    },
+  },
+  elevated: {
+    name: "Elevated Mode",
+    description: "Unlocked access to restricted tools with full audit logging",
+    emoji: "🔓",
+    systemPromptModifier: `You are in ELEVATED MODE. You have access to restricted and destructive operations.
+- All actions are fully audit-logged
+- Destructive shell commands (rm -rf, format, etc.) are now permitted
+- System-level operations (service management, config changes) are unlocked
+- Exercise extreme caution with every action
+- Confirm destructive operations before executing
+- This mode is time-limited and will auto-deactivate after 30 minutes
+- 2FA verification was required to enter this mode
+- Double-check all file paths and commands before execution`,
+    settings: {
+      verbosity: "detailed",
+      humor: "off",
+      proactivity: "minimal",
     },
   },
 };
@@ -193,6 +212,7 @@ export async function getModeStats(
     creative: { totalSessions: 0, totalMinutes: 0 },
     research: { totalSessions: 0, totalMinutes: 0 },
     learning: { totalSessions: 0, totalMinutes: 0 },
+    elevated: { totalSessions: 0, totalMinutes: 0 },
   };
 
   for (const entry of history) {
@@ -260,6 +280,18 @@ export function suggestMode(userMessage: string): MoltMode | null {
     lowerMessage.includes("what is")
   ) {
     return "learning";
+  }
+
+  // Elevated keywords
+  if (
+    lowerMessage.includes("elevated") ||
+    lowerMessage.includes("sudo") ||
+    lowerMessage.includes("admin") ||
+    lowerMessage.includes("unrestricted") ||
+    lowerMessage.includes("destructive") ||
+    lowerMessage.includes("system-level")
+  ) {
+    return "elevated";
   }
 
   return null;
