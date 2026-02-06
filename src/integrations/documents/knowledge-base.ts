@@ -1,5 +1,5 @@
 /**
- * Knowledge Base for Moltbot Document Ingestion
+ * Knowledge Base for OpenSentinel Document Ingestion
  *
  * Stores and queries document embeddings using pgvector for similarity search.
  */

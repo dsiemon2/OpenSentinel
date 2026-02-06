@@ -21,7 +21,7 @@ export interface SpreadsheetResult {
 // Generate temp file path
 function getTempPath(extension: string): string {
   const id = randomBytes(8).toString("hex");
-  return join(tmpdir(), `moltbot-spreadsheet-${id}.${extension}`);
+  return join(tmpdir(), `sentinel-spreadsheet-${id}.${extension}`);
 }
 
 // Convert data to CSV format

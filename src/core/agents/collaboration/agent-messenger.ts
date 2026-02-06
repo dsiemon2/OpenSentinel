@@ -78,7 +78,7 @@ interface PendingRequest {
 }
 
 // Redis channels for pub/sub
-const CHANNEL_PREFIX = "moltbot:agent:messages";
+const CHANNEL_PREFIX = "sentinel:agent:messages";
 const BROADCAST_CHANNEL = `${CHANNEL_PREFIX}:broadcast`;
 const getAgentChannel = (agentId: string) => `${CHANNEL_PREFIX}:${agentId}`;
 const getAgentTypeChannel = (type: AgentType) => `${CHANNEL_PREFIX}:type:${type}`;
@@ -523,7 +523,7 @@ export class AgentMessenger extends EventEmitter {
  */
 export class MessageQueue {
   private redis: Redis;
-  private queuePrefix = "moltbot:agent:queue";
+  private queuePrefix = "sentinel:agent:queue";
 
   constructor() {
     this.redis = new Redis(env.REDIS_URL, {

@@ -1,6 +1,6 @@
-// Type definitions for the Moltbot preload API
+// Type definitions for the OpenSentinel preload API
 
-interface MoltbotAPI {
+interface OpenSentinelAPI {
   // Settings
   getSettings: () => Promise<{
     apiUrl: string;
@@ -38,7 +38,7 @@ interface MoltbotAPI {
 
 declare global {
   interface Window {
-    moltbot: MoltbotAPI;
+    opensentinel: OpenSentinelAPI;
   }
 }
 

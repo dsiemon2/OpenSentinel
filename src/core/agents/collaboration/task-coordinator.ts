@@ -111,7 +111,7 @@ const DEFAULT_TOKEN_BUDGET = 50000;
 const DEFAULT_MAX_RETRIES = 2;
 const MAX_CONCURRENT_TASKS = 5;
 
-const COORDINATOR_PREFIX = "moltbot:coordinator";
+const COORDINATOR_PREFIX = "sentinel:coordinator";
 
 /**
  * TaskCoordinator - Orchestrates multi-agent task execution

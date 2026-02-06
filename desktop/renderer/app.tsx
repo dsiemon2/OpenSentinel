@@ -25,10 +25,10 @@ function App() {
 
   useEffect(() => {
     // Get API URL from settings
-    window.moltbot.getApiUrl().then(setApiUrl);
+    window.opensentinel.getApiUrl().then(setApiUrl);
 
     // Get app info
-    window.moltbot.getAppInfo().then(setAppInfo);
+    window.opensentinel.getAppInfo().then(setAppInfo);
   }, []);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ function App() {
       <div className="app-content">
         <aside className="sidebar">
           <div className="logo">
-            <span>Molt</span>bot
+            <span>OpenSent</span>inel
           </div>
 
           <nav>

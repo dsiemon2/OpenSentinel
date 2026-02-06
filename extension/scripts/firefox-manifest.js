@@ -22,7 +22,7 @@ const firefoxManifest = {
   // Firefox uses 'browser_specific_settings' instead of relying on Chrome defaults
   browser_specific_settings: {
     gecko: {
-      id: 'moltbot@extension',
+      id: 'sentinel@extension',
       strict_min_version: '109.0'
     }
   },

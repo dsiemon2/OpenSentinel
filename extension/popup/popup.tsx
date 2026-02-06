@@ -1,5 +1,5 @@
 /**
- * Moltbot Extension Popup Component
+ * OpenSentinel Extension Popup Component
  * Chat interface with quick actions for page interaction
  */
 
@@ -288,7 +288,7 @@ const Popup: React.FC = () => {
       <div className="header">
         <div className="header-title">
           <div className="logo">M</div>
-          <h1>Moltbot</h1>
+          <h1>OpenSentinel</h1>
         </div>
         <div className="header-actions">
           <button className="icon-btn" onClick={openOptions} title="Settings">
@@ -308,7 +308,7 @@ const Popup: React.FC = () => {
           {isConnected === null
             ? 'Connecting...'
             : isConnected
-            ? 'Connected to Moltbot'
+            ? 'Connected to OpenSentinel'
             : 'Not connected'}
         </span>
       </div>
@@ -348,7 +348,7 @@ const Popup: React.FC = () => {
             <div className="empty-state-icon">
               <BotIcon />
             </div>
-            <h2>Hi! I'm Moltbot</h2>
+            <h2>Hi! I'm OpenSentinel</h2>
             <p>
               Ask me anything, or use the quick actions above to interact with
               the current page.

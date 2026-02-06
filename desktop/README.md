@@ -1,8 +1,8 @@
-# Moltbot Desktop
+# OpenSentinel Desktop
 
 **Status: IMPLEMENTED** (v2.0.0)
 
-Electron-based desktop application for Moltbot - your personal AI assistant.
+Electron-based desktop application for OpenSentinel - your personal AI assistant.
 
 ## Features
 
@@ -10,14 +10,14 @@ Electron-based desktop application for Moltbot - your personal AI assistant.
 - **Global Hotkey**: Press `Ctrl+Shift+M` (configurable) to open the quick input popup from anywhere
 - **Quick Input Popup**: Spotlight-like floating window for quick questions
 - **Full Chat Interface**: Complete chat UI with conversation history
-- **Native Notifications**: Get notified when Moltbot responds
-- **Auto-Start**: Optionally start Moltbot with your system
+- **Native Notifications**: Get notified when OpenSentinel responds
+- **Auto-Start**: Optionally start OpenSentinel with your system
 - **Minimize to Tray**: Close the window without quitting the app
 
 ## Requirements
 
 - Node.js 18+ or Bun
-- Moltbot server running (default: http://localhost:8030)
+- OpenSentinel server running (default: http://localhost:8030)
 
 ## Development Setup
 
@@ -65,8 +65,8 @@ npm run dist:win
 ```
 
 Creates:
-- `release/Moltbot Setup x.x.x.exe` - NSIS installer
-- `release/Moltbot x.x.x.exe` - Portable executable
+- `release/OpenSentinel Setup x.x.x.exe` - NSIS installer
+- `release/OpenSentinel x.x.x.exe` - Portable executable
 
 ### Build for Linux
 
@@ -75,8 +75,8 @@ npm run dist:linux
 ```
 
 Creates:
-- `release/Moltbot-x.x.x.AppImage` - AppImage (portable)
-- `release/moltbot_x.x.x_amd64.deb` - Debian package
+- `release/OpenSentinel-x.x.x.AppImage` - AppImage (portable)
+- `release/opensentinel_x.x.x_amd64.deb` - Debian package
 
 ## Project Structure
 
@@ -114,14 +114,14 @@ desktop/
 
 Settings are stored using electron-store:
 
-- **Windows**: `%APPDATA%/moltbot-desktop/config.json`
-- **Linux**: `~/.config/moltbot-desktop/config.json`
+- **Windows**: `%APPDATA%/opensentinel-desktop/config.json`
+- **Linux**: `~/.config/opensentinel-desktop/config.json`
 
 ### Available Settings
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `apiUrl` | `http://localhost:8030` | Moltbot API server URL |
+| `apiUrl` | `http://localhost:8030` | OpenSentinel API server URL |
 | `autoLaunch` | `false` | Start with system |
 | `minimizeToTray` | `true` | Minimize to tray instead of closing |
 | `globalShortcut` | `CommandOrControl+Shift+M` | Quick input hotkey |
@@ -152,10 +152,10 @@ You can use tools like:
 
 ## API Integration
 
-The desktop app connects to the Moltbot API server. Make sure the server is running:
+The desktop app connects to the OpenSentinel API server. Make sure the server is running:
 
 ```bash
-# From the main Moltbot directory
+# From the main OpenSentinel directory
 bun run start
 ```
 
@@ -170,7 +170,7 @@ The app uses these API endpoints:
 
 ### App doesn't start
 
-1. Check if Moltbot server is running
+1. Check if OpenSentinel server is running
 2. Verify the API URL in settings
 3. Check the developer console (View > Toggle Developer Tools)
 

@@ -1,7 +1,7 @@
 /**
  * Intelligence Module
  *
- * Advanced AI and research features for Moltbot including:
+ * Advanced AI and research features for OpenSentinel including:
  * - Predictive suggestions based on user patterns
  * - Relationship graph tracking between people, projects, topics
  * - Temporal reasoning for understanding time context

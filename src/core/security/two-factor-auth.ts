@@ -120,7 +120,7 @@ function generateRecoveryCodes(): string[] {
  * Hash a recovery code for storage
  */
 function hashRecoveryCode(code: string): string {
-  return createHmac("sha256", "moltbot-recovery")
+  return createHmac("sha256", "sentinel-recovery")
     .update(code.replace(/-/g, "").toUpperCase())
     .digest("hex");
 }
@@ -191,7 +191,7 @@ export async function initializeTwoFactor(userId: string): Promise<TwoFactorSecr
     .limit(1);
 
   const accountName = user?.name || user?.telegramId || userId.slice(0, 8);
-  const issuer = "Moltbot";
+  const issuer = "OpenSentinel";
   const otpauthUrl = `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(
     accountName
   )}?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=${TOTP_DIGITS}&period=${TOTP_PERIOD}`;

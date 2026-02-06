@@ -1,5 +1,5 @@
 /**
- * IFTTT-like Workflow Automation for Moltbot
+ * IFTTT-like Workflow Automation for OpenSentinel
  *
  * This module provides a complete workflow automation system with:
  * - Multiple trigger types (time, webhook, event, condition, manual)
@@ -360,7 +360,7 @@ export const workflowTemplates: WorkflowTemplate[] = [
   {
     id: "tool-automation",
     name: "Tool Automation",
-    description: "Run a Moltbot tool on schedule or trigger",
+    description: "Run an OpenSentinel tool on schedule or trigger",
     category: "automation",
     tags: ["tool", "automation", "scheduled"],
     create: (config) => {

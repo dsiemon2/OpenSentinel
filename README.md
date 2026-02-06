@@ -1,10 +1,10 @@
-# Moltbot
+# OpenSentinel
 
 A self-hosted personal AI assistant powered by Claude, with JARVIS-like capabilities.
 
-## What is Moltbot?
+## What is OpenSentinel?
 
-Moltbot is your own personal AI assistant that runs on your computer. Think of it like having Jarvis from Iron Man - you can talk to it, ask questions, and it can do things for you.
+OpenSentinel is your own personal AI assistant that runs on your computer. Think of it like having Jarvis from Iron Man - you can talk to it, ask questions, and it can do things for you.
 
 ## Features
 
@@ -19,7 +19,7 @@ Moltbot is your own personal AI assistant that runs on your computer. Think of i
 - Respond with voice (JARVIS voice via ElevenLabs)
 
 ### Advanced Voice
-- Wake word detection ("Hey Molt")
+- Wake word detection ("Hey OpenSentinel")
 - Continuous conversation mode
 - Voice activity detection (VAD)
 - Speaker diarization (multi-person)
@@ -112,7 +112,7 @@ Moltbot is your own personal AI assistant that runs on your computer. Think of i
 - Built-in workflow templates
 
 ### Desktop & Browser Apps
-- **Electron Desktop App**: System tray, global hotkeys (Ctrl+Shift+M)
+- **Electron Desktop App**: System tray, global hotkeys (Ctrl+Shift+O)
 - **Browser Extension**: Chrome/Firefox popup chat, context menu
 
 ## Quick Start
@@ -127,7 +127,7 @@ Moltbot is your own personal AI assistant that runs on your computer. Think of i
 
 1. **Clone and install dependencies**
    ```bash
-   cd /home/vboxuser/Products/Moltbot
+   cd /home/vboxuser/Products/OpenSentinel
    bun install
    ```
 
@@ -152,7 +152,7 @@ Moltbot is your own personal AI assistant that runs on your computer. Think of i
    cd src/web && bun install && bun run build && cd ../..
    ```
 
-6. **Start Moltbot**
+6. **Start OpenSentinel**
    ```bash
    bun run start
    ```
@@ -190,7 +190,7 @@ curl -X POST http://localhost:8030/api/ask \
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         MOLTBOT v2.0                            │
+│                       OPENSENTINEL v2.0                          │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │
@@ -271,7 +271,7 @@ extension/                      # Browser extension
 
 | Service | Port |
 |---------|------|
-| Moltbot API + Dashboard | 8030 |
+| OpenSentinel API + Dashboard | 8030 |
 | PostgreSQL | 5445 |
 | Redis | 6379 |
 

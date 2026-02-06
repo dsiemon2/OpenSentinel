@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 export default function TitleBar() {
   const [isMaximized, setIsMaximized] = useState(false);
-  const platform = window.moltbot.platform;
+  const platform = window.opensentinel.platform;
 
   // Only show custom title bar on Windows
   if (platform !== 'win32') {
@@ -10,22 +10,22 @@ export default function TitleBar() {
   }
 
   const handleMinimize = () => {
-    window.moltbot.minimizeWindow();
+    window.opensentinel.minimizeWindow();
   };
 
   const handleMaximize = () => {
-    window.moltbot.maximizeWindow();
+    window.opensentinel.maximizeWindow();
     setIsMaximized(!isMaximized);
   };
 
   const handleClose = () => {
-    window.moltbot.closeWindow();
+    window.opensentinel.closeWindow();
   };
 
   return (
     <div className="title-bar">
       <div className="title-bar-drag">
-        <span className="title-bar-title">Moltbot</span>
+        <span className="title-bar-title">OpenSentinel</span>
       </div>
       <div className="title-bar-controls">
         <button

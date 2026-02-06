@@ -1,5 +1,5 @@
 /**
- * Document Ingestion System for Moltbot
+ * Document Ingestion System for OpenSentinel
  *
  * Provides comprehensive document processing capabilities including:
  * - PDF parsing with text and metadata extraction

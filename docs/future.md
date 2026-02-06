@@ -1,4 +1,4 @@
-# Moltbot Future Vision
+# OpenSentinel Future Vision
 
 **STATUS: ALL CURRENT FEATURES IMPLEMENTED** (v2.0.0 - February 2026)
 
@@ -11,7 +11,7 @@ This document now tracks potential future enhancements beyond the current implem
 All features from the original vision have been implemented:
 
 - ✅ Multi-modal input (Telegram, Discord, Slack, Voice, Web, API)
-- ✅ Wake word detection ("Hey Molt")
+- ✅ Wake word detection ("Hey OpenSentinel")
 - ✅ Continuous conversation mode
 - ✅ 30+ tools (shell, files, browser, search, OCR, vision, video)
 - ✅ Sub-agent system (research, coding, writing, analysis)
@@ -85,7 +85,7 @@ All previously identified technical debt has been resolved:
 
 ## Contributing
 
-Want to help build the future of Moltbot?
+Want to help build the future of OpenSentinel?
 
 1. Pick an item from the Future Enhancement Ideas
 2. Open an issue to discuss approach

@@ -1,7 +1,7 @@
 /**
  * Vision Integration
  *
- * Provides webcam and screen analysis capabilities for Moltbot:
+ * Provides webcam and screen analysis capabilities for OpenSentinel:
  * - Screen capture (full screen, window, region)
  * - Webcam capture and streaming
  * - Image analysis with Claude Vision

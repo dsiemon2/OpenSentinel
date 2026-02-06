@@ -1,7 +1,7 @@
 {
-  "name": "moltbot-extension",
+  "name": "opensentinel-extension",
   "version": "1.0.0",
-  "description": "Moltbot browser extension - Personal AI assistant powered by Claude",
+  "description": "OpenSentinel browser extension - Personal AI assistant powered by Claude",
   "private": true,
   "type": "module",
   "scripts": {

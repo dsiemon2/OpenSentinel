@@ -415,7 +415,7 @@ export async function captureScreen(
   const format = options.format || "png";
   const outputPath =
     options.outputPath ||
-    join(tmpdir(), `moltbot-screenshot-${randomUUID()}.${format}`);
+    join(tmpdir(), `sentinel-screenshot-${randomUUID()}.${format}`);
 
   try {
     // Apply delay if specified

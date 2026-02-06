@@ -1,4 +1,4 @@
-# Moltbot Technical Implementation
+# OpenSentinel Technical Implementation
 
 **Status: COMPLETE** (v2.0.0)
 
@@ -220,6 +220,6 @@ workflows (id, user_id, name, triggers, conditions, actions, enabled, created_at
 
 | Service | Port |
 |---------|------|
-| Moltbot API + Dashboard | 8030 |
+| OpenSentinel API + Dashboard | 8030 |
 | PostgreSQL | 5445 |
 | Redis | 6379 |

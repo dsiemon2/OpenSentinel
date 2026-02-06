@@ -262,7 +262,7 @@ export function startAgentWorker(): void {
   if (worker) return;
 
   worker = new Worker(
-    "moltbot-agents",
+    "sentinel-agents",
     async (job: Job<AgentJobData>) => {
       const result = await processAgentTask(job);
 

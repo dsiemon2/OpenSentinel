@@ -1,5 +1,5 @@
 /**
- * Twilio Integration for Moltbot
+ * Twilio Integration for OpenSentinel
  *
  * Main export file for SMS and Voice (phone call) integration using Twilio.
  */

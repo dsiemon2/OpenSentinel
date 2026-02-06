@@ -59,7 +59,7 @@ const DEFAULT_OPTIONS: ImageGenerationOptions = {
 // Generate temp file path
 function getTempPath(format: ImageFormat = "png"): string {
   const id = randomBytes(8).toString("hex");
-  return join(tmpdir(), `moltbot-image-${id}.${format}`);
+  return join(tmpdir(), `sentinel-image-${id}.${format}`);
 }
 
 // Get OpenAI API key from environment

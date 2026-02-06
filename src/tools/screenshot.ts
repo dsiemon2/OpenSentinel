@@ -26,7 +26,7 @@ export interface ScreenshotOptions {
 // Generate temp file path
 function getTempPath(format: string): string {
   const id = randomBytes(8).toString("hex");
-  return join(tmpdir(), `moltbot-screenshot-${id}.${format}`);
+  return join(tmpdir(), `sentinel-screenshot-${id}.${format}`);
 }
 
 // Take screenshot on Linux

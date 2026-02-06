@@ -644,7 +644,7 @@ function buildReviewOptions(result: CodeReviewResult): CreateReviewOptions {
   body += `| Readability | ${result.metrics.readabilityScore}/100 |\n`;
   body += `| **Overall** | **${result.metrics.overallScore}/100** |\n`;
 
-  body += `\n---\n*Reviewed by Moltbot AI*`;
+  body += `\n---\n*Reviewed by OpenSentinel AI*`;
 
   return {
     event,

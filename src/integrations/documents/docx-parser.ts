@@ -1,5 +1,5 @@
 /**
- * DOCX Parser for Moltbot Document Ingestion
+ * DOCX Parser for OpenSentinel Document Ingestion
  *
  * Extracts text content from Word documents using mammoth.
  */

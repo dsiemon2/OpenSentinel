@@ -1,4 +1,4 @@
-# Moltbot Features
+# OpenSentinel Features
 
 **Status: ALL FEATURES IMPLEMENTED** (v2.0.0)
 
@@ -36,7 +36,7 @@
 - Task queue monitor
 
 ### Voice Interface ✅
-- Wake word ("Hey Molt")
+- Wake word ("Hey OpenSentinel")
 - Continuous conversation mode
 - Voice activity detection
 - Speaker diarization

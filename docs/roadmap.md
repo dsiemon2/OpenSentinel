@@ -1,4 +1,4 @@
-# Moltbot Development Roadmap
+# OpenSentinel Development Roadmap
 
 **STATUS: ALL PHASES COMPLETE** (v2.0.0 - February 2026)
 

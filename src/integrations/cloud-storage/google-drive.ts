@@ -1,7 +1,7 @@
 /**
  * Google Drive Integration
  *
- * Provides comprehensive Google Drive API integration for Moltbot,
+ * Provides comprehensive Google Drive API integration for OpenSentinel,
  * including file operations, folder management, sharing, and sync.
  */
 

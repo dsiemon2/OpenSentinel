@@ -62,7 +62,7 @@ export {
 } from "./inbox-summarizer";
 
 /**
- * Email Integration for Moltbot
+ * Email Integration for OpenSentinel
  *
  * This module provides comprehensive email functionality:
  *

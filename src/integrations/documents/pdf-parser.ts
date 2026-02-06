@@ -1,5 +1,5 @@
 /**
- * PDF Parser for Moltbot Document Ingestion
+ * PDF Parser for OpenSentinel Document Ingestion
  *
  * Extracts text content from PDF files using pdf-parse.
  */

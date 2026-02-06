@@ -52,7 +52,7 @@ describe("Twilio Integration", () => {
         AccountSid: "AC123456",
         From: "+15551234567",
         To: "+15559876543",
-        Body: "Hello, Moltbot!",
+        Body: "Hello, OpenSentinel!",
         NumMedia: "0",
       };
 
@@ -62,7 +62,7 @@ describe("Twilio Integration", () => {
       expect(sms.accountSid).toBe("AC123456");
       expect(sms.from).toBe("+15551234567");
       expect(sms.to).toBe("+15559876543");
-      expect(sms.body).toBe("Hello, Moltbot!");
+      expect(sms.body).toBe("Hello, OpenSentinel!");
       expect(sms.numMedia).toBe(0);
       expect(sms.mediaUrls).toBeUndefined();
     });

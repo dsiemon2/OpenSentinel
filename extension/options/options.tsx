@@ -1,5 +1,5 @@
 /**
- * Moltbot Extension Options Page
+ * OpenSentinel Extension Options Page
  * Configure API URL and view connection status
  */
 
@@ -116,8 +116,8 @@ const Options: React.FC = () => {
       <div className="header">
         <div className="logo">M</div>
         <div>
-          <h1>Moltbot Settings</h1>
-          <p>Configure your Moltbot browser extension</p>
+          <h1>OpenSentinel Settings</h1>
+          <p>Configure your OpenSentinel browser extension</p>
         </div>
       </div>
 
@@ -142,13 +142,13 @@ const Options: React.FC = () => {
             {connectionStatus === 'checking'
               ? 'Checking connection...'
               : connectionStatus === 'connected'
-              ? 'Connected to Moltbot server'
+              ? 'Connected to OpenSentinel server'
               : 'Not connected - check your server'}
           </span>
         </div>
 
         <div className="form-group">
-          <label htmlFor="apiUrl">Moltbot API URL</label>
+          <label htmlFor="apiUrl">OpenSentinel API URL</label>
           <input
             id="apiUrl"
             type="url"
@@ -157,7 +157,7 @@ const Options: React.FC = () => {
             placeholder="http://localhost:8030"
           />
           <p className="input-hint">
-            Enter the URL where your Moltbot server is running. Default is http://localhost:8030
+            Enter the URL where your OpenSentinel server is running. Default is http://localhost:8030
           </p>
         </div>
 
@@ -203,7 +203,7 @@ const Options: React.FC = () => {
 
         <div className="shortcuts-list">
           <div className="shortcut-item">
-            <span className="shortcut-name">Open Moltbot popup</span>
+            <span className="shortcut-name">Open OpenSentinel popup</span>
             <div className="shortcut-key">
               <span className="key">Alt</span>
               <span className="key">M</span>
@@ -245,14 +245,14 @@ const Options: React.FC = () => {
       <div className="card">
         <h2 className="card-title">
           <InfoIcon />
-          About Moltbot Extension
+          About OpenSentinel Extension
         </h2>
 
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.6' }}>
-          Moltbot is your personal AI assistant powered by Claude. This extension allows you to:
+          OpenSentinel is your personal AI assistant powered by Claude. This extension allows you to:
         </p>
         <ul style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.8', marginTop: '12px', paddingLeft: '20px' }}>
-          <li>Chat with Moltbot directly from your browser</li>
+          <li>Chat with OpenSentinel directly from your browser</li>
           <li>Summarize web pages with one click</li>
           <li>Extract structured data from any page</li>
           <li>Ask questions about selected text</li>
@@ -263,8 +263,8 @@ const Options: React.FC = () => {
       {/* Footer */}
       <div className="footer">
         <p>
-          Moltbot Extension v1.0.0 |{' '}
-          <a href="https://github.com/yourusername/moltbot" target="_blank" rel="noopener noreferrer">
+          OpenSentinel Extension v1.0.0 |{' '}
+          <a href="https://github.com/yourusername/opensentinel" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
         </p>

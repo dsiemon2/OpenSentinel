@@ -5,3 +5,6 @@ dist/
 *.log
 data/
 .DS_Store
+mcp.json
+whatsapp-auth/
+CLAUDE.md.local-backup

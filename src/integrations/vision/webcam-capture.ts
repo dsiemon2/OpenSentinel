@@ -270,7 +270,7 @@ export async function captureWebcam(
   const format = options.format || "png";
   const outputPath =
     options.outputPath ||
-    join(tmpdir(), `moltbot-webcam-${randomUUID()}.${format}`);
+    join(tmpdir(), `sentinel-webcam-${randomUUID()}.${format}`);
   const device = options.device || getDefaultDevice();
   const timeout = options.timeout || 10000;
   const skipFrames = options.skipFrames ?? 10;
@@ -371,7 +371,7 @@ export async function captureWebcamVideo(
   const format = options.format || "mp4";
   const outputPath =
     options.outputPath ||
-    join(tmpdir(), `moltbot-webcam-video-${randomUUID()}.${format}`);
+    join(tmpdir(), `sentinel-webcam-video-${randomUUID()}.${format}`);
   const device = options.device || getDefaultDevice();
   const frameRate = options.frameRate || 30;
   const duration = options.duration;

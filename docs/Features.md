@@ -1,6 +1,6 @@
 # Features
 
-Complete feature list for Moltbot - ALL FEATURES IMPLEMENTED (v2.0.0)
+Complete feature list for OpenSentinel - ALL FEATURES IMPLEMENTED (v2.0.0)
 
 **Status: 250+ Features Complete** (February 2026)
 
@@ -32,7 +32,7 @@ Complete feature list for Moltbot - ALL FEATURES IMPLEMENTED (v2.0.0)
 |---------|--------|-------|
 | Slash commands | ✅ | 7 commands registered |
 | Direct messages | ✅ | DM support |
-| Channel mentions | ✅ | @MoltBot mentions |
+| Channel mentions | ✅ | @OpenSentinel mentions |
 | Voice channels | ✅ | Join, leave, speak TTS |
 | File attachments | ✅ | Audio transcription, text files |
 | Role-based auth | ✅ | User ID + role allowlists |
@@ -40,18 +40,18 @@ Complete feature list for Moltbot - ALL FEATURES IMPLEMENTED (v2.0.0)
 ### 1.3 Slack Integration
 | Feature | Status | Notes |
 |---------|--------|-------|
-| App mentions | ✅ | @Moltbot mentions |
+| App mentions | ✅ | @OpenSentinel mentions |
 | Direct messages | ✅ | DM conversations |
 | Thread replies | ✅ | Contextual threads |
 | File attachments | ✅ | Document processing |
-| Slash commands | ✅ | /moltbot commands |
+| Slash commands | ✅ | /sentinel commands |
 | Socket mode | ✅ | Real-time events |
 
 ### 1.4 Voice Interface
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Voice transcription | ✅ | OpenAI Whisper |
-| Wake word ("Hey Molt") | ✅ | `src/inputs/voice/wake-word.ts` |
+| Wake word ("Hey OpenSentinel") | ✅ | `src/inputs/voice/wake-word.ts` |
 | Local STT (faster-whisper) | ✅ | GPU-accelerated |
 | Continuous conversation | ✅ | `src/inputs/voice/continuous-mode.ts` |
 | Voice activity detection | ✅ | `src/inputs/voice/vad.ts` |

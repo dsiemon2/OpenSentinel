@@ -23,7 +23,7 @@ export interface MathRenderOptions {
 // Generate temp file path
 function getTempPath(extension: string): string {
   const id = randomBytes(8).toString("hex");
-  return join(tmpdir(), `moltbot-math-${id}.${extension}`);
+  return join(tmpdir(), `sentinel-math-${id}.${extension}`);
 }
 
 // Convert LaTeX to SVG using basic transformation

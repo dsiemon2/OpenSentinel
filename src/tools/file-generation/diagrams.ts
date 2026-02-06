@@ -24,7 +24,7 @@ export interface DiagramResult {
 // Generate temp file path
 function getTempPath(): string {
   const id = randomBytes(8).toString("hex");
-  return join(tmpdir(), `moltbot-diagram-${id}.md`);
+  return join(tmpdir(), `sentinel-diagram-${id}.md`);
 }
 
 // Flowchart helpers

@@ -1,14 +1,20 @@
-import {
-  App,
-  ExpressReceiver,
-  type MessageEvent,
-  type AppMentionEvent,
-  type GenericMessageEvent,
-  type FileSharedEvent,
-  type SlackEventMiddlewareArgs,
-  type AllMiddlewareArgs,
-} from "@slack/bolt";
-import { WebClient, type ChatPostMessageResponse } from "@slack/web-api";
+// Use require-style for CJS/ESM compat
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const { App, ExpressReceiver } = require("@slack/bolt") as {
+  App: typeof import("@slack/bolt").App;
+  ExpressReceiver: typeof import("@slack/bolt").ExpressReceiver;
+};
+const { WebClient } = require("@slack/web-api") as {
+  WebClient: typeof import("@slack/web-api").WebClient;
+};
+type SlackEventMiddlewareArgs<T extends string> = any;
+type AllMiddlewareArgs = any;
+type MessageEvent = any;
+type AppMentionEvent = any;
+type GenericMessageEvent = any;
+type FileSharedEvent = any;
+type ChatPostMessageResponse = any;
 import { chatWithTools, type Message } from "../../core/brain";
 import { transcribeAudio } from "../../outputs/stt";
 import {
@@ -56,10 +62,10 @@ interface ThreadedMessage extends GenericMessageEvent {
  * Slack bot class
  */
 export class SlackBot {
-  private app: App;
+  private app: InstanceType<typeof App>;
   private config: SlackBotConfig;
-  private client: WebClient;
-  private receiver: ExpressReceiver | undefined;
+  private client: InstanceType<typeof WebClient>;
+  private receiver: InstanceType<typeof ExpressReceiver> | undefined;
   private isRunning: boolean = false;
 
   constructor(config: SlackBotConfig) {
@@ -98,25 +104,25 @@ export class SlackBot {
   private setupEventHandlers(): void {
     // App mention handler (when someone @mentions the bot)
     if (this.config.allowMentions) {
-      this.app.event("app_mention", async (args) => {
+      this.app.event("app_mention", async (args: any) => {
         await this.handleAppMention(args);
       });
     }
 
     // Direct message handler
     if (this.config.allowDMs) {
-      this.app.message(async (args) => {
+      this.app.message(async (args: any) => {
         await this.handleMessage(args);
       });
     }
 
     // File shared event handler
-    this.app.event("file_shared", async (args) => {
+    this.app.event("file_shared", async (args: any) => {
       await this.handleFileShared(args);
     });
 
     // Error handler
-    this.app.error(async (error) => {
+    this.app.error(async (error: any) => {
       console.error("[Slack] App error:", error);
     });
   }
@@ -126,7 +132,7 @@ export class SlackBot {
    */
   private setupSlashCommands(): void {
     for (const cmd of slashCommands) {
-      this.app.command(cmd.command, async (args) => {
+      this.app.command(cmd.command, async (args: any) => {
         // Check authorization
         if (!this.isUserAuthorized(args.command.user_id, args.command.channel_id)) {
           await args.ack();
@@ -151,21 +157,21 @@ export class SlackBot {
     const { event, say, client } = args;
 
     // Check authorization
-    if (!this.isUserAuthorized(event.user, event.channel)) {
+    if (!this.isUserAuthorized(event.user as string, event.channel as string)) {
       return;
     }
 
     // Remove the bot mention from the text
-    const text = event.text.replace(/<@[A-Z0-9]+>/gi, "").trim();
+    const text = (event.text as string).replace(/<@[A-Z0-9]+>/gi, "").trim();
     if (!text) {
       await say({
-        text: "Hi! How can I help you? Mention me with a question or use `/moltbot help` for available commands.",
+        text: "Hi! How can I help you? Mention me with a question or use `/sentinel help` for available commands.",
         thread_ts: event.thread_ts || event.ts,
       });
       return;
     }
 
-    const userId = event.user;
+    const userId = event.user as string;
     const sessionKey = event.thread_ts
       ? `${userId}:thread:${event.thread_ts}`
       : userId;
@@ -276,7 +282,7 @@ export class SlackBot {
     if (!userId) return;
 
     // Check authorization
-    if (!this.isUserAuthorized(userId, event.channel)) {
+    if (!this.isUserAuthorized(userId, event.channel as string)) {
       return;
     }
 
@@ -484,14 +490,14 @@ export class SlackBot {
   /**
    * Get the Slack app instance
    */
-  getApp(): App {
+  getApp(): InstanceType<typeof App> {
     return this.app;
   }
 
   /**
    * Get the Slack Web API client
    */
-  getClient(): WebClient {
+  getClient(): InstanceType<typeof WebClient> {
     return this.client;
   }
 
@@ -519,7 +525,7 @@ export class SlackBot {
       text,
       thread_ts: options?.threadTs,
       mrkdwn: options?.mrkdwn ?? true,
-      blocks: options?.blocks,
+      blocks: options?.blocks as any,
     });
   }
 
@@ -535,7 +541,7 @@ export class SlackBot {
     return this.client.chat.postMessage({
       channel: channelId,
       text: text || "Message",
-      blocks,
+      blocks: blocks as any,
       thread_ts: threadTs,
     });
   }
@@ -560,7 +566,7 @@ export class SlackBot {
       title: options?.title,
       initial_comment: options?.initialComment,
       thread_ts: options?.threadTs,
-    });
+    } as any);
   }
 
   /**
@@ -629,7 +635,7 @@ export class SlackBot {
   /**
    * Get the Express receiver (for adding custom routes)
    */
-  getReceiver(): ExpressReceiver | undefined {
+  getReceiver(): InstanceType<typeof ExpressReceiver> | undefined {
     return this.receiver;
   }
 }

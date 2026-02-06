@@ -1,5 +1,5 @@
 /**
- * Notion Integration for Moltbot
+ * Notion Integration for OpenSentinel
  *
  * Provides comprehensive access to Notion API functionality including:
  * - Page operations (create, read, update, archive)

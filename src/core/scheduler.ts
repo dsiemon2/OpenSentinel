@@ -9,16 +9,59 @@ import { generateWeeklyReport, generateMonthlyReport } from "./molt/growth-repor
 import { resetMonthlyUsage } from "./permissions/permission-manager";
 import { flushMetrics } from "./observability/metrics";
 
-// Redis connection for BullMQ
-const connection = new Redis(env.REDIS_URL, {
-  maxRetriesPerRequest: null,
+// Lazy Redis connection and queues — created on first use
+let _connection: Redis | null = null;
+let _taskQueue: Queue | null = null;
+let _maintenanceQueue: Queue | null = null;
+
+function getConnection(): Redis {
+  if (!_connection) {
+    _connection = new Redis(env.REDIS_URL, {
+      maxRetriesPerRequest: null,
+    });
+  }
+  return _connection;
+}
+
+function getTaskQueue(): Queue {
+  if (!_taskQueue) {
+    _taskQueue = new Queue("sentinel-tasks", { connection: getConnection() });
+  }
+  return _taskQueue;
+}
+
+function getMaintenanceQueue(): Queue {
+  if (!_maintenanceQueue) {
+    _maintenanceQueue = new Queue("sentinel-maintenance", { connection: getConnection() });
+  }
+  return _maintenanceQueue;
+}
+
+// Backward-compatible exports
+const connection = new Proxy({} as Redis, {
+  get(_target, prop) {
+    const instance = getConnection();
+    const value = (instance as any)[prop];
+    if (typeof value === "function") return value.bind(instance);
+    return value;
+  },
 });
-
-// Task queue
-const taskQueue = new Queue("moltbot-tasks", { connection });
-
-// Maintenance queue for background jobs
-const maintenanceQueue = new Queue("moltbot-maintenance", { connection });
+const taskQueue = new Proxy({} as Queue, {
+  get(_target, prop) {
+    const instance = getTaskQueue();
+    const value = (instance as any)[prop];
+    if (typeof value === "function") return value.bind(instance);
+    return value;
+  },
+});
+const maintenanceQueue = new Proxy({} as Queue, {
+  get(_target, prop) {
+    const instance = getMaintenanceQueue();
+    const value = (instance as any)[prop];
+    if (typeof value === "function") return value.bind(instance);
+    return value;
+  },
+});
 
 interface ScheduledTask {
   type: "reminder" | "briefing" | "custom" | "calendar_check" | "memory_shed" | "growth_report" | "metrics_flush";
@@ -73,12 +116,12 @@ export function startWorker(
   if (worker) return;
 
   worker = new Worker(
-    "moltbot-tasks",
+    "sentinel-tasks",
     async (job: Job<ScheduledTask>) => {
       console.log(`[Scheduler] Processing task: ${job.name}`);
       await onTask(job.data);
     },
-    { connection }
+    { connection: getConnection() }
   );
 
   worker.on("completed", (job) => {
@@ -97,21 +140,21 @@ export function startMaintenanceWorker(): void {
   if (maintenanceWorker) return;
 
   maintenanceWorker = new Worker(
-    "moltbot-maintenance",
+    "sentinel-maintenance",
     async (job: Job<ScheduledTask>) => {
       console.log(`[Maintenance] Processing: ${job.name}`);
 
       switch (job.data.type) {
         case "calendar_check":
           if (job.data.userId) {
-            await processCalendarTriggers(job.data.userId);
+            await processCalendarTriggers(job.data.userId, []);
           }
           break;
 
         case "memory_shed":
           if (job.data.userId) {
             const result = await autoShed(job.data.userId);
-            console.log(`[Maintenance] Memory shed: archived ${result.archived} memories`);
+            console.log(`[Maintenance] Memory shed: archived ${result.archivedCount} memories`);
           }
           break;
 
@@ -134,7 +177,7 @@ export function startMaintenanceWorker(): void {
           console.log(`[Maintenance] Unknown task type: ${job.data.type}`);
       }
     },
-    { connection }
+    { connection: getConnection() }
   );
 
   maintenanceWorker.on("completed", (job) => {
@@ -251,7 +294,7 @@ export async function shutdownScheduler(): Promise<void> {
   stopWorker();
   stopMaintenanceWorker();
   stopAgentWorker();
-  await connection.quit();
+  if (_connection) await _connection.quit();
   console.log("[Scheduler] Shutdown complete");
 }
 
@@ -276,7 +319,7 @@ export async function generateBriefing(userId?: string): Promise<string> {
   // Try to use calendar-aware briefing
   if (userId) {
     try {
-      return await generateDailyBriefing(userId);
+      return await generateDailyBriefing(userId, []);
     } catch {
       // Fall back to simple briefing
     }

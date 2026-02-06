@@ -473,7 +473,7 @@ export async function summarizeVideo(
     };
   }
 
-  const tempDir = join(tmpdir(), `moltbot-video-${randomUUID()}`);
+  const tempDir = join(tmpdir(), `sentinel-video-${randomUUID()}`);
 
   try {
     await mkdir(tempDir, { recursive: true });
@@ -586,7 +586,7 @@ export async function extractKeyMoments(
     return { success: false, error: "Video file not found" };
   }
 
-  const tempDir = join(tmpdir(), `moltbot-video-${randomUUID()}`);
+  const tempDir = join(tmpdir(), `sentinel-video-${randomUUID()}`);
 
   try {
     await mkdir(tempDir, { recursive: true });

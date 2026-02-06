@@ -1,5 +1,5 @@
 /**
- * Twilio Voice Integration for Moltbot
+ * Twilio Voice Integration for OpenSentinel
  *
  * Provides functionality to make and receive phone calls with TTS,
  * recording, and transcription capabilities.
