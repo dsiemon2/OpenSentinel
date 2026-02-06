@@ -135,7 +135,7 @@ const DEFAULT_OPTIONS: WordDocumentOptions = {
 // Generate temp file path
 function getTempPath(): string {
   const id = randomBytes(8).toString("hex");
-  return join(tmpdir(), `moltbot-doc-${id}.docx`);
+  return join(tmpdir(), `sentinel-doc-${id}.docx`);
 }
 
 // Escape XML special characters
@@ -662,7 +662,7 @@ function generateCorePropsXml(options: WordDocumentOptions): string {
                    xmlns:dcterms="http://purl.org/dc/terms/"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   ${options.title ? `<dc:title>${escapeXml(options.title)}</dc:title>` : ""}
-  ${options.author ? `<dc:creator>${escapeXml(options.author)}</dc:creator>` : "<dc:creator>Moltbot</dc:creator>"}
+  ${options.author ? `<dc:creator>${escapeXml(options.author)}</dc:creator>` : "<dc:creator>OpenSentinel</dc:creator>"}
   ${options.subject ? `<dc:subject>${escapeXml(options.subject)}</dc:subject>` : ""}
   ${options.description ? `<dc:description>${escapeXml(options.description)}</dc:description>` : ""}
   ${options.keywords ? `<cp:keywords>${escapeXml(options.keywords.join(", "))}</cp:keywords>` : ""}
@@ -675,7 +675,7 @@ function generateCorePropsXml(options: WordDocumentOptions): string {
 function generateAppPropsXml(): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">
-  <Application>Moltbot Document Generator</Application>
+  <Application>OpenSentinel Document Generator</Application>
   <AppVersion>1.0</AppVersion>
 </Properties>`;
 }
@@ -928,7 +928,7 @@ async function generateWithDocxLibrary(
 
   const doc = new Document({
     title: options.title,
-    creator: options.author || "Moltbot",
+    creator: options.author || "OpenSentinel",
     subject: options.subject,
     description: options.description,
     keywords: options.keywords?.join(", "),

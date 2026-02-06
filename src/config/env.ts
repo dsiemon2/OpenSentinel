@@ -5,20 +5,20 @@ const envSchema = z.object({
   CLAUDE_API_KEY: z.string().min(1, "CLAUDE_API_KEY is required"),
 
   // Telegram
-  TELEGRAM_BOT_TOKEN: z.string().min(1, "TELEGRAM_BOT_TOKEN is required"),
-  TELEGRAM_CHAT_ID: z.string().min(1, "TELEGRAM_CHAT_ID is required"),
+  TELEGRAM_BOT_TOKEN: z.string().optional().default(""),
+  TELEGRAM_CHAT_ID: z.string().optional().default(""),
 
   // OpenAI (Whisper STT)
-  OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required"),
+  OPENAI_API_KEY: z.string().optional().default(""),
 
   // ElevenLabs TTS
-  ELEVENLABS_API_KEY: z.string().min(1, "ELEVENLABS_API_KEY is required"),
-  ELEVENLABS_VOICE_ID: z.string().min(1, "ELEVENLABS_VOICE_ID is required"),
+  ELEVENLABS_API_KEY: z.string().optional().default(""),
+  ELEVENLABS_VOICE_ID: z.string().optional().default(""),
 
   // Database
   DATABASE_URL: z
     .string()
-    .default("postgresql://moltbot:moltbot@localhost:5432/moltbot"),
+    .default("postgresql://sentinel:sentinel@localhost:5432/sentinel"),
 
   // Redis
   REDIS_URL: z.string().default("redis://localhost:6379"),
@@ -88,6 +88,28 @@ const envSchema = z.object({
   SPOTIFY_CLIENT_SECRET: z.string().optional(),
   SPOTIFY_REDIRECT_URI: z.string().url().optional(),
 
+  // MCP (Model Context Protocol)
+  MCP_ENABLED: z.coerce.boolean().optional().default(true),
+  MCP_CONFIG_PATH: z.string().optional().default("./mcp.json"),
+
+  // WhatsApp (optional)
+  WHATSAPP_ENABLED: z.coerce.boolean().optional().default(false),
+  WHATSAPP_AUTH_DIR: z.string().optional().default("./whatsapp-auth"),
+  WHATSAPP_ALLOWED_NUMBERS: z.string().optional(), // Comma-separated
+
+  // Signal (optional)
+  SIGNAL_ENABLED: z.coerce.boolean().optional().default(false),
+  SIGNAL_PHONE_NUMBER: z.string().optional(),
+  SIGNAL_CLI_PATH: z.string().optional().default("signal-cli"),
+  SIGNAL_ALLOWED_NUMBERS: z.string().optional(), // Comma-separated
+
+  // iMessage (optional, macOS only)
+  IMESSAGE_ENABLED: z.coerce.boolean().optional().default(false),
+  IMESSAGE_MODE: z.enum(["bluebubbles", "applescript"]).optional().default("applescript"),
+  IMESSAGE_BLUEBUBBLES_URL: z.string().optional(),
+  IMESSAGE_BLUEBUBBLES_PASSWORD: z.string().optional(),
+  IMESSAGE_ALLOWED_NUMBERS: z.string().optional(), // Comma-separated
+
   // Server
   PORT: z.coerce.number().default(8030),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
@@ -95,18 +117,97 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
-function loadEnv(): Env {
+// Internal mutable store
+let _env: Env | null = null;
+
+/**
+ * Programmatic configuration for library use.
+ * Call this before any module accesses `env`.
+ * Config values are merged with process.env (config takes precedence).
+ */
+export function configure(config: Partial<Env> & { CLAUDE_API_KEY: string }): Env {
+  const merged = { ...process.env, ...config };
+  const result = envSchema.safeParse(merged);
+
+  if (!result.success) {
+    const errors = result.error.errors.map(
+      (e) => `${e.path.join(".")}: ${e.message}`
+    );
+    throw new Error(
+      `OpenSentinel configuration validation failed:\n  ${errors.join("\n  ")}`
+    );
+  }
+
+  _env = result.data;
+  return _env;
+}
+
+/**
+ * Load config from process.env.
+ * Called lazily on first access if configure() was not called.
+ *
+ * When used as a library, env vars may not be set at import time
+ * (module-level singletons trigger this during static initialization).
+ * In that case, we populate with defaults and partial values rather
+ * than throwing — services will fail with clear errors when actually used.
+ */
+function loadFromProcessEnv(): Env {
   const result = envSchema.safeParse(process.env);
 
   if (!result.success) {
-    console.error("Environment validation failed:");
-    for (const error of result.error.errors) {
-      console.error(`  - ${error.path.join(".")}: ${error.message}`);
+    // If running as CLI (not library), throw so the user sees the error immediately
+    if (process.env.__OPENSENTINEL_CLI__) {
+      const errors = result.error.errors.map(
+        (e) => `${e.path.join(".")}: ${e.message}`
+      );
+      throw new Error(
+        `Environment validation failed:\n  ${errors.join("\n  ")}`
+      );
     }
-    process.exit(1);
+
+    // For library use: populate with whatever we have, fill missing with defaults
+    // Services will fail individually when they try to use undefined API keys
+    const lenientSchema = envSchema.extend({
+      CLAUDE_API_KEY: z.string().default(""),
+    });
+    const lenientResult = lenientSchema.safeParse(process.env);
+    _env = (lenientResult.success ? lenientResult.data : {}) as Env;
+    return _env;
   }
 
-  return result.data;
+  _env = result.data;
+  return _env;
 }
 
-export const env = loadEnv();
+/**
+ * The env accessor. Lazy — loads from process.env on first access
+ * if configure() was not called first.
+ *
+ * All 37+ consumer files keep using `env.SOME_PROP` unchanged.
+ */
+export const env: Env = new Proxy({} as Env, {
+  get(_target, prop: string) {
+    if (!_env) {
+      loadFromProcessEnv();
+    }
+    return (_env as any)[prop];
+  },
+  has(_target, prop: string) {
+    if (!_env) {
+      loadFromProcessEnv();
+    }
+    return prop in (_env as any);
+  },
+  ownKeys() {
+    if (!_env) {
+      loadFromProcessEnv();
+    }
+    return Reflect.ownKeys(_env as any);
+  },
+  getOwnPropertyDescriptor(_target, prop) {
+    if (!_env) {
+      loadFromProcessEnv();
+    }
+    return Object.getOwnPropertyDescriptor(_env as any, prop);
+  },
+});

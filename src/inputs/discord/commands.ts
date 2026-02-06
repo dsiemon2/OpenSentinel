@@ -38,16 +38,16 @@ function clearSession(userId: string): void {
 }
 
 /**
- * /ask - Ask Moltbot a question
+ * /ask - Ask OpenSentinel a question
  */
 export const askCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName("ask")
-    .setDescription("Ask Moltbot a question")
+    .setDescription("Ask OpenSentinel a question")
     .addStringOption((option) =>
       option
         .setName("question")
-        .setDescription("Your question for Moltbot")
+        .setDescription("Your question for OpenSentinel")
         .setRequired(true)
     )
     .toJSON(),
@@ -99,12 +99,12 @@ export const askCommand: SlashCommand = {
 };
 
 /**
- * /chat - Multi-turn conversation with Moltbot
+ * /chat - Multi-turn conversation with OpenSentinel
  */
 export const chatCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName("chat")
-    .setDescription("Have a conversation with Moltbot")
+    .setDescription("Have a conversation with OpenSentinel")
     .addStringOption((option) =>
       option
         .setName("message")
@@ -163,7 +163,7 @@ export const chatCommand: SlashCommand = {
 export const clearCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName("clear")
-    .setDescription("Clear your conversation history with Moltbot")
+    .setDescription("Clear your conversation history with OpenSentinel")
     .toJSON(),
 
   async execute(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -249,12 +249,12 @@ export const remindCommand: SlashCommand = {
 };
 
 /**
- * /status - Check Moltbot status
+ * /status - Check OpenSentinel status
  */
 export const statusCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName("status")
-    .setDescription("Check Moltbot status and capabilities")
+    .setDescription("Check OpenSentinel status and capabilities")
     .toJSON(),
 
   async execute(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -262,7 +262,7 @@ export const statusCommand: SlashCommand = {
     const historyCount = session.length;
 
     await interaction.reply({
-      content: `**Moltbot Status**
+      content: `**OpenSentinel Status**
 
 Bot: Online
 Your conversation history: ${historyCount} messages
@@ -288,12 +288,12 @@ Use \`/help\` for available commands.`,
 export const helpCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName("help")
-    .setDescription("Show available Moltbot commands")
+    .setDescription("Show available OpenSentinel commands")
     .toJSON(),
 
   async execute(interaction: ChatInputCommandInteraction): Promise<void> {
     await interaction.reply({
-      content: `**Moltbot Commands**
+      content: `**OpenSentinel Commands**
 
 \`/ask <question>\` - Ask a single question
 \`/chat <message>\` - Continue a conversation

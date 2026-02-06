@@ -3,7 +3,24 @@ import { eq, desc, sql, and } from "drizzle-orm";
 import OpenAI from "openai";
 import { env } from "../config/env";
 
-const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+// Lazy OpenAI client — created on first use
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+  }
+  return _openai;
+}
+const openai = new Proxy({} as OpenAI, {
+  get(_target, prop) {
+    const instance = getOpenAI();
+    const value = (instance as any)[prop];
+    if (typeof value === "function") {
+      return value.bind(instance);
+    }
+    return value;
+  },
+});
 
 // Generate embedding for text using OpenAI
 export async function generateEmbedding(text: string): Promise<number[]> {
@@ -52,7 +69,8 @@ export async function searchMemories(
   `);
 
   // Update last_accessed for retrieved memories
-  const memoryIds = results.rows.map((r: any) => r.id);
+  const rows = results as any[];
+  const memoryIds = rows.map((r: any) => r.id);
   if (memoryIds.length > 0) {
     await db.execute(sql`
       UPDATE memories
@@ -61,7 +79,7 @@ export async function searchMemories(
     `);
   }
 
-  return results.rows as Memory[];
+  return rows as Memory[];
 }
 
 // Get recent memories for a user

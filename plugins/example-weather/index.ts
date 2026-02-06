@@ -1,7 +1,7 @@
 /**
  * Example Weather Plugin
  *
- * Demonstrates how to create a Moltbot plugin with:
+ * Demonstrates how to create an OpenSentinel plugin with:
  * - Tool registration
  * - Storage usage
  * - HTTP requests

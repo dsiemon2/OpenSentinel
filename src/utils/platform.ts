@@ -12,9 +12,9 @@ export function getHomeDir(): string {
 
 export function getDataDir(): string {
   if (isWindows) {
-    return path.join(process.env.APPDATA || getHomeDir(), "Moltbot");
+    return path.join(process.env.APPDATA || getHomeDir(), "OpenSentinel");
   }
-  return path.join(getHomeDir(), ".moltbot");
+  return path.join(getHomeDir(), ".sentinel");
 }
 
 export function getTempDir(): string {

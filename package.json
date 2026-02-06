@@ -1,10 +1,29 @@
 {
-  "name": "moltbot",
-  "version": "1.0.0",
+  "name": "opensentinel",
+  "version": "2.0.0",
+  "description": "Self-hosted personal AI assistant powered by Claude with Telegram, Discord, Slack, WhatsApp, Signal, iMessage, and web interfaces",
   "type": "module",
+  "main": "./dist/lib.js",
+  "module": "./dist/lib.js",
+  "types": "./dist/lib.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/lib.js",
+      "types": "./dist/lib.d.ts"
+    }
+  },
+  "bin": {
+    "opensentinel": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "start": "bun src/index.ts",
+    "dev": "bun --watch src/cli.ts",
+    "start": "bun src/cli.ts",
+    "build": "tsup",
+    "prepublishOnly": "bun run build",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
@@ -12,39 +31,57 @@
     "db:migrate": "bun src/db/migrate.ts",
     "db:studio": "drizzle-kit studio"
   },
+  "keywords": [
+    "ai",
+    "assistant",
+    "claude",
+    "telegram",
+    "discord",
+    "slack",
+    "whatsapp",
+    "signal",
+    "imessage",
+    "self-hosted"
+  ],
+  "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
-    "@discordjs/voice": "^0.18.0",
-    "@grammyjs/files": "^1.1.1",
-    "@octokit/webhooks": "^14.2.0",
-    "@slack/bolt": "^4.1.0",
-    "@slack/web-api": "^7.7.0",
     "bullmq": "^5.34.0",
     "date-fns": "^4.1.0",
-    "discord.js": "^14.16.0",
     "drizzle-orm": "^0.39.0",
-    "exceljs": "^4.4.0",
     "glob": "^13.0.1",
-    "grammy": "^1.34.0",
     "hono": "^4.7.0",
-    "imapflow": "^1.2.8",
     "ioredis": "^5.4.1",
-    "mailparser": "^3.9.3",
-    "mammoth": "^1.11.0",
     "marked": "^12.0.0",
     "nanoid": "^5.0.0",
     "node-cron": "^4.2.1",
+    "openai": "^4.77.0",
+    "postgres": "^3.4.5",
+    "uuid": "^13.0.0",
+    "zod": "^3.24.0"
+  },
+  "optionalDependencies": {
+    "@discordjs/voice": "^0.18.0",
+    "@grammyjs/files": "^1.1.1",
+    "@hapi/boom": "^10.0.0",
+    "@octokit/webhooks": "^14.2.0",
+    "@slack/bolt": "^4.1.0",
+    "@slack/web-api": "^7.7.0",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "discord.js": "^14.16.0",
+    "exceljs": "^4.4.0",
+    "grammy": "^1.34.0",
+    "imapflow": "^1.2.8",
+    "mailparser": "^3.9.3",
+    "mammoth": "^1.11.0",
     "nodemailer": "^7.0.13",
     "octokit": "^5.0.5",
-    "openai": "^4.77.0",
     "pdf-parse": "^2.4.5",
     "pdfkit": "^0.15.0",
     "playwright": "^1.58.1",
-    "postgres": "^3.4.5",
+    "qrcode-terminal": "^0.12.0",
     "screenshot-desktop": "^1.15.0",
-    "tesseract.js": "^5.0.0",
-    "uuid": "^13.0.0",
-    "zod": "^3.24.0"
+    "tesseract.js": "^5.0.0"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -54,6 +91,7 @@
     "@types/pdf-parse": "^1.1.5",
     "@types/uuid": "^11.0.0",
     "drizzle-kit": "^0.30.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.7.0"
   }
 }

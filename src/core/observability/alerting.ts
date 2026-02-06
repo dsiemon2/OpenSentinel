@@ -1,7 +1,7 @@
 /**
  * Alerting System - Anomaly detection, cost alerts, error spikes, health monitoring
  *
- * Provides comprehensive alerting and monitoring for the Moltbot system,
+ * Provides comprehensive alerting and monitoring for the OpenSentinel system,
  * including automatic anomaly detection, cost tracking, and health checks.
  */
 

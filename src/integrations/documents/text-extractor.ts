@@ -1,5 +1,5 @@
 /**
- * Text Extractor for Moltbot Document Ingestion
+ * Text Extractor for OpenSentinel Document Ingestion
  *
  * Extracts text from various text-based formats: TXT, MD, HTML, CSV, JSON
  */

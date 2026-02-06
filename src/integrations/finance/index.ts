@@ -1,5 +1,5 @@
 /**
- * Finance Integration for Moltbot
+ * Finance Integration for OpenSentinel
  *
  * Provides comprehensive financial tracking capabilities:
  * - Cryptocurrency prices (CoinGecko API)

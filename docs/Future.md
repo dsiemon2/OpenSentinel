@@ -1,6 +1,6 @@
 # Future Vision
 
-Long-term goals and advanced features for Moltbot beyond the current roadmap.
+Long-term goals and advanced features for OpenSentinel beyond the current roadmap.
 
 **STATUS: ALL FEATURES IMPLEMENTED** (February 2026)
 
@@ -17,13 +17,13 @@ Leaning into the transformation/growth theme:
 - **Implementation**: `src/core/molt/evolution-tracker.ts`
 
 ### Skill Unlocking ✅
-- [x] As Moltbot learns preferences, new capabilities unlock
+- [x] As OpenSentinel learns preferences, new capabilities unlock
 - [x] Gamification of assistant relationship
 - [x] Achievement system for milestones
 - **Implementation**: `src/core/molt/achievement-system.ts`
 
 ### Growth Reports ✅
-- [x] Monthly digest of what Moltbot learned
+- [x] Monthly digest of what OpenSentinel learned
 - [x] Insights into conversation patterns
 - [x] Suggestions for better utilization
 - **Implementation**: `src/core/molt/growth-reporter.ts`
@@ -46,7 +46,7 @@ Leaning into the transformation/growth theme:
 ## Advanced Input Methods ✅ COMPLETE
 
 ### Voice Interface ✅
-- [x] Wake word detection ("Hey Molt") - `src/inputs/voice/wake-word.ts`
+- [x] Wake word detection ("Hey OpenSentinel") - `src/inputs/voice/wake-word.ts`
 - [x] Continuous conversation mode - `src/inputs/voice/continuous-mode.ts`
 - [x] Voice activity detection (VAD) - `src/inputs/voice/vad.ts`
 - [x] Speaker diarization (multi-person) - `src/inputs/voice/speaker-diarization.ts`

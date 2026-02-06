@@ -112,7 +112,7 @@ export const DEFAULT_ACHIEVEMENTS: AchievementDefinition[] = [
   {
     code: "week_streak",
     name: "Weekly Regular",
-    description: "Used Moltbot 7 days in a row",
+    description: "Used OpenSentinel 7 days in a row",
     iconEmoji: "📅",
     category: "mastery",
     criteria: { type: "streak", metric: "daily_usage", threshold: 7 },
@@ -121,7 +121,7 @@ export const DEFAULT_ACHIEVEMENTS: AchievementDefinition[] = [
   {
     code: "month_streak",
     name: "Monthly Champion",
-    description: "Used Moltbot 30 days in a row",
+    description: "Used OpenSentinel 30 days in a row",
     iconEmoji: "🏆",
     category: "mastery",
     criteria: { type: "streak", metric: "daily_usage", threshold: 30 },

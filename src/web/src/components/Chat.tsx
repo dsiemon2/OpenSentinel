@@ -86,7 +86,7 @@ export default function Chat() {
               marginTop: "2rem",
             }}
           >
-            <h2 style={{ marginBottom: "0.5rem" }}>Welcome to Moltbot</h2>
+            <h2 style={{ marginBottom: "0.5rem" }}>Welcome to OpenSentinel</h2>
             <p>Your personal AI assistant. Start a conversation below.</p>
           </div>
         )}

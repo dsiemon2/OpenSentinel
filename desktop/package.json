@@ -1,9 +1,9 @@
 {
-  "name": "moltbot-desktop",
+  "name": "opensentinel-desktop",
   "version": "1.0.0",
-  "description": "Moltbot Desktop - Personal AI Assistant",
+  "description": "OpenSentinel Desktop - Personal AI Assistant",
   "main": "dist/main.js",
-  "author": "Moltbot",
+  "author": "OpenSentinel",
   "license": "MIT",
   "scripts": {
     "dev": "concurrently \"npm run dev:main\" \"npm run dev:renderer\"",
@@ -19,8 +19,8 @@
     "dist:linux": "electron-builder --linux"
   },
   "build": {
-    "appId": "com.moltbot.desktop",
-    "productName": "Moltbot",
+    "appId": "com.opensentinel.desktop",
+    "productName": "OpenSentinel",
     "directories": {
       "output": "release"
     },

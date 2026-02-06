@@ -299,7 +299,7 @@ async function sendChallengeToDevice(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Moltbot-Signature": signature,
+        "X-OpenSentinel-Signature": signature,
         "X-Challenge-Id": challenge.challengeId,
       },
       body: payloadStr,

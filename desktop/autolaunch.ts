@@ -6,7 +6,7 @@ let autoLauncher: AutoLaunch | null = null;
 function getAutoLauncher(): AutoLaunch {
   if (!autoLauncher) {
     autoLauncher = new AutoLaunch({
-      name: 'Moltbot',
+      name: 'OpenSentinel',
       path: app.getPath('exe'),
       isHidden: true, // Start minimized to tray
     });

@@ -56,7 +56,7 @@
 ### Telegram Enhancements
 - [x] Inline keyboard responses
 - [x] Reaction-based commands
-- [x] Forward-to-Moltbot processing
+- [x] Forward-to-OpenSentinel processing
 - [x] Thread/topic organization
 
 ### Scheduling
@@ -111,7 +111,7 @@
 ### Local Speech
 - [x] faster-whisper support (GPU-accelerated STT)
 - [x] Piper TTS support (local, fast)
-- [x] Wake word detection ("Hey Molt") - `src/inputs/voice/wake-word.ts`
+- [x] Wake word detection ("Hey OpenSentinel") - `src/inputs/voice/wake-word.ts`
 - [x] Continuous conversation mode - `src/inputs/voice/continuous-mode.ts`
 
 ### Privacy Mode

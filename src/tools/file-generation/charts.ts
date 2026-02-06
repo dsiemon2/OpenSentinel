@@ -50,7 +50,7 @@ const DEFAULT_COLORS = [
 // Generate temp file path
 function getTempPath(): string {
   const id = randomBytes(8).toString("hex");
-  return join(tmpdir(), `moltbot-chart-${id}.svg`);
+  return join(tmpdir(), `sentinel-chart-${id}.svg`);
 }
 
 // Generate SVG bar chart

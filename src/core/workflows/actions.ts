@@ -75,7 +75,7 @@ export interface HttpRequestAction extends BaseAction {
   };
 }
 
-// Run a Moltbot tool
+// Run an OpenSentinel tool
 export interface RunToolAction extends BaseAction {
   type: "run_tool";
   tool: {

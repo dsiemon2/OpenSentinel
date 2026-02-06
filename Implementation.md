@@ -4,7 +4,7 @@
 
 **ALL FEATURES IMPLEMENTED** - February 2026
 
-Moltbot is a fully-featured self-hosted personal AI assistant with Claude as the brain, supporting Telegram, Discord, Slack, Web Dashboard, and REST API interfaces.
+OpenSentinel is a fully-featured self-hosted personal AI assistant with Claude as the brain, supporting Telegram, Discord, Slack, Web Dashboard, and REST API interfaces.
 
 ---
 
@@ -13,7 +13,7 @@ Moltbot is a fully-featured self-hosted personal AI assistant with Claude as the
 | Service | Status | Details |
 |---------|--------|---------|
 | Telegram | ✅ Active | @JarvisElectronBot |
-| Discord | ✅ Active | MoltBot#8291 |
+| Discord | ✅ Active | OpenSentinel#8291 |
 | Slack | ✅ Ready | Configure tokens to enable |
 | Web Dashboard | ✅ Active | http://localhost:8030 |
 | REST API | ✅ Active | http://localhost:8030/api |
@@ -108,7 +108,7 @@ Moltbot is a fully-featured self-hosted personal AI assistant with Claude as the
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           MOLTBOT v2.0.0                                     │
+│                       OPENSENTINEL v2.0.0                                    │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  INPUTS                        CORE                           OUTPUTS       │
@@ -196,7 +196,7 @@ Moltbot is a fully-featured self-hosted personal AI assistant with Claude as the
 
 | Service | Port |
 |---------|------|
-| Moltbot API + Dashboard | 8030 |
+| OpenSentinel API + Dashboard | 8030 |
 | PostgreSQL | 5445 |
 | Redis | 6379 |
 

@@ -72,8 +72,8 @@ export default function Chat({ apiUrl }: ChatProps) {
           },
         ]);
         // Show notification for errors
-        window.moltbot.showNotification({
-          title: 'Moltbot Error',
+        window.opensentinel.showNotification({
+          title: 'OpenSentinel Error',
           body: data.error,
         });
       } else {
@@ -93,13 +93,13 @@ export default function Chat({ apiUrl }: ChatProps) {
         ...prev,
         {
           role: 'assistant',
-          content: 'Sorry, there was an error connecting to the server. Make sure Moltbot is running.',
+          content: 'Sorry, there was an error connecting to the server. Make sure OpenSentinel is running.',
           timestamp: new Date(),
         },
       ]);
-      window.moltbot.showNotification({
+      window.opensentinel.showNotification({
         title: 'Connection Error',
-        body: 'Could not connect to Moltbot server',
+        body: 'Could not connect to OpenSentinel server',
       });
     } finally {
       setLoading(false);
@@ -140,7 +140,7 @@ export default function Chat({ apiUrl }: ChatProps) {
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <h2>Welcome to Moltbot</h2>
+            <h2>Welcome to OpenSentinel</h2>
             <p>Your personal AI assistant. Start a conversation below.</p>
             <div className="quick-actions">
               <button onClick={() => setInput('What can you help me with?')}>
@@ -160,7 +160,7 @@ export default function Chat({ apiUrl }: ChatProps) {
           <div key={i} className={`message ${msg.role}`}>
             <div className="message-header">
               <span className="message-role">
-                {msg.role === 'user' ? 'You' : 'Moltbot'}
+                {msg.role === 'user' ? 'You' : 'OpenSentinel'}
               </span>
               <span className="message-time">{formatTime(msg.timestamp)}</span>
             </div>
@@ -181,7 +181,7 @@ export default function Chat({ apiUrl }: ChatProps) {
         {loading && (
           <div className="message assistant">
             <div className="message-header">
-              <span className="message-role">Moltbot</span>
+              <span className="message-role">OpenSentinel</span>
             </div>
             <div className="loading">
               <div className="spinner" />

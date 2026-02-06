@@ -1,7 +1,15 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { serveStatic } from "hono/bun";
+// Use platform-appropriate static file serving
+let serveStatic: any;
+try {
+  // Bun runtime
+  serveStatic = require("hono/bun").serveStatic;
+} catch {
+  // Fallback: no static file serving (API-only mode)
+  serveStatic = () => async (_c: any, next: any) => next();
+}
 import { chat, chatWithTools, streamChat, type Message } from "../../core/brain";
 import { db, conversations, messages, memories } from "../../db";
 import { desc, eq } from "drizzle-orm";

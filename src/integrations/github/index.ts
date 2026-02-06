@@ -1,7 +1,7 @@
 /**
  * GitHub Integration
  *
- * Provides comprehensive GitHub API integration for Moltbot,
+ * Provides comprehensive GitHub API integration for OpenSentinel,
  * including repository management, issues, pull requests,
  * AI-powered code review, and webhook handling.
  */

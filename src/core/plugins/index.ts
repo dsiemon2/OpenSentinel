@@ -1,7 +1,7 @@
 /**
  * Plugin System - Main entry point
  *
- * This module provides a complete plugin/extensibility system for Moltbot.
+ * This module provides a complete plugin/extensibility system for OpenSentinel.
  *
  * Features:
  * - Plugin discovery and loading from filesystem
@@ -44,7 +44,7 @@
  * Creating a Plugin:
  * ```typescript
  * // plugins/my-plugin/index.ts
- * import type { Plugin, PluginAPI, PluginManifest } from '@moltbot/plugins';
+ * import type { Plugin, PluginAPI, PluginManifest } from '@sentinel/plugins';
  *
  * export default function createPlugin(manifest: PluginManifest): Plugin {
  *   return {

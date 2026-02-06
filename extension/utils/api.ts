@@ -1,6 +1,6 @@
 /**
- * Moltbot API Client
- * Handles all communication with the Moltbot backend
+ * OpenSentinel API Client
+ * Handles all communication with the OpenSentinel backend
  */
 
 export interface ChatMessage {
@@ -35,7 +35,7 @@ export interface ApiError {
 }
 
 const DEFAULT_API_URL = 'http://localhost:8030';
-const STORAGE_KEY = 'moltbot_api_url';
+const STORAGE_KEY = 'opensentinel_api_url';
 
 /**
  * Get the configured API URL from storage
@@ -57,7 +57,7 @@ export async function setApiUrl(url: string): Promise<void> {
 }
 
 /**
- * Make an authenticated request to the Moltbot API
+ * Make an authenticated request to the OpenSentinel API
  */
 async function apiRequest<T>(
   endpoint: string,
@@ -90,7 +90,7 @@ async function apiRequest<T>(
 }
 
 /**
- * Send a chat message to Moltbot
+ * Send a chat message to OpenSentinel
  */
 export async function sendMessage(
   message: string,

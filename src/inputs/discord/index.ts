@@ -6,7 +6,7 @@ import {
   Routes,
   Collection,
   type Message as DiscordMessage,
-  type VoiceState,
+  type VoiceState as DiscordVoiceState,
   type GuildMember,
   type Interaction,
   ChannelType,
@@ -130,7 +130,7 @@ export class DiscordBot {
 
     // Voice state update handler
     this.client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
-      await this.handleVoiceStateUpdate(oldState, newState);
+      await this.handleVoiceStateUpdate(oldState as any, newState as any);
     });
 
     // Error handler
@@ -404,7 +404,9 @@ export class DiscordBot {
 
     try {
       // Show typing indicator
-      await message.channel.sendTyping();
+      if ("sendTyping" in message.channel) {
+        await (message.channel as any).sendTyping();
+      }
 
       // Handle file attachments
       let processedContent = content;
@@ -422,7 +424,9 @@ export class DiscordBot {
         `discord:${userId}`,
         async () => {
           // Keep typing indicator alive during tool use
-          await message.channel.sendTyping();
+          if ("sendTyping" in message.channel) {
+            await (message.channel as any).sendTyping();
+          }
         }
       );
 
@@ -512,8 +516,8 @@ export class DiscordBot {
    * Handle voice state updates
    */
   private async handleVoiceStateUpdate(
-    oldState: VoiceState,
-    newState: VoiceState
+    oldState: any,
+    newState: any
   ): Promise<void> {
     // Check if the bot was disconnected
     if (
@@ -522,13 +526,13 @@ export class DiscordBot {
       oldState.channelId
     ) {
       // Bot was disconnected from voice
-      const guildId = oldState.guild.id;
+      const guildId = oldState.guild?.id || oldState.guildId;
       const voiceState = this.voiceConnections.get(guildId);
 
       if (voiceState) {
         voiceState.player.stop();
         this.voiceConnections.delete(guildId);
-        console.log(`[Discord] Bot disconnected from voice in ${oldState.guild.name}`);
+        console.log(`[Discord] Bot disconnected from voice in ${oldState.guild?.name || guildId}`);
       }
     }
   }

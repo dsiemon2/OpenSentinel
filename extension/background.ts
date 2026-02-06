@@ -1,5 +1,5 @@
 /**
- * Moltbot Extension Background Service Worker
+ * OpenSentinel Extension Background Service Worker
  * Handles context menus, keyboard shortcuts, and message routing
  */
 
@@ -25,10 +25,10 @@ export interface PageDataResponse {
 }
 
 // Context menu IDs
-const MENU_ASK_ABOUT = 'moltbot-ask-about';
-const MENU_SUMMARIZE = 'moltbot-summarize';
-const MENU_EXTRACT = 'moltbot-extract';
-const MENU_CAPTURE = 'moltbot-capture';
+const MENU_ASK_ABOUT = 'opensentinel-ask-about';
+const MENU_SUMMARIZE = 'opensentinel-summarize';
+const MENU_EXTRACT = 'opensentinel-extract';
+const MENU_CAPTURE = 'opensentinel-capture';
 
 /**
  * Initialize context menus on extension install/update
@@ -39,7 +39,7 @@ chrome.runtime.onInstalled.addListener(() => {
     // Create context menus
     chrome.contextMenus.create({
       id: MENU_ASK_ABOUT,
-      title: 'Ask Moltbot about "%s"',
+      title: 'Ask OpenSentinel about "%s"',
       contexts: ['selection'],
     });
 
@@ -89,7 +89,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
           // Fallback: show notification if popup can't be opened
           showNotification(
             'Selection saved',
-            'Click the Moltbot icon to ask about the selected text'
+            'Click the OpenSentinel icon to ask about the selected text'
           );
         });
         break;
@@ -102,7 +102,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
           return;
         }
 
-        showNotification('Summarizing...', 'Please wait while Moltbot summarizes the page');
+        showNotification('Summarizing...', 'Please wait while OpenSentinel summarizes the page');
 
         const response = await summarizePage(pageData);
 
@@ -116,7 +116,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
           },
         });
 
-        showNotification('Summary ready', 'Click the Moltbot icon to view the summary');
+        showNotification('Summary ready', 'Click the OpenSentinel icon to view the summary');
         break;
       }
 
@@ -127,7 +127,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
           return;
         }
 
-        showNotification('Extracting...', 'Please wait while Moltbot extracts data');
+        showNotification('Extracting...', 'Please wait while OpenSentinel extracts data');
 
         const response = await extractData(pageData);
 
@@ -140,7 +140,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
           },
         });
 
-        showNotification('Extraction ready', 'Click the Moltbot icon to view the extracted data');
+        showNotification('Extraction ready', 'Click the OpenSentinel icon to view the extracted data');
         break;
       }
 
@@ -311,7 +311,7 @@ async function getPageData(tabId: number): Promise<PageData | null> {
 function showNotification(title: string, message: string): void {
   // Use basic notification API (requires notifications permission if you want rich notifications)
   // For now, we'll log to console as a fallback
-  console.log(`[Moltbot] ${title}: ${message}`);
+  console.log(`[OpenSentinel] ${title}: ${message}`);
 
   // Try to send message to active tab to show in-page notification
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {

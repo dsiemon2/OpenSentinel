@@ -3,7 +3,7 @@
   "name": "Example Weather Plugin",
   "version": "1.0.0",
   "description": "An example plugin that provides weather information tools",
-  "author": "Moltbot Team",
+  "author": "OpenSentinel Team",
   "main": "index.ts",
   "permissions": [
     "tools:register",

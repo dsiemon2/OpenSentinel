@@ -150,7 +150,7 @@ const DEFAULT_OPTIONS: PresentationOptions = {
 // Generate temp file path
 function getTempPath(): string {
   const id = randomBytes(8).toString("hex");
-  return join(tmpdir(), `moltbot-presentation-${id}.pptx`);
+  return join(tmpdir(), `sentinel-presentation-${id}.pptx`);
 }
 
 // Escape XML special characters
@@ -269,9 +269,9 @@ function generateThemeXml(theme: PresentationTheme): string {
   const t = { ...DEFAULT_THEME, ...theme };
 
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Moltbot Theme">
+<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="OpenSentinel Theme">
   <a:themeElements>
-    <a:clrScheme name="Moltbot">
+    <a:clrScheme name="OpenSentinel">
       <a:dk1><a:srgbClr val="000000"/></a:dk1>
       <a:lt1><a:srgbClr val="${normalizeColor(t.backgroundColor!)}"/></a:lt1>
       <a:dk2><a:srgbClr val="${normalizeColor(t.titleColor!)}"/></a:dk2>
@@ -285,7 +285,7 @@ function generateThemeXml(theme: PresentationTheme): string {
       <a:hlink><a:srgbClr val="0000FF"/></a:hlink>
       <a:folHlink><a:srgbClr val="800080"/></a:folHlink>
     </a:clrScheme>
-    <a:fontScheme name="Moltbot">
+    <a:fontScheme name="OpenSentinel">
       <a:majorFont>
         <a:latin typeface="${t.titleFont}"/>
         <a:ea typeface=""/>
@@ -297,7 +297,7 @@ function generateThemeXml(theme: PresentationTheme): string {
         <a:cs typeface=""/>
       </a:minorFont>
     </a:fontScheme>
-    <a:fmtScheme name="Moltbot">
+    <a:fmtScheme name="OpenSentinel">
       <a:fillStyleLst>
         <a:solidFill><a:schemeClr val="phClr"/></a:solidFill>
         <a:solidFill><a:schemeClr val="phClr"/></a:solidFill>
@@ -968,7 +968,7 @@ function generateCorePropsXml(options: PresentationOptions): string {
                    xmlns:dcterms="http://purl.org/dc/terms/"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   ${options.title ? `<dc:title>${escapeXml(options.title)}</dc:title>` : ""}
-  ${options.author ? `<dc:creator>${escapeXml(options.author)}</dc:creator>` : "<dc:creator>Moltbot</dc:creator>"}
+  ${options.author ? `<dc:creator>${escapeXml(options.author)}</dc:creator>` : "<dc:creator>OpenSentinel</dc:creator>"}
   ${options.subject ? `<dc:subject>${escapeXml(options.subject)}</dc:subject>` : ""}
   <dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created>
   <dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified>
@@ -979,7 +979,7 @@ function generateCorePropsXml(options: PresentationOptions): string {
 function generateAppPropsXml(options: PresentationOptions, slideCount: number): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">
-  <Application>Moltbot Presentation Generator</Application>
+  <Application>OpenSentinel Presentation Generator</Application>
   <AppVersion>1.0</AppVersion>
   ${options.company ? `<Company>${escapeXml(options.company)}</Company>` : ""}
   <Slides>${slideCount}</Slides>

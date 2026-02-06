@@ -1,6 +1,6 @@
-# MoltBot - Personal AI Assistant
+# OpenSentinel - Personal AI Assistant
 
-![MoltBot](GoGreen-Moltbot.png)
+![OpenSentinel](GoGreen-OpenSentinel.png)
 
 **Category:** AI Assistant
 **Version:** 2.0.0
@@ -24,9 +24,9 @@
 
 ## Overview
 
-MoltBot is a comprehensive self-hosted personal AI assistant—a JARVIS-style hub powered by Claude. It provides intelligent assistance through multiple communication channels including Telegram, Discord, Slack, voice commands, web dashboard, and REST API. The system features 30+ tools for shell execution, file operations, browser automation, web search, document generation, and more.
+OpenSentinel is a comprehensive self-hosted personal AI assistant—a JARVIS-style hub powered by Claude. It provides intelligent assistance through multiple communication channels including Telegram, Discord, Slack, voice commands, web dashboard, and REST API. The system features 30+ tools for shell execution, file operations, browser automation, web search, document generation, and more.
 
-MoltBot learns from interactions through a sophisticated RAG-based memory system, supports 15 domain expert personalities, and includes enterprise features like multi-user support, SSO integration, and comprehensive security controls.
+OpenSentinel learns from interactions through a sophisticated RAG-based memory system, supports 15 domain expert personalities, and includes enterprise features like multi-user support, SSO integration, and comprehensive security controls.
 
 ---
 
@@ -172,7 +172,7 @@ MoltBot learns from interactions through a sophisticated RAG-based memory system
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         MOLTBOT v2.0                            │
+│                    OPENSENTINEL v2.0                            │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │
@@ -254,7 +254,7 @@ MoltBot learns from interactions through a sophisticated RAG-based memory system
 
 | Service | Port |
 |---------|------|
-| MoltBot API + Dashboard | 8030 |
+| OpenSentinel API + Dashboard | 8030 |
 | PostgreSQL | 5445 |
 | Redis | 6379 |
 
@@ -276,5 +276,5 @@ MoltBot learns from interactions through a sophisticated RAG-based memory system
 ---
 
 **GoGreen Paperless Initiative**
-MoltBot - Personal AI Assistant
+OpenSentinel - Personal AI Assistant
 Version 2.0.0 | February 2026

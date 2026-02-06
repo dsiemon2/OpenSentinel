@@ -1,22 +1,22 @@
-# Moltbot Docker Compose Configuration
+# OpenSentinel Docker Compose Configuration
 # Usage: docker-compose up -d
 
 version: "3.8"
 
 services:
-  # Main Moltbot application
-  moltbot:
+  # Main OpenSentinel application
+  opensentinel:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: moltbot
+    container_name: opensentinel
     restart: unless-stopped
     ports:
       - "8030:8030"
     environment:
       - NODE_ENV=production
       - PORT=8030
-      - DATABASE_URL=postgresql://moltbot:${DB_PASSWORD:-moltbot}@postgres:5432/moltbot
+      - DATABASE_URL=postgresql://opensentinel:${DB_PASSWORD:-opensentinel}@postgres:5432/opensentinel
       - REDIS_URL=redis://redis:6379
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
@@ -25,15 +25,15 @@ services:
       - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
       - ELEVENLABS_VOICE_ID=${ELEVENLABS_VOICE_ID}
     volumes:
-      - moltbot_data:/app/data
-      - moltbot_logs:/app/logs
+      - opensentinel_data:/app/data
+      - opensentinel_logs:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     networks:
-      - moltbot-network
+      - opensentinel-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8030/health"]
       interval: 30s
@@ -44,21 +44,21 @@ services:
   # PostgreSQL with pgvector
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: moltbot-postgres
+    container_name: opensentinel-postgres
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=moltbot
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-moltbot}
-      - POSTGRES_DB=moltbot
+      - POSTGRES_USER=opensentinel
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-opensentinel}
+      - POSTGRES_DB=opensentinel
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "5445:5432"
     networks:
-      - moltbot-network
+      - opensentinel-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U moltbot -d moltbot"]
+      test: ["CMD-SHELL", "pg_isready -U opensentinel -d opensentinel"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -66,7 +66,7 @@ services:
   # Redis for caching and job queues
   redis:
     image: redis:7-alpine
-    container_name: moltbot-redis
+    container_name: opensentinel-redis
     restart: unless-stopped
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
@@ -74,7 +74,7 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - moltbot-network
+      - opensentinel-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -84,7 +84,7 @@ services:
   # Nginx reverse proxy (optional, for production)
   nginx:
     image: nginx:alpine
-    container_name: moltbot-nginx
+    container_name: opensentinel-nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -93,14 +93,14 @@ services:
       - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/ssl:/etc/nginx/ssl:ro
     depends_on:
-      - moltbot
+      - opensentinel
     networks:
-      - moltbot-network
+      - opensentinel-network
     profiles:
       - production
 
 networks:
-  moltbot-network:
+  opensentinel-network:
     driver: bridge
 
 volumes:
@@ -108,7 +108,7 @@ volumes:
     driver: local
   redis_data:
     driver: local
-  moltbot_data:
+  opensentinel_data:
     driver: local
-  moltbot_logs:
+  opensentinel_logs:
     driver: local

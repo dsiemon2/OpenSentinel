@@ -1,5 +1,5 @@
 /**
- * Document Chunker for Moltbot Document Ingestion
+ * Document Chunker for OpenSentinel Document Ingestion
  *
  * Splits documents into semantic chunks suitable for embedding and retrieval.
  */

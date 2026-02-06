@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 // Type definitions for exposed API
-interface MoltbotAPI {
+interface OpenSentinelAPI {
   // Settings
   getSettings: () => Promise<{
     apiUrl: string;
@@ -39,7 +39,7 @@ interface MoltbotAPI {
 
 // Expose protected methods that allow the renderer process to use
 // ipcRenderer without exposing the entire object
-const api: MoltbotAPI = {
+const api: OpenSentinelAPI = {
   // Settings
   getSettings: () => ipcRenderer.invoke('get-settings'),
   setSetting: (key: string, value: unknown) => ipcRenderer.invoke('set-setting', key, value),
@@ -67,11 +67,11 @@ const api: MoltbotAPI = {
   platform: process.platform,
 };
 
-contextBridge.exposeInMainWorld('moltbot', api);
+contextBridge.exposeInMainWorld('opensentinel', api);
 
 // Type declaration for TypeScript
 declare global {
   interface Window {
-    moltbot: MoltbotAPI;
+    opensentinel: OpenSentinelAPI;
   }
 }

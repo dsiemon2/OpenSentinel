@@ -1,4 +1,5 @@
 import type { Tool } from "@anthropic-ai/sdk/resources/messages";
+import { isMCPTool, executeMCPTool, type MCPRegistry } from "../core/mcp";
 import { executeCommand } from "./shell";
 import {
   listDirectory,
@@ -593,12 +594,33 @@ export const TOOLS: Tool[] = [
   },
 ];
 
+// MCP registry reference (set by brain.ts after initialization)
+let mcpRegistry: MCPRegistry | null = null;
+
+export function setMCPRegistry(registry: MCPRegistry | null): void {
+  mcpRegistry = registry;
+}
+
+export function getMCPRegistry(): MCPRegistry | null {
+  return mcpRegistry;
+}
+
 // Execute a tool by name
 export async function executeTool(
   name: string,
   input: Record<string, unknown>
 ): Promise<{ success: boolean; result: unknown; error?: string }> {
   try {
+    // Check if this is an MCP tool
+    if (isMCPTool(name) && mcpRegistry) {
+      const result = await executeMCPTool(mcpRegistry, name, input);
+      return {
+        success: result.success,
+        result: result.output || result.error,
+        error: result.error,
+      };
+    }
+
     switch (name) {
       case "execute_command": {
         const result = await executeCommand(

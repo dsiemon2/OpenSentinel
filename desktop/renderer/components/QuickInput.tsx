@@ -13,12 +13,12 @@ export default function QuickInput() {
     inputRef.current?.focus();
 
     // Get API URL
-    window.moltbot.getApiUrl().then(setApiUrl);
+    window.opensentinel.getApiUrl().then(setApiUrl);
 
     // Handle escape key to close
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        window.moltbot.hidePopup();
+        window.opensentinel.hidePopup();
       }
     };
 
@@ -48,8 +48,8 @@ export default function QuickInput() {
 
       if (data.error) {
         setError(data.error);
-        window.moltbot.showNotification({
-          title: 'Moltbot Error',
+        window.opensentinel.showNotification({
+          title: 'OpenSentinel Error',
           body: data.error,
         });
       } else {
@@ -58,8 +58,8 @@ export default function QuickInput() {
         if (content.length > 200) {
           setResponse(content.substring(0, 200) + '...');
           // Show full response in notification
-          window.moltbot.showNotification({
-            title: 'Moltbot Response',
+          window.opensentinel.showNotification({
+            title: 'OpenSentinel Response',
             body: content.substring(0, 100) + '...',
           });
         } else {
@@ -67,9 +67,9 @@ export default function QuickInput() {
         }
       }
     } catch (err) {
-      const errorMsg = 'Could not connect to Moltbot server';
+      const errorMsg = 'Could not connect to OpenSentinel server';
       setError(errorMsg);
-      window.moltbot.showNotification({
+      window.opensentinel.showNotification({
         title: 'Connection Error',
         body: errorMsg,
       });
@@ -86,8 +86,8 @@ export default function QuickInput() {
   };
 
   const openMainWindow = () => {
-    window.moltbot.showMainWindow();
-    window.moltbot.hidePopup();
+    window.opensentinel.showMainWindow();
+    window.opensentinel.hidePopup();
   };
 
   const reset = () => {
@@ -113,7 +113,7 @@ export default function QuickInput() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask Moltbot anything..."
+          placeholder="Ask OpenSentinel anything..."
           disabled={loading}
           className="quick-input"
         />

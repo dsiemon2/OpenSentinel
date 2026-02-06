@@ -1,7 +1,7 @@
 /**
  * Cloud Storage Integration
  *
- * Provides unified cloud storage integration for Moltbot,
+ * Provides unified cloud storage integration for OpenSentinel,
  * supporting Google Drive, Dropbox, and a unified interface.
  */
 

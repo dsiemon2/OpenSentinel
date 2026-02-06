@@ -1,21 +1,21 @@
-# Moltbot Browser Extension
+# OpenSentinel Browser Extension
 
 **Status: IMPLEMENTED** (v2.0.0)
 
-A Chrome/Firefox browser extension for interacting with your Moltbot personal AI assistant.
+A Chrome/Firefox browser extension for interacting with your OpenSentinel personal AI assistant.
 
 ## Features
 
-- **Popup Chat Interface**: Chat with Moltbot directly from your browser toolbar
+- **Popup Chat Interface**: Chat with OpenSentinel directly from your browser toolbar
 - **Page Summarization**: Summarize any webpage with one click
 - **Data Extraction**: Extract structured data from web pages
 - **Quick Capture**: Save pages to memory for future reference
-- **Context Menu Integration**: Right-click selected text to ask Moltbot about it
+- **Context Menu Integration**: Right-click selected text to ask OpenSentinel about it
 - **Keyboard Shortcuts**: Quick access via customizable keyboard shortcuts
 
 ## Prerequisites
 
-- A running Moltbot server (default: `http://localhost:8030`)
+- A running OpenSentinel server (default: `http://localhost:8030`)
 - Bun runtime installed (`curl -fsSL https://bun.sh/install | bash`)
 
 ## Installation
@@ -55,7 +55,7 @@ A Chrome/Firefox browser extension for interacting with your Moltbot personal AI
 2. Enable "Developer mode" in the top-right corner
 3. Click "Load unpacked"
 4. Select the `extension/dist` directory
-5. The Moltbot icon should appear in your toolbar
+5. The OpenSentinel icon should appear in your toolbar
 
 ### Loading in Firefox
 
@@ -69,9 +69,9 @@ For permanent installation in Firefox, you need to sign the extension through [a
 
 ## Configuration
 
-1. Click the Moltbot icon in your toolbar
+1. Click the OpenSentinel icon in your toolbar
 2. Click the settings (gear) icon
-3. Enter your Moltbot server URL (default: `http://localhost:8030`)
+3. Enter your OpenSentinel server URL (default: `http://localhost:8030`)
 4. Click "Save Settings"
 
 The extension will automatically test the connection to your server.
@@ -80,15 +80,15 @@ The extension will automatically test the connection to your server.
 
 ### Popup Chat
 
-Click the Moltbot icon in your toolbar to open the chat popup. You can:
-- Type messages directly to chat with Moltbot
+Click the OpenSentinel icon in your toolbar to open the chat popup. You can:
+- Type messages directly to chat with OpenSentinel
 - Use quick action buttons to summarize, extract data, or capture the current page
 
 ### Context Menu
 
 1. Select text on any webpage
 2. Right-click to open the context menu
-3. Choose "Ask Moltbot about [selected text]"
+3. Choose "Ask OpenSentinel about [selected text]"
 4. The popup will open with your selection attached
 
 You can also right-click anywhere on a page to:
@@ -100,7 +100,7 @@ You can also right-click anywhere on a page to:
 
 | Shortcut | Action |
 |----------|--------|
-| `Alt+M` | Open Moltbot popup |
+| `Alt+M` | Open OpenSentinel popup |
 | `Alt+Shift+M` | Quick capture current page |
 | `Alt+Shift+S` | Summarize current page |
 | `Alt+Shift+E` | Extract data from page |
@@ -124,7 +124,7 @@ extension/
 │   ├── options.html    # Options page HTML
 │   └── options.tsx     # React options component
 ├── utils/
-│   └── api.ts          # API client for Moltbot server
+│   └── api.ts          # API client for OpenSentinel server
 ├── icons/
 │   ├── icon.svg        # Source SVG icon
 │   └── create-icons.sh # Script to generate PNG icons
@@ -151,11 +151,11 @@ bun run typecheck
 
 ## Troubleshooting
 
-### Extension can't connect to Moltbot
+### Extension can't connect to OpenSentinel
 
-1. Ensure your Moltbot server is running on the configured URL
+1. Ensure your OpenSentinel server is running on the configured URL
 2. Check that the URL includes the correct port (default: 8030)
-3. Verify there are no CORS issues - the Moltbot server should allow requests from the extension
+3. Verify there are no CORS issues - the OpenSentinel server should allow requests from the extension
 
 ### Icons not showing
 
@@ -174,7 +174,7 @@ Or manually create icons at the required sizes.
 
 ## API Endpoints Used
 
-The extension communicates with these Moltbot API endpoints:
+The extension communicates with these OpenSentinel API endpoints:
 
 - `POST /api/chat` - Send messages and receive responses
 - `GET /api/health` - Check server connectivity
@@ -182,4 +182,4 @@ The extension communicates with these Moltbot API endpoints:
 
 ## License
 
-Part of the Moltbot project.
+Part of the OpenSentinel project.

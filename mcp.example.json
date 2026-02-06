@@ -1,0 +1,71 @@
+{
+  "servers": [
+    {
+      "id": "filesystem",
+      "name": "Filesystem Server",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-filesystem", "/home/user/documents"],
+      "enabled": false,
+      "_comment": "Access files in /home/user/documents"
+    },
+    {
+      "id": "github",
+      "name": "GitHub Server",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-github"],
+      "env": {
+        "GITHUB_TOKEN": "ghp_your-github-token"
+      },
+      "enabled": false,
+      "_comment": "GitHub API integration"
+    },
+    {
+      "id": "postgres",
+      "name": "PostgreSQL Server",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-postgres", "postgresql://user:pass@localhost:5432/db"],
+      "enabled": false,
+      "_comment": "Direct database access"
+    },
+    {
+      "id": "brave",
+      "name": "Brave Search",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "your-brave-api-key"
+      },
+      "enabled": false,
+      "_comment": "Web search via Brave"
+    },
+    {
+      "id": "memory",
+      "name": "Memory Server",
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-memory"],
+      "enabled": false,
+      "_comment": "Persistent memory storage"
+    },
+    {
+      "id": "custom-http",
+      "name": "Custom HTTP Server",
+      "transport": "http+sse",
+      "url": "http://localhost:3001/mcp",
+      "headers": {
+        "Authorization": "Bearer your-token"
+      },
+      "enabled": false,
+      "_comment": "Example HTTP+SSE transport server"
+    }
+  ],
+  "settings": {
+    "timeout": 30000,
+    "retryAttempts": 3,
+    "retryDelay": 1000
+  }
+}

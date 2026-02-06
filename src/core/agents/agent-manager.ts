@@ -26,7 +26,7 @@ const connection = new Redis(env.REDIS_URL, {
 });
 
 // Agent task queue
-const agentQueue = new Queue("moltbot-agents", { connection });
+const agentQueue = new Queue("sentinel-agents", { connection });
 
 const DEFAULT_TOKEN_BUDGET = 50000;
 const DEFAULT_TIME_BUDGET_MS = 3600000; // 1 hour

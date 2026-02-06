@@ -1,7 +1,7 @@
 /**
  * Dropbox Integration
  *
- * Provides comprehensive Dropbox API integration for Moltbot,
+ * Provides comprehensive Dropbox API integration for OpenSentinel,
  * including file operations, folder management, sharing, and sync.
  */
 

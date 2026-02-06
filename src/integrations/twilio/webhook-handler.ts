@@ -1,5 +1,5 @@
 /**
- * Twilio Webhook Handler for Moltbot
+ * Twilio Webhook Handler for OpenSentinel
  *
  * Handles incoming SMS and voice call webhooks from Twilio,
  * processing them with AI and returning appropriate responses.
@@ -410,7 +410,7 @@ export function createTwilioWebhooks(config: WebhookConfig = {}): Hono {
       };
 
       const twiml = generateTwiMLGather(
-        "Hello! I'm Moltbot, your AI assistant. How can I help you today?",
+        "Hello! I'm OpenSentinel, your AI assistant. How can I help you today?",
         gatherOptions,
         sayOptions
       );

@@ -7,10 +7,10 @@ export interface SessionData {
   messages: Array<{ role: "user" | "assistant"; content: string }>;
 }
 
-export type MoltbotContext = Context & { session: SessionData };
+export type OpenSentinelContext = Context & { session: SessionData };
 
 export function createBot() {
-  const bot = new Bot<MoltbotContext>(env.TELEGRAM_BOT_TOKEN);
+  const bot = new Bot<OpenSentinelContext>(env.TELEGRAM_BOT_TOKEN);
 
   // Session middleware for conversation history
   bot.use(
@@ -34,7 +34,7 @@ export function createBot() {
   // Command handlers
   bot.command("start", async (ctx) => {
     await ctx.reply(
-      `Hello! I'm Moltbot, your personal AI assistant with JARVIS-like capabilities.
+      `Hello! I'm OpenSentinel, your personal AI assistant with JARVIS-like capabilities.
 
 I can:
 • Chat and answer questions using Claude AI
@@ -91,7 +91,7 @@ Send me a message or voice note to get started!`
 
   bot.command("help", async (ctx) => {
     await ctx.reply(
-      `*Moltbot Commands*
+      `*OpenSentinel Commands*
 
 /start - Welcome message
 /clear - Clear conversation history

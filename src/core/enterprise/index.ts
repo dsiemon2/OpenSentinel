@@ -1,7 +1,7 @@
 /**
  * Enterprise Features Module
  *
- * This module provides enterprise-grade capabilities for Moltbot including:
+ * This module provides enterprise-grade capabilities for OpenSentinel including:
  * - Multi-user management with roles and permissions
  * - Team knowledge base with shared memories
  * - Usage quotas and billing integration

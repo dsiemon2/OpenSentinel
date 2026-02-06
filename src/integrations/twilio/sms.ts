@@ -1,5 +1,5 @@
 /**
- * Twilio SMS Integration for Moltbot
+ * Twilio SMS Integration for OpenSentinel
  *
  * Provides functionality to send and receive SMS/MMS messages via Twilio.
  */

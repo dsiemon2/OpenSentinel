@@ -134,13 +134,13 @@ class SandboxedStorage implements PluginStorage {
   private getStorageKey(key: string, options?: PluginStorageOptions): string {
     const scope = options?.scope || "plugin";
     const namespace = options?.namespace || "default";
-    return `moltbot:plugin:${this.pluginId}:${scope}:${namespace}:${key}`;
+    return `sentinel:plugin:${this.pluginId}:${scope}:${namespace}:${key}`;
   }
 
   private getPatternKey(options?: PluginStorageOptions): string {
     const scope = options?.scope || "plugin";
     const namespace = options?.namespace || "default";
-    return `moltbot:plugin:${this.pluginId}:${scope}:${namespace}:*`;
+    return `sentinel:plugin:${this.pluginId}:${scope}:${namespace}:*`;
   }
 
   async get<T = unknown>(key: string, options?: PluginStorageOptions): Promise<T | null> {
@@ -208,7 +208,7 @@ class SandboxedStorage implements PluginStorage {
 
     const scope = options?.scope || "plugin";
     const namespace = options?.namespace || "default";
-    const basePattern = `moltbot:plugin:${this.pluginId}:${scope}:${namespace}:`;
+    const basePattern = `sentinel:plugin:${this.pluginId}:${scope}:${namespace}:`;
     const pattern = prefix ? `${basePattern}${prefix}*` : `${basePattern}*`;
 
     const keys = await this.redis.keys(pattern);
@@ -311,7 +311,7 @@ class SandboxedHttpClient implements PluginHttpClient {
       const response = await fetch(options.url, {
         method: options.method || "GET",
         headers: {
-          "User-Agent": `Moltbot-Plugin/${this.pluginId}`,
+          "User-Agent": `OpenSentinel-Plugin/${this.pluginId}`,
           ...options.headers,
         },
         body: options.body ? JSON.stringify(options.body) : undefined,

@@ -1,5 +1,5 @@
 /**
- * Home Assistant Integration for Moltbot
+ * Home Assistant Integration for OpenSentinel
  *
  * Provides comprehensive integration with Home Assistant including:
  * - REST API client for state queries and service calls

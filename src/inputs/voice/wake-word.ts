@@ -9,7 +9,7 @@ import { isLinux, isWindows } from "../../utils/platform";
  * Wake word detection configuration
  */
 export interface WakeWordConfig {
-  /** The wake word phrase to listen for (default: "hey molt") */
+  /** The wake word phrase to listen for (default: "hey sentinel") */
   wakeWord: string;
   /** Variations of the wake word to also accept */
   variations: string[];
@@ -49,15 +49,14 @@ export interface MFCCFeatures {
 }
 
 const DEFAULT_CONFIG: WakeWordConfig = {
-  wakeWord: "hey molt",
+  wakeWord: "hey opensentinel",
   variations: [
-    "hey malt",
-    "hey mold",
-    "hey moult",
-    "hey molt bot",
-    "hey moltbot",
-    "a molt",
-    "hey melt",
+    "hey open sentinel",
+    "hey open sentimental",
+    "hey opensentinal",
+    "hey opensentinel bot",
+    "a opensentinel",
+    "hey open centennial",
   ],
   similarityThreshold: 0.7,
   sampleRate: 16000,
@@ -641,7 +640,7 @@ export function createAdvancedWakeWordDetector(
  */
 export function containsWakeWord(
   text: string,
-  wakeWord: string = "hey molt"
+  wakeWord: string = "hey opensentinel"
 ): boolean {
   const normalized = text.toLowerCase().trim();
   const wakeNormalized = wakeWord.toLowerCase();

@@ -2,7 +2,7 @@
  * iOS/macOS Shortcuts Integration
  *
  * Provides webhook endpoints for Apple Shortcuts automation.
- * Users can create Shortcuts that trigger Moltbot actions via HTTP requests.
+ * Users can create Shortcuts that trigger OpenSentinel actions via HTTP requests.
  */
 
 import { Hono } from "hono";
@@ -111,7 +111,7 @@ export function generateShortcutApiKey(): { key: string; prefix: string } {
 }
 
 export function hashApiKey(key: string): string {
-  return createHmac("sha256", "moltbot-shortcuts-secret")
+  return createHmac("sha256", "sentinel-shortcuts-secret")
     .update(key)
     .digest("hex");
 }
@@ -723,7 +723,7 @@ export function createShortcutsRouter(): Hono {
         },
         metadata: {
           deviceName: "iPhone",
-          shortcutName: "Ask Moltbot",
+          shortcutName: "Ask OpenSentinel",
         },
       },
       quick_capture: {

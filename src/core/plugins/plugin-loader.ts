@@ -164,19 +164,19 @@ export class PluginLoader {
         // Read package.json and extract manifest
         const packageJson = JSON.parse(await readFile(packagePath, "utf-8"));
 
-        if (!packageJson.moltbot) {
-          return null; // Not a Moltbot plugin
+        if (!packageJson.sentinel) {
+          return null; // Not an OpenSentinel plugin
         }
 
         const manifest: PluginManifest = {
-          id: packageJson.moltbot.id || packageJson.name,
-          name: packageJson.moltbot.name || packageJson.name,
+          id: packageJson.sentinel.id || packageJson.name,
+          name: packageJson.sentinel.name || packageJson.name,
           version: packageJson.version,
           description: packageJson.description,
           author: packageJson.author,
           homepage: packageJson.homepage,
-          main: packageJson.moltbot.main || packageJson.main || "index.ts",
-          ...packageJson.moltbot,
+          main: packageJson.sentinel.main || packageJson.main || "index.ts",
+          ...packageJson.sentinel,
         };
 
         if (!validateManifest(manifest)) {

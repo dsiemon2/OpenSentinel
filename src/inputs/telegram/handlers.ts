@@ -1,12 +1,12 @@
 import { InputFile } from "grammy";
-import type { MoltbotContext } from "./bot";
+import type { SentinelContext } from "./bot";
 import { chatWithTools, type Message } from "../../core/brain";
 import { transcribeAudio } from "../../outputs/stt";
 import { textToSpeech } from "../../outputs/tts";
 
 const MAX_HISTORY = 20; // Keep last 20 messages for context
 
-export async function handleMessage(ctx: MoltbotContext) {
+export async function handleMessage(ctx: SentinelContext) {
   const text = ctx.message?.text;
   if (!text) return;
 
@@ -57,7 +57,7 @@ export async function handleMessage(ctx: MoltbotContext) {
   }
 }
 
-export async function handleVoice(ctx: MoltbotContext) {
+export async function handleVoice(ctx: SentinelContext) {
   const voice = ctx.message?.voice;
   if (!voice) return;
 
@@ -129,7 +129,7 @@ export async function handleVoice(ctx: MoltbotContext) {
 }
 
 // Helper to send response, handling Markdown errors
-async function sendResponse(ctx: MoltbotContext, text: string) {
+async function sendResponse(ctx: SentinelContext, text: string) {
   const maxLength = 4096;
 
   // Try with Markdown first

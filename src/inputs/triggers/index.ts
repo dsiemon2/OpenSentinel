@@ -1,7 +1,7 @@
 /**
  * Device Triggers Module
  *
- * Provides various device-based trigger mechanisms for Moltbot automation:
+ * Provides various device-based trigger mechanisms for OpenSentinel automation:
  * - iOS/macOS Shortcuts integration
  * - Bluetooth device proximity detection
  * - Geofencing / location-based triggers

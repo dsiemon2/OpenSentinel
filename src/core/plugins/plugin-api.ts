@@ -1,6 +1,6 @@
 /**
  * Plugin API - Defines the interface exposed to plugins
- * Provides a safe, sandboxed API for plugins to interact with Moltbot
+ * Provides a safe, sandboxed API for plugins to interact with OpenSentinel
  */
 
 import type { Tool } from "@anthropic-ai/sdk/resources/messages";
@@ -22,8 +22,8 @@ export interface PluginManifest {
   author?: string;
   /** Plugin description */
   description?: string;
-  /** Minimum Moltbot version required */
-  minMoltbotVersion?: string;
+  /** Minimum OpenSentinel version required */
+  minOpenSentinelVersion?: string;
   /** Plugin dependencies (other plugin IDs) */
   dependencies?: string[];
   /** Required permissions */

@@ -332,7 +332,7 @@ export function getK8sMetadata(): K8sMetadata {
     podIP: process.env.POD_IP,
     serviceAccount: process.env.SERVICE_ACCOUNT,
     labels: {
-      app: "moltbot",
+      app: "sentinel",
       version: process.env.APP_VERSION || "1.0.0",
       environment: env.NODE_ENV,
     },
@@ -358,7 +358,7 @@ export function isRunningInK8s(): boolean {
  * Generate recommended Kubernetes deployment configuration
  */
 export function generateDeploymentConfig(
-  name: string = "moltbot",
+  name: string = "sentinel",
   namespace: string = "default",
   config?: Partial<K8sConfig>
 ): Record<string, unknown> {
@@ -451,7 +451,7 @@ export function generateDeploymentConfig(
           containers: [
             {
               name,
-              image: `moltbot:${process.env.APP_VERSION || "latest"}`,
+              image: `sentinel:${process.env.APP_VERSION || "latest"}`,
               imagePullPolicy: "Always",
               ports: [{ containerPort: 8030, name: "http" }],
               resources: mergedConfig.resources,
@@ -530,7 +530,7 @@ export function generateDeploymentConfig(
  * Generate HorizontalPodAutoscaler configuration
  */
 export function generateHPAConfig(
-  name: string = "moltbot",
+  name: string = "sentinel",
   namespace: string = "default",
   config?: Partial<K8sConfig["replicas"]>
 ): Record<string, unknown> {
@@ -606,7 +606,7 @@ export function generateHPAConfig(
  * Generate Service configuration
  */
 export function generateServiceConfig(
-  name: string = "moltbot",
+  name: string = "sentinel",
   namespace: string = "default"
 ): Record<string, unknown> {
   return {
@@ -636,7 +636,7 @@ export function generateServiceConfig(
  * Generate Ingress configuration
  */
 export function generateIngressConfig(
-  name: string = "moltbot",
+  name: string = "sentinel",
   namespace: string = "default",
   host: string,
   tlsSecretName?: string
@@ -694,7 +694,7 @@ export function generateIngressConfig(
  * Generate PodDisruptionBudget configuration
  */
 export function generatePDBConfig(
-  name: string = "moltbot",
+  name: string = "sentinel",
   namespace: string = "default"
 ): Record<string, unknown> {
   return {
@@ -735,7 +735,7 @@ export function setupGracefulShutdown(
     // Set a hard timeout
     const timeout = setTimeout(() => {
       console.error("[K8s] Shutdown timeout exceeded, forcing exit");
-      process.exit(1);
+      throw new Error("[K8s] Shutdown timeout exceeded");
     }, timeoutMs);
 
     try {
@@ -749,11 +749,10 @@ export function setupGracefulShutdown(
 
       console.log("[K8s] Graceful shutdown complete");
       clearTimeout(timeout);
-      process.exit(0);
     } catch (error) {
       console.error("[K8s] Error during shutdown:", error);
       clearTimeout(timeout);
-      process.exit(1);
+      throw error;
     }
   };
 
@@ -785,46 +784,46 @@ export async function getPrometheusMetrics(): Promise<string> {
     health.status === "healthy" ? 1 : health.status === "degraded" ? 0.5 : 0;
 
   const metrics = [
-    `# HELP moltbot_up Whether the application is up`,
-    `# TYPE moltbot_up gauge`,
-    `moltbot_up{pod="${metadata.podName}",namespace="${metadata.namespace}"} 1`,
+    `# HELP sentinel_up Whether the application is up`,
+    `# TYPE sentinel_up gauge`,
+    `sentinel_up{pod="${metadata.podName}",namespace="${metadata.namespace}"} 1`,
     "",
-    `# HELP moltbot_health_status Health status score (1=healthy, 0.5=degraded, 0=unhealthy)`,
-    `# TYPE moltbot_health_status gauge`,
-    `moltbot_health_status{pod="${metadata.podName}"} ${healthScore}`,
+    `# HELP sentinel_health_status Health status score (1=healthy, 0.5=degraded, 0=unhealthy)`,
+    `# TYPE sentinel_health_status gauge`,
+    `sentinel_health_status{pod="${metadata.podName}"} ${healthScore}`,
     "",
-    `# HELP moltbot_uptime_seconds Application uptime in seconds`,
-    `# TYPE moltbot_uptime_seconds counter`,
-    `moltbot_uptime_seconds{pod="${metadata.podName}"} ${uptime}`,
+    `# HELP sentinel_uptime_seconds Application uptime in seconds`,
+    `# TYPE sentinel_uptime_seconds counter`,
+    `sentinel_uptime_seconds{pod="${metadata.podName}"} ${uptime}`,
     "",
-    `# HELP moltbot_memory_heap_bytes Heap memory usage in bytes`,
-    `# TYPE moltbot_memory_heap_bytes gauge`,
-    `moltbot_memory_heap_bytes{pod="${metadata.podName}",type="used"} ${memory.heapUsed}`,
-    `moltbot_memory_heap_bytes{pod="${metadata.podName}",type="total"} ${memory.heapTotal}`,
+    `# HELP sentinel_memory_heap_bytes Heap memory usage in bytes`,
+    `# TYPE sentinel_memory_heap_bytes gauge`,
+    `sentinel_memory_heap_bytes{pod="${metadata.podName}",type="used"} ${memory.heapUsed}`,
+    `sentinel_memory_heap_bytes{pod="${metadata.podName}",type="total"} ${memory.heapTotal}`,
     "",
-    `# HELP moltbot_memory_rss_bytes RSS memory usage in bytes`,
-    `# TYPE moltbot_memory_rss_bytes gauge`,
-    `moltbot_memory_rss_bytes{pod="${metadata.podName}"} ${memory.rss}`,
+    `# HELP sentinel_memory_rss_bytes RSS memory usage in bytes`,
+    `# TYPE sentinel_memory_rss_bytes gauge`,
+    `sentinel_memory_rss_bytes{pod="${metadata.podName}"} ${memory.rss}`,
     "",
-    `# HELP moltbot_info Application information`,
-    `# TYPE moltbot_info gauge`,
-    `moltbot_info{version="${process.env.APP_VERSION || "1.0.0"}",node_env="${env.NODE_ENV}"} 1`,
+    `# HELP sentinel_info Application information`,
+    `# TYPE sentinel_info gauge`,
+    `sentinel_info{version="${process.env.APP_VERSION || "1.0.0"}",node_env="${env.NODE_ENV}"} 1`,
   ];
 
   // Add component health metrics
   for (const [component, check] of Object.entries(health.checks)) {
     const score = check.status === "healthy" ? 1 : check.status === "degraded" ? 0.5 : 0;
     metrics.push(
-      `# HELP moltbot_component_health_${component} Health status of ${component}`,
-      `# TYPE moltbot_component_health_${component} gauge`,
-      `moltbot_component_health_${component}{pod="${metadata.podName}"} ${score}`
+      `# HELP sentinel_component_health_${component} Health status of ${component}`,
+      `# TYPE sentinel_component_health_${component} gauge`,
+      `sentinel_component_health_${component}{pod="${metadata.podName}"} ${score}`
     );
 
     if (check.latencyMs !== undefined) {
       metrics.push(
-        `# HELP moltbot_component_latency_${component}_ms Latency of ${component} in milliseconds`,
-        `# TYPE moltbot_component_latency_${component}_ms gauge`,
-        `moltbot_component_latency_${component}_ms{pod="${metadata.podName}"} ${check.latencyMs}`
+        `# HELP sentinel_component_latency_${component}_ms Latency of ${component} in milliseconds`,
+        `# TYPE sentinel_component_latency_${component}_ms gauge`,
+        `sentinel_component_latency_${component}_ms{pod="${metadata.podName}"} ${check.latencyMs}`
       );
     }
   }

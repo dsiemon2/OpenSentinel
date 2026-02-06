@@ -51,7 +51,7 @@ export function createTray(): Tray {
   }
 
   tray = new Tray(icon);
-  tray.setToolTip('Moltbot - AI Assistant');
+  tray.setToolTip('OpenSentinel - AI Assistant');
 
   updateTrayMenu();
 
@@ -85,7 +85,7 @@ export function updateTrayMenu(): void {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Moltbot',
+      label: 'OpenSentinel',
       enabled: false,
       icon: undefined, // Could add small icon here
     },
@@ -136,7 +136,7 @@ export function updateTrayMenu(): void {
     },
     { type: 'separator' },
     {
-      label: 'Quit Moltbot',
+      label: 'Quit OpenSentinel',
       accelerator: process.platform === 'win32' ? 'Alt+F4' : 'CommandOrControl+Q',
       click: () => {
         quitApp();

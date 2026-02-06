@@ -28,7 +28,7 @@ export default function Settings({ onApiUrlChange }: SettingsProps) {
 
   useEffect(() => {
     loadSettings();
-    window.moltbot.getAppInfo().then(setAppInfo);
+    window.opensentinel.getAppInfo().then(setAppInfo);
   }, []);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function Settings({ onApiUrlChange }: SettingsProps) {
   }, [settings.apiUrl]);
 
   const loadSettings = async () => {
-    const data = await window.moltbot.getSettings();
+    const data = await window.opensentinel.getSettings();
     setSettings(data);
     setShortcutInput(data.globalShortcut);
   };
@@ -58,7 +58,7 @@ export default function Settings({ onApiUrlChange }: SettingsProps) {
   const updateSetting = async (key: keyof SettingsData, value: unknown) => {
     setSaving(true);
     try {
-      await window.moltbot.setSetting(key, value);
+      await window.opensentinel.setSetting(key, value);
       setSettings((prev) => ({ ...prev, [key]: value }));
 
       if (key === 'apiUrl') {
@@ -106,7 +106,7 @@ export default function Settings({ onApiUrlChange }: SettingsProps) {
 
   const formatShortcut = (shortcut: string) => {
     return shortcut
-      .replace('CommandOrControl', window.moltbot.platform === 'darwin' ? 'Cmd' : 'Ctrl')
+      .replace('CommandOrControl', window.opensentinel.platform === 'darwin' ? 'Cmd' : 'Ctrl')
       .replace(/\+/g, ' + ');
   };
 

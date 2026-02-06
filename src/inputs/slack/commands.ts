@@ -56,12 +56,12 @@ export function clearSession(userId: string): void {
 export { sessions };
 
 /**
- * /moltbot ask - Ask Moltbot a question
+ * /opensentinel ask - Ask OpenSentinel a question
  */
 export const askCommand: SlackSlashCommand = {
-  command: "/moltbot-ask",
-  description: "Ask Moltbot a question",
-  usage: "/moltbot-ask <question>",
+  command: "/opensentinel-ask",
+  description: "Ask OpenSentinel a question",
+  usage: "/opensentinel-ask <question>",
 
   async handler({ command, ack, respond, client }) {
     await ack();
@@ -72,7 +72,7 @@ export const askCommand: SlackSlashCommand = {
     if (!question) {
       await respond({
         response_type: "ephemeral",
-        text: "Please provide a question. Usage: `/moltbot-ask <question>`",
+        text: "Please provide a question. Usage: `/opensentinel-ask <question>`",
       });
       return;
     }
@@ -101,10 +101,10 @@ export const askCommand: SlackSlashCommand = {
       });
 
       console.log(
-        `[Slack] Processed /moltbot-ask from ${userId}. Tokens: ${response.inputTokens}/${response.outputTokens}`
+        `[Slack] Processed /opensentinel-ask from ${userId}. Tokens: ${response.inputTokens}/${response.outputTokens}`
       );
     } catch (error) {
-      console.error("[Slack] Error processing /moltbot-ask:", error);
+      console.error("[Slack] Error processing /opensentinel-ask:", error);
       await respond({
         response_type: "ephemeral",
         text: "Sorry, I encountered an error processing your question. Please try again.",
@@ -114,12 +114,12 @@ export const askCommand: SlackSlashCommand = {
 };
 
 /**
- * /moltbot chat - Continue a conversation
+ * /sentinel chat - Continue a conversation
  */
 export const chatCommand: SlackSlashCommand = {
-  command: "/moltbot-chat",
-  description: "Continue a conversation with Moltbot",
-  usage: "/moltbot-chat <message>",
+  command: "/opensentinel-chat",
+  description: "Continue a conversation with OpenSentinel",
+  usage: "/opensentinel-chat <message>",
 
   async handler({ command, ack, respond }) {
     await ack();
@@ -130,7 +130,7 @@ export const chatCommand: SlackSlashCommand = {
     if (!message) {
       await respond({
         response_type: "ephemeral",
-        text: "Please provide a message. Usage: `/moltbot-chat <message>`",
+        text: "Please provide a message. Usage: `/opensentinel-chat <message>`",
       });
       return;
     }
@@ -158,10 +158,10 @@ export const chatCommand: SlackSlashCommand = {
       });
 
       console.log(
-        `[Slack] Processed /moltbot-chat from ${userId}. Tokens: ${response.inputTokens}/${response.outputTokens}`
+        `[Slack] Processed /opensentinel-chat from ${userId}. Tokens: ${response.inputTokens}/${response.outputTokens}`
       );
     } catch (error) {
-      console.error("[Slack] Error processing /moltbot-chat:", error);
+      console.error("[Slack] Error processing /opensentinel-chat:", error);
       await respond({
         response_type: "ephemeral",
         text: "Sorry, I encountered an error processing your message. Please try again.",
@@ -171,12 +171,12 @@ export const chatCommand: SlackSlashCommand = {
 };
 
 /**
- * /moltbot clear - Clear conversation history
+ * /sentinel clear - Clear conversation history
  */
 export const clearCommand: SlackSlashCommand = {
-  command: "/moltbot-clear",
-  description: "Clear your conversation history with Moltbot",
-  usage: "/moltbot-clear",
+  command: "/opensentinel-clear",
+  description: "Clear your conversation history with OpenSentinel",
+  usage: "/opensentinel-clear",
 
   async handler({ command, ack, respond }) {
     await ack();
@@ -193,12 +193,12 @@ export const clearCommand: SlackSlashCommand = {
 };
 
 /**
- * /moltbot remind - Set a reminder
+ * /sentinel remind - Set a reminder
  */
 export const remindCommand: SlackSlashCommand = {
-  command: "/moltbot-remind",
+  command: "/opensentinel-remind",
   description: "Set a reminder",
-  usage: "/moltbot-remind <time><s/m/h> <message>",
+  usage: "/opensentinel-remind <time><s/m/h> <message>",
 
   async handler({ command, ack, respond }) {
     await ack();
@@ -210,11 +210,11 @@ export const remindCommand: SlackSlashCommand = {
       await respond({
         response_type: "ephemeral",
         text:
-          "Invalid format. Use: `/moltbot-remind <number><s/m/h> <message>`\n\n" +
+          "Invalid format. Use: `/opensentinel-remind <number><s/m/h> <message>`\n\n" +
           "Examples:\n" +
-          "• `/moltbot-remind 5m Check the oven`\n" +
-          "• `/moltbot-remind 1h Call mom`\n" +
-          "• `/moltbot-remind 30s Test reminder`",
+          "• `/opensentinel-remind 5m Check the oven`\n" +
+          "• `/opensentinel-remind 1h Call mom`\n" +
+          "• `/opensentinel-remind 30s Test reminder`",
       });
       return;
     }
@@ -256,12 +256,12 @@ export const remindCommand: SlackSlashCommand = {
 };
 
 /**
- * /moltbot status - Check Moltbot status
+ * /opensentinel status - Check OpenSentinel status
  */
 export const statusCommand: SlackSlashCommand = {
-  command: "/moltbot-status",
-  description: "Check Moltbot status and capabilities",
-  usage: "/moltbot-status",
+  command: "/opensentinel-status",
+  description: "Check OpenSentinel status and capabilities",
+  usage: "/opensentinel-status",
 
   async handler({ command, ack, respond }) {
     await ack();
@@ -272,7 +272,7 @@ export const statusCommand: SlackSlashCommand = {
     await respond({
       response_type: "ephemeral",
       text:
-        "*Moltbot Status*\n\n" +
+        "*OpenSentinel Status*\n\n" +
         `Bot: Online\n` +
         `Your conversation history: ${historyCount} messages\n\n` +
         "*Capabilities:*\n" +
@@ -282,18 +282,18 @@ export const statusCommand: SlackSlashCommand = {
         "• Search the web\n" +
         "• Remember important information\n" +
         "• Set reminders\n\n" +
-        "Use `/moltbot-help` for available commands.",
+        "Use `/opensentinel-help` for available commands.",
     });
   },
 };
 
 /**
- * /moltbot help - Show available commands
+ * /opensentinel help - Show available commands
  */
 export const helpCommand: SlackSlashCommand = {
-  command: "/moltbot-help",
-  description: "Show available Moltbot commands",
-  usage: "/moltbot-help",
+  command: "/opensentinel-help",
+  description: "Show available OpenSentinel commands",
+  usage: "/opensentinel-help",
 
   async handler({ ack, respond }) {
     await ack();
@@ -301,29 +301,29 @@ export const helpCommand: SlackSlashCommand = {
     await respond({
       response_type: "ephemeral",
       text:
-        "*Moltbot Commands*\n\n" +
-        "`/moltbot-ask <question>` - Ask a single question\n" +
-        "`/moltbot-chat <message>` - Continue a conversation\n" +
-        "`/moltbot-clear` - Clear your conversation history\n" +
-        "`/moltbot-remind <time> <message>` - Set a reminder\n" +
-        "`/moltbot-status` - Check bot status\n" +
-        "`/moltbot-help` - Show this help message\n\n" +
+        "*OpenSentinel Commands*\n\n" +
+        "`/opensentinel-ask <question>` - Ask a single question\n" +
+        "`/opensentinel-chat <message>` - Continue a conversation\n" +
+        "`/opensentinel-clear` - Clear your conversation history\n" +
+        "`/opensentinel-remind <time> <message>` - Set a reminder\n" +
+        "`/opensentinel-status` - Check bot status\n" +
+        "`/opensentinel-help` - Show this help message\n\n" +
         "*Tips:*\n" +
-        "• Use `/moltbot-chat` for multi-turn conversations with context\n" +
-        "• Use `/moltbot-ask` for quick one-off questions\n" +
-        "• Mention @Moltbot in any channel to chat directly\n" +
+        "• Use `/opensentinel-chat` for multi-turn conversations with context\n" +
+        "• Use `/opensentinel-ask` for quick one-off questions\n" +
+        "• Mention @OpenSentinel in any channel to chat directly\n" +
         "• DM the bot for private conversations",
     });
   },
 };
 
 /**
- * /moltbot - Main command with subcommands
+ * /opensentinel - Main command with subcommands
  */
 export const mainCommand: SlackSlashCommand = {
-  command: "/moltbot",
-  description: "Moltbot AI assistant",
-  usage: "/moltbot <ask|chat|clear|remind|status|help> [args]",
+  command: "/opensentinel",
+  description: "OpenSentinel AI assistant",
+  usage: "/opensentinel <ask|chat|clear|remind|status|help> [args]",
 
   async handler({ command, ack, respond }) {
     await ack();
@@ -337,7 +337,7 @@ export const mainCommand: SlackSlashCommand = {
         if (!argsText) {
           await respond({
             response_type: "ephemeral",
-            text: "Please provide a question. Usage: `/moltbot ask <question>`",
+            text: "Please provide a question. Usage: `/opensentinel ask <question>`",
           });
           return;
         }
@@ -349,7 +349,7 @@ export const mainCommand: SlackSlashCommand = {
         if (!argsText) {
           await respond({
             response_type: "ephemeral",
-            text: "Please provide a message. Usage: `/moltbot chat <message>`",
+            text: "Please provide a message. Usage: `/opensentinel chat <message>`",
           });
           return;
         }
@@ -375,15 +375,15 @@ export const mainCommand: SlackSlashCommand = {
         await respond({
           response_type: "ephemeral",
           text:
-            "*Moltbot Commands*\n\n" +
-            "`/moltbot ask <question>` - Ask a single question\n" +
-            "`/moltbot chat <message>` - Continue a conversation\n" +
-            "`/moltbot clear` - Clear your conversation history\n" +
-            "`/moltbot remind <time> <message>` - Set a reminder\n" +
-            "`/moltbot status` - Check bot status\n" +
-            "`/moltbot help` - Show this help message\n\n" +
+            "*OpenSentinel Commands*\n\n" +
+            "`/opensentinel ask <question>` - Ask a single question\n" +
+            "`/opensentinel chat <message>` - Continue a conversation\n" +
+            "`/opensentinel clear` - Clear your conversation history\n" +
+            "`/opensentinel remind <time> <message>` - Set a reminder\n" +
+            "`/opensentinel status` - Check bot status\n" +
+            "`/opensentinel help` - Show this help message\n\n" +
             "*Or use individual commands:*\n" +
-            "`/moltbot-ask`, `/moltbot-chat`, `/moltbot-clear`, `/moltbot-remind`, `/moltbot-status`, `/moltbot-help`",
+            "`/opensentinel-ask`, `/opensentinel-chat`, `/opensentinel-clear`, `/opensentinel-remind`, `/opensentinel-status`, `/opensentinel-help`",
         });
         break;
     }

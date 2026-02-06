@@ -53,7 +53,7 @@ export interface ContextSnapshot {
   version: number;
 }
 
-const CONTEXT_PREFIX = "moltbot:shared_context";
+const CONTEXT_PREFIX = "sentinel:shared_context";
 const CONTEXT_TTL = 24 * 60 * 60; // 24 hours default
 
 /**

@@ -1,8 +1,8 @@
-# MOLTBOT: Complete Implementation
+# OPENSENTINEL: Complete Implementation
 
 **Status: FULLY IMPLEMENTED** (v2.0.0 - February 2026)
 
-Moltbot is a self-hosted personal AI assistant—a JARVIS-style hub powered by Claude, capable of receiving commands via Telegram, Discord, Slack, Voice, and API, executing browser automation, shell commands, file operations, and maintaining persistent memory.
+OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered by Claude, capable of receiving commands via Telegram, Discord, Slack, Voice, and API, executing browser automation, shell commands, file operations, and maintaining persistent memory.
 
 ---
 
@@ -10,7 +10,7 @@ Moltbot is a self-hosted personal AI assistant—a JARVIS-style hub powered by C
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         MOLTBOT v2.0                            │
+│                       OPENSENTINEL v2.0                          │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │
@@ -68,7 +68,7 @@ Moltbot is a self-hosted personal AI assistant—a JARVIS-style hub powered by C
 - Inline keyboard responses
 - Thread/topic support
 - Reaction-based commands
-- Forward-to-Moltbot processing
+- Forward-to-OpenSentinel processing
 - Scheduled message delivery
 
 #### 1.2 Discord Integration ✅
@@ -88,7 +88,7 @@ Moltbot is a self-hosted personal AI assistant—a JARVIS-style hub powered by C
 - Socket mode
 
 #### 1.4 Voice Interface ✅
-- Wake word detection ("Hey Molt")
+- Wake word detection ("Hey OpenSentinel")
 - Local STT (faster-whisper, GPU-accelerated)
 - Continuous conversation mode
 - Voice activity detection (VAD)
@@ -245,7 +245,7 @@ Moltbot is a self-hosted personal AI assistant—a JARVIS-style hub powered by C
 
 ```bash
 # Clone and install
-cd /home/vboxuser/Products/Moltbot
+cd /home/vboxuser/Products/OpenSentinel
 bun install
 
 # Configure environment
@@ -258,7 +258,7 @@ docker compose up -d
 # Run migrations
 bun run db:migrate
 
-# Start Moltbot
+# Start OpenSentinel
 bun run start
 ```
 
@@ -267,7 +267,7 @@ bun run start
 | Interface | Access |
 |-----------|--------|
 | Telegram | @JarvisElectronBot |
-| Discord | MoltBot#8291 |
+| Discord | OpenSentinel#8291 |
 | Web Dashboard | http://localhost:8030 |
 | REST API | http://localhost:8030/api |
 

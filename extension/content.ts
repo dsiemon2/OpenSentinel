@@ -1,5 +1,5 @@
 /**
- * Moltbot Extension Content Script
+ * OpenSentinel Extension Content Script
  * Handles page interaction, text extraction, and in-page UI elements
  */
 
@@ -27,14 +27,14 @@ type ContentMessage = ToastMessage | GetPageDataMessage | GetSelectionMessage;
  */
 function showToast(title: string, message: string, duration = 4000): void {
   // Remove existing toast if any
-  const existingToast = document.getElementById('moltbot-toast');
+  const existingToast = document.getElementById('opensentinel-toast');
   if (existingToast) {
     existingToast.remove();
   }
 
   // Create toast container
   const toast = document.createElement('div');
-  toast.id = 'moltbot-toast';
+  toast.id = 'opensentinel-toast';
   toast.style.cssText = `
     position: fixed;
     bottom: 20px;
@@ -47,7 +47,7 @@ function showToast(title: string, message: string, duration = 4000): void {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
     z-index: 2147483647;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-    animation: moltbot-slide-in 0.3s ease-out;
+    animation: opensentinel-slide-in 0.3s ease-out;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -118,7 +118,7 @@ function showToast(title: string, message: string, duration = 4000): void {
   // Add animation keyframes
   const style = document.createElement('style');
   style.textContent = `
-    @keyframes moltbot-slide-in {
+    @keyframes opensentinel-slide-in {
       from {
         transform: translateX(100%);
         opacity: 0;
@@ -128,7 +128,7 @@ function showToast(title: string, message: string, duration = 4000): void {
         opacity: 1;
       }
     }
-    @keyframes moltbot-slide-out {
+    @keyframes opensentinel-slide-out {
       from {
         transform: translateX(0);
         opacity: 1;
@@ -147,7 +147,7 @@ function showToast(title: string, message: string, duration = 4000): void {
   // Auto-remove after duration
   setTimeout(() => {
     if (toast.parentNode) {
-      toast.style.animation = 'moltbot-slide-out 0.3s ease-in forwards';
+      toast.style.animation = 'opensentinel-slide-out 0.3s ease-in forwards';
       setTimeout(() => toast.remove(), 300);
     }
   }, duration);
@@ -282,7 +282,7 @@ document.addEventListener('keydown', (e) => {
   if (e.altKey && e.shiftKey && e.key === 'S') {
     e.preventDefault();
     chrome.runtime.sendMessage({ type: 'SUMMARIZE_PAGE' }).catch(() => {
-      showToast('Error', 'Could not connect to Moltbot extension');
+      showToast('Error', 'Could not connect to OpenSentinel extension');
     });
   }
 
@@ -290,10 +290,10 @@ document.addEventListener('keydown', (e) => {
   if (e.altKey && e.shiftKey && e.key === 'E') {
     e.preventDefault();
     chrome.runtime.sendMessage({ type: 'EXTRACT_DATA' }).catch(() => {
-      showToast('Error', 'Could not connect to Moltbot extension');
+      showToast('Error', 'Could not connect to OpenSentinel extension');
     });
   }
 });
 
 // Log that content script is loaded (for debugging)
-console.log('[Moltbot] Content script loaded');
+console.log('[OpenSentinel] Content script loaded');
