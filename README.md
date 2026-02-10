@@ -2,9 +2,11 @@
 
 A self-hosted personal AI assistant powered by Claude, with JARVIS-like capabilities.
 
+**Live**: [app.opensentinel.ai](https://app.opensentinel.ai) | **Website**: [opensentinel.ai](https://opensentinel.ai)
+
 ## What is OpenSentinel?
 
-OpenSentinel is your own personal AI assistant that runs on your computer. Think of it like having Jarvis from Iron Man - you can talk to it, ask questions, and it can do things for you.
+OpenSentinel is your own personal AI assistant that runs on your infrastructure. Think of it like having Jarvis from Iron Man - you can talk to it, ask questions, and it can do things for you.
 
 ## Features
 
@@ -127,7 +129,8 @@ OpenSentinel is your own personal AI assistant that runs on your computer. Think
 
 1. **Clone and install dependencies**
    ```bash
-   cd /home/vboxuser/Products/OpenSentinel
+   git clone https://github.com/dsiemon2/OpenSentinel.git
+   cd OpenSentinel
    bun install
    ```
 

@@ -6,6 +6,20 @@ OpenSentinel is a self-hosted personal AI assistant powered by Claude, with Tele
 ## API Keys & Credentials
 All credentials are stored in `.env` (not committed to git). See `.env.example` for the required variables.
 
+## Production Deployment
+- **Server**: IONOS VPS at `74.208.129.33` (Ubuntu 24.04)
+- **App URL**: https://app.opensentinel.ai
+- **Marketing site**: https://opensentinel.ai
+- **Deploy path**: `/root/Products/OpenSentinel` on the server
+- **Service**: systemd `opensentinel.service` (runs `bun run src/cli.ts start`)
+- **Env file (server)**: `/root/.opensentinel/.env`
+- **Deploy method**: `rsync` or `scp` files to server, then `systemctl restart opensentinel`
+- **Reverse proxy**: Nginx with Let's Encrypt SSL
+
+## Git Remotes
+- `origin`: `git@github.com:dsiemon2/GoGreen-Moltbot.git` (development)
+- `opensentinel`: `git@github.com:dsiemon2/OpenSentinel.git` (public release)
+
 ## Tech Stack
 - **Runtime**: Bun (not Node.js)
 - **Language**: TypeScript

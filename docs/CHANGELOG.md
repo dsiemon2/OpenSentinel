@@ -2,6 +2,24 @@
 
 All notable changes to OpenSentinel are documented here.
 
+## [2.1.1] - 2026-02-10
+
+### Changed
+- Web dashboard: replaced "Moltbot" sidebar logo with OpenSentinel compass SVG icon + text (matches opensentinel.ai branding)
+- Web dashboard: added OpenSentinel favicon.svg (emerald-to-cyan gradient compass)
+- Web dashboard: updated logo CSS with flexbox layout and brand color (#10b981)
+- Fixed favicon reference from broken `/vite.svg` to `/favicon.svg`
+
+### Security
+- Removed all API keys and credentials from CLAUDE.md (now references `.env` only)
+- Scrubbed all secrets from entire git history using git-filter-repo
+- Removed partial/truncated tokens from docs/GETTING_STARTED.md and website/docs/channels.html
+- Replaced real Discord IDs, Telegram tokens, and Twilio credentials with generic placeholders in documentation
+
+### Deployment
+- Rebuilt web frontend dist and deployed to production server (74.208.129.33)
+- Force-pushed clean history to both GitHub remotes (GoGreen-Moltbot and OpenSentinel)
+
 ## [2.1.0] - 2026-02-06
 
 ### Added
