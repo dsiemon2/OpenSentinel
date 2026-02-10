@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package.json bun.lockb* ./
 
 # Install dependencies
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy source
 COPY . .
@@ -71,4 +71,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 EXPOSE 8030
 
 # Run
-CMD ["bun", "run", "src/index.ts"]
+CMD ["bun", "run", "src/cli.ts"]
