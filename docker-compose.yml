@@ -1,5 +1,10 @@
-# OpenSentinel Docker Compose Configuration
-# Usage: docker-compose up -d
+# OpenSentinel Docker Compose Configuration (OPTIONAL)
+#
+# Docker is optional. The recommended install is:
+#   npm install -g opensentinel && opensentinel setup
+#
+# Use Docker Compose for containerized deployments:
+#   docker-compose up -d
 
 version: "3.8"
 

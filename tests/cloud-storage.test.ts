@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, mock, spyOn } from "bun:test";
+import { join } from "node:path";
 
 describe("Cloud Storage Integration", () => {
   describe("Google Drive Module", () => {
@@ -877,7 +878,7 @@ describe("Cloud Storage Integration", () => {
   describe("Environment Configuration", () => {
     test("should have Google Drive env variables in schema", async () => {
       const fs = await import("fs");
-      const envContent = fs.readFileSync("/home/vboxuser/Products/Moltbot/src/config/env.ts", "utf-8");
+      const envContent = fs.readFileSync(join(import.meta.dirname, "..", "src", "config", "env.ts"), "utf-8");
 
       expect(envContent).toContain("GOOGLE_DRIVE_CLIENT_ID");
       expect(envContent).toContain("GOOGLE_DRIVE_CLIENT_SECRET");
@@ -887,7 +888,7 @@ describe("Cloud Storage Integration", () => {
 
     test("should have Dropbox env variables in schema", async () => {
       const fs = await import("fs");
-      const envContent = fs.readFileSync("/home/vboxuser/Products/Moltbot/src/config/env.ts", "utf-8");
+      const envContent = fs.readFileSync(join(import.meta.dirname, "..", "src", "config", "env.ts"), "utf-8");
 
       expect(envContent).toContain("DROPBOX_APP_KEY");
       expect(envContent).toContain("DROPBOX_APP_SECRET");
@@ -897,7 +898,7 @@ describe("Cloud Storage Integration", () => {
 
     test("Google Drive env variables should be optional", async () => {
       const fs = await import("fs");
-      const envContent = fs.readFileSync("/home/vboxuser/Products/Moltbot/src/config/env.ts", "utf-8");
+      const envContent = fs.readFileSync(join(import.meta.dirname, "..", "src", "config", "env.ts"), "utf-8");
 
       // Check they're marked as optional
       expect(envContent).toContain("GOOGLE_DRIVE_CLIENT_ID: z.string().optional()");
@@ -906,7 +907,7 @@ describe("Cloud Storage Integration", () => {
 
     test("Dropbox env variables should be optional", async () => {
       const fs = await import("fs");
-      const envContent = fs.readFileSync("/home/vboxuser/Products/Moltbot/src/config/env.ts", "utf-8");
+      const envContent = fs.readFileSync(join(import.meta.dirname, "..", "src", "config", "env.ts"), "utf-8");
 
       // Check they're marked as optional
       expect(envContent).toContain("DROPBOX_APP_KEY: z.string().optional()");

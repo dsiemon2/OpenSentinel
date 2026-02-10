@@ -26,7 +26,7 @@ All notable changes to OpenSentinel are documented here.
 - Website and marketing documentation
 
 ### Changed
-- Rebranded from MoltBot to OpenSentinel
+- Rebranded to OpenSentinel
 - Converted to dual CLI/library NPM package
 - All commands renamed from /sentinel-* to /opensentinel-*
 - Default wake word changed to "hey opensentinel"

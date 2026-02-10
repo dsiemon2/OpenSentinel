@@ -745,14 +745,14 @@
         <div class="quickstart-card" data-animate>
           <div class="quickstart-card-badge">Full Platform</div>
           <h3>Deploy Everything</h3>
-          <p>Run the complete platform with all services, dashboard, and integrations.</p>
+          <p>One command installs everything: Bun, PostgreSQL, Redis, and OpenSentinel.</p>
           <div class="quickstart-code">
-            <pre><code><span class="code-prompt">$</span> git clone https://github.com/dsiemon2/OpenSentinel.git
-<span class="code-prompt">$</span> cd OpenSentinel
-<span class="code-prompt">$</span> cp .env.example .env   <span class="code-comment"># add your API keys</span>
-<span class="code-prompt">$</span> docker compose up -d   <span class="code-comment"># start Postgres + Redis</span>
-<span class="code-prompt">$</span> bun install
-<span class="code-prompt">$</span> bun run start          <span class="code-comment"># launch OpenSentinel</span></code></pre>
+            <pre><code><span class="code-prompt">$</span> curl -fsSL https://opensentinel.ai/install.sh | bash</code></pre>
+          </div>
+          <div class="quickstart-code">
+            <pre><code><span class="code-comment"># Or install manually:</span>
+<span class="code-prompt">$</span> npm install -g opensentinel
+<span class="code-prompt">$</span> opensentinel setup     <span class="code-comment"># interactive wizard</span></code></pre>
           </div>
         </div>
 

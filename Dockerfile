@@ -1,4 +1,9 @@
-# Sentinel Dockerfile
+# OpenSentinel Dockerfile (OPTIONAL)
+#
+# Docker is optional. The recommended install is:
+#   npm install -g opensentinel && opensentinel setup
+#
+# Use this Dockerfile for containerized or CI/CD deployments.
 # Multi-stage build for optimized production image
 
 # Stage 1: Build

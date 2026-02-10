@@ -4,6 +4,11 @@ export default defineConfig({
   entry: {
     lib: "src/lib.ts",
     cli: "src/cli.ts",
+    "commands/start": "src/commands/start.ts",
+    "commands/setup": "src/commands/setup.ts",
+    "commands/stop": "src/commands/stop.ts",
+    "commands/status": "src/commands/status.ts",
+    "commands/utils": "src/commands/utils.ts",
   },
   format: ["esm"],
   dts: true,

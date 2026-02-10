@@ -139,7 +139,7 @@
           <thead><tr><th>Requirement</th><th>Version</th><th>Required For</th></tr></thead>
           <tbody>
             <tr><td><strong>Bun</strong> or <strong>Node.js</strong></td><td>Bun 1.0+ / Node 20+</td><td>Runtime</td></tr>
-            <tr><td><strong>Docker</strong></td><td>20+</td><td>Full platform only (PostgreSQL + Redis)</td></tr>
+            <tr><td><strong>Docker</strong> <em>(optional)</em></td><td>20+</td><td>Alternative deployment method</td></tr>
             <tr><td><strong>Claude API Key</strong></td><td>&mdash;</td><td>Always required</td></tr>
           </tbody>
         </table>
@@ -237,29 +237,21 @@ console.<span class="cf">log</span>(response.text);</code></pre>
 
         <div class="steps">
           <div class="step">
-            <div class="step-title">Clone the repository</div>
+            <div class="step-title">One-liner install (recommended)</div>
+            <p>This installs Bun, PostgreSQL, Redis, and OpenSentinel, then runs the interactive setup wizard:</p>
             <div class="codeblock">
               <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
-              <pre><code><span class="cp">$</span> git clone https://github.com/dsiemon2/OpenSentinel.git
-<span class="cp">$</span> cd OpenSentinel</code></pre>
+              <pre><code><span class="cp">$</span> curl -fsSL https://opensentinel.ai/install.sh | bash</code></pre>
             </div>
+            <p>The wizard will prompt you for your API keys, install PostgreSQL 16 + pgvector and Redis, run database migrations, and set up a system service.</p>
           </div>
 
           <div class="step">
-            <div class="step-title">Install dependencies</div>
+            <div class="step-title">Or install manually</div>
             <div class="codeblock">
               <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
-              <pre><code><span class="cp">$</span> bun install</code></pre>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-title">Configure environment variables</div>
-            <p>Copy the example and add your API keys:</p>
-            <div class="codeblock">
-              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
-              <pre><code><span class="cp">$</span> cp .env.example .env
-<span class="cp">$</span> nano .env  <span class="cc"># Add CLAUDE_API_KEY at minimum</span></code></pre>
+              <pre><code><span class="cp">$</span> npm install -g opensentinel
+<span class="cp">$</span> opensentinel setup     <span class="cc"># interactive wizard</span></code></pre>
             </div>
             <div class="callout callout-tip">
               <span class="callout-ico">&#x1F4A1;</span>
@@ -268,32 +260,15 @@ console.<span class="cf">log</span>(response.text);</code></pre>
           </div>
 
           <div class="step">
-            <div class="step-title">Start infrastructure</div>
-            <p>Launch PostgreSQL (with pgvector) and Redis:</p>
+            <div class="step-title">Or from source</div>
             <div class="codeblock">
               <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
-              <pre><code><span class="cp">$</span> docker compose up -d</code></pre>
-            </div>
-            <p>This starts:</p>
-            <ul>
-              <li><strong>PostgreSQL 16</strong> with pgvector on port <code>5445</code></li>
-              <li><strong>Redis 7</strong> on port <code>6379</code></li>
-            </ul>
-          </div>
-
-          <div class="step">
-            <div class="step-title">Run database migrations</div>
-            <div class="codeblock">
-              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
-              <pre><code><span class="cp">$</span> bun run db:migrate</code></pre>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-title">Launch OpenSentinel</div>
-            <div class="codeblock">
-              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
-              <pre><code><span class="cp">$</span> bun run start</code></pre>
+              <pre><code><span class="cp">$</span> git clone https://github.com/dsiemon2/OpenSentinel.git
+<span class="cp">$</span> cd OpenSentinel
+<span class="cp">$</span> bun install
+<span class="cp">$</span> cp .env.example .env   <span class="cc"># add your API keys</span>
+<span class="cp">$</span> bun run db:migrate     <span class="cc"># set up database</span>
+<span class="cp">$</span> bun run start          <span class="cc"># launch OpenSentinel</span></code></pre>
             </div>
           </div>
         </div>
