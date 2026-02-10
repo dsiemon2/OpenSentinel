@@ -44,10 +44,13 @@ body {
   padding: 1rem 0;
   border-bottom: 1px solid var(--border);
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .logo span {
-  color: var(--accent);
+  color: #10b981;
 }
 
 .nav-item {
