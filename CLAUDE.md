@@ -3,19 +3,42 @@
 ## Project Overview
 OpenSentinel is a self-hosted personal AI assistant powered by Claude, with Telegram, Discord, Slack, and web interfaces. It includes 250+ features including smart home control, productivity integrations, and workflow automation.
 
-## Configuration
+## API Keys & Credentials (PRESERVE THESE)
 
-All credentials go in your `.env` file. See `.env.example` for the full list. Key variables:
+### Core AI Services
+| Service | Variable | Value |
+|---------|----------|-------|
+| Claude API | `CLAUDE_API_KEY` | `REDACTED` |
+| OpenAI | `OPENAI_API_KEY` | `REDACTED` |
+| ElevenLabs | `ELEVENLABS_API_KEY` | `REDACTED` |
+| ElevenLabs Voice | `ELEVENLABS_VOICE_ID` | `REDACTED` |
+| HuggingFace | `HUGGINGFACE_ACCESS_TOKEN` | `REDACTED` |
 
-| Service | Variable | Required |
-|---------|----------|----------|
-| Claude API | `CLAUDE_API_KEY` | Yes |
-| OpenAI | `OPENAI_API_KEY` | For STT/memory |
-| Telegram | `TELEGRAM_BOT_TOKEN` | For Telegram |
-| Discord | `DISCORD_BOT_TOKEN` | For Discord |
-| Slack | `SLACK_BOT_TOKEN` | For Slack |
-| PostgreSQL | `DATABASE_URL` | For memory/persistence |
-| Redis | `REDIS_URL` | For job queue |
+### Communication Platforms
+| Service | Variable | Value |
+|---------|----------|-------|
+| Telegram Token | `TELEGRAM_BOT_TOKEN` | `REDACTED` |
+| Telegram Chat | `TELEGRAM_CHAT_ID` | `REDACTED` |
+| Discord Token | `DISCORD_BOT_TOKEN` | `REDACTED` |
+| Discord Client | `DISCORD_CLIENT_ID` | `your-client-id` |
+| Discord Guild | `DISCORD_GUILD_ID` | `your-server-id` |
+| Discord User | `DISCORD_ALLOWED_USER_IDS` | `your-user-id` |
+| Twilio SID | `TWILIO_ACCOUNT_SID` | `REDACTED` |
+| Twilio Auth | `TWILIO_AUTH_TOKEN` | `REDACTED` |
+| Twilio Phone | `TWILIO_PHONE_NUMBER` | `REDACTED` |
+
+### Payments (Not Active Yet)
+| Service | Variable | Value |
+|---------|----------|-------|
+| Stripe Key | `STRIPE_KEY` | `REDACTED` |
+| Stripe Secret | `STRIPE_SECRET` | `REDACTED` |
+| Stripe API Key | `STRIPE_API_KEY_ID` | `REDACTED` |
+
+### Database & Cache
+| Service | Variable | Value |
+|---------|----------|-------|
+| PostgreSQL | `DATABASE_URL` | `postgresql://opensentinel:opensentinel@localhost:5445/opensentinel` |
+| Redis | `REDIS_URL` | `redis://localhost:6379` |
 
 ## Tech Stack
 - **Runtime**: Bun (not Node.js)
@@ -94,7 +117,7 @@ extension/                      # Browser extension
 
 ## Discord Setup (IMPORTANT)
 1. Go to https://discord.com/developers/applications
-2. Click "MoltBot" → "Bot"
+2. Click "OpenSentinel" → "Bot"
 3. Enable ALL three "Privileged Gateway Intents":
    - Presence Intent ✅
    - Server Members Intent ✅

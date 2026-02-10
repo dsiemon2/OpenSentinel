@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, mock, spyOn } from "bun:test";
+import { join } from "node:path";
 
 describe("GitHub Integration", () => {
   describe("GitHub Client Module", () => {
@@ -924,7 +925,7 @@ describe("GitHub Integration", () => {
   describe("Environment Configuration", () => {
     test("should have GITHUB_TOKEN in env schema", async () => {
       const fs = await import("fs");
-      const envContent = fs.readFileSync("/home/vboxuser/Products/Moltbot/src/config/env.ts", "utf-8");
+      const envContent = fs.readFileSync(join(import.meta.dirname, "..", "src", "config", "env.ts"), "utf-8");
 
       expect(envContent).toContain("GITHUB_TOKEN");
       expect(envContent).toContain("z.string().optional()");
@@ -932,7 +933,7 @@ describe("GitHub Integration", () => {
 
     test("should have GITHUB_WEBHOOK_SECRET in env schema", async () => {
       const fs = await import("fs");
-      const envContent = fs.readFileSync("/home/vboxuser/Products/Moltbot/src/config/env.ts", "utf-8");
+      const envContent = fs.readFileSync(join(import.meta.dirname, "..", "src", "config", "env.ts"), "utf-8");
 
       expect(envContent).toContain("GITHUB_WEBHOOK_SECRET");
     });
