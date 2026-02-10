@@ -144,7 +144,7 @@ OpenSentinel is ready! Send a message via Telegram, API, WebSocket.
 2. Send `/newbot` and follow the prompts to create your bot.
 3. Copy the bot token into your `.env`:
    ```env
-   TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+   TELEGRAM_BOT_TOKEN=your-telegram-bot-token-here
    ```
 4. To find your Chat ID, message your bot and visit:
    ```
