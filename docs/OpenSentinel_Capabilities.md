@@ -35,7 +35,7 @@ OpenSentinel learns from interactions through a sophisticated RAG-based memory s
 | Feature | Description |
 |---------|-------------|
 | Multi-Channel Input | Telegram, Discord, Slack, Web, API, Voice |
-| Voice Interface | Wake word detection ("Hey Molt"), continuous conversation |
+| Voice Interface | Wake word detection ("Hey OpenSentinel"), continuous conversation |
 | Tool Execution | 30+ tools including shell, browser, files, search |
 | Memory System | RAG with pgvector, auto-extraction, importance scoring |
 | Sub-Agent System | Research, Coding, Writing, Analysis agents |
