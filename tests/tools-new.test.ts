@@ -80,12 +80,12 @@ describe("New Tools - TOOLS Array", () => {
   });
 
   describe("Total TOOLS count", () => {
-    test("should have exactly 33 tools", () => {
-      // Arrange & Act
+    test("should have at least 60 tools", () => {
+      // Arrange & Act (original tools + business tools + OSINT tools)
       const count = TOOLS.length;
 
-      // Assert
-      expect(count).toBe(33);
+      // Assert — count grows as new tools are added
+      expect(count).toBeGreaterThanOrEqual(60);
     });
   });
 

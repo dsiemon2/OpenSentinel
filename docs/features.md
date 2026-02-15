@@ -1,6 +1,6 @@
 # OpenSentinel Features
 
-**Status: ALL FEATURES IMPLEMENTED** (v2.0.0)
+**Status: ALL FEATURES IMPLEMENTED** (v2.1.1)
 
 ## Input Methods
 
@@ -35,6 +35,13 @@
 - File upload/download
 - Task queue monitor
 
+### Matrix Bot ✅
+- Responds to mentions and direct messages
+- Session-based conversation history
+- Auto-join on invite (configurable)
+- Message splitting for long responses
+- Typing indicators during processing
+
 ### Voice Interface ✅
 - Wake word ("Hey OpenSentinel")
 - Continuous conversation mode
@@ -62,17 +69,40 @@
 
 ### Memory (RAG) ✅
 - Automatic fact extraction
-- Semantic similarity search
+- Semantic similarity search (pgvector cosine, 1536d embeddings)
+- Full-text keyword search (PostgreSQL tsvector/GIN)
+- Graph-augmented search (entity relationship expansion)
+- Reciprocal Rank Fusion combining vector + keyword + graph results
 - Memory types: episodic, semantic, procedural
 - Importance scoring (1-10)
 - Memory decay and consolidation
 - Contradiction detection
+
+### Advanced Retrieval Pipeline ✅
+- HyDE (Hypothetical Document Embeddings) for improved semantic matching
+- Cross-Encoder Re-ranking (LLM-as-judge, 0-10 relevance scoring)
+- Recursive Multi-Step RAG with automatic gap detection
+- Redis-backed Retrieval Cache with TTL expiry
+- Contextual Query Rewriting from conversation history
+- Composable pipeline: each stage independently toggleable via env vars
+- Graceful degradation: falls back to hybrid search when all flags disabled
 
 ### Personality ✅
 - 15 domain expert modes
 - Mood detection and adaptation
 - Configurable personas (formal, casual, snarky)
 - Verbosity and humor controls
+
+### Multi-Provider LLM ✅
+- Provider abstraction layer supporting multiple AI backends
+- Anthropic Claude (default)
+- OpenRouter (access 100+ models)
+- Groq (ultra-fast inference)
+- Mistral AI
+- Ollama (local/offline models)
+- Any OpenAI-compatible endpoint
+- Per-request provider selection
+- Automatic format conversion between API standards
 
 ---
 
@@ -154,6 +184,17 @@
 
 ---
 
+## Observability ✅
+
+### Prometheus Metrics ✅
+- Standard Prometheus text exposition format
+- Request, token, error, and tool counters
+- Response latency and tool duration histograms
+- Uptime and memory gauges
+- Scrape endpoint at GET /metrics
+
+---
+
 ## Security Features ✅
 
 ### Authentication
@@ -176,6 +217,20 @@
 - Network requests controlled
 - Rate limiting
 
+### Autonomy Levels ✅
+- Readonly: only search/read tools
+- Supervised: all tools with enhanced logging
+- Autonomous: full access (default)
+- Per-user level configuration
+- API control (GET/PUT /api/autonomy)
+
+### Device Pairing ✅
+- 6-digit pairing codes for consumer-friendly auth
+- Time-limited codes (5 min default)
+- Bearer token exchange
+- Device management and revocation
+- CLI command: `opensentinel pair`
+
 ---
 
 ## Desktop & Browser ✅
@@ -191,3 +246,14 @@
 - Popup chat interface
 - Right-click context menu
 - Page summarization
+
+---
+
+## Infrastructure ✅
+
+### Built-in Tunnels
+- Cloudflare (no auth, random URL)
+- ngrok (requires auth token)
+- localtunnel (npm-based, custom subdomain)
+- Auto-start with `TUNNEL_ENABLED=true`
+- Public URL printed on startup

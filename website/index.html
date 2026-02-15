@@ -156,7 +156,7 @@
     <div class="container">
       <div class="stats-grid">
         <div class="stat" data-animate>
-          <span class="stat-value">250+</span>
+          <span class="stat-value">280+</span>
           <span class="stat-label">Features</span>
         </div>
         <div class="stat-divider"></div>
@@ -176,7 +176,7 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat" data-animate>
-          <span class="stat-value">2,793</span>
+          <span class="stat-value">3,800+</span>
           <span class="stat-label">Unit Tests</span>
         </div>
       </div>
@@ -218,13 +218,16 @@
             <h3>OpenSentinel</h3>
           </div>
           <ul>
-            <li>Persistent memory with pgvector RAG</li>
+            <li>Advanced RAG: HyDE, re-ranking, multi-step retrieval, caching</li>
             <li>Workflow engine with triggers &amp; schedules</li>
             <li>4 specialist sub-agents in parallel</li>
             <li>2FA, audit logs, GDPR, encrypted vault</li>
             <li>Multi-user with SSO and quotas</li>
             <li>Sandboxed plugins + MCP servers</li>
             <li>Metrics, replay, alerting, dry-run</li>
+            <li>Multi-LLM: OpenRouter, Groq, Mistral, Ollama</li>
+            <li>Prometheus metrics for DevOps monitoring</li>
+            <li>Built-in tunnels for instant public access</li>
           </ul>
         </div>
       </div>
@@ -250,7 +253,7 @@
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           </div>
           <h3>Persistent Memory</h3>
-          <p>PostgreSQL + pgvector RAG system with automatic extraction, importance scoring, semantic search, memory consolidation, and decay. Your AI genuinely learns over time.</p>
+          <p>Advanced RAG with pgvector, HyDE, cross-encoder re-ranking, multi-step retrieval, and Redis caching. Hybrid search fuses vector, keyword, and graph results. Your AI genuinely learns over time.</p>
           <div class="feature-tag">Core Differentiator</div>
         </div>
 
@@ -316,6 +319,45 @@
           </div>
           <h3>Plugin & MCP Support</h3>
           <p>Sandboxed plugin system with lifecycle management plus Model Context Protocol server support for connecting to external tool ecosystems.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Multi-Provider LLM</h3>
+          <p>Use Anthropic, OpenRouter, Groq, Mistral, Ollama, or any OpenAI-compatible endpoint. Switch providers per-request or set a default. Run models locally for full privacy.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Autonomy Controls</h3>
+          <p>Three autonomy levels &mdash; readonly, supervised, autonomous &mdash; control what the AI can do. Per-user settings, API control, and full audit trail.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Prometheus Metrics</h3>
+          <p>Standard Prometheus text format at /metrics. Request counters, token usage, latency histograms, and system gauges. Plug into Grafana instantly.</p>
+        </div>
+
+        <!-- App Ecosystem -->
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>App Ecosystem SDK</h3>
+          <p>Connect 30+ applications to OpenSentinel's AI platform. TypeScript and Python SDKs with auto-registration, cross-app memory sharing, unified notifications, and sub-agent spawning.</p>
+          <ul>
+            <li>TypeScript + Python SDKs</li>
+            <li>30+ integrated apps</li>
+            <li>Cross-app intelligence</li>
+            <li>Unified notifications</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -547,6 +589,25 @@
         <div class="integration-item"><span class="integration-icon">&#x1F9E0;</span><span>Ollama</span></div>
         <div class="integration-item"><span class="integration-icon">&#x1F50C;</span><span>MCP Servers</span></div>
         <div class="integration-item"><span class="integration-icon">&#x1F517;</span><span>Webhooks</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4E3;</span><span>Matrix</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F504;</span><span>OpenRouter</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x26A1;</span><span>Groq</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F32A;</span><span>Mistral</span></div>
+      </div>
+
+      <div class="section-header" style="margin-top: 4rem;" data-animate>
+        <h3>Connected Applications</h3>
+        <p class="section-desc">Build on the OpenSentinel platform with the App Ecosystem SDK. These applications leverage cross-app memory sharing, unified notifications, and AI-powered intelligence.</p>
+      </div>
+
+      <div class="integrations-grid" data-animate>
+        <div class="integration-item"><span class="integration-icon">&#x1F393;</span><span>TutorAI</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4C4;</span><span>DocGen AI</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F6D2;</span><span>EcomFlow</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F4CA;</span><span>PolyMarketAI</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x1F33F;</span><span>GoGreen Sourcing</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x23F0;</span><span>TimeSheetAI</span></div>
+        <div class="integration-item"><span class="integration-icon">&#x2795;</span><span>20+ more</span></div>
       </div>
     </div>
   </section>
@@ -574,6 +635,7 @@
               <span>WhatsApp</span>
               <span>Signal</span>
               <span>iMessage</span>
+              <span>Matrix</span>
               <span>Web UI</span>
               <span>REST API</span>
               <span>Voice</span>
@@ -584,13 +646,15 @@
           <div class="arch-col arch-col--core">
             <h4>OpenSentinel Core</h4>
             <div class="arch-items">
-              <span class="arch-highlight">Claude Brain</span>
-              <span class="arch-highlight">Memory / RAG</span>
+              <span class="arch-highlight">LLM Providers</span>
+              <span class="arch-highlight">Advanced RAG</span>
               <span>Tool Router</span>
               <span>Sub-Agents (4)</span>
               <span>Workflow Engine</span>
               <span>Plugin System</span>
               <span>Scheduler</span>
+              <span>Autonomy</span>
+              <span>Prometheus</span>
             </div>
           </div>
           <div class="arch-arrow">&#x2192;</div>
@@ -612,6 +676,7 @@
             <span>PostgreSQL + pgvector</span>
             <span>Redis + BullMQ</span>
             <span>Docker / Kubernetes</span>
+            <span>Tunnels (CF / ngrok)</span>
           </div>
         </div>
       </div>
@@ -731,7 +796,7 @@
         <div class="quickstart-card" data-animate>
           <div class="quickstart-card-badge">Library</div>
           <h3>Use in Your Project</h3>
-          <p>Add AI capabilities to any Node.js or Bun application.</p>
+          <p>Add AI capabilities to any Bun application.</p>
           <div class="quickstart-code">
             <pre><code><span class="code-prompt">$</span> npm install opensentinel</code></pre>
           </div>
@@ -751,7 +816,7 @@
           </div>
           <div class="quickstart-code">
             <pre><code><span class="code-comment"># Or install manually:</span>
-<span class="code-prompt">$</span> npm install -g opensentinel
+<span class="code-prompt">$</span> bun install -g opensentinel
 <span class="code-prompt">$</span> opensentinel setup     <span class="code-comment"># interactive wizard</span></code></pre>
           </div>
         </div>

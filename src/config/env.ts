@@ -18,7 +18,7 @@ const envSchema = z.object({
   // Database
   DATABASE_URL: z
     .string()
-    .default("postgresql://sentinel:sentinel@localhost:5432/sentinel"),
+    .default(""),
 
   // Redis
   REDIS_URL: z.string().default("redis://localhost:6379"),
@@ -53,6 +53,14 @@ const envSchema = z.object({
   EMAIL_USER: z.string().optional(),
   EMAIL_PASSWORD: z.string().optional(),
   EMAIL_PROVIDER: z.enum(["gmail", "outlook", "yahoo", "custom"]).optional(),
+
+  // Local Mail Server (Dovecot master user for multi-account access)
+  EMAIL_MASTER_USER: z.string().optional(),
+  EMAIL_MASTER_PASSWORD: z.string().optional(),
+  EMAIL_LOCAL_IMAP_HOST: z.string().optional().default("127.0.0.1"),
+  EMAIL_LOCAL_IMAP_PORT: z.coerce.number().optional().default(993),
+  EMAIL_LOCAL_SMTP_HOST: z.string().optional().default("127.0.0.1"),
+  EMAIL_LOCAL_SMTP_PORT: z.coerce.number().optional().default(25),
 
   // GitHub (optional)
   GITHUB_TOKEN: z.string().optional(),
@@ -92,6 +100,46 @@ const envSchema = z.object({
   MCP_ENABLED: z.coerce.boolean().optional().default(true),
   MCP_CONFIG_PATH: z.string().optional().default("./mcp.json"),
 
+  // Multi-Provider LLM
+  LLM_PROVIDER: z.string().optional().default("anthropic"),
+  OPENROUTER_API_KEY: z.string().optional(),
+  OPENROUTER_BASE_URL: z.string().optional(),
+  GROQ_API_KEY: z.string().optional(),
+  MISTRAL_API_KEY: z.string().optional(),
+  OPENAI_LLM_ENABLED: z.coerce.boolean().optional().default(false),
+  OPENAI_COMPATIBLE_API_KEY: z.string().optional(),
+  OPENAI_COMPATIBLE_BASE_URL: z.string().optional(),
+  OPENAI_COMPATIBLE_MODEL: z.string().optional(),
+
+  // Ollama (local models)
+  OLLAMA_ENABLED: z.coerce.boolean().optional().default(false),
+  OLLAMA_BASE_URL: z.string().optional().default("http://localhost:11434"),
+  OLLAMA_DEFAULT_MODEL: z.string().optional().default("llama3.1"),
+
+  // Model Routing
+  MODEL_ROUTING_ENABLED: z.coerce.boolean().optional().default(true),
+  MODEL_OPUS_ENABLED: z.coerce.boolean().optional().default(false),
+
+  // Context Compaction
+  COMPACTION_ENABLED: z.coerce.boolean().optional().default(true),
+  COMPACTION_TOKEN_THRESHOLD: z.coerce.number().optional().default(80000),
+  COMPACTION_PRESERVE_RECENT: z.coerce.number().optional().default(6),
+
+  // Security (OWASP Agentic)
+  PROMPT_GUARD_ENABLED: z.coerce.boolean().optional().default(true),
+  PROMPT_GUARD_THRESHOLD: z.coerce.number().optional().default(0.7),
+  CIRCUIT_BREAKER_ENABLED: z.coerce.boolean().optional().default(true),
+  TOOL_SANDBOX_ENABLED: z.coerce.boolean().optional().default(true),
+
+  // Observability
+  COST_TRACKING_ENABLED: z.coerce.boolean().optional().default(true),
+  QUALITY_SCORING_ENABLED: z.coerce.boolean().optional().default(true),
+  REQUEST_TRACING_ENABLED: z.coerce.boolean().optional().default(true),
+
+  // Intent Parser & Gateway
+  LOCAL_INTENT_PARSER_ENABLED: z.coerce.boolean().optional().default(true),
+  UNIFIED_GATEWAY_ENABLED: z.coerce.boolean().optional().default(false),
+
   // WhatsApp (optional)
   WHATSAPP_ENABLED: z.coerce.boolean().optional().default(false),
   WHATSAPP_AUTH_DIR: z.string().optional().default("./whatsapp-auth"),
@@ -109,6 +157,56 @@ const envSchema = z.object({
   IMESSAGE_BLUEBUBBLES_URL: z.string().optional(),
   IMESSAGE_BLUEBUBBLES_PASSWORD: z.string().optional(),
   IMESSAGE_ALLOWED_NUMBERS: z.string().optional(), // Comma-separated
+
+  // Tunnel Support
+  TUNNEL_ENABLED: z.coerce.boolean().optional().default(false),
+  TUNNEL_PROVIDER: z.enum(["cloudflare", "ngrok", "localtunnel"]).optional().default("cloudflare"),
+  TUNNEL_SUBDOMAIN: z.string().optional(),
+  TUNNEL_AUTH_TOKEN: z.string().optional(),
+
+  // Autonomy Levels
+  AUTONOMY_LEVEL: z.enum(["readonly", "supervised", "autonomous"]).optional().default("autonomous"),
+
+  // Prometheus/OpenTelemetry
+  PROMETHEUS_ENABLED: z.coerce.boolean().optional().default(false),
+  PROMETHEUS_PATH: z.string().optional().default("/metrics"),
+
+  // Device Pairing
+  PAIRING_ENABLED: z.coerce.boolean().optional().default(false),
+  PAIRING_CODE_LIFETIME_MINUTES: z.coerce.number().optional().default(5),
+
+  // Matrix (optional)
+  MATRIX_ENABLED: z.coerce.boolean().optional().default(false),
+  MATRIX_HOMESERVER_URL: z.string().optional(),
+  MATRIX_ACCESS_TOKEN: z.string().optional(),
+  MATRIX_USER_ID: z.string().optional(),
+  MATRIX_ALLOWED_ROOM_IDS: z.string().optional(), // Comma-separated
+  MATRIX_AUTO_JOIN: z.coerce.boolean().optional().default(true),
+  MATRIX_E2E_ENABLED: z.coerce.boolean().optional().default(false),
+
+  // Neo4j (OSINT graph database)
+  NEO4J_URI: z.string().optional().default("bolt://localhost:7687"),
+  NEO4J_USER: z.string().optional().default("neo4j"),
+  NEO4J_PASSWORD: z.string().optional().default(""),
+  NEO4J_DATABASE: z.string().optional().default("neo4j"),
+
+  // OSINT API Keys
+  FEC_API_KEY: z.string().optional().default(""),
+  OPENCORPORATES_API_TOKEN: z.string().optional().default(""),
+  SEC_EDGAR_USER_AGENT: z.string().optional().default("OpenSentinel/2.1 (contact@opensentinel.ai)"),
+
+  // OSINT Feature Toggle
+  OSINT_ENABLED: z.coerce.boolean().optional().default(false),
+  OSINT_RATE_LIMIT_BUFFER_MS: z.coerce.number().optional().default(200),
+
+  // Advanced RAG
+  HYDE_ENABLED: z.coerce.boolean().optional().default(false),
+  RERANK_ENABLED: z.coerce.boolean().optional().default(false),
+  RERANK_MIN_SCORE: z.coerce.number().optional().default(3),
+  MULTISTEP_RAG_ENABLED: z.coerce.boolean().optional().default(false),
+  MULTISTEP_MAX_STEPS: z.coerce.number().optional().default(2),
+  RETRIEVAL_CACHE_ENABLED: z.coerce.boolean().optional().default(false),
+  CONTEXTUAL_QUERY_ENABLED: z.coerce.boolean().optional().default(false),
 
   // Server
   PORT: z.coerce.number().default(8030),

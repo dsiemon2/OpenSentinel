@@ -113,8 +113,11 @@ export interface AnomalyDetection {
 }
 
 // Constants
-const TOKEN_COST_PER_MILLION_INPUT = 3.0; // Claude Sonnet input
-const TOKEN_COST_PER_MILLION_OUTPUT = 15.0; // Claude Sonnet output
+// Dynamic pricing — uses cost-tracker's MODEL_TIERS for accurate multi-model pricing.
+// These defaults are used as fallback (Sonnet pricing).
+import { costTracker } from "./cost-tracker";
+const TOKEN_COST_PER_MILLION_INPUT = 3.0; // Fallback: Claude Sonnet input
+const TOKEN_COST_PER_MILLION_OUTPUT = 15.0; // Fallback: Claude Sonnet output
 
 // In-memory stores
 const activeAlerts = new Map<string, Alert>();

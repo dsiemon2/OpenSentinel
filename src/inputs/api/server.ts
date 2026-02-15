@@ -13,7 +13,7 @@ try {
 import { chat, chatWithTools, streamChat, type Message } from "../../core/brain";
 import { db, conversations, messages, memories } from "../../db";
 import { desc, eq } from "drizzle-orm";
-import { searchMemories, storeMemory } from "../../core/memory";
+import { searchMemories, storeMemory, updateMemory, deleteMemory, exportMemories, getMemoryById } from "../../core/memory";
 
 const app = new Hono();
 
@@ -214,6 +214,7 @@ app.post("/api/memories", async (c) => {
       importance: body.importance || 5,
       userId: body.userId,
       source: "api",
+      provenance: "api:manual",
     });
 
     return c.json(memory);
@@ -223,14 +224,202 @@ app.post("/api/memories", async (c) => {
   }
 });
 
+// Get a single memory by ID
+app.get("/api/memories/export", async (c) => {
+  try {
+    const userId = c.req.query("userId");
+    const format = (c.req.query("format") || "markdown") as "markdown" | "json";
+
+    const exported = await exportMemories(userId || undefined, format);
+
+    if (format === "json") {
+      return c.json(JSON.parse(exported));
+    }
+
+    return c.text(exported);
+  } catch (error) {
+    console.error("Error exporting memories:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+app.get("/api/memories/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const memory = await getMemoryById(id);
+
+    if (!memory) {
+      return c.json({ error: "Memory not found" }, 404);
+    }
+
+    return c.json(memory);
+  } catch (error) {
+    console.error("Error fetching memory:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// Update a memory
+app.put("/api/memories/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const body = await c.req.json<{
+      content?: string;
+      type?: string;
+      importance?: number;
+    }>();
+
+    const updated = await updateMemory(id, body);
+
+    if (!updated) {
+      return c.json({ error: "Memory not found or no changes" }, 404);
+    }
+
+    return c.json(updated);
+  } catch (error) {
+    console.error("Error updating memory:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// Delete a memory (soft-delete to archive)
+app.delete("/api/memories/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const deleted = await deleteMemory(id);
+
+    if (!deleted) {
+      return c.json({ error: "Memory not found" }, 404);
+    }
+
+    return c.json({ success: true, id });
+  } catch (error) {
+    console.error("Error deleting memory:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// ===== Autonomy API =====
+
+app.get("/api/autonomy", async (c) => {
+  try {
+    const { autonomyManager } = await import("../../core/security/autonomy");
+    const userId = c.req.query("userId");
+    return c.json({
+      level: userId ? autonomyManager.getLevel(userId) : autonomyManager.getDefaultLevel(),
+      stats: autonomyManager.getStats(),
+    });
+  } catch (error) {
+    return c.json({ error: "Autonomy system not available" }, 500);
+  }
+});
+
+app.put("/api/autonomy", async (c) => {
+  try {
+    const { autonomyManager } = await import("../../core/security/autonomy");
+    const body = await c.req.json<{ level: string; userId?: string }>();
+    const level = body.level as "readonly" | "supervised" | "autonomous";
+
+    if (!["readonly", "supervised", "autonomous"].includes(level)) {
+      return c.json({ error: "Invalid level. Must be: readonly, supervised, or autonomous" }, 400);
+    }
+
+    if (body.userId) {
+      autonomyManager.setLevel(body.userId, level);
+    } else {
+      autonomyManager.setDefaultLevel(level);
+    }
+
+    return c.json({ success: true, level });
+  } catch (error) {
+    return c.json({ error: "Autonomy system not available" }, 500);
+  }
+});
+
+// ===== Prometheus Metrics =====
+
+app.get("/metrics", async (c) => {
+  try {
+    const { prometheusExporter } = await import("../../core/observability/prometheus");
+    const text = prometheusExporter.toTextFormat();
+    return c.text(text, 200, { "Content-Type": "text/plain; version=0.0.4; charset=utf-8" });
+  } catch (error) {
+    return c.text("# Prometheus metrics not available\n", 500);
+  }
+});
+
+app.get("/api/metrics/prometheus", async (c) => {
+  try {
+    const { prometheusExporter } = await import("../../core/observability/prometheus");
+    const text = prometheusExporter.toTextFormat();
+    return c.text(text, 200, { "Content-Type": "text/plain; version=0.0.4; charset=utf-8" });
+  } catch (error) {
+    return c.text("# Prometheus metrics not available\n", 500);
+  }
+});
+
+// ===== Pairing API =====
+
+app.post("/api/pair", async (c) => {
+  try {
+    const { pairingManager } = await import("../../core/security/pairing");
+    const body = await c.req.json<{ code: string; deviceInfo?: string }>();
+
+    if (!body.code) {
+      return c.json({ error: "code is required" }, 400);
+    }
+
+    const result = pairingManager.pair(body.code, body.deviceInfo || "Unknown device");
+
+    if (!result.success) {
+      return c.json({ error: result.error }, 401);
+    }
+
+    return c.json({ token: result.token });
+  } catch (error) {
+    return c.json({ error: "Pairing system not available" }, 500);
+  }
+});
+
+// ===== Providers API =====
+
+app.get("/api/providers", async (c) => {
+  try {
+    const { providerRegistry } = await import("../../core/providers");
+    return c.json({
+      providers: providerRegistry.listProviders(),
+      default: providerRegistry.getDefaultId(),
+    });
+  } catch (error) {
+    return c.json({ error: "Provider system not available" }, 500);
+  }
+});
+
+// ===== OSINT API =====
+import { osintRoutes } from "./routes/osint";
+app.route("/api/osint", osintRoutes);
+
+// ===== SDK API (External App Integration) =====
+import { sdkRoutes } from "./routes/sdk";
+app.route("/api/sdk", sdkRoutes);
+
 // ===== System API =====
 
 app.get("/api/system/status", async (c) => {
+  // Only expose detailed stats to authenticated requests (Bearer token)
+  const authHeader = c.req.header("Authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return c.json({
+      status: "online",
+      version: "2.1.1",
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+    });
+  }
+  // Public: only expose status and version (no runtime details)
   return c.json({
     status: "online",
-    version: "1.0.0",
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
+    version: "2.1.1",
   });
 });
 

@@ -1,4 +1,4 @@
-import { db, memories, type NewMemory, type Memory } from "../db";
+import { db, memories, archivedMemories, type NewMemory, type Memory } from "../db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import OpenAI from "openai";
 import { env } from "../config/env";
@@ -31,9 +31,9 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   return response.data[0].embedding;
 }
 
-// Store a new memory with embedding
+// Store a new memory with embedding and tsvector
 export async function storeMemory(
-  memory: Omit<NewMemory, "embedding">
+  memory: Omit<NewMemory, "embedding" | "searchVector">
 ): Promise<Memory> {
   const embedding = await generateEmbedding(memory.content);
 
@@ -42,10 +42,124 @@ export async function storeMemory(
     .values({
       ...memory,
       embedding,
+      provenance: memory.provenance || `${memory.source || "unknown"}:auto`,
     })
     .returning();
 
+  // Update tsvector for full-text search
+  try {
+    await db.execute(sql`
+      UPDATE memories
+      SET search_vector = to_tsvector('english', ${memory.content})
+      WHERE id = ${stored.id}
+    `);
+  } catch {
+    // tsvector update is non-critical
+  }
+
   return stored;
+}
+
+// Update an existing memory
+export async function updateMemory(
+  id: string,
+  updates: { content?: string; type?: string; importance?: number }
+): Promise<Memory | null> {
+  // Build SET clause dynamically
+  const setClauses: any[] = [];
+  if (updates.content) {
+    const newEmbedding = await generateEmbedding(updates.content);
+    setClauses.push(sql`content = ${updates.content}`);
+    setClauses.push(sql`embedding = ${JSON.stringify(newEmbedding)}::vector`);
+    setClauses.push(sql`search_vector = to_tsvector('english', ${updates.content})`);
+  }
+  if (updates.type) {
+    setClauses.push(sql`type = ${updates.type}`);
+  }
+  if (updates.importance !== undefined) {
+    setClauses.push(sql`importance = ${updates.importance}`);
+  }
+
+  if (setClauses.length === 0) return null;
+
+  const result = await db.execute(sql`
+    UPDATE memories
+    SET ${sql.join(setClauses, sql`, `)}
+    WHERE id = ${id}
+    RETURNING *
+  `);
+
+  return (result as any[])[0] || null;
+}
+
+// Delete a memory (soft-delete: move to archived)
+export async function deleteMemory(id: string): Promise<boolean> {
+  // Get the memory first
+  const result = await db.execute(sql`
+    SELECT * FROM memories WHERE id = ${id}
+  `);
+  const memory = (result as any[])[0];
+  if (!memory) return false;
+
+  // Archive it
+  await db.insert(archivedMemories).values({
+    originalMemoryId: memory.id,
+    userId: memory.user_id,
+    type: memory.type,
+    content: memory.content,
+    reason: "user_request",
+    originalCreatedAt: memory.created_at,
+  });
+
+  // Delete from active memories
+  await db.execute(sql`DELETE FROM memories WHERE id = ${id}`);
+
+  return true;
+}
+
+// Export memories as Markdown or JSON
+export async function exportMemories(
+  userId?: string,
+  format: "markdown" | "json" = "markdown"
+): Promise<string> {
+  const mems = await db
+    .select()
+    .from(memories)
+    .where(userId ? eq(memories.userId, userId) : undefined)
+    .orderBy(desc(memories.createdAt));
+
+  if (format === "json") {
+    return JSON.stringify(
+      mems.map((m) => ({
+        id: m.id,
+        type: m.type,
+        content: m.content,
+        importance: m.importance,
+        source: m.source,
+        provenance: (m as any).provenance,
+        createdAt: m.createdAt,
+      })),
+      null,
+      2
+    );
+  }
+
+  // Markdown format
+  const lines = [
+    "# Memories Export",
+    `Exported: ${new Date().toISOString()}`,
+    `Total: ${mems.length} memories`,
+    "",
+  ];
+
+  for (const m of mems) {
+    lines.push(`## [${m.type}] (Importance: ${m.importance}/10)`);
+    lines.push(m.content);
+    lines.push(`_Source: ${m.source || "unknown"} | Created: ${m.createdAt.toISOString()}_`);
+    lines.push("");
+  }
+
+  return lines.join("\n");
 }
 
 // Search memories by semantic similarity
@@ -59,7 +173,7 @@ export async function searchMemories(
   // Use pgvector cosine similarity search
   const results = await db.execute(sql`
     SELECT
-      id, user_id, type, content, importance, source, metadata,
+      id, user_id, type, content, importance, source, provenance, metadata,
       last_accessed, created_at,
       1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) as similarity
     FROM memories
@@ -80,6 +194,14 @@ export async function searchMemories(
   }
 
   return rows as Memory[];
+}
+
+// Get a single memory by ID
+export async function getMemoryById(id: string): Promise<Memory | null> {
+  const result = await db.execute(sql`
+    SELECT * FROM memories WHERE id = ${id}
+  `);
+  return (result as any[])[0] || null;
 }
 
 // Get recent memories for a user
@@ -128,6 +250,7 @@ Return only the JSON array, no other text. If no memorable facts, return [].`;
           type: mem.type || "semantic",
           importance: mem.importance || 5,
           source: "conversation",
+          provenance: "extraction:auto",
         });
         storedMemories.push(stored);
       }
@@ -143,8 +266,37 @@ Return only the JSON array, no other text. If no memorable facts, return [].`;
 // Build context string from relevant memories
 export async function buildMemoryContext(
   query: string,
-  userId?: string
+  userId?: string,
+  conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>
 ): Promise<string> {
+  // Use enhanced retrieval pipeline when any advanced RAG feature is enabled
+  const anyAdvancedEnabled = env.HYDE_ENABLED || env.RERANK_ENABLED ||
+    env.MULTISTEP_RAG_ENABLED || env.RETRIEVAL_CACHE_ENABLED || env.CONTEXTUAL_QUERY_ENABLED;
+
+  if (anyAdvancedEnabled) {
+    try {
+      const { enhancedRetrieve } = await import("./memory/enhanced-retrieval");
+      const result = await enhancedRetrieve(query, { userId, limit: 5, conversationHistory });
+
+      if (result.results.length === 0) {
+        return "";
+      }
+
+      const memoryStrings = result.results.map((m: any) => {
+        const provenance = m.provenance ? ` [${m.provenance}]` : "";
+        const score = m.rerankScore != null
+          ? `rerank: ${m.rerankScore}/10`
+          : `relevance: ${((m.similarity || 0) * 100).toFixed(0)}%`;
+        return `- [${m.type}] ${m.content} (${score})${provenance}`;
+      });
+
+      return `\n\nRelevant memories about the user:\n${memoryStrings.join("\n")}`;
+    } catch {
+      // Enhanced retrieval failed, fall back to basic search
+    }
+  }
+
+  // Fallback: basic vector search
   const relevantMemories = await searchMemories(query, userId, 5);
 
   if (relevantMemories.length === 0) {
@@ -152,7 +304,10 @@ export async function buildMemoryContext(
   }
 
   const memoryStrings = relevantMemories.map(
-    (m: any) => `- [${m.type}] ${m.content} (relevance: ${(m.similarity * 100).toFixed(0)}%)`
+    (m: any) => {
+      const provenance = m.provenance ? ` [${m.provenance}]` : "";
+      return `- [${m.type}] ${m.content} (relevance: ${(m.similarity * 100).toFixed(0)}%)${provenance}`;
+    }
   );
 
   return `\n\nRelevant memories about the user:\n${memoryStrings.join("\n")}`;

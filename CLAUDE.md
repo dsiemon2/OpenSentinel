@@ -33,7 +33,7 @@ All credentials are stored in `.env` (not committed to git). See `.env.example` 
 # Development
 bun run dev          # Start with hot reload
 bun run start        # Production start
-bun test             # Run all tests (1733 tests)
+bun test             # Run all tests (2793 tests)
 
 # Database
 bun run db:generate  # Generate migrations

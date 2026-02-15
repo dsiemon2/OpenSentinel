@@ -69,7 +69,7 @@ GET /api/system/status
 ```json
 {
   "status": "online",
-  "version": "2.0.0",
+  "version": "2.1.1",
   "uptime": 3600.123,
   "memory": {
     "rss": 52428800,
@@ -427,6 +427,249 @@ GET /api/conversations/:id
 **Status codes:**
 - `200` -- success
 - `404` -- conversation not found
+
+---
+
+### List Providers
+
+List all registered LLM providers and the current default.
+
+```
+GET /api/providers
+```
+
+**Response:**
+
+```json
+{
+  "providers": [
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "enabled": true
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "enabled": false
+    },
+    {
+      "id": "groq",
+      "name": "Groq",
+      "enabled": false
+    },
+    {
+      "id": "mistral",
+      "name": "Mistral",
+      "enabled": false
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "enabled": false
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "enabled": false
+    },
+    {
+      "id": "custom",
+      "name": "OpenAI-Compatible",
+      "enabled": false
+    }
+  ],
+  "default": "anthropic"
+}
+```
+
+**Example:**
+
+```bash
+curl http://localhost:8030/api/providers
+```
+
+---
+
+### Get Autonomy Level
+
+Get the current autonomy level and tool counts per category.
+
+```
+GET /api/autonomy
+```
+
+**Response:**
+
+```json
+{
+  "level": "autonomous",
+  "readonlyToolCount": 8,
+  "supervisedToolCount": 5
+}
+```
+
+**Example:**
+
+```bash
+curl http://localhost:8030/api/autonomy
+```
+
+---
+
+### Set Autonomy Level
+
+Update the autonomy level. Optionally scope to a specific user.
+
+```
+PUT /api/autonomy
+```
+
+**Request body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `level` | string | Yes | One of `readonly`, `supervised`, or `autonomous` |
+| `userId` | string | No | Scope the level to a specific user |
+
+**Response:**
+
+```json
+{
+  "level": "supervised",
+  "userId": "user-123"
+}
+```
+
+**Status codes:**
+- `200` -- success
+- `400` -- invalid level value
+
+**Example:**
+
+```bash
+curl -X PUT http://localhost:8030/api/autonomy \
+  -H "Content-Type: application/json" \
+  -d '{
+    "level": "supervised",
+    "userId": "user-123"
+  }'
+```
+
+---
+
+### Prometheus Metrics
+
+Export metrics in Prometheus text exposition format. Only available when `PROMETHEUS_ENABLED=true`.
+
+```
+GET /metrics
+```
+
+**Response** (`text/plain; version=0.0.4`):
+
+```
+# HELP requests_total Total number of requests processed
+# TYPE requests_total counter
+requests_total 1542
+
+# HELP tokens_input_total Total input tokens consumed
+# TYPE tokens_input_total counter
+tokens_input_total 284530
+
+# HELP tokens_output_total Total output tokens generated
+# TYPE tokens_output_total counter
+tokens_output_total 102847
+
+# HELP errors_total Total number of errors
+# TYPE errors_total counter
+errors_total 3
+
+# HELP tool_executions_total Total tool executions
+# TYPE tool_executions_total counter
+tool_executions_total 847
+
+# HELP response_latency_ms Response latency in milliseconds
+# TYPE response_latency_ms histogram
+response_latency_ms_bucket{le="100"} 120
+response_latency_ms_bucket{le="500"} 980
+response_latency_ms_bucket{le="1000"} 1400
+response_latency_ms_bucket{le="5000"} 1530
+response_latency_ms_bucket{le="+Inf"} 1542
+response_latency_ms_sum 482310
+response_latency_ms_count 1542
+
+# HELP tool_duration_ms Tool execution duration in milliseconds
+# TYPE tool_duration_ms histogram
+tool_duration_ms_bucket{le="100"} 500
+tool_duration_ms_bucket{le="500"} 720
+tool_duration_ms_bucket{le="1000"} 830
+tool_duration_ms_bucket{le="+Inf"} 847
+tool_duration_ms_sum 195420
+tool_duration_ms_count 847
+
+# HELP uptime_seconds Application uptime in seconds
+# TYPE uptime_seconds gauge
+uptime_seconds 86421.5
+
+# HELP memory_heap_bytes Heap memory usage in bytes
+# TYPE memory_heap_bytes gauge
+memory_heap_bytes 18874368
+```
+
+**Example:**
+
+```bash
+curl http://localhost:8030/metrics
+```
+
+---
+
+### Device Pairing
+
+Exchange a 6-digit pairing code for a bearer token. Codes are generated via the CLI (`opensentinel pair`) and are valid for 5 minutes by default. Returned tokens are prefixed with `os_pair_`.
+
+```
+POST /api/pair
+```
+
+**Request body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `code` | string | Yes | The 6-digit pairing code |
+| `deviceInfo` | object | No | Optional device metadata |
+| `deviceInfo.name` | string | No | Human-readable device name |
+| `deviceInfo.type` | string | No | Device type (e.g., `mobile`, `desktop`, `tablet`) |
+
+**Response:**
+
+```json
+{
+  "token": "os_pair_abc123def456ghi789jkl012mno345",
+  "deviceId": "dev_xyz"
+}
+```
+
+**Status codes:**
+- `200` -- success
+- `400` -- missing or invalid code
+- `401` -- code expired or not found
+- `404` -- pairing not enabled
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:8030/api/pair \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "123456",
+    "deviceInfo": {
+      "name": "iPhone",
+      "type": "mobile"
+    }
+  }'
+```
 
 ---
 

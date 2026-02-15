@@ -29,6 +29,7 @@
           <a href="tools.html">Tools</a>
           <a href="integrations.html">Integrations</a>
           <a href="templates.html">Templates</a>
+          <a href="sdk.html">SDK</a>
         </nav>
       </div>
       <div class="header-right">
@@ -60,12 +61,14 @@
         <a href="getting-started.html#platform" class="sidebar-link"><span class="ico">&#x1F433;</span> Full Platform</a>
         <a href="getting-started.html#template" class="sidebar-link"><span class="ico">&#x1F4CB;</span> From Template</a>
         <a href="getting-started.html#configuration" class="sidebar-link"><span class="ico">&#x1F527;</span> Configuration</a>
+        <a href="getting-started.html#advanced-rag" class="sidebar-link"><span class="ico">&#x1F9E0;</span> Advanced RAG</a>
         <a href="getting-started.html#first-message" class="sidebar-link"><span class="ico">&#x1F4AC;</span> First Message</a>
       </div>
 
       <div class="sidebar-group">
         <div class="sidebar-group-title">Core Concepts</div>
         <a href="tools.html#memory" class="sidebar-link"><span class="ico">&#x1F9E0;</span> Brain & Memory</a>
+        <a href="tools.html#providers" class="sidebar-link"><span class="ico">&#x1F504;</span> LLM Providers</a>
         <a href="tools.html" class="sidebar-link"><span class="ico">&#x1F6E0;</span> Tools</a>
         <a href="agents.html" class="sidebar-link"><span class="ico">&#x1F916;</span> Sub-Agents</a>
         <a href="tools.html#workflows" class="sidebar-link"><span class="ico">&#x26A1;</span> Workflows</a>
@@ -79,6 +82,7 @@
         <a href="channels.html#slack" class="sidebar-link"><span class="ico">&#x1F4E8;</span> Slack</a>
         <a href="channels.html#whatsapp" class="sidebar-link"><span class="ico">&#x1F4F1;</span> WhatsApp</a>
         <a href="channels.html#web-api" class="sidebar-link"><span class="ico">&#x1F310;</span> Web & API</a>
+        <a href="channels.html#matrix" class="sidebar-link"><span class="ico">&#x1F4E3;</span> Matrix</a>
         <a href="channels.html#voice" class="sidebar-link"><span class="ico">&#x1F3A4;</span> Voice</a>
       </div>
 
@@ -110,6 +114,11 @@
         <div class="sidebar-group-title">Apps</div>
         <a href="enterprise.html#desktop" class="sidebar-link"><span class="ico">&#x1F5A5;</span> Desktop App</a>
         <a href="enterprise.html#extension" class="sidebar-link"><span class="ico">&#x1F30D;</span> Browser Extension</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">SDK</div>
+        <a href="sdk.html" class="sidebar-link"><span class="ico">&#x1F517;</span> App Ecosystem SDK</a>
       </div>
     </aside>
 
@@ -233,7 +242,7 @@ console.<span class="cf">log</span>(response.text);</code></pre>
 
         <!-- ========== Full Platform ========== -->
         <h2 id="platform">Option B: Deploy the Full Platform</h2>
-        <p>Run OpenSentinel with all services: persistent vector memory, task scheduler, web dashboard, and all messaging channels.</p>
+        <p>Run OpenSentinel with all services: advanced RAG memory (HyDE, re-ranking, caching), task scheduler, web dashboard, and all messaging channels.</p>
 
         <div class="steps">
           <div class="step">
@@ -250,7 +259,7 @@ console.<span class="cf">log</span>(response.text);</code></pre>
             <div class="step-title">Or install manually</div>
             <div class="codeblock">
               <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
-              <pre><code><span class="cp">$</span> npm install -g opensentinel
+              <pre><code><span class="cp">$</span> bun install -g opensentinel
 <span class="cp">$</span> opensentinel setup     <span class="cc"># interactive wizard</span></code></pre>
             </div>
             <div class="callout callout-tip">
@@ -337,8 +346,27 @@ console.<span class="cf">log</span>(response.text);</code></pre>
             <tr><td><code>SLACK_BOT_TOKEN</code></td><td>Slack bot token</td><td>For Slack</td></tr>
             <tr><td><code>ELEVENLABS_API_KEY</code></td><td>Text-to-speech</td><td>For voice output</td></tr>
             <tr><td><code>TWILIO_ACCOUNT_SID</code></td><td>SMS and phone calls</td><td>For Twilio</td></tr>
+            <tr><td><code>LLM_PROVIDER</code></td><td>Default LLM provider (anthropic, openrouter, groq, mistral, ollama)</td><td>No (default: anthropic)</td></tr>
+            <tr><td><code>OPENROUTER_API_KEY</code></td><td>OpenRouter API key for multi-model access</td><td>For OpenRouter</td></tr>
+            <tr><td><code>GROQ_API_KEY</code></td><td>Groq API key for fast inference</td><td>For Groq</td></tr>
+            <tr><td><code>OLLAMA_ENABLED</code></td><td>Enable local Ollama models</td><td>For local models</td></tr>
+            <tr><td><code>TUNNEL_ENABLED</code></td><td>Auto-start tunnel for public URL</td><td>For tunnels</td></tr>
+            <tr><td><code>AUTONOMY_LEVEL</code></td><td>Agent autonomy (readonly/supervised/autonomous)</td><td>No (default: autonomous)</td></tr>
+            <tr><td><code>PROMETHEUS_ENABLED</code></td><td>Enable Prometheus metrics at /metrics</td><td>For monitoring</td></tr>
+            <tr><td><code>MATRIX_ENABLED</code></td><td>Enable Matrix messaging channel</td><td>For Matrix</td></tr>
+            <tr><td><code>PAIRING_ENABLED</code></td><td>Enable device pairing auth</td><td>For pairing</td></tr>
+            <tr><td><code>HYDE_ENABLED</code></td><td>HyDE — generate ideal answer before searching memory</td><td>For better recall</td></tr>
+            <tr><td><code>RERANK_ENABLED</code></td><td>LLM re-ranking — score results 0-10 for true relevance</td><td>For precision</td></tr>
+            <tr><td><code>CONTEXTUAL_QUERY_ENABLED</code></td><td>Rewrite queries using conversation context</td><td>For follow-ups</td></tr>
+            <tr><td><code>MULTISTEP_RAG_ENABLED</code></td><td>Multi-step retrieval — detect and fill context gaps</td><td>For thoroughness</td></tr>
+            <tr><td><code>RETRIEVAL_CACHE_ENABLED</code></td><td>Redis cache for retrieval results (1h TTL)</td><td>For speed</td></tr>
           </tbody>
         </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Advanced RAG:</strong> Enable <code>HYDE_ENABLED</code> + <code>RERANK_ENABLED</code> for best memory recall quality, or enable all five RAG flags for the full pipeline. See the <a href="https://github.com/dsiemon2/OpenSentinel/blob/main/docs/GETTING_STARTED.md#advanced-rag-features">RAG configuration guide</a> for details.</div>
+        </div>
 
         <h3>Library Configuration (Programmatic)</h3>
         <p>When using OpenSentinel as a library, use <code>configure()</code> instead of environment variables:</p>
@@ -360,6 +388,47 @@ console.<span class="cf">log</span>(response.text);</code></pre>
         <div class="callout callout-info">
           <span class="callout-ico">&#x2139;&#xFE0F;</span>
           <div><strong>Lazy initialization.</strong> OpenSentinel doesn't connect to any service at import time. Database, Redis, and API connections are created only when you first use a feature that needs them.</div>
+        </div>
+
+
+        <!-- ========== Advanced RAG ========== -->
+        <h2 id="advanced-rag">Advanced RAG Configuration</h2>
+        <p>OpenSentinel's memory system includes five optional retrieval enhancements that dramatically improve recall quality. All are disabled by default &mdash; enable what you need.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># Rewrite queries using conversation context (resolves "he", "that", etc.)</span>
+<span class="cv">CONTEXTUAL_QUERY_ENABLED</span>=<span class="cs">true</span>
+
+<span class="cc"># Generate a hypothetical answer before searching (better semantic matching)</span>
+<span class="cv">HYDE_ENABLED</span>=<span class="cs">true</span>
+
+<span class="cc"># LLM scores each result 0-10 for true relevance (eliminates false positives)</span>
+<span class="cv">RERANK_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">RERANK_MIN_SCORE</span>=<span class="cs">3</span>
+
+<span class="cc"># Detect gaps in context and run follow-up searches</span>
+<span class="cv">MULTISTEP_RAG_ENABLED</span>=<span class="cs">true</span>
+<span class="cv">MULTISTEP_MAX_STEPS</span>=<span class="cs">2</span>
+
+<span class="cc"># Cache retrieval results in Redis (1h TTL, ~60% faster on repeated queries)</span>
+<span class="cv">RETRIEVAL_CACHE_ENABLED</span>=<span class="cs">true</span></code></pre>
+        </div>
+
+        <h3>Recommended Setups</h3>
+        <table>
+          <thead><tr><th>Goal</th><th>Enable</th><th>Tradeoff</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Best quality</strong></td><td><code>HYDE_ENABLED</code> + <code>RERANK_ENABLED</code></td><td>+1-2s latency (LLM calls)</td></tr>
+            <tr><td><strong>Conversational</strong></td><td><code>CONTEXTUAL_QUERY_ENABLED</code></td><td>Minimal overhead</td></tr>
+            <tr><td><strong>Speed</strong></td><td><code>RETRIEVAL_CACHE_ENABLED</code></td><td>Requires Redis</td></tr>
+            <tr><td><strong>Full pipeline</strong></td><td>All five flags</td><td>Max quality + caching</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x2139;&#xFE0F;</span>
+          <div><strong>Pipeline flow:</strong> Query &rarr; Contextual Rewrite &rarr; HyDE &rarr; Cache Check &rarr; Hybrid Search &rarr; Re-rank &rarr; Cache Store &rarr; Multi-Step gap fill. Disabled stages are skipped automatically.</div>
         </div>
 
 
@@ -409,11 +478,11 @@ console.<span class="cf">log</span>(result.text);</code></pre>
           <div class="go-deeper-cards">
             <a href="#" class="go-deeper-card">
               <span class="ico">&#x1F9E0;</span>
-              <div><strong>Brain & Memory</strong><span>Learn how pgvector RAG memory works</span></div>
+              <div><strong>Brain & Memory</strong><span>Learn how the advanced RAG pipeline works</span></div>
             </a>
             <a href="#" class="go-deeper-card">
               <span class="ico">&#x1F6E0;</span>
-              <div><strong>Tools Reference</strong><span>All 30+ tools and how to use them</span></div>
+              <div><strong>Tools Reference</strong><span>All 60+ tools and how to use them</span></div>
             </a>
             <a href="#" class="go-deeper-card">
               <span class="ico">&#x1F916;</span>

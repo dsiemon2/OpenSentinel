@@ -1,6 +1,6 @@
 # Security
 
-This document describes the security features and architecture of OpenSentinel v2.0.0. As a self-hosted application, OpenSentinel keeps all data on your infrastructure. The security module is implemented across multiple files in `src/core/security/`.
+This document describes the security features and architecture of OpenSentinel v2.1.1. As a self-hosted application, OpenSentinel keeps all data on your infrastructure. The security module is implemented across multiple files in `src/core/security/`.
 
 ## Table of Contents
 
@@ -9,6 +9,8 @@ This document describes the security features and architecture of OpenSentinel v
 - [Two-Factor Authentication (2FA)](#two-factor-authentication-2fa)
 - [Biometric Verification](#biometric-verification)
 - [Elevated Mode](#elevated-mode)
+- [Autonomy Levels](#autonomy-levels)
+- [Device Pairing](#device-pairing)
 - [Sandboxing](#sandboxing)
 - [Data Protection](#data-protection)
 - [Rate Limiting](#rate-limiting)
@@ -199,6 +201,76 @@ Elevated mode provides time-limited enhanced privileges for administrative opera
 | Audit logging | All actions during elevated mode are logged |
 
 When elevated mode is active, the user can perform sensitive operations without re-verifying for each action. After the 30-minute window expires, elevated privileges are automatically revoked and subsequent sensitive operations require fresh verification.
+
+---
+
+## Autonomy Levels
+
+OpenSentinel provides configurable autonomy levels that control how much freedom the AI agent has when executing tools. This is managed by the `AutonomyManager` (`src/core/security/autonomy.ts`).
+
+### Levels
+
+| Level | Description | Allowed Tools |
+|-------|-------------|---------------|
+| `readonly` | Agent can only use read-only tools. No modifications to files, systems, or external services. | `search_web`, `browse_url`, `read_file`, `list_directory`, `search_files`, `analyze_image`, `ocr_document`, `video_info` |
+| `supervised` | Agent can use all tools, but executions of sensitive tools are logged with extra detail for review. | All tools (write tools flagged for review) |
+| `autonomous` | Full access to all tools with standard logging. This is the default behavior. | All tools |
+
+### Configuration
+
+Set the default level via the `AUTONOMY_LEVEL` environment variable:
+
+```env
+AUTONOMY_LEVEL=supervised
+```
+
+Per-user levels can be set via the API:
+
+```bash
+curl -X PUT http://localhost:8030/api/autonomy \
+  -H "Content-Type: application/json" \
+  -d '{"level": "readonly", "userId": "user-123"}'
+```
+
+### Behavior
+
+- In `readonly` mode, attempts to use write tools (e.g., `execute_command`, `write_file`) are blocked and return an error to the AI.
+- In `supervised` mode, all tool executions proceed but sensitive operations are flagged in logs.
+- The autonomy check runs before tool execution, acting as a security gate.
+
+---
+
+## Device Pairing
+
+Device pairing (`src/core/security/pairing.ts`) provides a consumer-friendly alternative to API key authentication. Instead of managing API keys, users pair devices using a 6-digit code displayed in the terminal.
+
+### Pairing Flow
+
+1. **Code generation**: On startup (when `PAIRING_ENABLED=true`), OpenSentinel generates a 6-digit pairing code and displays it in the console.
+2. **Code exchange**: The client app sends the code to `POST /api/pair` along with optional device information.
+3. **Token issuance**: If the code is valid and not expired, OpenSentinel returns a bearer token (prefixed `os_pair_`).
+4. **Authenticated access**: The client uses the bearer token for subsequent API requests.
+
+### Code Properties
+
+| Property | Value |
+|----------|-------|
+| Format | 6-digit numeric code |
+| Lifetime | 5 minutes (configurable via `PAIRING_CODE_LIFETIME_MINUTES`) |
+| Usage | Single-use (consumed after successful pairing) |
+| Active codes | Only one code active at a time |
+| Regeneration | `opensentinel pair` CLI command or API |
+
+### Device Management
+
+Paired devices are tracked with metadata (name, type, last seen). Devices can be listed and revoked. Each device receives a unique token that can be independently invalidated.
+
+### CLI
+
+```bash
+# Show current pairing code and paired devices
+opensentinel pair
+```
 
 ---
 

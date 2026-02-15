@@ -29,6 +29,7 @@ This guide walks you through installing, configuring, and running OpenSentinel o
 | `TELEGRAM_BOT_TOKEN` | [@BotFather](https://t.me/BotFather) on Telegram | Telegram channel |
 | `DISCORD_BOT_TOKEN` | [Discord Developer Portal](https://discord.com/developers/applications) | Discord channel |
 | `SLACK_BOT_TOKEN` | [Slack API](https://api.slack.com/apps) | Slack channel |
+| `MATRIX_ACCESS_TOKEN` | Your Matrix homeserver | Matrix channel |
 
 ---
 
@@ -122,16 +123,17 @@ On startup, you will see:
 
 ```
 +==========================================+
-|           OPENSENTINEL v2.0.0            |
+|           OPENSENTINEL v2.1.1            |
 |     Your Personal AI Assistant           |
 +==========================================+
 
 [Telegram] Bot started as @YourBotName
+[Matrix] Bot started as @opensentinel:matrix.org
 [API] Server running at http://localhost:8030
 [WebSocket] Available at ws://localhost:8030/ws
 [Web] Dashboard available at http://localhost:8030
 
-OpenSentinel is ready! Send a message via Telegram, API, WebSocket.
+OpenSentinel is ready! Send a message via Telegram, Matrix, API, WebSocket.
 ```
 
 ---
@@ -285,6 +287,26 @@ IMESSAGE_ALLOWED_NUMBERS=+1234567890
 
 ---
 
+### Matrix
+
+Matrix integration uses the [matrix-js-sdk](https://github.com/matrix-org/matrix-js-sdk) for connecting to any Matrix homeserver.
+
+1. Create a Matrix account for your bot on your homeserver (e.g., [matrix.org](https://matrix.org)).
+2. Get an access token by logging in via the Matrix API or using a client like Element.
+3. Configure your `.env`:
+   ```env
+   MATRIX_ENABLED=true
+   MATRIX_HOMESERVER_URL=https://matrix.org
+   MATRIX_ACCESS_TOKEN=your-access-token
+   MATRIX_USER_ID=@opensentinel:matrix.org
+   MATRIX_ALLOWED_ROOM_IDS=!roomid1:matrix.org,!roomid2:matrix.org
+   MATRIX_AUTO_JOIN=true
+   ```
+4. Invite the bot to a room. If `MATRIX_AUTO_JOIN=true`, it will automatically accept invitations.
+5. Mention the bot by name or send a direct message to interact.
+
+---
+
 ## Web Dashboard
 
 Once OpenSentinel is running, open your browser and navigate to:
@@ -324,6 +346,108 @@ curl -X POST http://localhost:8030/api/ask \
 ```
 
 For full API documentation, see [API.md](API.md).
+
+---
+
+## Advanced RAG Features
+
+OpenSentinel includes an advanced retrieval-augmented generation (RAG) pipeline that dramatically improves memory recall quality. All five enhancements are disabled by default and can be enabled independently via environment variables.
+
+### How the Pipeline Works
+
+When enabled, the retrieval pipeline processes queries through up to seven stages:
+
+```
+User Query → Contextual Rewrite → HyDE → Cache Check → Hybrid Search → Re-rank → Cache Store → Multi-Step
+```
+
+Each stage is optional. Disabled stages are simply skipped. If all stages are disabled, OpenSentinel falls back to its standard hybrid vector + keyword search.
+
+### Enabling the Features
+
+Add any combination of these to your `.env` file:
+
+```env
+# Contextual Query Rewriting — resolves pronouns and references from conversation history
+CONTEXTUAL_QUERY_ENABLED=true
+
+# HyDE (Hypothetical Document Embeddings) — generates an ideal answer before searching
+HYDE_ENABLED=true
+
+# Cross-Encoder Re-ranking — LLM scores each result 0-10 for true relevance
+RERANK_ENABLED=true
+RERANK_MIN_SCORE=3          # discard results below this score (0-10, default: 3)
+
+# Multi-Step Retrieval — detects gaps in context and fetches more
+MULTISTEP_RAG_ENABLED=true
+MULTISTEP_MAX_STEPS=2       # max follow-up rounds (default: 2)
+
+# Retrieval Cache — caches results in Redis to speed up similar queries
+RETRIEVAL_CACHE_ENABLED=true
+```
+
+Restart OpenSentinel after changing any of these values.
+
+### Recommended Configurations
+
+| Goal | Enable | Notes |
+|------|--------|-------|
+| **Best quality** | `HYDE_ENABLED` + `RERANK_ENABLED` | Best retrieval accuracy. Adds ~1-2s per query for LLM calls. |
+| **Conversational** | `CONTEXTUAL_QUERY_ENABLED` | Essential if users ask follow-up questions that reference earlier messages (e.g., "Tell me more about *that*"). |
+| **Speed** | `RETRIEVAL_CACHE_ENABLED` | Caches results for 1 hour. Reduces latency ~60% on repeated or similar queries. |
+| **Thorough research** | `MULTISTEP_RAG_ENABLED` + `RERANK_ENABLED` | Fills gaps by generating follow-up queries. Great for complex questions. |
+| **Full pipeline** | All flags enabled | Maximum quality with caching. Recommended for production use. |
+
+### What Each Feature Does
+
+#### Contextual Query Rewriting (`CONTEXTUAL_QUERY_ENABLED`)
+
+Uses the last 4 conversation messages to rewrite ambiguous queries. For example, if the user says "What's his email?" after discussing a contact, the system rewrites the query to "What is John Smith's email address?" before searching memory.
+
+#### HyDE (`HYDE_ENABLED`)
+
+Instead of searching with the raw user query, OpenSentinel first asks Claude to write a hypothetical "ideal answer" (~200 words), then embeds *that* document for the vector search. This bridges the vocabulary gap between questions and stored facts, dramatically improving recall for questions that don't lexically match stored memories.
+
+#### Cross-Encoder Re-ranking (`RERANK_ENABLED`)
+
+After initial retrieval returns candidates, Claude scores each result 0-10 for true relevance to the query. Results are re-sorted by this score, and any below `RERANK_MIN_SCORE` (default: 3) are discarded. This eliminates false positives that "looked similar" in embedding space but weren't actually relevant.
+
+#### Multi-Step Retrieval (`MULTISTEP_RAG_ENABLED`)
+
+After the initial search and re-ranking, Claude evaluates whether the retrieved context fully answers the query. If gaps are detected, the system generates targeted follow-up queries and retrieves additional context. This repeats for up to `MULTISTEP_MAX_STEPS` rounds (default: 2), building a comprehensive context.
+
+#### Retrieval Cache (`RETRIEVAL_CACHE_ENABLED`)
+
+Caches retrieval results in Redis keyed by a hash of the query embedding. When a very similar query comes in (within cosine similarity threshold), the cached results are returned instantly instead of running the full search pipeline. Cache entries expire after 1 hour by default.
+
+### Prerequisites
+
+- **All features**: Require a configured LLM provider (Claude API key)
+- **HyDE, Re-ranking, Multi-Step, Contextual**: Make additional LLM API calls (one per feature per query)
+- **Retrieval Cache**: Requires Redis (`REDIS_URL` in `.env`)
+- **Memory search**: Requires PostgreSQL with pgvector and an `OPENAI_API_KEY` for embeddings
+
+### Verifying RAG Features
+
+After enabling features, you can check that they're working by looking at the console output. When advanced RAG is active, you'll see log messages indicating which pipeline stages are running:
+
+```
+[Memory] Enhanced retrieval: contextual rewrite → HyDE → cache miss → hybrid search → rerank → cache store
+```
+
+You can also test via the API:
+
+```bash
+# Store a memory
+curl -X POST http://localhost:8030/api/ask \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Remember that my favorite programming language is TypeScript"}'
+
+# Retrieve with advanced RAG (uses contextual rewriting, HyDE, etc.)
+curl -X POST http://localhost:8030/api/ask \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What language do I prefer for coding?"}'
+```
 
 ---
 
@@ -388,7 +512,7 @@ Run the test suite:
 bun test
 ```
 
-The suite includes 2168 tests covering all components.
+The suite includes 3,800+ tests covering all components.
 
 ---
 
@@ -465,6 +589,8 @@ PORT=8031
 ## Next Steps
 
 - Read the [Architecture Guide](ARCHITECTURE.md) to understand how OpenSentinel works internally.
+- Configure [Advanced RAG Features](#advanced-rag-features) to improve memory retrieval quality.
 - Explore the [API Reference](API.md) for programmatic access.
 - Check out the [Features Overview](features.md) for the full list of capabilities.
+- See the [Configuration Reference](CONFIGURATION.md) for all environment variables.
 - Learn about [Tools](TOOLS.md), [Skills](SKILLS.md), and [Plugins](PLUGINS.md) to extend OpenSentinel.

@@ -104,7 +104,7 @@ OpenSentinel is a **completely custom, self-contained AI assistant** built from 
 ### Architecture
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    OpenSentinel v2.0.0                        │
+│                    OpenSentinel v2.1.1                        │
 ├─────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs        │
 │  ──────              │  ────               │  ───────        │

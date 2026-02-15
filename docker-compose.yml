@@ -21,7 +21,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8030
-      - DATABASE_URL=postgresql://opensentinel:${DB_PASSWORD:-opensentinel}@postgres:5432/opensentinel
+      - DATABASE_URL=postgresql://opensentinel:${DB_PASSWORD}@postgres:5432/opensentinel
       - REDIS_URL=redis://redis:6379
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -64,13 +64,13 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRES_USER=opensentinel
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-opensentinel}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=opensentinel
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
-      - "5445:5432"
+      - "127.0.0.1:5445:5432"
     networks:
       - opensentinel-network
     healthcheck:
@@ -88,7 +88,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "6384:6379"
+      - "127.0.0.1:6384:6379"
     networks:
       - opensentinel-network
     healthcheck:
@@ -96,6 +96,32 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Neo4j for OSINT knowledge graph (optional)
+  neo4j:
+    image: neo4j:5-community
+    container_name: opensentinel-neo4j
+    restart: unless-stopped
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-changeme}
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_memory_heap_initial__size=256m
+      - NEO4J_dbms_memory_heap_max__size=512m
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    ports:
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
+    networks:
+      - opensentinel-network
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "${NEO4J_PASSWORD:-changeme}", "RETURN 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    profiles:
+      - osint
 
   # Nginx reverse proxy (optional, for production)
   nginx:
@@ -127,4 +153,8 @@ volumes:
   opensentinel_data:
     driver: local
   opensentinel_logs:
+    driver: local
+  neo4j_data:
+    driver: local
+  neo4j_logs:
     driver: local

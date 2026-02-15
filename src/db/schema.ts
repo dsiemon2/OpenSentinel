@@ -8,7 +8,15 @@ import {
   boolean,
   vector,
   index,
+  customType,
 } from "drizzle-orm/pg-core";
+
+// Custom tsvector type for full-text search
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return "tsvector";
+  },
+});
 
 // Users table
 export const users = pgTable("users", {
@@ -64,8 +72,10 @@ export const memories = pgTable(
       .$type<"episodic" | "semantic" | "procedural">(),
     content: text("content").notNull(),
     embedding: vector("embedding", { dimensions: 1536 }), // OpenAI embedding size
+    searchVector: tsvector("search_vector"), // Full-text search vector (GIN indexed)
     importance: integer("importance").default(5), // 1-10 scale
     source: text("source"), // Where this memory came from
+    provenance: text("provenance"), // Origin tracking: "conversation:id", "api:manual", "extraction:auto"
     metadata: jsonb("metadata"),
     lastAccessed: timestamp("last_accessed").defaultNow(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -528,6 +538,69 @@ export const usageQuotas = pgTable(
 );
 
 // ============================================
+// KNOWLEDGE GRAPH TABLES
+// ============================================
+
+// Graph entities — people, projects, topics, events, organizations, locations
+export const graphEntities = pgTable(
+  "graph_entities",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id),
+    type: text("type")
+      .notNull()
+      .$type<"person" | "project" | "topic" | "event" | "organization" | "location">(),
+    name: text("name").notNull(),
+    aliases: jsonb("aliases").$type<string[]>().default([]),
+    description: text("description"),
+    attributes: jsonb("attributes").$type<Record<string, unknown>>().default({}),
+    importance: integer("importance").default(50), // 0-100
+    mentionCount: integer("mention_count").default(1),
+    embedding: vector("embedding", { dimensions: 1536 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("graph_entities_user_idx").on(table.userId),
+    index("graph_entities_type_idx").on(table.type),
+    index("graph_entities_name_idx").on(table.name),
+  ]
+);
+
+// Graph relationships — connections between entities
+export const graphRelationships = pgTable(
+  "graph_relationships",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sourceEntityId: uuid("source_entity_id")
+      .references(() => graphEntities.id, { onDelete: "cascade" })
+      .notNull(),
+    targetEntityId: uuid("target_entity_id")
+      .references(() => graphEntities.id, { onDelete: "cascade" })
+      .notNull(),
+    type: text("type")
+      .notNull()
+      .$type<
+        | "knows" | "works_with" | "works_on" | "family" | "friend"
+        | "colleague" | "manages" | "reports_to" | "belongs_to"
+        | "related_to" | "located_in" | "interested_in" | "expert_in"
+        | "mentioned_in" | "participates_in"
+      >(),
+    strength: integer("strength").default(50), // 0-100
+    bidirectional: boolean("bidirectional").default(false),
+    context: text("context"),
+    attributes: jsonb("attributes").$type<Record<string, unknown>>().default({}),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("graph_rel_source_idx").on(table.sourceEntityId),
+    index("graph_rel_target_idx").on(table.targetEntityId),
+    index("graph_rel_type_idx").on(table.type),
+  ]
+);
+
+// ============================================
 // DOCUMENT KNOWLEDGE BASE TABLES
 // ============================================
 
@@ -629,6 +702,12 @@ export type NewPersona = typeof personas.$inferInsert;
 export type Organization = typeof organizations.$inferSelect;
 export type NewOrganization = typeof organizations.$inferInsert;
 export type OrganizationMember = typeof organizationMembers.$inferSelect;
+
+// Knowledge graph types
+export type GraphEntity = typeof graphEntities.$inferSelect;
+export type NewGraphEntity = typeof graphEntities.$inferInsert;
+export type GraphRelationship = typeof graphRelationships.$inferSelect;
+export type NewGraphRelationship = typeof graphRelationships.$inferInsert;
 
 // Document knowledge base types
 export type Document = typeof documents.$inferSelect;

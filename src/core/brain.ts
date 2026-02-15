@@ -1,10 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
-import type {
-  MessageParam,
-  ContentBlockParam,
-  ToolResultBlockParam,
-} from "@anthropic-ai/sdk/resources/messages";
-import type { Tool } from "@anthropic-ai/sdk/resources/messages";
 import { env } from "../config/env";
 import { TOOLS, executeTool, getMCPRegistry } from "../tools";
 import { mcpToolsToAnthropicTools } from "./mcp";
@@ -19,10 +12,19 @@ import { metric } from "./observability/metrics";
 import { audit } from "./security/audit-logger";
 import { thinkingLevelManager } from "./intelligence/thinking-levels";
 import { hookManager, soulHookManager } from "./hooks";
+import { modelRouter } from "./brain/router";
+import { buildReflectionPrompt, buildPlanningPrompt, evaluateOutcomes, reflectionTracker, type ToolOutcome } from "./brain/reflection";
+import { compactConversation, needsCompaction } from "./brain/compaction";
+import { intentParser } from "./brain/intent-parser";
+import { costTracker } from "./observability/cost-tracker";
+import { providerRegistry } from "./providers";
+import type { LLMProvider } from "./providers/provider";
+import type { LLMContentBlock, LLMTool, LLMMessage, LLMRequest, LLMResponse } from "./providers/types";
 
-const client = new Anthropic({
-  apiKey: env.CLAUDE_API_KEY,
-});
+/** Get the current default LLM provider */
+function getProvider(): LLMProvider {
+  return providerRegistry.getDefault();
+}
 
 const SYSTEM_PROMPT = `You are OpenSentinel, a personal AI assistant with a JARVIS-like personality. You are helpful, efficient, and have a subtle sense of humor. You speak in a professional yet friendly manner.
 
@@ -53,13 +55,23 @@ export interface BrainResponse {
 }
 
 // Get all available tools (native + MCP)
-function getAllTools(): Tool[] {
+function getAllTools(): LLMTool[] {
   const registry = getMCPRegistry();
   if (registry) {
     const mcpTools = mcpToolsToAnthropicTools(registry);
-    return [...TOOLS, ...mcpTools];
+    return [...TOOLS, ...mcpTools] as LLMTool[];
   }
-  return TOOLS;
+  return TOOLS as LLMTool[];
+}
+
+// Initialize router from env config
+function initRouter(): void {
+  try {
+    modelRouter.setEnabled(env.MODEL_ROUTING_ENABLED ?? true);
+    modelRouter.setOpusEnabled(env.MODEL_OPUS_ENABLED ?? false);
+  } catch {
+    // Env not available yet, use defaults
+  }
 }
 
 // Simple chat without tools
@@ -67,18 +79,25 @@ export async function chat(
   messages: Message[],
   systemPrompt?: string
 ): Promise<BrainResponse> {
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 4096,
+  initRouter();
+
+  // Route to optimal model based on message complexity
+  const lastMsg = messages.filter(m => m.role === "user").pop();
+  const routed = modelRouter.routeMessage(lastMsg?.content || "");
+
+  const provider = getProvider();
+  const response = await provider.createMessage({
+    model: routed.model,
+    max_tokens: routed.maxTokens,
     system: systemPrompt || SYSTEM_PROMPT,
     messages: messages.map((m) => ({
-      role: m.role,
+      role: m.role as "user" | "assistant",
       content: m.content,
     })),
   });
 
   const textContent = response.content.find((c) => c.type === "text");
-  const content = textContent ? textContent.text : "";
+  const content = textContent?.text || "";
 
   return {
     content,
@@ -94,16 +113,31 @@ export async function chatWithTools(
   onToolUse?: (toolName: string, input: unknown) => void
 ): Promise<BrainResponse> {
   const startTime = Date.now();
+  initRouter();
 
   // Build memory context from user's query
   const lastUserMessage = messages.filter((m) => m.role === "user").pop();
+
+  // Check intent parser for local handling (skip API call for trivial commands)
+  if (lastUserMessage && env.LOCAL_INTENT_PARSER_ENABLED !== false) {
+    const intent = intentParser.parseIntent(lastUserMessage.content);
+    if (intent?.handled && intent.response) {
+      console.log(`[IntentParser] Handled locally: ${intent.intent}`);
+      return {
+        content: intent.response,
+        inputTokens: 0,
+        outputTokens: 0,
+      };
+    }
+  }
+
   let memoryContext = "";
   let modeContext = "";
   let personalityContext = "";
 
   if (lastUserMessage && userId) {
     try {
-      memoryContext = await buildMemoryContext(lastUserMessage.content, userId);
+      memoryContext = await buildMemoryContext(lastUserMessage.content, userId, messages);
     } catch {
       // Memory system not available, continue without it
     }
@@ -148,7 +182,13 @@ export async function chatWithTools(
     soulContext = soulHookManager.buildSoulPrompt(activeSoul);
   }
 
-  const systemWithContext = SYSTEM_PROMPT + memoryContext + modeContext + personalityContext + soulContext;
+  // Add planning prompt for structured reasoning (ReAct: Thought phase)
+  const planningContext = buildPlanningPrompt(
+    lastUserMessage?.content || "",
+    getAllTools().length
+  );
+
+  const systemWithContext = SYSTEM_PROMPT + memoryContext + modeContext + personalityContext + soulContext + planningContext;
 
   // Run before hooks
   const hookResult = await hookManager.runBefore("message:process", {
@@ -165,9 +205,20 @@ export async function chatWithTools(
     };
   }
 
-  // Convert messages to Anthropic format
-  const anthropicMessages: MessageParam[] = messages.map((m) => ({
-    role: m.role,
+  // Apply context compaction if conversation is too long
+  const compactionResult = compactConversation(messages, {
+    enabled: env.COMPACTION_ENABLED ?? true,
+    tokenThreshold: env.COMPACTION_TOKEN_THRESHOLD ?? 80000,
+    preserveRecentCount: env.COMPACTION_PRESERVE_RECENT ?? 6,
+  });
+
+  if (compactionResult.wasCompacted) {
+    console.log(`[Compaction] Compacted ${compactionResult.originalCount} messages → ${compactionResult.compactedCount} (~${compactionResult.summaryTokenEstimate} summary tokens)`);
+  }
+
+  // Convert messages to provider-agnostic format (use compacted messages)
+  const llmMessages: LLMMessage[] = compactionResult.messages.map((m) => ({
+    role: m.role as "user" | "assistant",
     content: m.content,
   }));
 
@@ -178,15 +229,29 @@ export async function chatWithTools(
   // Get thinking level API params
   const thinkingParams = thinkingLevelManager.buildApiParams(userId ?? "default");
 
-  // Tool use loop
-  let response = await client.messages.create({
-    model: thinkingParams.model,
-    max_tokens: thinkingParams.max_tokens,
+  // Route to optimal model: thinking level may override router
+  const routed = modelRouter.routeMessage(lastUserMessage?.content || "", {
+    thinkingLevel: thinkingLevelManager.getLevel(userId ?? "default"),
+  });
+  // If thinking level uses extended thinking, keep its model; otherwise use routed model
+  const finalModel = thinkingParams.thinking ? thinkingParams.model : routed.model;
+  const finalMaxTokens = thinkingParams.thinking ? thinkingParams.max_tokens : Math.max(routed.maxTokens, thinkingParams.max_tokens);
+
+  console.log(`[Router] Model: ${finalModel} (tier: ${routed.tier}, thinking: ${thinkingParams.thinking ? "enabled" : "off"})`);
+
+  // Track tool outcomes for reflection
+  const toolOutcomes: ToolOutcome[] = [];
+
+  // Tool use loop (ReAct: Action + Observation phases)
+  const provider = getProvider();
+  let response = await provider.createMessage({
+    model: finalModel,
+    max_tokens: finalMaxTokens,
     system: systemWithContext,
     tools: getAllTools(),
-    messages: anthropicMessages,
+    messages: llmMessages,
     ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking } : {}),
-  } as any);
+  });
 
   totalInputTokens += response.usage.input_tokens;
   totalOutputTokens += response.usage.output_tokens;
@@ -197,12 +262,12 @@ export async function chatWithTools(
       (block) => block.type === "tool_use"
     );
 
-    const toolResults: ToolResultBlockParam[] = [];
+    const toolResults: LLMContentBlock[] = [];
 
     for (const toolUse of toolUseBlocks) {
       if (toolUse.type === "tool_use") {
-        onToolUse?.(toolUse.name, toolUse.input);
-        toolsUsed.push(toolUse.name);
+        onToolUse?.(toolUse.name!, toolUse.input);
+        toolsUsed.push(toolUse.name!);
 
         // Run before-tool hook
         const toolHook = await hookManager.runBefore("tool:execute", {
@@ -216,27 +281,39 @@ export async function chatWithTools(
         let result;
         if (toolHook.proceed) {
           result = await executeTool(
-            toolUse.name,
+            toolUse.name!,
             toolUse.input as Record<string, unknown>
           );
         } else {
           result = { success: false, result: null, error: toolHook.reason ?? "Blocked by hook" };
         }
 
+        const toolDuration = Date.now() - toolStartTime;
+
         // Run after-tool hook
         await hookManager.runAfter("tool:execute", {
           toolName: toolUse.name,
           toolInput: toolUse.input,
           toolResult: result,
-          duration: Date.now() - toolStartTime,
+          duration: toolDuration,
         }, userId);
+
+        // Track tool outcome for reflection (ReAct: Observation)
+        toolOutcomes.push({
+          toolName: toolUse.name!,
+          input: toolUse.input,
+          result: result,
+          success: result.success,
+          error: result.error,
+          duration: toolDuration,
+        });
 
         // Track tool usage
         if (userId) {
           try {
-            await trackPattern(userId, "tool_usage", toolUse.name, { tool: toolUse.name });
-            metric.toolDuration(toolUse.name, Date.now() - toolStartTime, result.success);
-            await audit.toolUse(userId, toolUse.name, toolUse.input as Record<string, unknown>, result.success);
+            await trackPattern(userId, "tool_usage", toolUse.name!, { tool: toolUse.name! });
+            metric.toolDuration(toolUse.name!, toolDuration, result.success);
+            await audit.toolUse(userId, toolUse.name!, toolUse.input as Record<string, unknown>, result.success);
           } catch {
             // Tracking/audit not available
           }
@@ -251,25 +328,35 @@ export async function chatWithTools(
     }
 
     // Add assistant response and tool results to messages
-    anthropicMessages.push({
+    llmMessages.push({
       role: "assistant",
-      content: response.content as ContentBlockParam[],
+      content: response.content,
     });
 
-    anthropicMessages.push({
+    llmMessages.push({
       role: "user",
       content: toolResults,
     });
 
-    // Continue conversation
-    response = await client.messages.create({
-      model: thinkingParams.model,
-      max_tokens: thinkingParams.max_tokens,
-      system: systemWithContext,
+    // ReAct: Reflection phase — evaluate outcomes and inject reflection if needed
+    const reflection = evaluateOutcomes(toolOutcomes);
+    let reflectionSystemPrompt = systemWithContext;
+
+    if (reflection.reflection && !reflectionTracker.hasExceededLimit(userId ?? "default")) {
+      reflectionSystemPrompt = systemWithContext + reflection.reflection;
+      reflectionTracker.addReflection(userId ?? "default", reflection);
+      console.log(`[Reflection] Confidence: ${(reflection.confidence * 100).toFixed(0)}% | Failed: ${reflection.failedTools.join(", ") || "none"}`);
+    }
+
+    // Continue conversation with reflection context
+    response = await provider.createMessage({
+      model: finalModel,
+      max_tokens: finalMaxTokens,
+      system: reflectionSystemPrompt,
       tools: getAllTools(),
-      messages: anthropicMessages,
+      messages: llmMessages,
       ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking } : {}),
-    } as any);
+    });
 
     totalInputTokens += response.usage.input_tokens;
     totalOutputTokens += response.usage.output_tokens;
@@ -277,12 +364,19 @@ export async function chatWithTools(
 
   // Extract final text response
   const textContent = response.content.find((c) => c.type === "text");
-  const content = textContent && textContent.type === "text" ? textContent.text : "";
+  const content = textContent?.text || "";
 
-  // Record metrics
+  // Record metrics (including routing cost estimate)
   const latency = Date.now() - startTime;
-  metric.latency(latency, { type: "chat" });
-  metric.tokens(totalInputTokens, totalOutputTokens, { userId: userId || "unknown" });
+  metric.latency(latency, { type: "chat", model: finalModel });
+  metric.tokens(totalInputTokens, totalOutputTokens, { userId: userId || "unknown", model: finalModel });
+
+  // Track cost with multi-model pricing
+  try {
+    costTracker.recordUsage(routed.tier, totalInputTokens, totalOutputTokens);
+  } catch {
+    // Cost tracking non-critical
+  }
 
   // Check for achievements
   if (userId) {
@@ -293,12 +387,18 @@ export async function chatWithTools(
     }
   }
 
+  // Clean up reflection tracker for this conversation
+  reflectionTracker.clearReflections(userId ?? "default");
+
   // Run after-message hook
   await hookManager.runAfter("message:process", {
     response: content,
     inputTokens: totalInputTokens,
     outputTokens: totalOutputTokens,
     toolsUsed,
+    model: finalModel,
+    routedTier: routed.tier,
+    compacted: compactionResult.wasCompacted,
   }, userId);
 
   return {
@@ -314,29 +414,36 @@ export async function streamChat(
   systemPrompt?: string,
   onChunk?: (text: string) => void
 ): Promise<BrainResponse> {
-  const stream = await client.messages.stream({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 4096,
+  initRouter();
+
+  // Route to optimal model
+  const lastMsg = messages.filter(m => m.role === "user").pop();
+  const routed = modelRouter.routeMessage(lastMsg?.content || "");
+
+  const provider = getProvider();
+  const streamResult = provider.streamMessage({
+    model: routed.model,
+    max_tokens: routed.maxTokens,
     system: systemPrompt || SYSTEM_PROMPT,
     messages: messages.map((m) => ({
-      role: m.role,
+      role: m.role as "user" | "assistant",
       content: m.content,
     })),
   });
 
   let fullContent = "";
 
-  for await (const event of stream) {
+  for await (const event of streamResult.events) {
     if (
       event.type === "content_block_delta" &&
-      event.delta.type === "text_delta"
+      event.delta?.type === "text_delta"
     ) {
       fullContent += event.delta.text;
       onChunk?.(event.delta.text);
     }
   }
 
-  const finalMessage = await stream.finalMessage();
+  const finalMessage = await streamResult.finalMessage();
 
   return {
     content: fullContent,
@@ -368,13 +475,15 @@ export async function* streamChatWithTools(
 ): AsyncGenerator<StreamEvent, BrainResponse, undefined> {
   const startTime = Date.now();
 
+  initRouter();
+
   // Build memory context
   const lastUserMessage = messages.filter((m) => m.role === "user").pop();
   let memoryContext = "";
 
   if (lastUserMessage && userId) {
     try {
-      memoryContext = await buildMemoryContext(lastUserMessage.content, userId);
+      memoryContext = await buildMemoryContext(lastUserMessage.content, userId, messages);
     } catch {
       // Memory system not available
     }
@@ -382,9 +491,16 @@ export async function* streamChatWithTools(
 
   const systemWithContext = SYSTEM_PROMPT + memoryContext;
 
-  // Convert messages to Anthropic format
-  const anthropicMessages: MessageParam[] = messages.map((m) => ({
-    role: m.role,
+  // Apply context compaction if needed
+  const compactionResult = compactConversation(messages, {
+    enabled: env.COMPACTION_ENABLED ?? true,
+    tokenThreshold: env.COMPACTION_TOKEN_THRESHOLD ?? 80000,
+    preserveRecentCount: env.COMPACTION_PRESERVE_RECENT ?? 6,
+  });
+
+  // Convert messages to provider-agnostic format (use compacted messages)
+  const llmMessages: LLMMessage[] = compactionResult.messages.map((m) => ({
+    role: m.role as "user" | "assistant",
     content: m.content,
   }));
 
@@ -393,18 +509,25 @@ export async function* streamChatWithTools(
   const toolsUsed: string[] = [];
   let fullContent = "";
 
+  // Route to optimal model
+  const routed = modelRouter.routeMessage(lastUserMessage?.content || "", {
+    thinkingLevel: thinkingLevelManager.getLevel(userId ?? "default"),
+  });
+  const finalModel = routed.model;
+
   // Initial request with streaming
-  const stream = client.messages.stream({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 4096,
+  const provider = getProvider();
+  const streamResult = provider.streamMessage({
+    model: finalModel,
+    max_tokens: routed.maxTokens,
     system: systemWithContext,
     tools: getAllTools(),
-    messages: anthropicMessages,
+    messages: llmMessages,
   });
 
   // Process streaming events
-  for await (const event of stream) {
-    if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+  for await (const event of streamResult.events) {
+    if (event.type === "content_block_delta" && event.delta?.type === "text_delta") {
       fullContent += event.delta.text;
       yield {
         type: "chunk",
@@ -413,32 +536,32 @@ export async function* streamChatWithTools(
     }
   }
 
-  let response = await stream.finalMessage();
+  let response = await streamResult.finalMessage();
   totalInputTokens += response.usage.input_tokens;
   totalOutputTokens += response.usage.output_tokens;
 
   // Tool use loop
   while (response.stop_reason === "tool_use") {
     const toolUseBlocks = response.content.filter((block) => block.type === "tool_use");
-    const toolResults: ToolResultBlockParam[] = [];
+    const toolResults: LLMContentBlock[] = [];
 
     for (const toolUse of toolUseBlocks) {
       if (toolUse.type === "tool_use") {
-        toolsUsed.push(toolUse.name);
+        toolsUsed.push(toolUse.name!);
 
         // Yield tool start event
         yield {
           type: "tool_start",
-          data: { toolName: toolUse.name, toolInput: toolUse.input },
+          data: { toolName: toolUse.name!, toolInput: toolUse.input },
         };
 
         console.log(`[Tool] Executing: ${toolUse.name}`);
-        const result = await executeTool(toolUse.name, toolUse.input as Record<string, unknown>);
+        const result = await executeTool(toolUse.name!, toolUse.input as Record<string, unknown>);
 
         // Yield tool result event
         yield {
           type: "tool_result",
-          data: { toolName: toolUse.name, toolResult: result },
+          data: { toolName: toolUse.name!, toolResult: result },
         };
 
         toolResults.push({
@@ -450,27 +573,27 @@ export async function* streamChatWithTools(
     }
 
     // Add to messages and continue
-    anthropicMessages.push({
+    llmMessages.push({
       role: "assistant",
-      content: response.content as ContentBlockParam[],
+      content: response.content,
     });
 
-    anthropicMessages.push({
+    llmMessages.push({
       role: "user",
       content: toolResults,
     });
 
     // Stream the continuation
-    const continueStream = client.messages.stream({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 4096,
+    const continueStreamResult = provider.streamMessage({
+      model: finalModel,
+      max_tokens: routed.maxTokens,
       system: systemWithContext,
       tools: getAllTools(),
-      messages: anthropicMessages,
+      messages: llmMessages,
     });
 
-    for await (const event of continueStream) {
-      if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+    for await (const event of continueStreamResult.events) {
+      if (event.type === "content_block_delta" && event.delta?.type === "text_delta") {
         fullContent += event.delta.text;
         yield {
           type: "chunk",
@@ -479,7 +602,7 @@ export async function* streamChatWithTools(
       }
     }
 
-    response = await continueStream.finalMessage();
+    response = await continueStreamResult.finalMessage();
     totalInputTokens += response.usage.input_tokens;
     totalOutputTokens += response.usage.output_tokens;
   }
@@ -509,3 +632,10 @@ export async function* streamChatWithTools(
 }
 
 export { SYSTEM_PROMPT };
+export { modelRouter } from "./brain/router";
+export { reflectionTracker } from "./brain/reflection";
+export { compactConversation, needsCompaction } from "./brain/compaction";
+export { intentParser } from "./brain/intent-parser";
+export { costTracker } from "./observability/cost-tracker";
+export { qualityScorer } from "./observability/quality-scorer";
+export { requestTracer } from "./observability/request-tracer";

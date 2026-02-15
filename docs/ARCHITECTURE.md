@@ -1,6 +1,6 @@
 # OpenSentinel Architecture
 
-This document describes the internal architecture of OpenSentinel v2.0.0, covering data flow, core components, and the overall system design.
+This document describes the internal architecture of OpenSentinel v2.1.1, covering data flow, core components, and the overall system design.
 
 ---
 
@@ -10,7 +10,7 @@ This document describes the internal architecture of OpenSentinel v2.0.0, coveri
 +----------------------------------------------------------------------+
 |                          INPUT LAYER                                  |
 |                                                                      |
-|  Telegram  Discord  Slack  WhatsApp  Signal  iMessage  Web  REST API |
+|  Telegram  Discord  Slack  WhatsApp  Signal  iMessage  Matrix  Web  API |
 |     |        |       |       |        |        |        |      |     |
 +------+--------+-------+-------+--------+--------+--------+------+----+
        |        |       |       |        |        |        |      |
@@ -33,6 +33,11 @@ This document describes the internal architecture of OpenSentinel v2.0.0, coveri
 |  |(Personas)|  |(Predict) |  | (2FA/Enc)|  |(Multi-U) |              |
 |  +----------+  +----------+  +----------+  +----------+              |
 |                                                                      |
+|  +----------+  +----------+  +----------+                            |
+|  | Providers|  |  Tunnel  |  | Autonomy |                            |
+|  |(Multi-LLM)| |(Expose) |  | (Levels) |                            |
+|  +----------+  +----------+  +----------+                            |
+|                                                                      |
 +----------------------------------------------------------------------+
        |                                                        |
        v                                                        v
@@ -51,6 +56,25 @@ This document describes the internal architecture of OpenSentinel v2.0.0, coveri
 |                                                                      |
 |  Text Responses   TTS (ElevenLabs/Piper)   File Attachments          |
 |  Inline Keyboards   Reactions   Voice Channel Audio   Notifications  |
++----------------------------------------------------------------------+
+       |                                                        |
+       v                                                        v
++----------------------------------------------------------------------+
+|                       SDK / ECOSYSTEM LAYER                           |
+|                                                                      |
+|  TutorAI  DocGen-AI  EcomFlow  PolyMarketAI  Sourcing  TimeSheetAI  |
+|  Boomer   MangyDog   Salon    SCO  SellMe  Recruiting  Sales  ...   |
+|     |        |         |        |      |        |         |          |
+|     v        v         v        v      v        v         v          |
+|  +---------------------------------------------------------+         |
+|  |           OpenSentinel SDK API (/api/sdk/*)             |         |
+|  |  register | chat | notify | memory | tools | agents     |         |
+|  +---------------------------------------------------------+         |
+|     |                                                                |
+|     v                                                                |
+|  +------+  +--------+  +--------+  +-------+  +--------+            |
+|  | Brain |  | Memory |  | Notify |  | Tools |  | Agents |            |
+|  +------+  +--------+  +--------+  +-------+  +--------+            |
 +----------------------------------------------------------------------+
        |                                                        |
        v                                                        v
@@ -100,29 +124,73 @@ interface BrainResponse {
 
 ---
 
-### Memory (`src/core/memory.ts`)
+### Providers (`src/core/providers/`)
 
-The Memory system implements Retrieval-Augmented Generation (RAG) using PostgreSQL with the pgvector extension.
+The provider system abstracts LLM API differences behind a unified interface, allowing OpenSentinel to work with multiple AI providers.
+
+**Components:**
+
+| File | Purpose |
+|------|---------|
+| `types.ts` | Shared types: `LLMMessage`, `LLMContentBlock`, `LLMTool`, `LLMRequest`, `LLMResponse`, `LLMStreamEvent` |
+| `provider.ts` | `LLMProvider` interface: `createMessage()`, `streamMessage()`, `listModels()`, `isAvailable()` |
+| `anthropic-provider.ts` | Wraps Anthropic SDK. Handles thinking, vision, native streaming. |
+| `openai-compatible-provider.ts` | Covers OpenAI, OpenRouter, Groq, Mistral. Converts tool and message formats. |
+| `ollama.ts` | Extends OpenAI-compatible. Adds model listing via `/api/tags`, health check. |
+| `registry.ts` | `ProviderRegistry`: register, get, set default, list providers |
+| `index.ts` | `initializeProviders()`: auto-registers from env vars at startup |
+
+**Supported providers:** Anthropic, OpenAI, OpenRouter, Groq, Mistral, Ollama, any OpenAI-compatible endpoint.
+
+---
+
+### Memory (`src/core/memory.ts` + `src/core/memory/`)
+
+The Memory system implements Retrieval-Augmented Generation (RAG) using PostgreSQL with the pgvector extension, enhanced with a composable 7-stage retrieval pipeline.
 
 **Memory types:**
 - **Episodic** -- specific events and interactions ("User asked about Paris last Tuesday")
 - **Semantic** -- facts and knowledge ("User's favorite color is blue")
 - **Procedural** -- learned processes and workflows ("When user says 'deploy', run the deploy script")
 
-**Features:**
+**Core features:**
 - Automatic fact extraction from conversations
-- Vector similarity search using pgvector embeddings
+- Vector similarity search using pgvector embeddings (1536d, text-embedding-3-small)
+- Full-text keyword search using PostgreSQL tsvector/GIN
+- Graph-augmented search via entity relationship expansion
+- Reciprocal Rank Fusion (RRF, k=60) combining all search strategies
 - Importance scoring (1-10 scale)
 - Memory decay and consolidation over time
 - Contradiction detection (new facts can override old ones)
 - Context building for the Brain's system prompt
 
+**Advanced Retrieval Pipeline** (`src/core/memory/`):
+
+When any advanced RAG feature is enabled, the pipeline upgrades from basic vector search to a composable multi-stage pipeline:
+
+```
+Query → Contextual Rewrite → HyDE → Cache Check → Hybrid Search → Re-rank → Cache Store → Multi-Step
+```
+
+| Stage | Module | Feature Flag | Description |
+|-------|--------|--------------|-------------|
+| 1. Contextual Query | `contextual-query.ts` | `CONTEXTUAL_QUERY_ENABLED` | Rewrites query using conversation history to resolve pronouns and references |
+| 2. HyDE | `hyde.ts` | `HYDE_ENABLED` | Generates a hypothetical "ideal answer" document, embeds it for better retrieval |
+| 3. Cache | `retrieval-cache.ts` | `RETRIEVAL_CACHE_ENABLED` | Redis-backed cache keyed by embedding hash, 1h TTL default |
+| 4. Hybrid Search | `hybrid-search.ts` | Always on | Vector + keyword + graph search fused with RRF |
+| 5. Re-ranking | `reranker.ts` | `RERANK_ENABLED` | LLM-as-judge scores each result 0-10, re-sorts by true relevance |
+| 6. Multi-Step | `multi-step.ts` | `MULTISTEP_RAG_ENABLED` | Evaluates completeness, generates follow-up queries for gaps |
+| 7. Orchestrator | `enhanced-retrieval.ts` | -- | Wires all stages together, graceful degradation |
+
+All features default to `false` -- zero impact until explicitly enabled. The pipeline degrades gracefully: if all flags are off, it falls back to standard hybrid search.
+
 **Flow:**
 1. User sends a message
-2. Brain calls `buildMemoryContext()` with the user's query
-3. Memory system performs a semantic search against stored memories
-4. Relevant memories are injected into the system prompt as context
-5. After the response, new facts may be extracted and stored
+2. Brain calls `buildMemoryContext()` with the user's query and conversation history
+3. If advanced RAG is enabled, the enhanced retrieval pipeline runs (contextual rewrite → HyDE → cache → hybrid search → re-rank → multi-step)
+4. Otherwise, basic vector search is used
+5. Relevant memories are injected into the system prompt as context
+6. After the response, new facts may be extracted and stored
 
 ---
 
@@ -309,6 +377,7 @@ Each input channel follows the same pattern:
 | WhatsApp | `src/inputs/whatsapp/` | @whiskeysockets/baileys |
 | Signal | `src/inputs/signal/` | signal-cli (subprocess) |
 | iMessage | `src/inputs/imessage/` | AppleScript or BlueBubbles |
+| Matrix | `src/inputs/matrix/` | matrix-js-sdk |
 | REST API | `src/inputs/api/server.ts` | Hono |
 | WebSocket | `src/inputs/websocket/` | Bun native WebSocket |
 | Voice | `src/inputs/voice/` | Wake word + VAD |
@@ -319,7 +388,7 @@ Each input channel follows the same pattern:
 
 ## Tool System
 
-OpenSentinel provides 33 built-in tools defined in `src/tools/index.ts`.
+OpenSentinel provides 60+ built-in tools defined in `src/tools/index.ts`.
 
 **How tools work:**
 
@@ -382,6 +451,8 @@ External service adapters live in `src/integrations/`:
 | `session-manager.ts` | Session lifecycle and token management |
 | `data-retention.ts` | Configurable data retention policies |
 | `gdpr-compliance.ts` | GDPR data export and deletion tools |
+| `autonomy.ts` | Agent autonomy levels (readonly, supervised, autonomous) |
+| `pairing.ts` | Device pairing with 6-digit codes and bearer tokens |
 
 ---
 
@@ -408,6 +479,7 @@ External service adapters live in `src/integrations/`:
 | `dry-run.ts` | Execute without side effects for testing |
 | `prompt-inspector.ts` | Inspect and debug system prompts |
 | `error-tracker.ts` | Centralized error tracking and reporting |
+| `prometheus.ts` | Prometheus text exposition format metrics export |
 
 ---
 
@@ -424,6 +496,59 @@ The Model Context Protocol allows OpenSentinel to connect to external tool serve
 | `types.ts` | TypeScript type definitions |
 
 **Configuration:** MCP servers are defined in `mcp.json` and loaded at startup when `MCP_ENABLED=true`.
+
+---
+
+### Tunnel (`src/core/tunnel/`)
+
+Built-in tunnel support for exposing the local server to the internet without manual nginx/SSL setup.
+
+| File | Purpose |
+|------|---------|
+| `types.ts` | `TunnelProvider` interface: `start()`, `stop()`, `getPublicUrl()`, `isRunning()` |
+| `cloudflare.ts` | Spawns `cloudflared` binary, parses `.trycloudflare.com` URL from stdout |
+| `ngrok.ts` | Spawns `ngrok` binary, polls `localhost:4040/api/tunnels` for public URL |
+| `localtunnel.ts` | Uses `localtunnel` npm package, supports custom subdomains |
+| `index.ts` | Factory `createTunnel()`, `autoStartTunnel()`, `stopTunnel()` |
+
+Tunnel auto-starts when `TUNNEL_ENABLED=true` and prints the public URL on startup.
+
+---
+
+## SDK / Ecosystem Layer
+
+External applications connect to OpenSentinel via the SDK API:
+
+```
++----------------------------------------------------------------------+
+|                       SDK / ECOSYSTEM LAYER                           |
+|                                                                      |
+|  TutorAI  DocGen-AI  EcomFlow  PolyMarketAI  Sourcing  TimeSheetAI  |
+|  Boomer   MangyDog   Salon    SCO  SellMe  Recruiting  Sales  ...   |
+|     |        |         |        |      |        |         |          |
+|     v        v         v        v      v        v         v          |
+|  +---------------------------------------------------------+         |
+|  |           OpenSentinel SDK API (/api/sdk/*)             |         |
+|  |  register | chat | notify | memory | tools | agents     |         |
+|  +---------------------------------------------------------+         |
+|     |                                                                |
+|     v                                                                |
+|  +------+  +--------+  +--------+  +-------+  +--------+            |
+|  | Brain |  | Memory |  | Notify |  | Tools |  | Agents |            |
+|  +------+  +--------+  +--------+  +-------+  +--------+            |
++----------------------------------------------------------------------+
+```
+
+### SDK Authentication
+- Apps register via `POST /api/sdk/register` with name and type
+- Registration returns an API key prefixed with `osk_`
+- All subsequent requests use `Authorization: Bearer osk_...`
+- App-specific memory isolation via `userId: sdk:{appId}`
+
+### Cross-App Intelligence
+- All app interactions stored in pgvector memory
+- Cross-app search enabled via `crossApp: true` parameter
+- App provenance tracked via `source` and `provenance` fields
 
 ---
 
@@ -459,7 +584,15 @@ opensentinel/
 |   +-- config/env.ts                      # Environment variable loader
 |   +-- core/
 |   |   +-- brain.ts                       # Claude API + tool execution loop
-|   |   +-- memory.ts                      # RAG memory system (pgvector)
+|   |   +-- memory.ts                      # Advanced RAG memory (pgvector + pipeline)
+|   |   +-- memory/                        # Advanced retrieval pipeline
+|   |   |   +-- hybrid-search.ts           # Vector + keyword + graph + RRF
+|   |   |   +-- hyde.ts                    # Hypothetical Document Embeddings
+|   |   |   +-- reranker.ts               # LLM cross-encoder re-ranking
+|   |   |   +-- multi-step.ts             # Recursive gap-filling retrieval
+|   |   |   +-- retrieval-cache.ts        # Redis retrieval cache
+|   |   |   +-- contextual-query.ts       # Conversation-aware query rewriting
+|   |   |   +-- enhanced-retrieval.ts     # Pipeline orchestrator
 |   |   +-- scheduler.ts                   # BullMQ task scheduler
 |   |   +-- polls.ts                       # Cross-platform polls
 |   |   +-- reactions.ts                   # Cross-platform reactions
@@ -481,6 +614,8 @@ opensentinel/
 |   |   +-- plugins/                       # Plugin system
 |   |   +-- workflows/                     # Automation engine
 |   |   +-- mcp/                           # Model Context Protocol
+|   |   +-- providers/                     # Multi-LLM provider abstraction
+|   |   +-- tunnel/                        # Built-in tunnel (Cloudflare, ngrok, localtunnel)
 |   |   +-- permissions/                   # Permission management
 |   +-- inputs/
 |   |   +-- telegram/                      # grammY bot
@@ -489,6 +624,7 @@ opensentinel/
 |   |   +-- whatsapp/                      # Baileys WhatsApp Web
 |   |   +-- signal/                        # signal-cli integration
 |   |   +-- imessage/                      # AppleScript / BlueBubbles
+|   |   +-- matrix/                        # Matrix messaging bot
 |   |   +-- api/server.ts                  # Hono REST API
 |   |   +-- websocket/                     # Bun native WebSocket
 |   |   +-- voice/                         # Wake word, VAD, diarization
@@ -527,7 +663,7 @@ opensentinel/
 +-- plugins/                               # Plugin directory
 +-- docker/                                # Docker configs (init-db, nginx)
 +-- docker-compose.yml                     # Full stack orchestration
-+-- tests/                                 # Test suite (2168 tests)
++-- tests/                                 # Test suite (2793 tests)
 +-- docs/                                  # Documentation
 +-- package.json                           # NPM package (opensentinel)
 +-- drizzle.config.ts                      # Drizzle ORM configuration
