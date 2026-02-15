@@ -1,12 +1,13 @@
 # Deployment Guide
 
-This document covers production deployment options for OpenSentinel v2.0.0. The recommended approach is Docker Compose, which handles all dependencies automatically.
+This document covers production deployment options for OpenSentinel v2.1.1. The recommended approach is Docker Compose, which handles all dependencies automatically.
 
 ## Table of Contents
 
 - [Docker Compose Deployment (Recommended)](#docker-compose-deployment-recommended)
 - [Bare Metal Deployment](#bare-metal-deployment)
 - [Kubernetes Deployment](#kubernetes-deployment)
+- [Tunnel Support](#tunnel-support)
 - [Updating](#updating)
 - [Backup Strategy](#backup-strategy)
 - [Monitoring](#monitoring)
@@ -361,6 +362,53 @@ For PostgreSQL and Redis, consider using managed services (e.g., Amazon RDS, Ela
 
 ---
 
+## Tunnel Support
+
+OpenSentinel includes built-in tunnel support for exposing your local instance to the internet without configuring nginx or SSL certificates. This is useful for webhook callbacks, mobile access, demo environments, and development.
+
+### Quick Start
+
+```env
+TUNNEL_ENABLED=true
+TUNNEL_PROVIDER=cloudflare  # cloudflare, ngrok, or localtunnel
+```
+
+On startup, OpenSentinel will automatically create a tunnel and print the public URL:
+
+```
+[Tunnel] Public URL: https://random-words.trycloudflare.com
+```
+
+### Provider Comparison
+
+| Provider | Auth Required | Custom Subdomain | Binary Required |
+|----------|--------------|------------------|-----------------|
+| Cloudflare | No | No (random URL) | Yes (`cloudflared`) |
+| ngrok | Yes (`TUNNEL_AUTH_TOKEN`) | Yes (paid plan) | Yes (`ngrok`) |
+| localtunnel | No | Yes (`TUNNEL_SUBDOMAIN`) | No (npm package) |
+
+### Installing Tunnel Binaries
+
+**Cloudflare (recommended)**:
+```bash
+# Linux
+curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared
+chmod +x /usr/local/bin/cloudflared
+
+# macOS
+brew install cloudflared
+```
+
+**ngrok**:
+```bash
+# Install from https://ngrok.com/download
+ngrok config add-authtoken YOUR_TOKEN
+```
+
+**localtunnel**: No installation needed (uses the `localtunnel` npm package).
+
+---
+
 ## Updating
 
 ### Docker Compose
@@ -481,6 +529,42 @@ The built-in observability system (`src/core/observability/`) provides:
 - **Metrics collection**: Track request counts, response times, tool execution durations, and memory usage.
 - **Context viewer** (`src/core/observability/context-viewer.ts`): Inspect conversation context, active tools, and memory state in real time.
 - **Alerting** (`src/core/observability/alerting.ts`): Configure alert rules for anomalous behavior, errors, or threshold breaches. Alerts can be routed to Telegram, Discord, Slack, email, or webhooks.
+
+### Prometheus Metrics
+
+When `PROMETHEUS_ENABLED=true`, OpenSentinel exports metrics in Prometheus text exposition format at the `/metrics` endpoint (configurable via `PROMETHEUS_PATH`).
+
+**Available metrics:**
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `opensentinel_requests_total` | Counter | Total requests processed (labels: channel, model) |
+| `opensentinel_tokens_input_total` | Counter | Total input tokens consumed (labels: model) |
+| `opensentinel_tokens_output_total` | Counter | Total output tokens produced (labels: model) |
+| `opensentinel_errors_total` | Counter | Total errors encountered (labels: type) |
+| `opensentinel_tool_executions_total` | Counter | Total tool executions (labels: tool, success) |
+| `opensentinel_response_latency_ms` | Histogram | Response latency in milliseconds |
+| `opensentinel_tool_duration_ms` | Histogram | Tool execution duration in milliseconds |
+| `opensentinel_uptime_seconds` | Gauge | Process uptime |
+| `opensentinel_memory_heap_bytes` | Gauge | Heap memory usage |
+
+**Prometheus scrape configuration:**
+
+```yaml
+# prometheus.yml
+scrape_configs:
+  - job_name: 'opensentinel'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:8030']
+    metrics_path: '/metrics'
+```
+
+**Quick test:**
+
+```bash
+curl http://localhost:8030/metrics
+```
 
 ### Log Monitoring
 

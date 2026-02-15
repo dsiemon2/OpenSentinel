@@ -10,6 +10,7 @@ import { iMessageBot } from "./inputs/imessage";
 import wsHandler from "./inputs/websocket";
 import { initMCPRegistry, type MCPRegistry, getMCPToolSummary } from "./core/mcp";
 import { setMCPRegistry } from "./tools";
+import { initializeProviders } from "./core/providers";
 
 export async function main() {
   console.log(`
@@ -18,6 +19,9 @@ export async function main() {
 ║     Your Personal AI Assistant           ║
 ╚══════════════════════════════════════════╝
 `);
+
+  // Initialize LLM providers (Anthropic, OpenRouter, Groq, Mistral, Ollama, etc.)
+  await initializeProviders();
 
   // Start Telegram bot
   console.log("[Telegram] Starting bot...");
@@ -190,6 +194,72 @@ export async function main() {
   console.log(`[API] Server running at http://localhost:${server.port}`);
   console.log(`[WebSocket] Available at ws://localhost:${server.port}/ws`);
   console.log(`[Web] Dashboard available at http://localhost:${server.port}`);
+
+  // Start tunnel if configured
+  let tunnelUrl: string | null = null;
+  if ((env as any).TUNNEL_ENABLED) {
+    try {
+      const { autoStartTunnel } = await import("./core/tunnel");
+      tunnelUrl = await autoStartTunnel(
+        env.PORT,
+        (env as any).TUNNEL_PROVIDER || "cloudflare",
+        {
+          authToken: (env as any).TUNNEL_AUTH_TOKEN,
+          subdomain: (env as any).TUNNEL_SUBDOMAIN,
+        }
+      );
+    } catch (err: any) {
+      console.warn("[Tunnel] Failed to start:", err.message);
+    }
+  }
+
+  // Initialize autonomy manager
+  if ((env as any).AUTONOMY_LEVEL) {
+    try {
+      const { autonomyManager } = await import("./core/security/autonomy");
+      autonomyManager.setDefaultLevel((env as any).AUTONOMY_LEVEL);
+      console.log(`[Autonomy] Level: ${(env as any).AUTONOMY_LEVEL}`);
+    } catch {
+      // Autonomy system non-critical
+    }
+  }
+
+  // Initialize device pairing
+  if ((env as any).PAIRING_ENABLED) {
+    try {
+      const { pairingManager } = await import("./core/security/pairing");
+      if ((env as any).PAIRING_CODE_LIFETIME_MINUTES) {
+        pairingManager.setCodeLifetime((env as any).PAIRING_CODE_LIFETIME_MINUTES);
+      }
+      const code = pairingManager.generateCode();
+      console.log(`[Pairing] Device pairing enabled. Code: ${code}`);
+    } catch {
+      // Pairing system non-critical
+    }
+  }
+
+  // Start Matrix bot if configured
+  let matrixBot: any = null;
+  if ((env as any).MATRIX_ENABLED && (env as any).MATRIX_HOMESERVER_URL && (env as any).MATRIX_ACCESS_TOKEN) {
+    console.log("[Matrix] Starting bot...");
+    try {
+      const { MatrixBot } = await import("./inputs/matrix");
+      matrixBot = new MatrixBot({
+        homeserverUrl: (env as any).MATRIX_HOMESERVER_URL,
+        accessToken: (env as any).MATRIX_ACCESS_TOKEN,
+        userId: (env as any).MATRIX_USER_ID || "",
+        allowedRoomIds: (env as any).MATRIX_ALLOWED_ROOM_IDS?.split(",").filter(Boolean),
+        autoJoin: (env as any).MATRIX_AUTO_JOIN ?? true,
+        e2eEnabled: (env as any).MATRIX_E2E_ENABLED ?? false,
+      });
+      await matrixBot.start();
+      console.log("[Matrix] Bot started");
+    } catch (err: any) {
+      console.warn("[Matrix] Failed to start bot:", err.message);
+      matrixBot = null;
+    }
+  }
+
   console.log("");
   const channels = [
     "Telegram",
@@ -198,10 +268,14 @@ export async function main() {
     whatsappBot ? "WhatsApp" : null,
     signalBot ? "Signal" : null,
     imessageBot ? "iMessage" : null,
+    matrixBot ? "Matrix" : null,
     "API",
     "WebSocket",
   ].filter(Boolean).join(", ");
   console.log(`OpenSentinel is ready! Send a message via ${channels}.`);
+  if (tunnelUrl) {
+    console.log(`Public URL: ${tunnelUrl}`);
+  }
 
   // Return shutdown function for CLI to wire up
   return async function shutdown() {
@@ -215,6 +289,12 @@ export async function main() {
     if (whatsappBot) await whatsappBot.stop();
     if (signalBot) await signalBot.stop();
     if (imessageBot) await imessageBot.stop();
+    if (matrixBot) await matrixBot.stop();
+    // Stop tunnel
+    try {
+      const { stopTunnel } = await import("./core/tunnel");
+      await stopTunnel();
+    } catch { /* tunnel not loaded */ }
     server.stop();
   };
 }

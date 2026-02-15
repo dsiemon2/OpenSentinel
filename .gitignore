@@ -8,3 +8,8 @@ data/
 mcp.json
 whatsapp-auth/
 CLAUDE.md.local-backup
+
+# Dangerous files (may contain credentials)
+deploy_phase*.py
+tmp_*.py
+*.docx

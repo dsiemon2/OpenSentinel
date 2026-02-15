@@ -1,6 +1,6 @@
 # OPENSENTINEL: Complete Implementation
 
-**Status: FULLY IMPLEMENTED** (v2.0.0 - February 2026)
+**Status: FULLY IMPLEMENTED** (v2.1.1 - February 2026)
 
 OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered by Claude, capable of receiving commands via Telegram, Discord, Slack, Voice, and API, executing browser automation, shell commands, file operations, and maintaining persistent memory.
 
@@ -10,12 +10,12 @@ OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                       OPENSENTINEL v2.0                          │
+│                       OPENSENTINEL v2.1.1                        │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │
 │  • Telegram          │  • Claude Brain     │  • Text            │
-│  • Discord           │  • Memory/RAG       │  • Voice TTS       │
+│  • Discord           │  • Advanced RAG     │  • Voice TTS       │
 │  • Slack             │  • Tool Router      │  • Files (PDF,     │
 │  • Web Dashboard     │  • Scheduler        │    Word, Excel,    │
 │  • REST API          │  • Sub-Agents       │    PPT, Images)    │
@@ -122,13 +122,19 @@ OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered
 - User preference injection
 - Project-specific contexts
 
-#### 2.2 Memory System (RAG-Enhanced)
+#### 2.2 Memory System (Advanced RAG)
 - Auto-extraction of memorable facts
 - Importance scoring (1-10)
 - Memory decay for low-importance items
 - Memory consolidation (nightly job)
 - Contradiction detection
 - Privacy tiers (vault-level encryption)
+- HyDE (Hypothetical Document Embeddings) for improved retrieval
+- Cross-Encoder Re-ranking (LLM-as-judge scoring)
+- Recursive Multi-Step RAG with gap detection
+- Redis-backed Retrieval Cache with TTL expiry
+- Contextual Query Rewriting from conversation history
+- Hybrid search: vector + keyword + graph with RRF fusion
 
 #### 2.3 Reasoning Modes
 - Quick response (default)

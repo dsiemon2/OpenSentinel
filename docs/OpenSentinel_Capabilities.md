@@ -3,7 +3,7 @@
 ![OpenSentinel](GoGreen-OpenSentinel.png)
 
 **Category:** AI Assistant
-**Version:** 2.0.0
+**Version:** 2.1.1
 **Status:** Production Ready
 **Date:** February 2026
 
@@ -37,7 +37,7 @@ OpenSentinel learns from interactions through a sophisticated RAG-based memory s
 | Multi-Channel Input | Telegram, Discord, Slack, Web, API, Voice |
 | Voice Interface | Wake word detection ("Hey OpenSentinel"), continuous conversation |
 | Tool Execution | 30+ tools including shell, browser, files, search |
-| Memory System | RAG with pgvector, auto-extraction, importance scoring |
+| Memory System | Advanced RAG with pgvector, HyDE, cross-encoder re-ranking, multi-step retrieval, Redis cache, contextual query rewriting, auto-extraction, importance scoring |
 | Sub-Agent System | Research, Coding, Writing, Analysis agents |
 | File Generation | PDF, Word, Excel, PowerPoint, charts, AI images |
 | Personality System | 15 domain experts, mood detection, tone adaptation |
@@ -85,14 +85,30 @@ OpenSentinel learns from interactions through a sophisticated RAG-based memory s
 
 | AI Model | Status | Purpose |
 |----------|--------|---------|
-| Claude (Anthropic) | ✅ Active | Primary AI Brain |
+| Claude (Anthropic) | ✅ Active | Primary AI Brain (default provider) |
 | OpenAI GPT-4 | ✅ Active | Embeddings, Vision |
 | OpenAI Whisper | ✅ Active | Speech-to-Text |
 | ElevenLabs | ✅ Active | Text-to-Speech (JARVIS voice) |
 | DALL-E | ✅ Active | AI Image Generation |
-| Ollama | ✅ Ready | Local LLM Fallback |
+| Ollama | ✅ Active | Local/offline models (localhost:11434) |
 | faster-whisper | ✅ Ready | Local STT (GPU) |
 | Piper | ✅ Ready | Local TTS |
+
+### Multi-Provider LLM Support
+
+OpenSentinel includes a provider abstraction layer that supports multiple AI backends:
+
+| Provider | Status | Notes |
+|----------|--------|-------|
+| Anthropic Claude | ✅ Active | Default provider |
+| OpenRouter | ✅ Active | Access 100+ models |
+| Groq | ✅ Active | Ultra-fast inference |
+| Mistral AI | ✅ Active | Mistral models |
+| OpenAI | ✅ Active | GPT-4 and compatible models |
+| Ollama | ✅ Active | Local/offline models |
+| Custom Endpoints | ✅ Active | Any OpenAI-compatible API |
+
+Providers are automatically registered from environment variables. Per-request provider selection and automatic format conversion between API standards are supported.
 
 ---
 
@@ -103,6 +119,7 @@ OpenSentinel learns from interactions through a sophisticated RAG-based memory s
 | Telegram | ✅ Active | Text, voice, images, documents, inline keyboards |
 | Discord | ✅ Active | Slash commands, DMs, voice channels, mentions |
 | Slack | ✅ Ready | App mentions, threads, file attachments |
+| Matrix | ✅ Active | Mentions, DMs, auto-join on invite, session history |
 | Web Dashboard | ✅ Active | Chat, memory explorer, settings, task monitor |
 | REST API | ✅ Active | Full programmatic control |
 | Voice | ✅ Active | Wake word, VAD, speaker diarization |
@@ -165,6 +182,9 @@ OpenSentinel learns from interactions through a sophisticated RAG-based memory s
 | Rate Limiting | ✅ Active | Per-user, per-operation limits |
 | Command Sandboxing | ✅ Active | Allowlist/blocklist for shell |
 | Plugin Isolation | ✅ Active | Sandboxed plugin execution |
+| Autonomy Levels | ✅ Active | Readonly, supervised, or autonomous tool access |
+| Device Pairing | ✅ Active | 6-digit code to bearer token exchange |
+| Prometheus Metrics | ✅ Active | Counters, histograms, gauges at GET /metrics |
 
 ---
 
@@ -172,20 +192,26 @@ OpenSentinel learns from interactions through a sophisticated RAG-based memory s
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    OPENSENTINEL v2.0                            │
+│                    OPENSENTINEL v2.1.1                          │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │
 │  • Telegram          │  • Claude Brain     │  • Text            │
 │  • Discord           │  • Memory/RAG       │  • Voice TTS       │
 │  • Slack             │  • Tool Router      │  • Files (PDF,     │
-│  • Web Dashboard     │  • Scheduler        │    Word, Excel,    │
-│  • REST API          │  • Sub-Agents       │    PPT, Images)    │
-│  • Voice (Wake Word) │  • Plugins          │                    │
+│  • Matrix            │  • Scheduler        │    Word, Excel,    │
+│  • Web Dashboard     │  • Sub-Agents       │    PPT, Images)    │
+│  • REST API          │  • Plugins          │                    │
+│  • Voice (Wake Word) │  • Multi-LLM        │                    │
 │  • Device Triggers   │                     │                    │
+├─────────────────────────────────────────────────────────────────┤
+│  Providers: Anthropic, OpenRouter, Groq, Mistral, Ollama       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Tools: Shell, Files, Browser, Search, OCR, Screenshots,       │
 │         Video, Image Analysis, File Generation (30+)           │
+├─────────────────────────────────────────────────────────────────┤
+│  Infrastructure: Built-in Tunnels (Cloudflare, ngrok,          │
+│                  localtunnel), Prometheus Metrics               │
 ├─────────────────────────────────────────────────────────────────┤
 │  Intelligence: Predictive, Relationship Graph, Temporal,       │
 │                Multi-lingual, 15 Domain Experts                 │
@@ -271,10 +297,10 @@ OpenSentinel learns from interactions through a sophisticated RAG-based memory s
 | Sub-Agents | 4 |
 | Source Files | 150+ |
 | Lines of Code | ~52,000 |
-| Unit Tests | 1,733 |
+| Unit Tests | 2,793 |
 
 ---
 
 **GoGreen Paperless Initiative**
 OpenSentinel - Personal AI Assistant
-Version 2.0.0 | February 2026
+Version 2.1.1 | February 2026

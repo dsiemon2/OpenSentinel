@@ -32,10 +32,14 @@ switch (command) {
     import("./commands/status").then((m) => m.default());
     break;
 
+  case "pair":
+    import("./commands/pair").then((m) => m.showPairingInfo());
+    break;
+
   case "version":
   case "--version":
   case "-v":
-    console.log("opensentinel v2.0.0");
+    console.log("opensentinel v2.1.1");
     break;
 
   case "help":
@@ -52,6 +56,7 @@ Commands:
   setup     Interactive setup wizard
   stop      Stop the system service
   status    Show service status
+  pair      Show device pairing info
   version   Show version
   help      Show this help
 

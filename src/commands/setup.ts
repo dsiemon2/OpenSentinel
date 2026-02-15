@@ -233,7 +233,7 @@ async function installPostgres(platform: Platform): Promise<{ databaseUrl: strin
     await exec("sudo systemctl start postgresql");
   } else {
     console.log(`  ${colors.yellow}Unsupported package manager. Please install PostgreSQL 16 + pgvector manually.${colors.reset}`);
-    return { databaseUrl: "postgresql://opensentinel:opensentinel@localhost:5432/opensentinel" };
+    return { databaseUrl: "" };
   }
 
   console.log(`  ${colors.green}PostgreSQL installed.${colors.reset}`);

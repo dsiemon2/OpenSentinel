@@ -51,9 +51,20 @@ export async function handleMessage(ctx: SentinelContext) {
     );
   } catch (error) {
     console.error("Error processing message:", error);
-    await ctx.reply(
-      "Sorry, I encountered an error processing your message. Please try again."
-    );
+    const errMsg = error instanceof Error ? error.message : String(error);
+    if (errMsg.includes("credit balance is too low")) {
+      await ctx.reply(
+        "⚠️ The AI service is temporarily unavailable due to API billing. The admin has been notified."
+      );
+    } else if (errMsg.includes("rate_limit") || errMsg.includes("429")) {
+      await ctx.reply(
+        "⏳ Too many requests — please wait a moment and try again."
+      );
+    } else {
+      await ctx.reply(
+        "Sorry, I encountered an error processing your message. Please try again."
+      );
+    }
   }
 }
 

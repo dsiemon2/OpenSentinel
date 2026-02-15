@@ -17,7 +17,7 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Browse the web with Playwright
 - Search the internet
 - Set reminders and scheduled tasks
-- Remember things about you (RAG memory)
+- Remember things about you (advanced RAG: HyDE, re-ranking, multi-step, caching)
 - Respond with voice (JARVIS voice via ElevenLabs)
 
 ### Advanced Voice
@@ -32,8 +32,16 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Telegram bot with voice support
 - Discord bot with slash commands and voice channels
 - Slack bot with app mentions and threads
+- Matrix bot with mentions and DMs
 - Web dashboard
 - REST API
+
+### Multi-Provider LLM
+- Anthropic Claude (default)
+- OpenRouter, Groq, Mistral, OpenAI
+- Ollama (local/offline models)
+- Any OpenAI-compatible endpoint
+- Automatic provider registration from env vars
 
 ### Device Triggers
 - iOS/macOS Shortcuts integration
@@ -77,6 +85,8 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Audit logging
 - GDPR compliance tools
 - Rate limiting
+- Autonomy levels (readonly/supervised/autonomous)
+- Device pairing (6-digit code auth)
 
 ### Enterprise Features
 - Multi-user support
@@ -91,6 +101,7 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Tool dry-run (preview without executing)
 - Prompt inspector
 - Alerting (anomaly, cost, errors)
+- Prometheus metrics export (GET /metrics)
 
 ### Integrations
 - **Email**: IMAP/SMTP with AI inbox summarization
@@ -101,6 +112,9 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - **Spotify**: Playback, playlists, search
 - **Cloud Storage**: Google Drive, Dropbox
 - **Finance**: Crypto, stocks, currency, portfolio tracking
+
+### Infrastructure
+- Built-in tunnels (Cloudflare, ngrok, localtunnel)
 
 ### Vision & Documents
 - Screen capture and webcam analysis
@@ -193,16 +207,21 @@ curl -X POST http://localhost:8030/api/ask \
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                       OPENSENTINEL v2.0                          │
+│                       OPENSENTINEL v2.1.1                          │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │
 │  • Telegram          │  • Claude Brain     │  • Text            │
-│  • Web Dashboard     │  • Memory/RAG       │  • Voice TTS       │
-│  • REST API          │  • Tool Router      │  • Files (PDF,     │
-│  • Voice (Wake Word) │  • Scheduler        │    Word, Excel,    │
-│  • Device Triggers   │  • Sub-Agents       │    PPT, Images)    │
-│  • Calendar          │  • Plugins          │                    │
+│  • Discord           │  • Memory/RAG       │  • Voice TTS       │
+│  • Slack             │  • Tool Router      │  • Files (PDF,     │
+│  • Matrix            │  • Scheduler        │    Word, Excel,    │
+│  • Web Dashboard     │  • Sub-Agents       │    PPT, Images)    │
+│  • REST API          │  • Plugins          │                    │
+│  • Voice (Wake Word) │  • Multi-LLM        │                    │
+│  • Device Triggers   │                     │                    │
+│  • Calendar          │                     │                    │
+├─────────────────────────────────────────────────────────────────┤
+│  Providers: Anthropic, OpenRouter, Groq, Mistral, Ollama       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Tools: Shell, Files, Browser, Search, OCR, Screenshots,       │
 │         Video, Image Analysis, File Generation                  │
@@ -214,7 +233,7 @@ curl -X POST http://localhost:8030/api/ask \
 ├─────────────────────────────────────────────────────────────────┤
 │  Enterprise: Multi-User, Team Memory, Quotas, SSO, Kubernetes  │
 ├─────────────────────────────────────────────────────────────────┤
-│  Data: PostgreSQL + pgvector │ Redis                           │
+│  Data: PostgreSQL + pgvector │ Redis (Cache/Queue)             │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -226,7 +245,8 @@ src/
 ├── config/env.ts               # Environment config
 ├── core/
 │   ├── brain.ts                # Claude API + tool execution
-│   ├── memory.ts               # RAG memory system
+│   ├── memory.ts               # Advanced RAG memory system
+│   ├── memory/                 # Retrieval pipeline (HyDE, re-ranking, caching)
 │   ├── scheduler.ts            # BullMQ task scheduler
 │   ├── agents/                 # Sub-agent system
 │   ├── enterprise/             # Multi-user, SSO, quotas
@@ -235,12 +255,15 @@ src/
 │   ├── observability/          # Metrics, replay, alerting
 │   ├── personality/            # Personas, mood, domain experts
 │   ├── plugins/                # Plugin system
+│   ├── providers/              # Multi-LLM provider abstraction
 │   ├── security/               # 2FA, vault, GDPR, audit
+│   ├── tunnel/                 # Built-in tunnel support
 │   └── workflows/              # Automation engine
 ├── inputs/
 │   ├── telegram/               # Telegram bot
 │   ├── discord/                # Discord bot
 │   ├── slack/                  # Slack bot
+│   ├── matrix/                 # Matrix messaging bot
 │   ├── api/                    # REST API
 │   ├── calendar/               # Google, Outlook, iCal
 │   ├── triggers/               # Shortcuts, Bluetooth, NFC, Geofence

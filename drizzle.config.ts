@@ -5,6 +5,6 @@ export default defineConfig({
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL || "postgresql://opensentinel:opensentinel@localhost:5445/opensentinel",
+    url: process.env.DATABASE_URL || "",
   },
 });

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Ecosystem SDK - OpenSentinel Docs</title>
+  <meta name="description" content="TypeScript and Python SDKs for connecting external applications to OpenSentinel's AI capabilities, memory system, and 60+ tools.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="../" class="header-logo">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="12" stroke="url(#hlg)" stroke-width="2.5"/><circle cx="14" cy="14" r="5" fill="url(#hlg)"/><line x1="14" y1="2" x2="14" y2="8" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="20" x2="14" y2="26" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="14" x2="8" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="14" x2="26" y2="14" stroke="url(#hlg)" stroke-width="2" stroke-linecap="round"/><defs><linearGradient id="hlg" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs></svg>
+          OpenSentinel
+          <span class="header-badge">Docs</span>
+        </a>
+        <nav class="header-nav">
+          <a href="getting-started.html">Get Started</a>
+          <a href="channels.html">Channels</a>
+          <a href="agents.html">Agents</a>
+          <a href="tools.html">Tools</a>
+          <a href="integrations.html">Integrations</a>
+          <a href="enterprise.html">Enterprise</a>
+          <a href="templates.html">Templates</a>
+          <a href="sdk.html" class="active">SDK</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search docs...
+          <kbd>Ctrl K</kbd>
+        </div>
+        <a href="https://github.com/dsiemon2/OpenSentinel" class="header-github" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <button class="header-mobile-toggle" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <div class="doc-layout">
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Getting Started</div>
+        <a href="getting-started.html" class="sidebar-link"><span class="ico">&#x1F680;</span> Quick Start</a>
+        <a href="getting-started.html#prerequisites" class="sidebar-link"><span class="ico">&#x2699;</span> Prerequisites</a>
+        <a href="getting-started.html#library" class="sidebar-link"><span class="ico">&#x1F4E6;</span> Use as Library</a>
+        <a href="getting-started.html#platform" class="sidebar-link"><span class="ico">&#x1F433;</span> Full Platform</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Core Concepts</div>
+        <a href="channels.html" class="sidebar-link"><span class="ico">&#x1F4AC;</span> Channels</a>
+        <a href="agents.html" class="sidebar-link"><span class="ico">&#x1F916;</span> Agents</a>
+        <a href="tools.html" class="sidebar-link"><span class="ico">&#x1F6E0;</span> Tools</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Integrations</div>
+        <a href="integrations.html" class="sidebar-link"><span class="ico">&#x1F50C;</span> Overview</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Enterprise</div>
+        <a href="enterprise.html" class="sidebar-link"><span class="ico">&#x1F3E2;</span> Overview</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Templates</div>
+        <a href="templates.html" class="sidebar-link"><span class="ico">&#x1F4CB;</span> Template Gallery</a>
+      </div>
+
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">App Ecosystem SDK</div>
+        <a href="sdk.html" class="sidebar-link active"><span class="ico">&#x1F517;</span> Overview</a>
+        <a href="sdk.html#quick-start-ts" class="sidebar-link"><span class="ico">&#x1F4E6;</span> TypeScript SDK</a>
+        <a href="sdk.html#quick-start-py" class="sidebar-link"><span class="ico">&#x1F40D;</span> Python SDK</a>
+        <a href="sdk.html#env-vars" class="sidebar-link"><span class="ico">&#x2699;</span> Environment Variables</a>
+        <a href="sdk.html#api-endpoints" class="sidebar-link"><span class="ico">&#x1F310;</span> API Endpoints</a>
+        <a href="sdk.html#apps" class="sidebar-link"><span class="ico">&#x1F4BB;</span> Integrated Apps</a>
+        <a href="sdk.html#fallback" class="sidebar-link"><span class="ico">&#x1F6E1;</span> Fallback Behavior</a>
+      </div>
+    </aside>
+
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="doc-main">
+      <div class="breadcrumb">
+        <a href="index.html">Docs</a>
+        <span>/</span>
+        <span>App Ecosystem SDK</span>
+      </div>
+
+      <div class="content">
+        <h1>App Ecosystem SDK</h1>
+        <p class="lead">TypeScript and Python SDKs for connecting external applications to OpenSentinel's AI capabilities, memory system, notification channels, and 60+ tools.</p>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x26A1;</span>
+          <div><strong>Any app can connect.</strong> Register your application, get an API key, and leverage OpenSentinel's full AI stack &mdash; chat, memory, tools, sub-agents, and notifications &mdash; from any codebase.</div>
+        </div>
+
+
+        <!-- ========== Overview ========== -->
+        <h2 id="overview">Overview</h2>
+        <p>OpenSentinel provides TypeScript and Python SDKs for connecting external applications. Any app can leverage OpenSentinel's AI capabilities, memory system, notification channels, and 60+ tools.</p>
+
+        <p>The SDK handles authentication, request signing, connection pooling, and graceful fallback. Your app registers once, receives an API key, and can immediately use all OpenSentinel features.</p>
+
+        <ul>
+          <li><strong>Chat &amp; AI</strong> &mdash; send messages to Claude with full tool access</li>
+          <li><strong>Memory</strong> &mdash; store and search memories via pgvector RAG</li>
+          <li><strong>Notifications</strong> &mdash; push alerts to Telegram, Discord, Slack, email, etc.</li>
+          <li><strong>Tools</strong> &mdash; execute any of OpenSentinel's 60+ tools programmatically</li>
+          <li><strong>Sub-Agents</strong> &mdash; spawn Research, Coding, Writing, and Analysis agents</li>
+        </ul>
+
+
+        <!-- ========== Quick Start TypeScript ========== -->
+        <h2 id="quick-start-ts">Quick Start (TypeScript)</h2>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Install the SDK</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> npm install opensentinel</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Register and chat</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">TypeScript</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="ck">import</span> { OpenSentinelClient } <span class="ck">from</span> <span class="cs">"opensentinel/sdk"</span>;
+
+<span class="ck">const</span> client = <span class="ck">new</span> <span class="cf">OpenSentinelClient</span>({
+  <span class="cv">url</span>: <span class="cs">"https://app.opensentinel.ai"</span>,
+  <span class="cv">appName</span>: <span class="cs">"MyApp"</span>,
+  <span class="cv">appType</span>: <span class="cs">"ecommerce"</span>,
+});
+
+<span class="ck">await</span> client.<span class="cf">register</span>();
+<span class="ck">const</span> response = <span class="ck">await</span> client.<span class="cf">chat</span>(<span class="cs">"Analyze my sales data"</span>);
+console.<span class="cf">log</span>(response.content);</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-success">
+          <span class="callout-ico">&#x2705;</span>
+          <div>That's it. Your app is now connected to OpenSentinel. The client handles registration, API key management, and automatic reconnection.</div>
+        </div>
+
+
+        <!-- ========== Quick Start Python ========== -->
+        <h2 id="quick-start-py">Quick Start (Python)</h2>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Install the SDK</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="cp">$</span> pip install opensentinel-sdk</code></pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-title">Register and chat</div>
+            <div class="codeblock">
+              <div class="codeblock-header"><span class="codeblock-lang">Python</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+              <pre><code><span class="ck">from</span> opensentinel_sdk <span class="ck">import</span> OpenSentinelClient
+
+client = <span class="cf">OpenSentinelClient</span>(
+    <span class="cv">url</span>=<span class="cs">"https://app.opensentinel.ai"</span>,
+    <span class="cv">app_name</span>=<span class="cs">"MyApp"</span>,
+    <span class="cv">app_type</span>=<span class="cs">"legal-documents"</span>,
+)
+
+client.<span class="cf">register</span>()
+response = client.<span class="cf">chat</span>(<span class="cs">"Summarize this contract"</span>)
+<span class="cf">print</span>(response.content)</code></pre>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ========== Environment Variables ========== -->
+        <h2 id="env-vars">Environment Variables</h2>
+        <p>The SDK can be configured via environment variables or constructor parameters. Environment variables take precedence when set.</p>
+
+        <table>
+          <thead><tr><th>Variable</th><th>Description</th><th>Default</th></tr></thead>
+          <tbody>
+            <tr><td><code>OPENSENTINEL_URL</code></td><td>OpenSentinel server URL</td><td><code>http://localhost:8030</code></td></tr>
+            <tr><td><code>OPENSENTINEL_API_KEY</code></td><td>Pre-registered API key</td><td>(auto-registered)</td></tr>
+            <tr><td><code>OPENSENTINEL_ENABLED</code></td><td>Enable integration</td><td><code>false</code></td></tr>
+          </tbody>
+        </table>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># Point to your OpenSentinel instance</span>
+<span class="cv">OPENSENTINEL_URL</span>=<span class="cs">https://app.opensentinel.ai</span>
+<span class="cv">OPENSENTINEL_ENABLED</span>=<span class="cs">true</span>
+
+<span class="cc"># Optional: pre-registered API key (skip auto-registration)</span>
+<span class="cv">OPENSENTINEL_API_KEY</span>=<span class="cs">osk_xxxxxxxxxxxxxxxxxxxxxxxxxxxx</span></code></pre>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Auto-registration.</strong> If no API key is provided, the SDK will automatically call <code>/api/sdk/register</code> on first use and cache the key locally. For production, pre-register and set <code>OPENSENTINEL_API_KEY</code>.</div>
+        </div>
+
+
+        <!-- ========== API Endpoints ========== -->
+        <h2 id="api-endpoints">API Endpoints</h2>
+        <p>The SDK abstracts these endpoints, but you can also call them directly via HTTP.</p>
+
+        <table>
+          <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>/api/sdk/register</code></td><td>POST</td><td>Register app, get API key</td></tr>
+            <tr><td><code>/api/sdk/chat</code></td><td>POST</td><td>AI chat with tools</td></tr>
+            <tr><td><code>/api/sdk/notify</code></td><td>POST</td><td>Send notification</td></tr>
+            <tr><td><code>/api/sdk/memory</code></td><td>POST</td><td>Store memory</td></tr>
+            <tr><td><code>/api/sdk/memory/search</code></td><td>POST</td><td>Search memories</td></tr>
+            <tr><td><code>/api/sdk/tools</code></td><td>GET</td><td>List tools</td></tr>
+            <tr><td><code>/api/sdk/tools/execute</code></td><td>POST</td><td>Execute tool</td></tr>
+            <tr><td><code>/api/sdk/agent/spawn</code></td><td>POST</td><td>Spawn sub-agent</td></tr>
+            <tr><td><code>/api/sdk/status</code></td><td>GET</td><td>System status</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Example: Direct HTTP</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># Register an app</span>
+<span class="cp">$</span> curl -X POST https://app.opensentinel.ai/api/sdk/register \
+    -H <span class="cs">"Content-Type: application/json"</span> \
+    -d <span class="cs">'{"appName": "MyApp", "appType": "analytics"}'</span>
+
+<span class="cc"># Chat with your API key</span>
+<span class="cp">$</span> curl -X POST https://app.opensentinel.ai/api/sdk/chat \
+    -H <span class="cs">"Authorization: Bearer osk_your_api_key"</span> \
+    -H <span class="cs">"Content-Type: application/json"</span> \
+    -d <span class="cs">'{"message": "Summarize today'\''s metrics"}'</span></code></pre>
+        </div>
+
+
+        <!-- ========== Integrated Applications ========== -->
+        <h2 id="apps">Integrated Applications</h2>
+        <p>30+ applications in the GoGreen ecosystem are connected through the SDK:</p>
+
+        <table>
+          <thead><tr><th>Application</th><th>Domain</th><th>SDK</th></tr></thead>
+          <tbody>
+            <tr><td><strong>TutorAI</strong></td><td>K-12 AI tutoring</td><td>TypeScript</td></tr>
+            <tr><td><strong>DocGen AI</strong></td><td>Legal document intelligence</td><td>Python</td></tr>
+            <tr><td><strong>EcomFlow</strong></td><td>Multi-channel e-commerce</td><td>TypeScript</td></tr>
+            <tr><td><strong>PolyMarketAI</strong></td><td>Prediction market trading</td><td>Python</td></tr>
+            <tr><td><strong>GoGreen Sourcing</strong></td><td>Procurement intelligence</td><td>TypeScript</td></tr>
+            <tr><td><strong>TimeSheetAI</strong></td><td>Timesheet tracking</td><td>TypeScript</td></tr>
+            <tr><td colspan="3"><strong>20+ more</strong> &mdash; Voice assistants, sales training, recruiting, property management, and more.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x2139;&#xFE0F;</span>
+          <div><strong>Add your own app.</strong> The SDK is open and any application can connect. Register via the API or SDK client, and you'll receive a scoped API key with access to all OpenSentinel features.</div>
+        </div>
+
+
+        <!-- ========== Fallback Behavior ========== -->
+        <h2 id="fallback">Fallback Behavior</h2>
+        <p>All SDKs support graceful fallback. When OpenSentinel is unavailable, methods return <code>null</code> (TypeScript with <code>fallback: true</code>) or <code>None</code> (Python with <code>fallback=True</code>), allowing apps to use their own AI implementations.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-tabs">
+            <button class="codeblock-tab active" onclick="switchCodeTab(this, 'fallback-ts')">TypeScript</button>
+            <button class="codeblock-tab" onclick="switchCodeTab(this, 'fallback-py')">Python</button>
+          </div>
+          <div id="fallback-ts" class="tab-panel active">
+            <pre><code><span class="ck">const</span> client = <span class="ck">new</span> <span class="cf">OpenSentinelClient</span>({
+  <span class="cv">url</span>: <span class="cs">"https://app.opensentinel.ai"</span>,
+  <span class="cv">appName</span>: <span class="cs">"MyApp"</span>,
+  <span class="cv">fallback</span>: <span class="ck">true</span>,  <span class="cc">// return null instead of throwing</span>
+});
+
+<span class="ck">const</span> response = <span class="ck">await</span> client.<span class="cf">chat</span>(<span class="cs">"Analyze this"</span>);
+<span class="ck">if</span> (response === <span class="ck">null</span>) {
+  <span class="cc">// OpenSentinel unavailable, use local AI</span>
+  <span class="ck">const</span> localResult = <span class="ck">await</span> <span class="cf">myLocalAI</span>(<span class="cs">"Analyze this"</span>);
+}</code></pre>
+          </div>
+          <div id="fallback-py" class="tab-panel" style="display:none">
+            <pre><code>client = <span class="cf">OpenSentinelClient</span>(
+    <span class="cv">url</span>=<span class="cs">"https://app.opensentinel.ai"</span>,
+    <span class="cv">app_name</span>=<span class="cs">"MyApp"</span>,
+    <span class="cv">fallback</span>=<span class="ck">True</span>,  <span class="cc"># return None instead of raising</span>
+)
+
+response = client.<span class="cf">chat</span>(<span class="cs">"Analyze this"</span>)
+<span class="ck">if</span> response <span class="ck">is None</span>:
+    <span class="cc"># OpenSentinel unavailable, use local AI</span>
+    local_result = <span class="cf">my_local_ai</span>(<span class="cs">"Analyze this"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Zero downtime.</strong> With fallback mode enabled, your application continues to function even if OpenSentinel is offline for maintenance or updates. AI features degrade gracefully rather than failing.</div>
+        </div>
+
+
+        <!-- ========== Page Nav ========== -->
+        <div class="page-nav">
+          <a href="templates.html" class="page-nav-link">
+            <span class="page-nav-label">&larr; Previous</span>
+            <span class="page-nav-title">Templates</span>
+          </a>
+          <a href="getting-started.html" class="page-nav-link page-nav-link--next">
+            <span class="page-nav-label">Next &rarr;</span>
+            <span class="page-nav-title">Getting Started</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function copyCode(btn) {
+      const block = btn.closest('.codeblock');
+      const pre = block.querySelector('pre');
+      const text = pre.textContent.replace(/^\$ /gm, '');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+
+    function switchCodeTab(clickedTab, panelId) {
+      const tabs = clickedTab.parentElement;
+      const allTabs = tabs.querySelectorAll('.codeblock-tab');
+      allTabs.forEach(t => t.classList.remove('active'));
+      clickedTab.classList.add('active');
+
+      let sibling = tabs.nextElementSibling;
+      while (sibling && sibling.classList.contains('tab-panel')) {
+        sibling.style.display = 'none';
+        sibling.classList.remove('active');
+        sibling = sibling.nextElementSibling;
+      }
+
+      const panel = document.getElementById(panelId);
+      if (panel) {
+        panel.style.display = 'block';
+        panel.classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>
