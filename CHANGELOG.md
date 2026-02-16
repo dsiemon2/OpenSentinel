@@ -1,6 +1,32 @@
 # Changelog
 
-All notable changes to OpenSentinel are documented here.
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [2.5.1] - 2026-02-16
+
+### Added
+- CI/CD pipeline with GitHub Actions (lint, test, build)
+- Comprehensive project documentation overhaul (CLAUDE.md, README.md, CHANGELOG.md)
+- CI status badge, tech stack badges, and MIT license badge to README
+- Contributing and Community sections for open-source audience
+- CI/CD, Testing, and Logging sections to CLAUDE.md
+
+### Changed
+- Standardized all documentation for public open-source consumption
+- Polished README language and structure for community contributors
+- Updated CHANGELOG to Keep a Changelog format
+
+### Security
+- Sanitized all documentation: removed private server IPs, deploy paths, and internal infrastructure details
+- Removed obsolete backup files containing sensitive configuration
+
+### Removed
+- Deleted obsolete/duplicate documentation files (CLAUDE.md.local-backup, DELIVERABLE.md, Implementation.md)
 
 ## [2.5.0] - 2026-02-15
 
@@ -9,9 +35,6 @@ All notable changes to OpenSentinel are documented here.
   - TypeScript SDK (`src/sdk/index.ts`): `OpenSentinelClient` with chat, notify, memory, tools, agent methods
   - Python SDK (`sdk/python/opensentinel_sdk.py`): Zero-dependency client for FastAPI/Django apps
   - SDK API routes (`src/inputs/api/routes/sdk.ts`): 9 endpoints for app registration, chat, notifications, memory, tools, agents
-- **30+ App Integrations**: OpenSentinel SDK integrated into entire GoGreen ecosystem
-  - Main apps: TutorAI, DocGen AI, EcomFlow, PolyMarketAI, GoGreen Sourcing, TimeSheetAI
-  - Products ecosystem: 20+ apps including voice assistants, sales training, recruiting, e-commerce, workflow automation
 - Cross-app memory sharing via pgvector (app-specific or cross-app search)
 - App registration with auto-generated API keys
 - Unified notification routing from any app to any channel
@@ -31,22 +54,13 @@ All notable changes to OpenSentinel are documented here.
   - Recursive Multi-Step RAG with automatic gap detection and follow-up queries
   - Redis-backed Retrieval Cache with TTL expiry and embedding-hash keys
   - Contextual Query Rewriting from conversation history (pronoun/reference resolution)
-- Pipeline orchestrator (`enhanced-retrieval.ts`) wiring all stages together with graceful degradation
+- Pipeline orchestrator with graceful degradation
 - 7 new env vars for feature-gating each RAG enhancement (all default to `false`)
-- OSINT & Data Mining system: Neo4j graph database, 5 public records API integrations (FEC, IRS 990, USAspending, SEC EDGAR, OpenCorporates), entity resolution with Jaro-Winkler fuzzy matching, enrichment pipeline, 4 OSINT tools, D3.js graph visualization
-- 572 comprehensive tests for the Advanced RAG system across 8 test files:
-  - `rag-modules.test.ts` (65) — Individual module exports, types, feature gating
-  - `rag-pipeline.test.ts` (14) — Pipeline orchestrator exports and env defaults
-  - `rag-reranker-comprehensive.test.ts` (77) — Score parsing, batch splitting, filtering, sorting, clamping
-  - `rag-cache-contextual-comprehensive.test.ts` (73) — Cache singleton, embedding hashing, history validation
-  - `rag-hyde-multistep-comprehensive.test.ts` (102) — RRF math, HyDE types, multi-step iteration, dedup
-  - `rag-pipeline-comprehensive.test.ts` (101) — Step counting, feature flag combos, fallback behavior
-  - `rag-env-integration-comprehensive.test.ts` (116) — Cross-module compatibility, graceful degradation
-  - `memory.test.ts` (24) — Core memory exports, function signatures, type contracts
+- OSINT and Data Mining system with Neo4j graph database and public records API integrations
+- 572 comprehensive tests for the Advanced RAG system across 8 test files
 
 ### Changed
 - `buildMemoryContext()` now accepts optional `conversationHistory` parameter for contextual retrieval
-- `chatWithTools()` passes conversation history to memory context builder
 - Memory retrieval automatically upgrades to enhanced pipeline when any RAG flag is enabled
 - Test count increased from 3,290 to 3,800+
 
@@ -61,47 +75,31 @@ All notable changes to OpenSentinel are documented here.
 - Device pairing authentication (6-digit code to bearer token exchange)
 - Matrix messaging channel with session-based conversations
 - 7 new test files (131 tests) covering providers, autonomy, prometheus, pairing, ollama, tunnel, matrix
-- CLI `pair` command for device pairing management
-- New API endpoints: `/api/providers`, `/api/autonomy`, `/metrics`, `/api/pair`
 
 ### Changed
-- Brain (`src/core/brain.ts`) refactored from direct Anthropic SDK to provider abstraction layer
+- Brain refactored from direct Anthropic SDK to provider abstraction layer
 - Tool type definitions changed from Anthropic `Tool` to generic `LLMTool`
 - Test count increased from 3,159 to 3,290+
 
 ## [2.1.1] - 2026-02-10
 
 ### Added
-- Published `opensentinel` package to npm (`opensentinel@2.1.1`)
-- Added `website/install.sh` to repo (one-line installer: installs Bun + OpenSentinel + runs setup wizard)
+- Published `opensentinel` package to npm
+- One-line installer script (installs Bun + OpenSentinel + runs setup wizard)
 
 ### Changed
-- Web dashboard: replaced "Moltbot" sidebar logo with OpenSentinel compass SVG icon + text (matches opensentinel.ai branding)
-- Web dashboard: added OpenSentinel favicon.svg (emerald-to-cyan gradient compass)
-- Web dashboard: updated logo CSS with flexbox layout and brand color (#10b981)
-- Fixed favicon reference from broken `/vite.svg` to `/favicon.svg`
-- Website: fixed test count from 1,733 to 2,793
-- Website: changed "Works with Node.js and Bun" to "Built on Bun, npm-installable"
-- Website: changed global install command from `npm install -g` to `bun install -g` (CLI requires Bun)
-- Website: changed library description from "Node.js or Bun" to "Bun"
-- CLI: updated version string from v2.0.0 to v2.1.1
-- Updated all documentation to v2.1.1 version references and 2,793 test count
+- Web dashboard: updated branding with OpenSentinel compass SVG icon
+- Updated all documentation to v2.1.1 version references
 
 ### Security
-- Removed all API keys and credentials from CLAUDE.md (now references `.env` only)
-- Scrubbed all secrets from entire git history using git-filter-repo
-- Removed partial/truncated tokens from docs/GETTING_STARTED.md and website/docs/channels.html
-- Replaced real Discord IDs, Telegram tokens, and Twilio credentials with generic placeholders in documentation
-
-### Deployment
-- Rebuilt web frontend dist and deployed to production server
-- Deployed updated website to opensentinel.ai
-- Force-pushed clean history to GitHub remotes
+- Removed all API keys and credentials from documentation (now references `.env` only)
+- Scrubbed all secrets from entire git history
+- Replaced real credentials with generic placeholders in all documentation
 
 ## [2.1.0] - 2026-02-06
 
 ### Added
-- 13 new features for full feature parity: apply_patch tool, elevated mode, emoji reactions, skills system, polls, auth monitoring, Sentinel Hub, thinking levels, hooks & SOUL system, node-based workflows, Gmail PubSub, Zalo integration, browser troubleshooting
+- 13 new features: apply_patch tool, elevated mode, emoji reactions, skills system, polls, auth monitoring, Sentinel Hub, thinking levels, hooks and SOUL system, node-based workflows, Gmail PubSub, Zalo integration, browser troubleshooting
 - 14 new test files (435 tests) covering all new features
 - Comprehensive documentation suite (17 new docs)
 
@@ -124,7 +122,6 @@ All notable changes to OpenSentinel are documented here.
 ### Changed
 - Rebranded to OpenSentinel
 - Converted to dual CLI/library NPM package
-- All commands renamed from /sentinel-* to /opensentinel-*
 - Default wake word changed to "hey opensentinel"
 
 ## [1.4.0] - 2026-02-03
@@ -183,3 +180,17 @@ All notable changes to OpenSentinel are documented here.
 - Enterprise: multi-user, SSO, quotas
 - Desktop app (Electron)
 - Browser extension (Chrome/Firefox)
+
+[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v2.5.1...HEAD
+[2.5.1]: https://github.com/dsiemon2/OpenSentinel/compare/v2.5.0...v2.5.1
+[2.5.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.2.1...v2.5.0
+[2.2.1]: https://github.com/dsiemon2/OpenSentinel/compare/v2.2.0...v2.2.1
+[2.2.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.1.1...v2.2.0
+[2.1.1]: https://github.com/dsiemon2/OpenSentinel/compare/v2.1.0...v2.1.1
+[2.1.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/dsiemon2/OpenSentinel/compare/v1.4.0...v2.0.0
+[1.4.0]: https://github.com/dsiemon2/OpenSentinel/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/dsiemon2/OpenSentinel/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/dsiemon2/OpenSentinel/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/dsiemon2/OpenSentinel/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/dsiemon2/OpenSentinel/releases/tag/v1.0.0
