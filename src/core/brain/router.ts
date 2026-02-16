@@ -103,6 +103,7 @@ export interface RoutingContext {
   toolsRequested?: string[];
   hasHistory?: boolean;
   thinkingLevel?: string;
+  appTypeTier?: "fast" | "balanced" | "powerful";
 }
 
 export class ModelRouter {
@@ -193,8 +194,17 @@ export class ModelRouter {
       return "powerful";
     }
 
+    // Enforce app-type minimum tier
+    const result = this.defaultTier;
+    if (context?.appTypeTier) {
+      const tierOrder: Record<string, number> = { fast: 0, balanced: 1, powerful: 2 };
+      if (tierOrder[context.appTypeTier] > tierOrder[result]) {
+        return context.appTypeTier;
+      }
+    }
+
     // Default to balanced
-    return this.defaultTier;
+    return result;
   }
 
   /**

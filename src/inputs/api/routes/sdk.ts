@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { executeTool, TOOLS } from "../../../tools";
-import { chatWithTools, type Message } from "../../../core/brain";
+import { chatWithTools, type Message, type ChatOptions } from "../../../core/brain";
+import { prioritizeTools, getAppProfile } from "../../../core/app-profiles";
 import { storeMemory, searchMemories } from "../../../core/memory";
 
 // In-memory app registry (production would use DB)
@@ -138,7 +139,7 @@ sdkRoutes.post("/chat", async (c) => {
 
     const toolsUsed: string[] = [];
     const response = body.useTools !== false
-      ? await chatWithTools(messages, `sdk:${app.id}`, (tool) => toolsUsed.push(tool))
+      ? await chatWithTools(messages, `sdk:${app.id}`, (tool) => toolsUsed.push(tool), { appType: app.type })
       : await (await import("../../../core/brain")).chat(messages, body.systemPrompt);
 
     // Store interaction in memory for cross-app intelligence
@@ -286,13 +287,19 @@ sdkRoutes.post("/memory/search", async (c) => {
   }
 });
 
-// List available tools
+// List available tools (prioritized for app type)
 sdkRoutes.get("/tools", (c) => {
-  const toolList = (TOOLS as any[]).map((t) => ({
+  const app = c.get("sdkApp") as RegisteredApp;
+  const ordered = prioritizeTools(TOOLS as any[], app.type);
+  const profile = getAppProfile(app.type);
+  const prioritySet = new Set(profile.priorityTools);
+
+  const toolList = ordered.map((t: any) => ({
     name: t.name,
     description: t.description,
+    priority: prioritySet.has(t.name),
   }));
-  return c.json({ tools: toolList, count: toolList.length });
+  return c.json({ tools: toolList, count: toolList.length, appType: app.type });
 });
 
 // Execute a specific tool
@@ -333,7 +340,7 @@ sdkRoutes.post("/agent/spawn", async (c) => {
 
     const messages: Message[] = [{ role: "user", content: agentPrompt }];
     const toolsUsed: string[] = [];
-    const response = await chatWithTools(messages, `sdk:${app.id}:agent:${body.type}`, (tool) => toolsUsed.push(tool));
+    const response = await chatWithTools(messages, `sdk:${app.id}:agent:${body.type}`, (tool) => toolsUsed.push(tool), { appType: app.type });
 
     return c.json({
       agent: body.type,
