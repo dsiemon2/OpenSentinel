@@ -37,14 +37,18 @@ This deliverable covers the creation of a unified SDK ecosystem that connects **
 | Metric | Value |
 |--------|-------|
 | Apps integrated | 30+ |
-| New files created | 200+ |
-| Lines of code added | 40,000+ |
-| Tests written | 68 SDK route tests |
+| New files created | 250+ |
+| Lines of code added | 52,000+ |
+| Tests written | 68 SDK route tests + RAG/OSINT/provider tests |
 | Tests passing (OpenSentinel) | 4,356 / 4,429 (73 pre-existing failures) |
 | Docker compose files updated | 5 |
-| GitHub repos pushed | 25+ |
+| GitHub repos pushed | 28+ (including 3 newly created) |
 | SDK languages | 2 (TypeScript + Python) |
 | SDK API endpoints | 9 |
+| Domain tools added | 21 |
+| Core modules added | 12 (brain, gateway, tunnel, security, observability) |
+| Production deployed | ✅ https://app.opensentinel.ai |
+| Seed data | All 7 apps seeded (PolyMarketAI created from scratch) |
 
 ---
 
@@ -484,33 +488,130 @@ SCO-Digital-Assistant, GoGreen-Workflow-Hub, Voting, Realestate, Maximus - all w
 
 ---
 
-## 17. Known Issues & Remaining Work
+## 17. Additional Modules Committed (Post-Initial Delivery)
 
-### Needs Attention
+51 additional files committed and pushed covering:
 
-1. **PolyMarketAI seed data** - No seed file exists. Needs demo user, sample markets, and strategy config.
-2. **3 repos without GitHub remotes** - Ecom-Sales, PolyMarketAI, TimeSheetAI need GitHub repos created and remotes added.
-3. **FamilyChat no remote** - Local commits only, no GitHub remote configured.
-4. **5 pre-existing CI failures** - SCO-Digital-Assistant, GoGreen-Workflow-Hub, Voting, Realestate, Maximus were failing before our changes.
+### Core Modules
+| Module | Path | Purpose |
+|--------|------|---------|
+| Brain Refactor | `src/core/brain/` (4 files) | Compaction, intent parsing, reflection, routing |
+| API Gateway | `src/core/gateway/` (2 files) | Gateway layer with types |
+| Tunnel Support | `src/core/tunnel/` (5 files) | ngrok, Cloudflare, localtunnel providers |
+| Matrix Bot | `src/inputs/matrix/index.ts` | Matrix protocol messaging channel |
+| Pair Command | `src/commands/pair.ts` | Device pairing CLI command |
+
+### Security Modules
+| Module | Path | Purpose |
+|--------|------|---------|
+| Circuit Breaker | `src/core/security/circuit-breaker.ts` | Fault tolerance for external services |
+| Memory Guard | `src/core/security/memory-guard.ts` | Memory access protection |
+| Prompt Guard | `src/core/security/prompt-guard.ts` | Prompt injection detection |
+| Tool Sandbox | `src/core/security/tool-sandbox.ts` | Tool execution sandboxing |
+
+### Observability Modules
+| Module | Path | Purpose |
+|--------|------|---------|
+| Cost Tracker | `src/core/observability/cost-tracker.ts` | LLM API cost tracking |
+| Quality Scorer | `src/core/observability/quality-scorer.ts` | Response quality scoring |
+| Request Tracer | `src/core/observability/request-tracer.ts` | Distributed request tracing |
+
+### 21 Domain-Specific Tools
+`src/tools/` — competitor-tracker, content-creator, customer-support, data-analyst, dns-lookup, docs-writer, email-assistant, inventory-manager, legal-reviewer, meeting-assistant, onboarding-agent, real-estate, recruiter, sales-tracker, security-monitor, seo-optimizer, server-health, social-listener, trading-researcher, uptime-monitor, web-monitor
+
+### Web Dashboard
+- `EntityDetailPanel.tsx` — OSINT entity detail view
+- Updated `App.tsx` routes and `package.json`
+
+### Documentation
+- `docs/DNS_EMAIL_RECORDS.md` — DNS/email configuration
+- `docs/USAGE_GUIDE.md` — User guide
+- `docs/OpenSentinel_Marketing_Strategy_Refined.md`
+- `website/install.sh` — One-line installer script
+
+---
+
+## 18. PolyMarketAI Seed Data (Created)
+
+`PolyMarketAI/backend/scripts/seed.py` — 1,180 lines, fully idempotent with `--reset` support.
+
+| Data Type | Count | Details |
+|-----------|-------|---------|
+| Demo Users | 3 | demo@example.com, admin@example.com, trader@example.com |
+| Prediction Markets | 11 | Politics (2), Crypto (3), Sports (3), Science (2), Economics (1) |
+| Trading Strategies | 5 | Momentum, Market Making, AI Signal, Copy Trading, Arbitrage |
+| Portfolio Positions | 5 | 4 open + 1 realized (Super Bowl winner, +$65 PnL) |
+| Orders & Fills | 5 | 3 filled, 1 open, 1 cancelled |
+| AI Analysis Briefs | 3 | BTC, US Election, Fed Rate Cut |
+| News Feeds | 7 | CoinDesk, Reuters, ESPN, NASA, Fed Reserve, etc. |
+| News Articles | 4 | Sample articles across categories |
+
+**Run:** `cd backend && python scripts/seed.py` (or `seed-db` after pip install)
+
+---
+
+## 19. GitHub Repos Created
+
+Three apps that previously had no GitHub remotes now have repos:
+
+| App | GitHub URL | Branch |
+|-----|-----------|--------|
+| Ecom-Sales | https://github.com/dsiemon2/Ecom-Sales | master |
+| PolyMarketAI | https://github.com/dsiemon2/PolyMarketAI | master |
+| TimeSheetAI | https://github.com/dsiemon2/TimeSheetAI | master |
+
+---
+
+## 20. Production Deployment (Completed)
+
+### Deployment Details
+- **Server:** IONOS VPS at `74.208.129.33` (Ubuntu 24.04)
+- **App Directory:** `/opt/opensentinel/app`
+- **Service:** systemd `opensentinel.service`
+- **Method:** `git clone` → `rsync` → `bun install` → `systemctl restart`
+
+### Verified Working
+| Endpoint | Status | Response |
+|----------|--------|----------|
+| `GET /health` | ✅ 200 | `{"status":"ok"}` |
+| `GET /api/system/status` | ✅ 200 | `{"status":"online","version":"2.2.1"}` |
+| `POST /api/sdk/register` | ✅ 200 | Returns `osk_` API key |
+| `POST /api/sdk/chat` | ✅ 200 | AI responds with context |
+| `GET /api/sdk/tools` | ✅ 200 | 63 tools listed |
+| `GET /api/sdk/status` | ✅ 200 | Uptime, app registry, tool count |
+| `POST /api/ask` | ✅ 200 | Direct AI chat |
+| `GET /api/conversations` | ✅ 200 | Conversation history |
+| `GET /api/osint/stats` | ✅ 403 | Correctly gated (OSINT_ENABLED=false) |
+
+### Public URL Verified
+- `https://app.opensentinel.ai/health` → `{"status":"ok"}`
+- `https://app.opensentinel.ai/api/sdk/register` → Returns API key
+
+### Services Running
+- Hono API on port 8030
+- Telegram bot (@JarvisElectronBot)
+- Discord bot (MoltBot#8291)
+- MCP servers (GitHub, Memory, Sequential Thinking, Everything, Puppeteer)
+- WebSocket at ws://localhost:8030/ws
+- Autonomy level: autonomous
+
+---
+
+## 21. Known Issues (Remaining)
+
+1. **5 pre-existing CI failures** — SCO-Digital-Assistant, GoGreen-Workflow-Hub, Voting, Realestate, Maximus were failing before our changes (pnpm config, unrelated test failures).
+2. **FamilyChat no remote** — Local commits only, no GitHub remote configured.
+3. **GoGreen-DOC-AI Docker build** — CI code checks pass but Docker image build fails due to GitHub runner disk space (infrastructure issue).
 
 ### Activation Steps (per app)
 
 To enable OpenSentinel integration for any app:
 1. Set `OPENSENTINEL_ENABLED=true` in `.env`
-2. Set `OPENSENTINEL_URL=https://app.opensentinel.ai` (or local URL)
+2. Set `OPENSENTINEL_URL=https://app.opensentinel.ai`
 3. Optionally set `OPENSENTINEL_API_KEY` (auto-registration will provide one)
 4. Restart the app
-
-### Production Deployment
-
-OpenSentinel server at `https://app.opensentinel.ai` needs to be updated:
-```bash
-ssh root@74.208.129.33
-cd /root/Products/OpenSentinel
-git pull
-systemctl restart opensentinel
-```
 
 ---
 
 *Generated by Claude Opus 4.6 on February 16, 2026*
+*Updated with production deployment verification, seed data, GitHub repos, and additional modules.*
