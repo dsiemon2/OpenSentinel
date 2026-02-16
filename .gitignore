@@ -13,3 +13,9 @@ CLAUDE.md.local-backup
 deploy_phase*.py
 tmp_*.py
 *.docx
+
+# Security - Environment files (comprehensive)
+.env.*.local
+.env.docker
+.env.staging
+.env.production
