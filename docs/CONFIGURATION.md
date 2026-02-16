@@ -1,32 +1,17 @@
 # Configuration Reference
 
-This document provides a complete reference for all environment variables used by OpenSentinel v2.2.0. Configuration is managed through environment variables, validated at startup using Zod schemas defined in `src/config/env.ts`.
+This document provides a complete reference for all environment variables used by OpenSentinel v2.1.1. Configuration is managed through environment variables, validated at startup using Zod schemas defined in `src/config/env.ts`.
 
 ## Table of Contents
 
 - [Core AI Services](#core-ai-services)
 - [Database and Cache](#database-and-cache)
 - [Communication Platforms](#communication-platforms)
-  - [Telegram](#telegram)
-  - [Discord](#discord)
-  - [Slack](#slack)
-  - [WhatsApp](#whatsapp)
-  - [Signal](#signal)
-  - [iMessage](#imessage-macos-only)
-  - [Matrix](#matrix)
-  - [Twilio](#twilio-sms-and-voice)
 - [Productivity Integrations](#productivity-integrations)
 - [Smart Home and Entertainment](#smart-home-and-entertainment)
 - [Cloud Storage](#cloud-storage)
 - [Finance](#finance)
 - [MCP (Model Context Protocol)](#mcp-model-context-protocol)
-- [Multi-Provider LLM](#multi-provider-llm)
-- [Ollama (Local Models)](#ollama-local-models)
-- [Tunnel](#tunnel)
-- [Autonomy Levels](#autonomy-levels)
-- [Prometheus Metrics](#prometheus-metrics)
-- [Device Pairing](#device-pairing)
-- [Advanced RAG](#advanced-rag)
 - [Application](#application)
 - [Validation and Library Usage](#validation-and-library-usage)
 
@@ -106,18 +91,6 @@ This document provides a complete reference for all environment variables used b
 | `IMESSAGE_BLUEBUBBLES_URL` | BlueBubbles server URL (required when `IMESSAGE_MODE=bluebubbles`). | None | No |
 | `IMESSAGE_BLUEBUBBLES_PASSWORD` | BlueBubbles server password (required when `IMESSAGE_MODE=bluebubbles`). | None | No |
 | `IMESSAGE_ALLOWED_NUMBERS` | Comma-separated list of phone numbers or Apple IDs allowed to interact with the bot. | None | No |
-
-### Matrix
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `MATRIX_ENABLED` | Enable the Matrix integration. Set to `true` to activate. | `false` | No |
-| `MATRIX_HOMESERVER_URL` | Matrix homeserver URL (e.g., `https://matrix.org`). | None | No |
-| `MATRIX_ACCESS_TOKEN` | Matrix bot access token for authentication. | None | No |
-| `MATRIX_USER_ID` | Matrix bot user ID (e.g., `@bot:matrix.org`). | None | No |
-| `MATRIX_ALLOWED_ROOM_IDS` | Comma-separated list of Matrix room IDs where the bot responds. | None | No |
-| `MATRIX_AUTO_JOIN` | Automatically join rooms when invited. Set to `true` to enable. | `false` | No |
-| `MATRIX_E2E_ENABLED` | Enable end-to-end encryption support. | `false` | No |
 
 ### Twilio (SMS and Voice)
 
@@ -207,89 +180,6 @@ This document provides a complete reference for all environment variables used b
 | `MCP_ENABLED` | Enable or disable MCP server connections. Set to `false` to disable. | `true` | No |
 | `MCP_CONFIG_PATH` | Path to the MCP configuration JSON file that defines available MCP servers. | `./mcp.json` | No |
 
-## Multi-Provider LLM
-
-OpenSentinel supports multiple LLM providers through a provider abstraction layer. By default, it uses Anthropic (Claude). You can switch to any OpenAI-compatible provider or run multiple providers simultaneously.
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `LLM_PROVIDER` | Default LLM provider ID. Options: `anthropic`, `openai`, `openrouter`, `groq`, `mistral`, `ollama`, `custom`. | `anthropic` | No |
-| `OPENROUTER_API_KEY` | OpenRouter API key for accessing multiple models through a single API. | None | No |
-| `OPENROUTER_BASE_URL` | OpenRouter API base URL. | `https://openrouter.ai/api/v1` | No |
-| `GROQ_API_KEY` | Groq API key for ultra-fast inference. | None | No |
-| `MISTRAL_API_KEY` | Mistral AI API key. | None | No |
-| `OPENAI_LLM_ENABLED` | Use OpenAI as an LLM provider (separate from Whisper STT). Set to `true` to enable. | `false` | No |
-| `OPENAI_COMPATIBLE_API_KEY` | API key for a custom OpenAI-compatible endpoint. | None | No |
-| `OPENAI_COMPATIBLE_BASE_URL` | Base URL for a custom OpenAI-compatible endpoint. | None | No |
-| `OPENAI_COMPATIBLE_MODEL` | Default model name for the custom endpoint. | `default` | No |
-
-## Ollama (Local Models)
-
-Run AI models locally with Ollama for offline use, privacy, or cost savings. Ollama uses an OpenAI-compatible API.
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `OLLAMA_ENABLED` | Enable Ollama local model support. Set to `true` to activate. | `false` | No |
-| `OLLAMA_BASE_URL` | Ollama server URL. | `http://localhost:11434` | No |
-| `OLLAMA_DEFAULT_MODEL` | Default Ollama model to use. | `llama3.1` | No |
-
-## Tunnel
-
-Built-in tunnel support for exposing your local OpenSentinel instance to the internet. Useful for webhook callbacks, mobile access, and sharing.
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `TUNNEL_ENABLED` | Enable automatic tunnel on startup. Set to `true` to activate. | `false` | No |
-| `TUNNEL_PROVIDER` | Tunnel provider to use. Options: `cloudflare`, `ngrok`, `localtunnel`. | `cloudflare` | No |
-| `TUNNEL_SUBDOMAIN` | Request a specific subdomain (supported by ngrok and localtunnel). | None | No |
-| `TUNNEL_AUTH_TOKEN` | Authentication token (required for ngrok). | None | No |
-
-## Autonomy Levels
-
-Control how much freedom the AI agent has when executing tools.
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `AUTONOMY_LEVEL` | Default autonomy level for all users. `readonly`: only read/search tools allowed. `supervised`: all tools allowed but logged. `autonomous`: full access (current default behavior). | `autonomous` | No |
-
-## Prometheus Metrics
-
-Export metrics in Prometheus text exposition format for monitoring with Prometheus, Grafana, and other DevOps tools.
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `PROMETHEUS_ENABLED` | Enable Prometheus metrics export. Set to `true` to activate. | `false` | No |
-| `PROMETHEUS_PATH` | HTTP path for the Prometheus scrape endpoint. | `/metrics` | No |
-
-## Device Pairing
-
-Consumer-friendly device authentication using 6-digit pairing codes instead of API keys.
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `PAIRING_ENABLED` | Enable device pairing authentication. Set to `true` to activate. | `false` | No |
-| `PAIRING_CODE_LIFETIME_MINUTES` | How long a pairing code remains valid before expiring. | `5` | No |
-
-## Advanced RAG
-
-Enhance the memory retrieval pipeline with advanced techniques. All features default to disabled and can be enabled independently.
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `HYDE_ENABLED` | Enable Hypothetical Document Embeddings. Generates an ideal answer via LLM before embedding for better semantic matching. | `false` | No |
-| `RERANK_ENABLED` | Enable LLM-as-judge cross-encoder re-ranking. Scores each retrieved result 0-10 for true relevance. | `false` | No |
-| `RERANK_MIN_SCORE` | Minimum relevance score (0-10) to keep a result after re-ranking. | `3` | No |
-| `MULTISTEP_RAG_ENABLED` | Enable recursive multi-step retrieval. Evaluates context completeness and generates follow-up queries to fill gaps. | `false` | No |
-| `MULTISTEP_MAX_STEPS` | Maximum number of follow-up retrieval rounds. | `2` | No |
-| `RETRIEVAL_CACHE_ENABLED` | Enable Redis-backed retrieval cache. Caches search results by embedding hash with TTL expiry. | `false` | No |
-| `CONTEXTUAL_QUERY_ENABLED` | Enable contextual query rewriting. Uses conversation history to resolve pronouns and references before retrieval. | `false` | No |
-
-**Recommended combinations:**
-
-- **Quality-focused**: Enable `HYDE_ENABLED` + `RERANK_ENABLED` for best retrieval accuracy
-- **Speed-focused**: Enable `RETRIEVAL_CACHE_ENABLED` for reduced latency on repeated queries
-- **Full pipeline**: Enable all flags for maximum retrieval quality with caching
-
 ## Application
 
 | Variable | Description | Default | Required |
@@ -308,8 +198,8 @@ All environment variables are validated at startup using a Zod schema defined in
 - **Required fields**: `CLAUDE_API_KEY` must be a non-empty string. The application will fail to start without it.
 - **Optional fields with defaults**: Variables like `DATABASE_URL`, `REDIS_URL`, `PORT`, and `NODE_ENV` have sensible defaults and do not need to be explicitly set.
 - **Optional fields without defaults**: Integration-specific variables (Telegram, Discord, Slack, etc.) are fully optional. Features are disabled when their variables are not provided.
-- **Type coercion**: Boolean fields (`SLACK_SOCKET_MODE`, `WHATSAPP_ENABLED`, `SIGNAL_ENABLED`, `IMESSAGE_ENABLED`, `MCP_ENABLED`, `MATRIX_ENABLED`, `MATRIX_AUTO_JOIN`, `MATRIX_E2E_ENABLED`, `OLLAMA_ENABLED`, `TUNNEL_ENABLED`, `PROMETHEUS_ENABLED`, `PAIRING_ENABLED`, `OPENAI_LLM_ENABLED`) and numeric fields (`SLACK_PORT`, `PORT`, `EMAIL_IMAP_PORT`, `EMAIL_SMTP_PORT`, `PAIRING_CODE_LIFETIME_MINUTES`) are automatically coerced from string environment variable values.
-- **Enum validation**: `NODE_ENV` is restricted to `development`, `production`, or `test`. `EMAIL_PROVIDER` is restricted to `gmail`, `outlook`, `yahoo`, or `custom`. `IMESSAGE_MODE` is restricted to `applescript` or `bluebubbles`. `LLM_PROVIDER` is restricted to `anthropic`, `openai`, `openrouter`, `groq`, `mistral`, `ollama`, or `custom`. `TUNNEL_PROVIDER` is restricted to `cloudflare`, `ngrok`, or `localtunnel`. `AUTONOMY_LEVEL` is restricted to `readonly`, `supervised`, or `autonomous`.
+- **Type coercion**: Boolean fields (`SLACK_SOCKET_MODE`, `WHATSAPP_ENABLED`, `SIGNAL_ENABLED`, `IMESSAGE_ENABLED`, `MCP_ENABLED`) and numeric fields (`SLACK_PORT`, `PORT`, `EMAIL_IMAP_PORT`, `EMAIL_SMTP_PORT`) are automatically coerced from string environment variable values.
+- **Enum validation**: `NODE_ENV` is restricted to `development`, `production`, or `test`. `EMAIL_PROVIDER` is restricted to `gmail`, `outlook`, `yahoo`, or `custom`. `IMESSAGE_MODE` is restricted to `applescript` or `bluebubbles`.
 
 If validation fails when running as a CLI application (when `__OPENSENTINEL_CLI__` is set), the process exits with a descriptive error message listing all invalid fields.
 
