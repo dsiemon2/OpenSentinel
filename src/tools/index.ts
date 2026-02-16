@@ -192,12 +192,16 @@ function createLocalImapClient(emailAddress: string): ImapClient {
 
 // Helper: create an SMTP client for sending from any local address
 function createLocalSmtpClient(fromAddress: string): SmtpClient {
+  const host = env.EMAIL_LOCAL_SMTP_HOST || "127.0.0.1";
+  const port = env.EMAIL_LOCAL_SMTP_PORT || 25;
+
+  // Local SMTP on port 25: rely on permit_mynetworks (no auth needed from localhost)
   return new SmtpClient(
     {
-      host: env.EMAIL_LOCAL_SMTP_HOST || "127.0.0.1",
-      port: env.EMAIL_LOCAL_SMTP_PORT || 25,
+      host,
+      port,
       secure: false,
-      auth: { user: "", pass: "" },
+      auth: { user: "", pass: "" },  // Empty = SmtpClient skips auth attempt
       tls: { rejectUnauthorized: false },
     },
     fromAddress

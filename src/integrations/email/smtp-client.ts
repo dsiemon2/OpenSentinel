@@ -73,11 +73,14 @@ export class SmtpClient {
    */
   private getTransporter(): Transporter {
     if (!this.transporter) {
+      // Only include auth if credentials are actually provided
+      const hasAuth = this.config.auth?.user && this.config.auth?.pass;
+
       this.transporter = nodemailer.createTransport({
         host: this.config.host,
         port: this.config.port,
         secure: this.config.secure ?? (this.config.port === 465),
-        auth: this.config.auth,
+        ...(hasAuth ? { auth: this.config.auth } : {}),
         tls: this.config.tls ?? {
           rejectUnauthorized: true,
         },
