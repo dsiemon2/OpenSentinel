@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import Chat from "./components/Chat";
 import MemoryExplorer from "./components/MemoryExplorer";
 import Settings from "./components/Settings";
 
-type View = "chat" | "memories" | "settings";
+const GraphExplorer = lazy(() => import("./components/GraphExplorer"));
+
+type View = "chat" | "memories" | "graph" | "settings";
 
 interface SystemStatus {
   status: string;
@@ -68,6 +70,12 @@ function App() {
             Memories
           </div>
           <div
+            className={`nav-item ${view === "graph" ? "active" : ""}`}
+            onClick={() => setView("graph")}
+          >
+            Graph
+          </div>
+          <div
             className={`nav-item ${view === "settings" ? "active" : ""}`}
             onClick={() => setView("settings")}
           >
@@ -88,6 +96,11 @@ function App() {
       <main className="main">
         {view === "chat" && <Chat />}
         {view === "memories" && <MemoryExplorer />}
+        {view === "graph" && (
+          <Suspense fallback={<div style={{ padding: 24 }}>Loading Graph Explorer...</div>}>
+            <GraphExplorer />
+          </Suspense>
+        )}
         {view === "settings" && <Settings />}
       </main>
     </div>
