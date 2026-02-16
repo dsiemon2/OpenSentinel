@@ -18,6 +18,7 @@ import { compactConversation, needsCompaction } from "./brain/compaction";
 import { intentParser } from "./brain/intent-parser";
 import { costTracker } from "./observability/cost-tracker";
 import { providerRegistry } from "./providers";
+import { getAppProfile, prioritizeTools, buildAppTypeContext } from "./app-profiles";
 import type { LLMProvider } from "./providers/provider";
 import type { LLMContentBlock, LLMTool, LLMMessage, LLMRequest, LLMResponse } from "./providers/types";
 
@@ -106,11 +107,16 @@ export async function chat(
   };
 }
 
+export interface ChatOptions {
+  appType?: string;
+}
+
 // Chat with tool use capability
 export async function chatWithTools(
   messages: Message[],
   userId?: string,
-  onToolUse?: (toolName: string, input: unknown) => void
+  onToolUse?: (toolName: string, input: unknown) => void,
+  options?: ChatOptions
 ): Promise<BrainResponse> {
   const startTime = Date.now();
   initRouter();
@@ -188,7 +194,8 @@ export async function chatWithTools(
     getAllTools().length
   );
 
-  const systemWithContext = SYSTEM_PROMPT + memoryContext + modeContext + personalityContext + soulContext + planningContext;
+  const appTypeContext = options?.appType ? buildAppTypeContext(options.appType) : "";
+  const systemWithContext = SYSTEM_PROMPT + appTypeContext + memoryContext + modeContext + personalityContext + soulContext + planningContext;
 
   // Run before hooks
   const hookResult = await hookManager.runBefore("message:process", {
@@ -229,15 +236,22 @@ export async function chatWithTools(
   // Get thinking level API params
   const thinkingParams = thinkingLevelManager.buildApiParams(userId ?? "default");
 
+  // Resolve app profile for model tier suggestion
+  const appProfile = options?.appType ? getAppProfile(options.appType) : undefined;
+
   // Route to optimal model: thinking level may override router
   const routed = modelRouter.routeMessage(lastUserMessage?.content || "", {
     thinkingLevel: thinkingLevelManager.getLevel(userId ?? "default"),
+    appTypeTier: appProfile?.suggestedModelTier,
   });
   // If thinking level uses extended thinking, keep its model; otherwise use routed model
   const finalModel = thinkingParams.thinking ? thinkingParams.model : routed.model;
   const finalMaxTokens = thinkingParams.thinking ? thinkingParams.max_tokens : Math.max(routed.maxTokens, thinkingParams.max_tokens);
 
-  console.log(`[Router] Model: ${finalModel} (tier: ${routed.tier}, thinking: ${thinkingParams.thinking ? "enabled" : "off"})`);
+  console.log(`[Router] Model: ${finalModel} (tier: ${routed.tier}, thinking: ${thinkingParams.thinking ? "enabled" : "off"}${options?.appType ? `, app: ${options.appType}` : ""})`);
+
+  // Prioritize tools for app type (reorder, not filter)
+  const tools = options?.appType ? prioritizeTools(getAllTools(), options.appType) : getAllTools();
 
   // Track tool outcomes for reflection
   const toolOutcomes: ToolOutcome[] = [];
@@ -248,7 +262,7 @@ export async function chatWithTools(
     model: finalModel,
     max_tokens: finalMaxTokens,
     system: systemWithContext,
-    tools: getAllTools(),
+    tools,
     messages: llmMessages,
     ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking } : {}),
   });
@@ -353,7 +367,7 @@ export async function chatWithTools(
       model: finalModel,
       max_tokens: finalMaxTokens,
       system: reflectionSystemPrompt,
-      tools: getAllTools(),
+      tools,
       messages: llmMessages,
       ...(thinkingParams.thinking ? { thinking: thinkingParams.thinking } : {}),
     });
