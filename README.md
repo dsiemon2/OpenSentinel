@@ -1,12 +1,18 @@
 # OpenSentinel
 
+[![CI](https://github.com/dsiemon2/OpenSentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/dsiemon2/OpenSentinel/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-runtime-f9f1e1?logo=bun&logoColor=black)](https://bun.sh/)
+[![Docker](https://img.shields.io/badge/Docker-compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 A self-hosted personal AI assistant powered by Claude, with JARVIS-like capabilities.
 
-**Live**: [app.opensentinel.ai](https://app.opensentinel.ai) | **Website**: [opensentinel.ai](https://opensentinel.ai)
+**Website**: [opensentinel.ai](https://opensentinel.ai) | **Dashboard**: [app.opensentinel.ai](https://app.opensentinel.ai)
 
 ## What is OpenSentinel?
 
-OpenSentinel is your own personal AI assistant that runs on your infrastructure. Think of it like having Jarvis from Iron Man - you can talk to it, ask questions, and it can do things for you.
+OpenSentinel is your own personal AI assistant that runs on your infrastructure. Think of it like having Jarvis from Iron Man -- you can talk to it, ask questions, and it can take actions on your behalf. It connects to Telegram, Discord, Slack, a web dashboard, and a REST API, all backed by Claude as the reasoning engine.
 
 ## Features
 
@@ -123,7 +129,7 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Enhanced OCR with layout detection
 
 ### Workflow Automation
-- IFTTT-like trigger → action workflows
+- IFTTT-like trigger -> action workflows
 - Time, webhook, and event triggers
 - Built-in workflow templates
 
@@ -136,8 +142,7 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 ### Prerequisites
 - [Bun](https://bun.sh) runtime
 - [Docker](https://docker.com) for PostgreSQL and Redis
-- Telegram account
-- API keys (Claude, OpenAI, ElevenLabs)
+- API keys (Claude at minimum; see `.env.example` for all options)
 
 ### Installation
 
@@ -177,9 +182,9 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 ## How to Use
 
 ### Telegram (Primary)
-1. Open Telegram
-2. Search for your bot (e.g., `@JarvisElectronBot`)
-3. Send a message like "Hello!"
+1. Create a bot via [@BotFather](https://t.me/BotFather) on Telegram
+2. Add the bot token to your `.env` file
+3. Start OpenSentinel and send a message to your bot
 
 ### Web Dashboard
 1. Open http://localhost:8030 in your browser
@@ -207,19 +212,19 @@ curl -X POST http://localhost:8030/api/ask \
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                       OPENSENTINEL v2.1.1                          │
+│                       OPENSENTINEL                              │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │
-│  • Telegram          │  • Claude Brain     │  • Text            │
-│  • Discord           │  • Memory/RAG       │  • Voice TTS       │
-│  • Slack             │  • Tool Router      │  • Files (PDF,     │
-│  • Matrix            │  • Scheduler        │    Word, Excel,    │
-│  • Web Dashboard     │  • Sub-Agents       │    PPT, Images)    │
-│  • REST API          │  • Plugins          │                    │
-│  • Voice (Wake Word) │  • Multi-LLM        │                    │
-│  • Device Triggers   │                     │                    │
-│  • Calendar          │                     │                    │
+│  Telegram            │  Claude Brain       │  Text              │
+│  Discord             │  Memory/RAG         │  Voice TTS         │
+│  Slack               │  Tool Router        │  Files (PDF,       │
+│  Matrix              │  Scheduler          │    Word, Excel,    │
+│  Web Dashboard       │  Sub-Agents         │    PPT, Images)    │
+│  REST API            │  Plugins            │                    │
+│  Voice (Wake Word)   │  Multi-LLM          │                    │
+│  Device Triggers     │                     │                    │
+│  Calendar            │                     │                    │
 ├─────────────────────────────────────────────────────────────────┤
 │  Providers: Anthropic, OpenRouter, Groq, Mistral, Ollama       │
 ├─────────────────────────────────────────────────────────────────┤
@@ -291,6 +296,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
+tests/                          # 119 test files, 3,800+ tests
 ```
 
 ## Ports
@@ -301,6 +307,34 @@ extension/                      # Browser extension
 | PostgreSQL | 5445 |
 | Redis | 6379 |
 
+## Contributing
+
+We welcome contributions from the community! Whether it is a bug fix, new feature, documentation improvement, or test -- every contribution helps.
+
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/my-feature`
+3. **Make** your changes and add tests
+4. **Run** the test suite: `bun test`
+5. **Commit** your changes: `git commit -m "Add my feature"`
+6. **Push** to your fork: `git push origin feature/my-feature`
+7. **Open** a Pull Request
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on code style, testing requirements, and how to add new tools, integrations, and channels.
+
+### Reporting Issues
+
+Found a bug or have a feature request? [Open an issue](https://github.com/dsiemon2/OpenSentinel/issues) with:
+- A clear description of the problem or feature
+- Steps to reproduce (for bugs)
+- Expected vs. actual behavior
+- Your environment (OS, Bun version)
+
+## Community
+
+- **GitHub Issues**: [Report bugs and request features](https://github.com/dsiemon2/OpenSentinel/issues)
+- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/dsiemon2/OpenSentinel/discussions)
+- **Website**: [opensentinel.ai](https://opensentinel.ai)
+
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE).

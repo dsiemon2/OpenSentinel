@@ -1276,7 +1276,7 @@ Extend OpenSentinel with custom plugins:
 
 | Component | Details |
 |-----------|---------|
-| **Server** | IONOS VPS, Ubuntu 24.04 |
+| **Server** | Any Linux VPS (Ubuntu 24.04 recommended) |
 | **Runtime** | Bun v1.3.9 |
 | **Database** | PostgreSQL 16 + pgvector |
 | **Cache** | Redis 7 |

@@ -1,7 +1,7 @@
 # OpenSentinel.ai - Complete Domain Setup Guide
 
 > **Domain:** `opensentinel.ai`
-> **Server:** IONOS VPS at `74.208.129.33` (Ubuntu 24.04)
+> **Server:** Your VPS at `your-server-ip` (Ubuntu 24.04 recommended)
 > **Hostname:** `server.gogreenpaperlessinitiative.com`
 
 This guide follows the exact same pattern as your existing domains (gogreenworkflowhub.com, gogreenaiconcierge.com, etc).
@@ -30,14 +30,14 @@ Set ALL of these at your DNS provider (Cloudflare, or your registrar's DNS panel
 
 | Type | Name | Value | TTL | Proxy |
 |------|------|-------|-----|-------|
-| A | `@` (root) | `74.208.129.33` | Auto | OFF (DNS only) |
-| A | `www` | `74.208.129.33` | Auto | OFF |
-| A | `mail` | `74.208.129.33` | Auto | OFF (MUST be DNS only) |
-| A | `api` | `74.208.129.33` | Auto | Optional |
-| A | `docs` | `74.208.129.33` | Auto | Optional |
-| A | `app` | `74.208.129.33` | Auto | Optional |
-| A | `admin` | `74.208.129.33` | Auto | Optional |
-| A | `status` | `74.208.129.33` | Auto | Optional |
+| A | `@` (root) | `your-server-ip` | Auto | OFF (DNS only) |
+| A | `www` | `your-server-ip` | Auto | OFF |
+| A | `mail` | `your-server-ip` | Auto | OFF (MUST be DNS only) |
+| A | `api` | `your-server-ip` | Auto | Optional |
+| A | `docs` | `your-server-ip` | Auto | Optional |
+| A | `app` | `your-server-ip` | Auto | Optional |
+| A | `admin` | `your-server-ip` | Auto | Optional |
+| A | `status` | `your-server-ip` | Auto | Optional |
 
 > **IMPORTANT:** The `mail` subdomain MUST NOT be proxied through Cloudflare (grey cloud, not orange). Mail traffic needs direct access to port 25/587/993.
 
@@ -51,7 +51,7 @@ Set ALL of these at your DNS provider (Cloudflare, or your registrar's DNS panel
 
 | Type | Name | Value |
 |------|------|-------|
-| TXT | `@` (root) | `v=spf1 a mx ip4:74.208.129.33 ~all` |
+| TXT | `@` (root) | `v=spf1 a mx ip4:your-server-ip ~all` |
 
 ### TXT - DKIM (generated in Step 4, add after)
 
@@ -500,16 +500,16 @@ Copy-paste this into your DNS provider. Replace `DKIM_PUBLIC_KEY` with the key f
 
 | # | Type | Name | Value | Priority | TTL |
 |---|------|------|-------|----------|-----|
-| 1 | A | `@` | `74.208.129.33` | - | Auto |
-| 2 | A | `www` | `74.208.129.33` | - | Auto |
-| 3 | A | `mail` | `74.208.129.33` | - | Auto |
-| 4 | A | `api` | `74.208.129.33` | - | Auto |
-| 5 | A | `docs` | `74.208.129.33` | - | Auto |
-| 6 | A | `app` | `74.208.129.33` | - | Auto |
-| 7 | A | `admin` | `74.208.129.33` | - | Auto |
-| 8 | A | `status` | `74.208.129.33` | - | Auto |
+| 1 | A | `@` | `your-server-ip` | - | Auto |
+| 2 | A | `www` | `your-server-ip` | - | Auto |
+| 3 | A | `mail` | `your-server-ip` | - | Auto |
+| 4 | A | `api` | `your-server-ip` | - | Auto |
+| 5 | A | `docs` | `your-server-ip` | - | Auto |
+| 6 | A | `app` | `your-server-ip` | - | Auto |
+| 7 | A | `admin` | `your-server-ip` | - | Auto |
+| 8 | A | `status` | `your-server-ip` | - | Auto |
 | 9 | MX | `@` | `mail.opensentinel.ai` | 0 | Auto |
-| 6 | TXT | `@` | `v=spf1 a mx ip4:74.208.129.33 ~all` | - | Auto |
+| 6 | TXT | `@` | `v=spf1 a mx ip4:your-server-ip ~all` | - | Auto |
 | 7 | TXT | `default._domainkey` | `v=DKIM1; h=sha256; k=rsa; p=DKIM_PUBLIC_KEY` | - | Auto |
 | 8 | TXT | `_dmarc` | `v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:admin@opensentinel.ai;` | - | Auto |
 | 9 | CAA | `@` | `0 issue "letsencrypt.org"` | - | Auto |

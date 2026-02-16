@@ -1,23 +1,22 @@
 # CLAUDE.md - AI Assistant Instructions
 
 ## Project Overview
-OpenSentinel is a self-hosted personal AI assistant powered by Claude, with Telegram, Discord, Slack, and web interfaces. It includes 250+ features including smart home control, productivity integrations, and workflow automation.
+OpenSentinel is a self-hosted personal AI assistant powered by Claude, with Telegram, Discord, Slack, and web interfaces. It includes 280+ features including smart home control, productivity integrations, and workflow automation.
 
 ## API Keys & Credentials
 All credentials are stored in `.env` (not committed to git). See `.env.example` for the required variables.
 
 ## Production Deployment
-- **Server**: IONOS VPS at `74.208.129.33` (Ubuntu 24.04)
 - **App URL**: https://app.opensentinel.ai
 - **Marketing site**: https://opensentinel.ai
-- **Deploy path**: `/root/Products/OpenSentinel` on the server
+- **Deploy path**: Configure `your-deploy-path` on your server
 - **Service**: systemd `opensentinel.service` (runs `bun run src/cli.ts start`)
-- **Env file (server)**: `/root/.opensentinel/.env`
+- **Env file (server)**: Store `.env` in a secure location on your server
 - **Deploy method**: `rsync` or `scp` files to server, then `systemctl restart opensentinel`
 - **Reverse proxy**: Nginx with Let's Encrypt SSL
 
 ## Git Remotes
-- `origin`: `git@github.com:dsiemon2/GoGreen-Moltbot.git` (development)
+- `origin`: Development repository
 - `opensentinel`: `git@github.com:dsiemon2/OpenSentinel.git` (public release)
 
 ## Tech Stack
@@ -28,12 +27,58 @@ All credentials are stored in `.env` (not committed to git). See `.env.example` 
 - **Cache/Queue**: Redis 7 (port 6379)
 - **Frontend**: React + Vite
 
+## CI/CD
+
+The project uses GitHub Actions for continuous integration. Workflows are located in `.github/workflows/`.
+
+**Note**: If no `.github/workflows/` directory exists yet, create one with a CI workflow that includes:
+- Linting and type checking
+- Running the full test suite (`bun test`)
+- Building the project (`bun run build`)
+
+Deployment is handled via manual `rsync`/`scp` to the production server, followed by a `systemctl restart opensentinel`.
+
+## Testing
+
+OpenSentinel uses **Bun's native test runner** (`bun:test`) with 119 test files and 3,800+ tests.
+
+```bash
+# Run all tests
+bun test
+
+# Run a single test file
+bun test tests/brain.test.ts
+
+# Run tests matching a pattern
+bun test --grep "should handle voice"
+
+# Watch mode
+bun test --watch
+
+# Coverage report
+bun test --coverage
+```
+
+Tests cover: core brain, all input channels (Telegram, Discord, Slack, Matrix), integrations (email, GitHub, Notion, Spotify, Home Assistant), tools, security, agents, workflows, plugins, RAG pipeline, and more.
+
+## Logging
+
+OpenSentinel uses a structured logging approach:
+
+- **HTTP Request Logging**: Hono's built-in logger middleware (`hono/logger`) on the API server
+- **Audit Logging**: Database-backed audit trail via `src/core/security/audit-logger.ts`
+  - Tracks: logins, tool usage, shell execution, file access, memory operations, mode changes, agent spawning, errors
+  - Queryable via `queryAuditLogs()` with filters for user, action, resource, date range
+  - Convenience methods: `audit.login()`, `audit.toolUse()`, `audit.shellExecute()`, `audit.fileAccess()`, `audit.error()`, etc.
+- **Metrics**: Prometheus-compatible metrics export at `GET /metrics`
+- **Observability**: Built-in metrics dashboard, replay mode, prompt inspector, and alerting (anomaly, cost, errors)
+
 ## Key Commands
 ```bash
 # Development
 bun run dev          # Start with hot reload
 bun run start        # Production start
-bun test             # Run all tests (2793 tests)
+bun test             # Run all tests
 
 # Database
 bun run db:generate  # Generate migrations
@@ -93,15 +138,16 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
+tests/                          # 119 test files, 3,800+ tests
 ```
 
 ## Discord Setup (IMPORTANT)
 1. Go to https://discord.com/developers/applications
-2. Click "OpenSentinel" → "Bot"
+2. Click "OpenSentinel" -> "Bot"
 3. Enable ALL three "Privileged Gateway Intents":
-   - Presence Intent ✅
-   - Server Members Intent ✅
-   - Message Content Intent ✅
+   - Presence Intent
+   - Server Members Intent
+   - Message Content Intent
 4. Click Save Changes
 
 ## Ports
@@ -138,3 +184,6 @@ npm run dist:win    # Windows installer
 cd extension && bun install && bun run build
 # Load extension/dist in Chrome at chrome://extensions
 ```
+
+---
+*Last Updated: 2026-02-16*
