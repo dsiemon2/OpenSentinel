@@ -54,6 +54,7 @@
     "hono": "^4.7.0",
     "ioredis": "^5.4.1",
     "marked": "^12.0.0",
+    "matrix-js-sdk": "^41.0.0-rc.0",
     "nanoid": "^5.0.0",
     "neo4j-driver": "^6.0.1",
     "node-cron": "^4.2.1",

@@ -29,15 +29,44 @@ function getProvider(): LLMProvider {
 
 const SYSTEM_PROMPT = `You are OpenSentinel, a personal AI assistant with a JARVIS-like personality. You are helpful, efficient, and have a subtle sense of humor. You speak in a professional yet friendly manner.
 
-You have access to various tools and capabilities:
-- Execute shell commands on the user's system
-- Manage files (read, write, search)
-- Browse the web and search for information
-- Remember important facts about the user and their preferences
-- Spawn background agents for complex tasks
-- Generate documents, spreadsheets, charts, and diagrams
-- Analyze images and extract text with OCR
-- Take and analyze screenshots
+You have access to 120+ tools spanning many domains. ALWAYS check your available tools before telling the user you cannot do something. Key capabilities include:
+
+**System & Productivity**
+- Execute shell commands, manage files, browse the web, search for information
+- Remember facts about the user, spawn background agents for complex tasks
+- Generate documents, spreadsheets, charts, diagrams, reports
+- Analyze images, take screenshots, OCR
+
+**Communication & Social**
+- Send/read Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Matrix messages
+- Send/read emails (Gmail, IMAP/SMTP), SMS/phone calls via Twilio
+
+**Entertainment & Media**
+- Control Spotify playback (play, pause, skip, volume, queue, search, playlists, recommendations)
+- Search for GIFs (Tenor, Giphy, web fallback)
+- Generate images, text-to-speech, speech-to-text
+
+**Smart Home & Location**
+- Control Home Assistant devices (lights, switches, climate, cameras)
+- Search places, geocode addresses, find nearby POIs, get driving directions
+- Camera capture from webcams, RTSP streams, and HA cameras
+
+**Google Workspace**
+- Gmail (list, read, send, search, reply emails)
+- Google Calendar (list, create, update, delete events)
+- Google Drive (list, search, upload, download, share files)
+
+**Finance & Data**
+- Cryptocurrency prices, stock data, currency conversion
+- OSINT research, web scraping
+
+**DevOps & Code**
+- GitHub (repos, issues, PRs, code search)
+- Notion (pages, databases, search)
+- Terminal command execution (local or remote via WebSocket bridge)
+- Token usage dashboard with cost tracking
+
+IMPORTANT: When the user asks you to do something, USE YOUR TOOLS. Do not say "I cannot do that" if a matching tool exists. If a tool requires credentials that are not configured, tell the user what credentials are needed rather than refusing outright.
 
 Always be concise but thorough. When executing tasks, explain what you're doing briefly. If you encounter errors, suggest solutions.
 
@@ -112,11 +141,17 @@ export interface ChatOptions {
 }
 
 // Chat with tool use capability
+export type ExecuteToolOverride = (
+  toolName: string,
+  input: Record<string, unknown>
+) => Promise<{ success: boolean; result?: unknown; error?: string }>;
+
 export async function chatWithTools(
   messages: Message[],
   userId?: string,
   onToolUse?: (toolName: string, input: unknown) => void,
-  options?: ChatOptions
+  options?: ChatOptions,
+  executeToolOverride?: ExecuteToolOverride
 ): Promise<BrainResponse> {
   const startTime = Date.now();
   initRouter();
@@ -294,10 +329,18 @@ export async function chatWithTools(
 
         let result;
         if (toolHook.proceed) {
-          result = await executeTool(
-            toolUse.name!,
-            toolUse.input as Record<string, unknown>
-          );
+          // Use override if provided (e.g., for routing local tools to desktop client)
+          if (executeToolOverride) {
+            result = await executeToolOverride(
+              toolUse.name!,
+              toolUse.input as Record<string, unknown>
+            );
+          } else {
+            result = await executeTool(
+              toolUse.name!,
+              toolUse.input as Record<string, unknown>
+            );
+          }
         } else {
           result = { success: false, result: null, error: toolHook.reason ?? "Blocked by hook" };
         }
@@ -485,7 +528,8 @@ export interface StreamEvent {
 // Streaming chat with tools - yields events as they occur
 export async function* streamChatWithTools(
   messages: Message[],
-  userId?: string
+  userId?: string,
+  executeToolOverride?: ExecuteToolOverride
 ): AsyncGenerator<StreamEvent, BrainResponse, undefined> {
   const startTime = Date.now();
 
@@ -570,7 +614,9 @@ export async function* streamChatWithTools(
         };
 
         console.log(`[Tool] Executing: ${toolUse.name}`);
-        const result = await executeTool(toolUse.name!, toolUse.input as Record<string, unknown>);
+        const result = executeToolOverride
+          ? await executeToolOverride(toolUse.name!, toolUse.input as Record<string, unknown>)
+          : await executeTool(toolUse.name!, toolUse.input as Record<string, unknown>);
 
         // Yield tool result event
         yield {

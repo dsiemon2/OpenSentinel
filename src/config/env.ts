@@ -66,6 +66,12 @@ const envSchema = z.object({
   GITHUB_TOKEN: z.string().optional(),
   GITHUB_WEBHOOK_SECRET: z.string().optional(),
 
+  // Google Services (unified OAuth2 — optional, falls back to service-specific)
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_REDIRECT_URI: z.string().optional(),
+  GOOGLE_REFRESH_TOKEN: z.string().optional(),
+
   // Google Drive (optional)
   GOOGLE_DRIVE_CLIENT_ID: z.string().optional(),
   GOOGLE_DRIVE_CLIENT_SECRET: z.string().optional(),
@@ -77,6 +83,10 @@ const envSchema = z.object({
   DROPBOX_APP_SECRET: z.string().optional(),
   DROPBOX_ACCESS_TOKEN: z.string().optional(),
   DROPBOX_REFRESH_TOKEN: z.string().optional(),
+
+  // GIF Search (optional)
+  TENOR_API_KEY: z.string().optional(),
+  GIPHY_API_KEY: z.string().optional(),
 
   // Finance (optional)
   ALPHA_VANTAGE_API_KEY: z.string().optional(),
@@ -94,7 +104,25 @@ const envSchema = z.object({
   // Spotify (optional)
   SPOTIFY_CLIENT_ID: z.string().optional(),
   SPOTIFY_CLIENT_SECRET: z.string().optional(),
-  SPOTIFY_REDIRECT_URI: z.string().url().optional(),
+  SPOTIFY_REDIRECT_URI: z.string().optional(),
+  SPOTIFY_REFRESH_TOKEN: z.string().optional(),
+
+  // Google Calendar (optional)
+  GOOGLE_CALENDAR_CLIENT_ID: z.string().optional(),
+  GOOGLE_CALENDAR_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_CALENDAR_REDIRECT_URI: z.string().url().optional(),
+  GOOGLE_CALENDAR_REFRESH_TOKEN: z.string().optional(),
+
+  // Outlook Calendar (optional)
+  OUTLOOK_CLIENT_ID: z.string().optional(),
+  OUTLOOK_CLIENT_SECRET: z.string().optional(),
+  OUTLOOK_REDIRECT_URI: z.string().url().optional(),
+  OUTLOOK_REFRESH_TOKEN: z.string().optional(),
+
+  // Dropbox (additional OAuth fields)
+  DROPBOX_CLIENT_ID: z.string().optional(),
+  DROPBOX_CLIENT_SECRET: z.string().optional(),
+  DROPBOX_REDIRECT_URI: z.string().url().optional(),
 
   // MCP (Model Context Protocol)
   MCP_ENABLED: z.coerce.boolean().optional().default(true),
@@ -198,6 +226,13 @@ const envSchema = z.object({
   // OSINT Feature Toggle
   OSINT_ENABLED: z.coerce.boolean().optional().default(false),
   OSINT_RATE_LIMIT_BUFFER_MS: z.coerce.number().optional().default(200),
+
+  // Embedding Provider
+  EMBEDDING_PROVIDER: z.enum(["openai", "huggingface", "tfidf"]).optional().default("openai"),
+  EMBEDDING_MODEL: z.string().optional(),
+  EMBEDDING_DIMENSIONS: z.coerce.number().optional(),
+  EMBEDDING_DB_DIMENSIONS: z.coerce.number().optional().default(1536),
+  EMBEDDING_BATCH_SIZE: z.coerce.number().optional().default(32),
 
   // Advanced RAG
   HYDE_ENABLED: z.coerce.boolean().optional().default(false),

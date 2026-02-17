@@ -17,7 +17,7 @@ import { generateSpreadsheet } from "./file-generation/spreadsheet";
 import { generateChart } from "./file-generation/charts";
 import { generateDiagram, generateStructuredDiagram } from "./file-generation/diagrams";
 import { spawnAgent, getAgent, cancelAgent } from "../core/agents/agent-manager";
-import { renderMath, renderMathDocument } from "./rendering/math-renderer";
+import { renderMath, renderMathDocument, latexToSpeech } from "./rendering/math-renderer";
 import { highlightCode, renderCode } from "./rendering/code-highlighter";
 import { markdownToHtml, renderMarkdown } from "./rendering/markdown-renderer";
 import {
@@ -170,6 +170,191 @@ import {
   osintEnrich,
   osintAnalyze,
 } from "./osint";
+
+// === New modules from sister projects ===
+import { integrationRegistry } from "../core/adapters";
+import {
+  createRule,
+  getRule,
+  updateRule,
+  deleteRule,
+  listRules,
+  processTrigger,
+  importRules,
+  exportRules,
+  RuleTrigger,
+} from "../core/automation/logic-rules";
+import {
+  submitForApproval,
+  processApproval,
+  getPendingApprovals,
+  getApprovalHistory,
+  addApprovalRule,
+  removeApprovalRule,
+  listApprovalRules,
+} from "../core/automation/approval-engine";
+import { RAGPipeline } from "../core/intelligence/rag-pipeline";
+import { riskEngine } from "../core/intelligence/risk-engine";
+import { GraphRAG } from "../core/intelligence/graph-rag";
+import { strategyOrchestrator } from "../core/intelligence/strategy-plugins";
+import { patternAnalyzer } from "../core/intelligence/pattern-analyzer";
+import { eventBus } from "../core/events/event-bus";
+import { autoResponder } from "../core/events/auto-responder";
+import { dagEngine } from "../core/workflows/dag-engine";
+import { encrypt, decrypt, encryptCredentials, decryptCredentials, signWebhook, verifyWebhookSignature, generateApiKey } from "../core/security/crypto";
+import { rateLimit, resetRateLimit, getRateLimitStatus } from "../core/security/rate-limiter-enhanced";
+import { logAuditAction, queryAudit, getAuditStats, exportAuditLog } from "../core/security/audit-trail";
+import { SyncEngine } from "../core/sync/multi-device-sync";
+
+// === New gap-fill imports ===
+import { generateICal, quickEvent, type ICalEvent } from "./file-generation/ical";
+import { generateReport, quickReport, type ReportSection } from "./file-generation/html-reports";
+import { treeOfThought, formatToTResult, type ToTConfig } from "../core/agents/reasoning/tree-of-thought";
+import { processMessage as adaptiveProcessMessage, getPromptModifier, getUserProfile as getAdaptiveProfile, resetProfile as resetAdaptiveProfile, getTopFrequentTopics, getTopFrequentTools } from "../core/intelligence/adaptive-feedback";
+import { addItem as srAddItem, reviewItem as srReviewItem, getDueItems as srGetDueItems, getUserItems as srGetUserItems, getStats as srGetStats, deleteItem as srDeleteItem } from "../core/intelligence/spaced-repetition";
+import { processAndAdjust, getDifficultyAdjustment, getUserState as getStruggleState, resetState as resetStruggleState, getStruggleTopics } from "../core/intelligence/struggle-detection";
+
+// === New tool imports (v2.7 tools) ===
+import { searchGifs } from "./gif-search";
+import { searchPlaces, reverseGeocode, findNearby, getDirections } from "./places-lookup";
+import { parseSpotifyCommand } from "./spotify-cli";
+import { getTokenDashboard } from "./token-dashboard";
+import { executeTerminalCommand } from "./terminal-agent";
+import { createGoogleServices, type GoogleServicesClient } from "../integrations/google";
+
+// === Unwired integration imports ===
+import { createSpotifyClient, type SpotifyClient } from "../integrations/spotify";
+import { twilioService } from "../integrations/twilio";
+import { makeCall, makeCallWithTTS, getCallStatus, endCall } from "../integrations/twilio/voice";
+import { initNotionFromEnv } from "../integrations/notion";
+import { isNotionInitialized } from "../integrations/notion/client";
+import * as notionPages from "../integrations/notion/pages";
+import * as notionDatabases from "../integrations/notion/databases";
+import * as notionSearch from "../integrations/notion/search";
+import { createHomeAssistant, type HomeAssistant } from "../integrations/homeassistant";
+import { getUnifiedCloudStorage } from "../integrations/cloud-storage/unified";
+import { GoogleCalendarClient } from "../inputs/calendar/google-calendar";
+import { OutlookCalendarClient } from "../inputs/calendar/outlook-calendar";
+import {
+  fetchICalFromUrl,
+  getTodaysEvents as getTodaysICalEvents,
+  getUpcomingEvents as getUpcomingICalEvents,
+  formatEvent,
+} from "../inputs/calendar/ical-parser";
+import {
+  createPersona,
+  getActivePersona,
+  activatePersona,
+  deactivatePersonas,
+  getUserPersonas,
+  deletePersona,
+  getPersonaSystemPrompt,
+  initializeDefaultPersonas,
+} from "../core/personality/persona-manager";
+import { detectMood, analyzeMoodTrend } from "../core/personality/mood-detector";
+import {
+  activateDomainExpert,
+  deactivateDomainExpert,
+  listDomainExperts,
+  detectDomainFromMessage,
+} from "../core/personality/domain-experts";
+
+// Singleton instances for stateful modules
+const ragPipeline = new RAGPipeline();
+const graphRAG = new GraphRAG();
+const syncEngine = new SyncEngine("opensentinel-primary");
+
+// Lazy-initialized integration singletons
+let spotifyClient: SpotifyClient | null = null;
+function getSpotifyClient(): SpotifyClient {
+  if (!spotifyClient) {
+    if (!env.SPOTIFY_CLIENT_ID || !env.SPOTIFY_CLIENT_SECRET) {
+      throw new Error("Spotify not configured. Set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in .env");
+    }
+    spotifyClient = createSpotifyClient({
+      clientId: env.SPOTIFY_CLIENT_ID,
+      clientSecret: env.SPOTIFY_CLIENT_SECRET,
+      redirectUri: env.SPOTIFY_REDIRECT_URI || `https://app.opensentinel.ai/api/callbacks/spotify`,
+    });
+    // Seed refresh token from env if available (skips interactive OAuth flow)
+    const refreshToken = (env as any).SPOTIFY_REFRESH_TOKEN;
+    if (refreshToken) {
+      spotifyClient.auth.setTokens({
+        accessToken: "",
+        refreshToken,
+        expiresAt: 0,
+        scope: "",
+        tokenType: "Bearer",
+      });
+    }
+  }
+  return spotifyClient;
+}
+
+let haInstance: HomeAssistant | null = null;
+function getHomeAssistant(): HomeAssistant {
+  if (!haInstance) {
+    if (!env.HOME_ASSISTANT_URL || !env.HOME_ASSISTANT_TOKEN) {
+      throw new Error("Home Assistant not configured. Set HOME_ASSISTANT_URL and HOME_ASSISTANT_TOKEN in .env");
+    }
+    haInstance = createHomeAssistant({
+      url: env.HOME_ASSISTANT_URL,
+      token: env.HOME_ASSISTANT_TOKEN,
+    });
+  }
+  return haInstance;
+}
+
+let googleCalClient: GoogleCalendarClient | null = null;
+function getGoogleCalendar(): GoogleCalendarClient {
+  if (!googleCalClient) {
+    if (!env.GOOGLE_CALENDAR_CLIENT_ID || !env.GOOGLE_CALENDAR_CLIENT_SECRET) {
+      throw new Error("Google Calendar not configured. Set GOOGLE_CALENDAR_CLIENT_ID and GOOGLE_CALENDAR_CLIENT_SECRET in .env");
+    }
+    googleCalClient = new GoogleCalendarClient({
+      clientId: env.GOOGLE_CALENDAR_CLIENT_ID,
+      clientSecret: env.GOOGLE_CALENDAR_CLIENT_SECRET,
+      redirectUri: env.GOOGLE_CALENDAR_REDIRECT_URI || `https://app.opensentinel.ai/api/callbacks/google-calendar`,
+      refreshToken: env.GOOGLE_CALENDAR_REFRESH_TOKEN,
+    });
+  }
+  return googleCalClient;
+}
+
+let outlookCalClient: OutlookCalendarClient | null = null;
+function getOutlookCalendar(): OutlookCalendarClient {
+  if (!outlookCalClient) {
+    if (!env.OUTLOOK_CLIENT_ID || !env.OUTLOOK_CLIENT_SECRET) {
+      throw new Error("Outlook Calendar not configured. Set OUTLOOK_CLIENT_ID and OUTLOOK_CLIENT_SECRET in .env");
+    }
+    outlookCalClient = new OutlookCalendarClient({
+      clientId: env.OUTLOOK_CLIENT_ID,
+      clientSecret: env.OUTLOOK_CLIENT_SECRET,
+      redirectUri: env.OUTLOOK_REDIRECT_URI || `https://app.opensentinel.ai/api/callbacks/outlook`,
+      refreshToken: env.OUTLOOK_REFRESH_TOKEN,
+    });
+  }
+  return outlookCalClient;
+}
+
+// Lazy-initialized Google Services singleton
+let googleServicesClient: GoogleServicesClient | null = null;
+function getGoogleServices(): GoogleServicesClient {
+  const clientId = (env as any).GOOGLE_CLIENT_ID || env.GOOGLE_DRIVE_CLIENT_ID || env.GOOGLE_CALENDAR_CLIENT_ID;
+  const clientSecret = (env as any).GOOGLE_CLIENT_SECRET || env.GOOGLE_DRIVE_CLIENT_SECRET || env.GOOGLE_CALENDAR_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    throw new Error("Google not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env");
+  }
+  if (!googleServicesClient) {
+    googleServicesClient = createGoogleServices({
+      clientId,
+      clientSecret,
+      redirectUri: (env as any).GOOGLE_REDIRECT_URI || env.GOOGLE_DRIVE_REDIRECT_URI || env.GOOGLE_CALENDAR_REDIRECT_URI || "https://app.opensentinel.ai/api/callbacks/google",
+      refreshToken: (env as any).GOOGLE_REFRESH_TOKEN || env.GOOGLE_DRIVE_REFRESH_TOKEN || env.GOOGLE_CALENDAR_REFRESH_TOKEN,
+    });
+  }
+  return googleServicesClient;
+}
 
 // Helper: create an IMAP client for any local mailbox using Dovecot master user
 function createLocalImapClient(emailAddress: string): ImapClient {
@@ -1817,6 +2002,750 @@ export const TOOLS: Tool[] = [
       required: ["action"],
     },
   },
+
+  // ===== Integration Adapter Framework (from Workflow-Hub) =====
+  {
+    name: "integration_execute",
+    description:
+      "Execute an action on a third-party integration (Salesforce, Stripe, HubSpot, Google Workspace, Microsoft 365, Shopify, Jira, Twilio, AWS S3, SendGrid, QuickBooks, Xero, Mailchimp, Zapier). First authenticate with integration_auth, then call actions.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        integration: { type: "string", description: "Integration slug (e.g., 'salesforce', 'stripe', 'hubspot', 'google-workspace', 'jira')" },
+        action: { type: "string", description: "Action name (e.g., 'createContact', 'sendEmail', 'createIssue')" },
+        input: { type: "object", description: "Action input parameters" },
+      },
+      required: ["integration", "action", "input"],
+    },
+  },
+  {
+    name: "integration_auth",
+    description: "Authenticate with a third-party integration. Provide credentials as key-value pairs.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        integration: { type: "string", description: "Integration slug" },
+        credentials: { type: "object", description: "Credentials (e.g., { apiKey: '...' } or { accessToken: '...' })" },
+      },
+      required: ["integration", "credentials"],
+    },
+  },
+  {
+    name: "integration_list",
+    description: "List all available third-party integrations and their capabilities.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        category: { type: "string", description: "Optional category filter (crm, payments, productivity, ecommerce, etc.)" },
+      },
+    },
+  },
+
+  // ===== Logic Rule Automation Engine (from Recruiting_AI) =====
+  {
+    name: "automation_rule",
+    description:
+      "Manage automation rules (trigger-condition-action). Create rules that automatically execute actions when conditions are met. Triggers include: message.received, tool.executed, webhook.received, schedule.daily, etc.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["create", "get", "update", "delete", "list", "process_trigger", "import", "export"], description: "Operation to perform" },
+        id: { type: "string", description: "Rule ID (for get/update/delete)" },
+        rule: { type: "object", description: "Rule configuration (for create/update)" },
+        trigger: { type: "string", description: "Trigger type (for process_trigger)" },
+        context: { type: "object", description: "Trigger context data (for process_trigger)" },
+        rules: { type: "array", description: "Array of rules (for import)" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Approval Engine (from GoGreenSourcingAI) =====
+  {
+    name: "approval_workflow",
+    description:
+      "Manage approval workflows. Submit entities for approval, process decisions, manage approval rules, and track approval status.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["submit", "approve", "reject", "pending", "history", "add_rule", "remove_rule", "list_rules"], description: "Operation" },
+        entity_type: { type: "string", description: "Entity type (e.g., 'purchase_order', 'deployment')" },
+        entity_id: { type: "string", description: "Entity ID" },
+        request_id: { type: "string", description: "Approval request ID (for approve/reject)" },
+        user_id: { type: "string", description: "User ID" },
+        comments: { type: "string", description: "Approval/rejection comments" },
+        entity_data: { type: "object", description: "Entity data for rule evaluation" },
+        rule: { type: "object", description: "Approval rule configuration (for add_rule)" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Enhanced RAG Pipeline (from PolyMarketAI) =====
+  {
+    name: "rag_pipeline",
+    description:
+      "Enhanced RAG (Retrieval Augmented Generation) pipeline with pluggable embeddings and hybrid search. Add documents, search with vector + keyword matching, chunk documents.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["add", "search", "search_vector", "search_keyword", "clear", "stats"], description: "Operation" },
+        content: { type: "string", description: "Document content (for add)" },
+        query: { type: "string", description: "Search query" },
+        metadata: { type: "object", description: "Document metadata" },
+        top_k: { type: "number", description: "Number of results (default 5)" },
+        chunk_size: { type: "number", description: "Chunk size for document splitting" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Risk Engine (from PolyMarketAI) =====
+  {
+    name: "risk_evaluate",
+    description:
+      "Evaluate an action against the risk/constraint engine. Non-bypassable safety checks including rate limits, cost limits, blocked tools, command injection detection, and sensitive data checks.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["evaluate", "config", "audit", "block_tool", "unblock_tool", "safe_mode", "kill_switch"], description: "Operation" },
+        context: { type: "object", description: "Risk evaluation context" },
+        tool_name: { type: "string", description: "Tool name (for block/unblock)" },
+        enabled: { type: "boolean", description: "Enable/disable (for safe_mode/kill_switch)" },
+        config: { type: "object", description: "Configuration updates" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Graph RAG (from GoGreen-DOC-AI) =====
+  {
+    name: "graph_rag",
+    description:
+      "Graph-based RAG with entity extraction and multi-hop traversal. Ingest documents to build a knowledge graph, then query with multi-hop entity traversal for complex questions.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["ingest", "search", "traverse", "entity", "stats"], description: "Operation" },
+        content: { type: "string", description: "Document content (for ingest)" },
+        query: { type: "string", description: "Search query" },
+        entity_id: { type: "string", description: "Entity ID (for traverse/entity)" },
+        max_hops: { type: "number", description: "Maximum traversal hops (default 2)" },
+        metadata: { type: "object", description: "Document metadata" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Strategy Plugins (from PolyMarketAI) =====
+  {
+    name: "strategy_orchestrator",
+    description:
+      "Run analysis strategies in parallel. Register strategy plugins, run one or all strategies, get consensus decisions. Used for multi-agent analysis and decision-making.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["list", "run_one", "run_all"], description: "Operation" },
+        strategy_name: { type: "string", description: "Strategy name (for run_one)" },
+        query: { type: "string", description: "Query/prompt for strategies" },
+        parameters: { type: "object", description: "Strategy parameters" },
+        timeout_ms: { type: "number", description: "Timeout in milliseconds" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Pattern Analyzer (from TimeSheetAI) =====
+  {
+    name: "pattern_analyzer",
+    description:
+      "Behavioral pattern analysis and prediction. Track user interactions, detect temporal/behavioral/preference/sequence patterns, predict next actions, and detect anomalies.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["record", "analyze", "predict", "detect_anomaly", "patterns", "corrections", "stats"], description: "Operation" },
+        event: { type: "object", description: "Pattern event to record" },
+        user_id: { type: "string", description: "User ID for analysis/prediction" },
+        context: { type: "object", description: "Current context for predictions" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Event Bus (from Ecom-Sales) =====
+  {
+    name: "event_bus",
+    description:
+      "Type-safe event bus with history and replay. Emit events, subscribe to event types (including wildcards), replay past events, and view dead letter queue.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["emit", "history", "replay", "dead_letters", "stats"], description: "Operation" },
+        event_type: { type: "string", description: "Event type (e.g., 'user.action', 'system.*')" },
+        payload: { type: "object", description: "Event payload (for emit)" },
+        since: { type: "string", description: "ISO date for filtering (for replay/history)" },
+        limit: { type: "number", description: "Result limit" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Auto-Responder (from Ecom-Sales) =====
+  {
+    name: "auto_responder",
+    description:
+      "Rule-based auto-responder with AI escalation. Add response rules with pattern matching, process incoming messages, configure business hours.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["add_rule", "remove_rule", "update_rule", "list_rules", "process"], description: "Operation" },
+        rule: { type: "object", description: "Response rule configuration" },
+        rule_id: { type: "string", description: "Rule ID (for remove/update)" },
+        message: { type: "string", description: "Message to process (for process)" },
+        channel: { type: "string", description: "Channel name (for process)" },
+        user_id: { type: "string", description: "User ID (for process)" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== DAG Workflow Engine (from Workflow-Hub) =====
+  {
+    name: "dag_workflow",
+    description:
+      "DAG (Directed Acyclic Graph) workflow engine. Create workflows with 7 node types (trigger, action, condition, loop, delay, ai, webhook), execute workflows, view execution history.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["create", "execute", "get", "list", "delete", "executions"], description: "Operation" },
+        workflow_id: { type: "string", description: "Workflow ID" },
+        workflow: { type: "object", description: "Workflow configuration (for create)" },
+        trigger_data: { type: "object", description: "Trigger data (for execute)" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Crypto Utilities (from Workflow-Hub) =====
+  {
+    name: "crypto_utils",
+    description:
+      "AES-256-GCM encryption, HMAC-SHA256 webhook signing, API key generation. Encrypt/decrypt strings and credentials, sign/verify webhooks.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["encrypt", "decrypt", "sign_webhook", "verify_webhook", "generate_api_key"], description: "Operation" },
+        plaintext: { type: "string", description: "Text to encrypt" },
+        ciphertext: { type: "string", description: "Text to decrypt" },
+        password: { type: "string", description: "Encryption password" },
+        payload: { type: "string", description: "Webhook payload to sign/verify" },
+        secret: { type: "string", description: "Webhook secret" },
+        signature: { type: "string", description: "Webhook signature to verify" },
+        prefix: { type: "string", description: "API key prefix (default 'os')" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Audit Trail (from GoGreenSourcingAI) =====
+  {
+    name: "audit_trail",
+    description:
+      "Immutable audit trail for tracking actions. Log actions, query audit entries by entity/user/action, export audit log, and view statistics.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["log", "query", "entity_trail", "user_actions", "stats", "export"], description: "Operation" },
+        log_action: { type: "string", description: "Action to log (for log)" },
+        entity: { type: "string", description: "Entity type" },
+        entity_id: { type: "string", description: "Entity ID" },
+        user_id: { type: "string", description: "User ID" },
+        metadata: { type: "object", description: "Additional metadata" },
+        limit: { type: "number", description: "Result limit" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Multi-Device Sync (from Ecom-Sales) =====
+  {
+    name: "device_sync",
+    description:
+      "Multi-device synchronization with version vector conflict resolution. Sync documents across devices, handle conflicts with configurable strategies (last-write-wins, merge, manual).",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["upsert", "get", "delete", "receive_remote", "changes_since", "conflicts", "resolve_conflict", "stats"], description: "Operation" },
+        document_id: { type: "string", description: "Document ID" },
+        data: { type: "object", description: "Document data" },
+        remote_document: { type: "object", description: "Remote document (for receive_remote)" },
+        since: { type: "string", description: "ISO date (for changes_since)" },
+        resolved_data: { type: "object", description: "Resolved data (for resolve_conflict)" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Spotify Integration =====
+  {
+    name: "spotify",
+    description:
+      "Control Spotify music playback, search for music, manage playlists, and get recommendations. Requires Spotify Premium for playback control.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["play", "pause", "next", "previous", "now_playing", "search", "queue", "volume", "shuffle", "repeat", "devices", "playlists", "create_playlist", "like", "profile", "recommendations"],
+          description: "Action to perform",
+        },
+        query: { type: "string", description: "Search query or song/artist/playlist name to play" },
+        type: { type: "string", enum: ["track", "album", "artist", "playlist"], description: "Search type or play type (default: track)" },
+        volume: { type: "number", description: "Volume level 0-100 (for volume action)" },
+        state: { type: "boolean", description: "On/off state (for shuffle action)" },
+        repeat_mode: { type: "string", enum: ["off", "track", "context"], description: "Repeat mode" },
+        device_id: { type: "string", description: "Target device ID" },
+        playlist_name: { type: "string", description: "Playlist name (for create_playlist)" },
+        playlist_description: { type: "string", description: "Playlist description" },
+        limit: { type: "number", description: "Number of results (default: 10)" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Twilio SMS/Voice =====
+  {
+    name: "twilio",
+    description:
+      "Send SMS/MMS messages and make phone calls via Twilio. Can send text messages, multimedia messages, and initiate voice calls with text-to-speech.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["send_sms", "send_mms", "make_call", "call_status", "end_call", "message_status"],
+          description: "Action to perform",
+        },
+        to: { type: "string", description: "Recipient phone number (E.164 format, e.g., +1234567890)" },
+        body: { type: "string", description: "Message body (for SMS/MMS)" },
+        media_urls: { type: "array", items: { type: "string" }, description: "Media URLs for MMS" },
+        message: { type: "string", description: "Text-to-speech message (for make_call)" },
+        call_sid: { type: "string", description: "Call SID (for call_status/end_call)" },
+        message_sid: { type: "string", description: "Message SID (for message_status)" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Notion Integration =====
+  {
+    name: "notion",
+    description:
+      "Interact with Notion workspace. Search pages and databases, create/update pages, query databases, and manage content. Requires NOTION_API_KEY in .env.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["search", "get_page", "create_page", "update_page", "query_database", "create_entry", "list_databases", "append_to_page"],
+          description: "Action to perform",
+        },
+        query: { type: "string", description: "Search query" },
+        page_id: { type: "string", description: "Notion page ID" },
+        database_id: { type: "string", description: "Notion database ID" },
+        title: { type: "string", description: "Page title (for create_page)" },
+        content: { type: "string", description: "Page content in markdown (for create_page/append_to_page)" },
+        parent_page_id: { type: "string", description: "Parent page ID (for create_page)" },
+        properties: { type: "object", description: "Properties to set/update" },
+        filter: { type: "object", description: "Database query filter" },
+        sorts: { type: "array", description: "Database query sorts" },
+        limit: { type: "number", description: "Results limit (default: 20)" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Home Assistant Smart Home =====
+  {
+    name: "smart_home",
+    description:
+      "Control smart home devices via Home Assistant. Turn lights on/off, adjust thermostats, lock doors, control media players, run automations, and activate scenes. Can also process natural language commands.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["list_devices", "get_state", "control", "command", "automations", "scenes", "activate_scene", "history"],
+          description: "Action to perform",
+        },
+        entity_id: { type: "string", description: "Home Assistant entity ID (e.g., light.living_room)" },
+        domain: { type: "string", description: "Device domain filter (light, switch, climate, lock, media_player, etc.)" },
+        service: { type: "string", description: "Service to call (e.g., turn_on, turn_off, toggle, set_temperature)" },
+        data: { type: "object", description: "Service call data (e.g., { brightness: 128, color_name: 'red' })" },
+        command: { type: "string", description: "Natural language command (e.g., 'turn off all the lights')" },
+        query: { type: "string", description: "Search query for devices/automations" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Cloud Storage =====
+  {
+    name: "cloud_storage",
+    description:
+      "Manage files on Google Drive and Dropbox. List, search, upload, download, share files, create folders, and check storage quota.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["list", "search", "upload", "download", "create_folder", "delete", "share", "quota", "providers"],
+          description: "Action to perform",
+        },
+        provider: { type: "string", enum: ["google_drive", "dropbox"], description: "Cloud provider (uses default if omitted)" },
+        path: { type: "string", description: "File/folder path or ID" },
+        query: { type: "string", description: "Search query" },
+        content: { type: "string", description: "File content to upload (text)" },
+        filename: { type: "string", description: "Filename for upload" },
+        folder_name: { type: "string", description: "Folder name to create" },
+        parent_path: { type: "string", description: "Parent folder path/ID" },
+        email: { type: "string", description: "Email to share with" },
+        role: { type: "string", enum: ["reader", "writer", "commenter"], description: "Share permission role" },
+        limit: { type: "number", description: "Results limit" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Calendar =====
+  {
+    name: "calendar",
+    description:
+      "Access Google Calendar, Outlook Calendar, or iCal feeds. View today's events, upcoming schedule, and list calendars. Supports multiple calendar providers.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["today", "upcoming", "list_calendars", "events"],
+          description: "Action to perform",
+        },
+        provider: { type: "string", enum: ["google", "outlook", "ical"], description: "Calendar provider (default: google)" },
+        days: { type: "number", description: "Number of days ahead for upcoming events (default: 7)" },
+        calendar_id: { type: "string", description: "Calendar ID (default: primary)" },
+        ical_url: { type: "string", description: "iCal feed URL (required for ical provider)" },
+        start_date: { type: "string", description: "Start date for events query (ISO 8601)" },
+        end_date: { type: "string", description: "End date for events query (ISO 8601)" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== Personality & Persona Management =====
+  {
+    name: "persona",
+    description:
+      "Manage AI personality and personas. Switch between personas (professional, casual, creative, etc.), detect user mood, activate domain experts, and customize response style.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["list", "activate", "deactivate", "create", "delete", "current", "detect_mood", "mood_trend", "domain_expert", "list_experts"],
+          description: "Action to perform",
+        },
+        persona_id: { type: "string", description: "Persona ID (for activate/delete)" },
+        user_id: { type: "string", description: "User ID" },
+        name: { type: "string", description: "Persona name (for create)" },
+        description: { type: "string", description: "Persona description" },
+        traits: { type: "array", description: "Persona traits", items: { type: "object" } },
+        message: { type: "string", description: "Message text (for detect_mood)" },
+        messages: { type: "array", description: "Message history (for mood_trend)", items: { type: "string" } },
+        expert_type: { type: "string", description: "Domain expert type (for domain_expert)" },
+      },
+      required: ["action"],
+    },
+  },
+
+  // ===== iCal Generation =====
+  {
+    name: "generate_ical",
+    description: "Generate iCal (.ics) calendar files from events. Supports recurring events, alarms, attendees, and all standard iCal features. Output can be imported into Google Calendar, Outlook, Apple Calendar, etc.",
+    input_schema: {
+      type: "object",
+      properties: {
+        events: {
+          type: "array",
+          description: "Array of events to include in the calendar file",
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Event title" },
+              start: { type: "string", description: "Start date/time (ISO 8601)" },
+              end: { type: "string", description: "End date/time (ISO 8601)" },
+              allDay: { type: "boolean", description: "Whether this is an all-day event" },
+              description: { type: "string", description: "Event description" },
+              location: { type: "string", description: "Event location" },
+              url: { type: "string", description: "Associated URL" },
+              status: { type: "string", enum: ["confirmed", "tentative", "cancelled"] },
+              categories: { type: "array", items: { type: "string" } },
+            },
+            required: ["title", "start"],
+          },
+        },
+        filename: { type: "string", description: "Output filename" },
+        calendar_name: { type: "string", description: "Calendar name" },
+        timezone: { type: "string", description: "Timezone (e.g., 'America/New_York')" },
+      },
+      required: ["events"],
+    },
+  },
+
+  // ===== HTML Report =====
+  {
+    name: "generate_report",
+    description: "Generate a styled HTML report with sections containing metrics cards, progress bars, tables, timelines, and key-value data. Supports light/dark/corporate/minimal themes. Print-ready.",
+    input_schema: {
+      type: "object",
+      properties: {
+        title: { type: "string", description: "Report title" },
+        subtitle: { type: "string", description: "Report subtitle" },
+        theme: { type: "string", enum: ["light", "dark", "corporate", "minimal"], description: "Visual theme" },
+        author: { type: "string", description: "Report author" },
+        sections: {
+          type: "array",
+          description: "Report sections",
+          items: {
+            type: "object",
+            properties: {
+              title: { type: "string", description: "Section heading" },
+              type: { type: "string", enum: ["text", "metrics", "table", "progress", "timeline", "kv"], description: "Section type" },
+              content: { type: "string", description: "HTML or text content (for 'text' type)" },
+              data: { description: "Structured data for the section type" },
+            },
+            required: ["title"],
+          },
+        },
+        filename: { type: "string", description: "Output filename" },
+      },
+      required: ["title", "sections"],
+    },
+  },
+
+  // ===== Math-to-Speech =====
+  {
+    name: "math_to_speech",
+    description: "Convert LaTeX mathematical expressions to natural spoken English. Useful for voice output, accessibility, and TTS. Examples: '\\frac{a}{b}' → 'a divided by b', 'x^2' → 'x squared', '\\sum_{i=1}^{n}' → 'the sum from i equals 1 to n of'.",
+    input_schema: {
+      type: "object",
+      properties: {
+        latex: { type: "string", description: "LaTeX expression to convert" },
+        expressions: { type: "array", items: { type: "string" }, description: "Multiple LaTeX expressions to convert at once" },
+      },
+      required: [],
+    },
+  },
+
+  // ===== Tree-of-Thought =====
+  {
+    name: "tree_of_thought",
+    description: "Solve complex problems using Tree-of-Thought reasoning. Explores multiple reasoning paths simultaneously, evaluates each branch, prunes weak paths, and finds the best solution. Best for problems with multiple valid approaches where a single chain-of-thought might miss the optimal answer.",
+    input_schema: {
+      type: "object",
+      properties: {
+        problem: { type: "string", description: "The problem to solve" },
+        max_depth: { type: "number", description: "Maximum reasoning depth (default 4)" },
+        branching_factor: { type: "number", description: "Candidate thoughts per node (default 3)" },
+        strategy: { type: "string", enum: ["bfs", "dfs"], description: "Search strategy (default bfs)" },
+        max_nodes: { type: "number", description: "Max nodes to explore, cost guard (default 30)" },
+        prune_threshold: { type: "number", description: "Min score 0-10 to keep branch alive (default 4)" },
+      },
+      required: ["problem"],
+    },
+  },
+
+  // ===== Adaptive Feedback =====
+  {
+    name: "adaptive_feedback",
+    description: "Manage the adaptive feedback system that learns user preferences and adjusts AI responses. Tracks verbosity, technical level, formality, and proactivity preferences from interaction patterns.",
+    input_schema: {
+      type: "object",
+      properties: {
+        action: {
+          type: "string",
+          enum: ["get_profile", "get_modifier", "process_message", "reset", "frequent_topics", "frequent_tools"],
+          description: "Action to perform",
+        },
+        user_id: { type: "string", description: "User ID" },
+        message: { type: "string", description: "Message to process (for process_message)" },
+        response_time_ms: { type: "number", description: "Response time in ms (for process_message)" },
+      },
+      required: ["action", "user_id"],
+    },
+  },
+
+  // ===== Spaced Repetition =====
+  {
+    name: "spaced_repetition",
+    description: "SM-2 spaced repetition system for optimized memory retention. Add items, review them with quality ratings, and the system schedules optimal review intervals. Works like Anki but integrated into the assistant.",
+    input_schema: {
+      type: "object",
+      properties: {
+        action: {
+          type: "string",
+          enum: ["add", "review", "due", "list", "stats", "delete"],
+          description: "Action: add item, review with quality rating, get due items, list all, get stats, or delete",
+        },
+        user_id: { type: "string", description: "User ID" },
+        front: { type: "string", description: "Question/prompt (for add)" },
+        back: { type: "string", description: "Answer/detail (for add)" },
+        category: { type: "string", description: "Category tag (for add/list)" },
+        item_id: { type: "string", description: "Item ID (for review/delete)" },
+        quality: { type: "number", description: "Review quality 0-5: 0=blackout, 3=difficult, 5=perfect (for review)" },
+        limit: { type: "number", description: "Max items to return (for due/list)" },
+      },
+      required: ["action", "user_id"],
+    },
+  },
+
+  // ===== Struggle Detection =====
+  {
+    name: "struggle_detection",
+    description: "Monitors user interaction to detect struggle/confusion and adaptively adjust difficulty. Returns difficulty level, hint progression, and prompt modifiers. Process messages to update state, or query current adjustment.",
+    input_schema: {
+      type: "object",
+      properties: {
+        action: {
+          type: "string",
+          enum: ["process", "get_adjustment", "get_state", "reset", "struggle_topics"],
+          description: "Action to perform",
+        },
+        user_id: { type: "string", description: "User ID" },
+        message: { type: "string", description: "User message to analyze (for process)" },
+        topic: { type: "string", description: "Current topic context" },
+        response_time_ms: { type: "number", description: "User's response time in ms" },
+      },
+      required: ["action", "user_id"],
+    },
+  },
+
+  // === New v2.7 tools ===
+
+  {
+    name: "gif_search",
+    description: "Search for GIFs using Tenor, Giphy, or DuckDuckGo fallback. Returns GIF URLs, titles, and dimensions. Great for reactions, memes, and visual responses.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        query: { type: "string", description: "Search query (e.g., 'happy dance', 'thumbs up', 'mind blown')" },
+        provider: { type: "string", enum: ["tenor", "giphy", "auto"], description: "GIF provider (default: auto)" },
+        limit: { type: "number", description: "Number of results (default: 5, max: 20)" },
+        rating: { type: "string", enum: ["g", "pg", "pg-13", "r"], description: "Content rating (default: pg)" },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "places_lookup",
+    description: "Search for places, geocode addresses, find nearby points of interest, and get driving directions. Uses OpenStreetMap (free, no API key).",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["search", "geocode", "reverse_geocode", "nearby", "directions"], description: "Action to perform" },
+        query: { type: "string", description: "Place name or address (for search/geocode)" },
+        lat: { type: "number", description: "Latitude" },
+        lon: { type: "number", description: "Longitude" },
+        dest_lat: { type: "number", description: "Destination latitude (for directions)" },
+        dest_lon: { type: "number", description: "Destination longitude (for directions)" },
+        dest_query: { type: "string", description: "Destination as address (for directions)" },
+        category: { type: "string", enum: ["restaurant", "hotel", "cafe", "hospital", "pharmacy", "gas_station", "parking", "atm", "supermarket", "school", "any"], description: "POI category (for nearby)" },
+        radius: { type: "number", description: "Search radius in meters (for nearby, default: 1000)" },
+        limit: { type: "number", description: "Max results (default: 10)" },
+      },
+      required: ["action"],
+    },
+  },
+  {
+    name: "spotify_cli",
+    description: "Natural language Spotify controller. Parse commands like 'play Radiohead', 'skip', 'what's playing', 'volume 50', 'shuffle on', 'queue Bohemian Rhapsody'.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        command: { type: "string", description: "Natural language command (e.g., 'play artist Radiohead', 'skip', 'volume 80', 'shuffle on')" },
+      },
+      required: ["command"],
+    },
+  },
+  {
+    name: "token_dashboard",
+    description: "View a dashboard of token usage, costs, model tier breakdown, estimated monthly spend, top tool usage, error rates, and system uptime.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        period: { type: "string", enum: ["hour", "day", "week", "month", "all"], description: "Time period (default: day)" },
+        format: { type: "string", enum: ["summary", "detailed", "prometheus"], description: "Output format (default: summary)" },
+      },
+    },
+  },
+  {
+    name: "terminal_agent",
+    description: "Execute terminal commands via the desktop WebSocket bridge (local execution) or server fallback. Supports shell selection, working directory, and timeout.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        command: { type: "string", description: "Shell command to execute" },
+        shell: { type: "string", enum: ["bash", "powershell", "cmd"], description: "Shell to use (default: auto-detect)" },
+        cwd: { type: "string", description: "Working directory" },
+        timeout: { type: "number", description: "Timeout in ms (default: 30000)" },
+        prefer_local: { type: "boolean", description: "Prefer local desktop execution (default: true)" },
+      },
+      required: ["command"],
+    },
+  },
+  {
+    name: "camera_monitor",
+    description: "Capture from webcams, RTSP streams, or Home Assistant cameras. Supports single capture, burst mode, motion detection, and device listing.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", enum: ["capture", "burst", "snapshot_rtsp", "snapshot_ha", "list_devices", "motion_detect", "capabilities"], description: "Action to perform" },
+        device: { type: "string", description: "Webcam device ID" },
+        rtsp_url: { type: "string", description: "RTSP stream URL" },
+        entity_id: { type: "string", description: "Home Assistant camera entity_id" },
+        resolution: { type: "string", description: "Resolution as WxH (e.g., '1920x1080')" },
+        format: { type: "string", enum: ["png", "jpg", "webp"], description: "Output format (default: jpg)" },
+        frame_count: { type: "number", description: "Frames for burst mode (default: 5)" },
+        duration: { type: "number", description: "Duration in seconds for motion detection" },
+        threshold: { type: "number", description: "Motion sensitivity 0-1 (default: 0.1)" },
+      },
+      required: ["action"],
+    },
+  },
+  {
+    name: "google_services",
+    description: "Interact with Google Workspace: Gmail (read, send, search), Google Calendar (events, create), Google Drive (list, upload, download). Requires Google OAuth2.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        service: { type: "string", enum: ["gmail", "calendar", "drive"], description: "Google service" },
+        action: { type: "string", enum: ["list", "read", "send", "search", "reply", "labels", "events", "create_event", "update_event", "delete_event", "list_files", "search_files", "upload", "download", "share"], description: "Action to perform" },
+        query: { type: "string", description: "Search query" },
+        to: { type: "string", description: "Recipient email" },
+        subject: { type: "string", description: "Email subject" },
+        body: { type: "string", description: "Email body or event description" },
+        message_id: { type: "string", description: "Email message ID" },
+        event_id: { type: "string", description: "Calendar event ID" },
+        file_id: { type: "string", description: "Drive file ID" },
+        calendar_id: { type: "string", description: "Calendar ID (default: primary)" },
+        start_time: { type: "string", description: "Event start (ISO 8601)" },
+        end_time: { type: "string", description: "Event end (ISO 8601)" },
+        title: { type: "string", description: "Event title or file name" },
+        file_path: { type: "string", description: "Local file path" },
+        limit: { type: "number", description: "Max results (default: 20)" },
+      },
+      required: ["service", "action"],
+    },
+  },
 ];
 
 // MCP registry reference (set by brain.ts after initialization)
@@ -3246,7 +4175,7 @@ export async function executeTool(
             return meeting ? { success: true, result: meeting } : { success: false, result: null, error: `Not found: ${input.meeting_id}` };
           }
           case "list": {
-            const meetings = listMeetings({ tag: input.tags?.[0] as string | undefined });
+            const meetings = listMeetings({ tag: (input.tags as string[] | undefined)?.[0] });
             return { success: true, result: { count: meetings.length, meetings: meetings.map((m) => ({ id: m.id, title: m.title, date: m.date.toISOString(), attendees: m.attendees.length, actions: m.actionItems.length, decisions: m.decisions.length })) } };
           }
           case "summarize": {
@@ -3477,7 +4406,7 @@ export async function executeTool(
 
       case "osint_graph": {
         const result = await osintGraphQuery({
-          action: input.action as string,
+          action: input.action as "search" | "neighbors" | "path" | "communities" | "cypher" | "duplicates" | "merge",
           entity_id: input.entity_id as string | undefined,
           entity_name: input.entity_name as string | undefined,
           target_id: input.target_id as string | undefined,
@@ -3500,11 +4429,1635 @@ export async function executeTool(
 
       case "osint_analyze": {
         const result = await osintAnalyze({
-          action: input.action as string,
+          action: input.action as "financial_flow" | "network_analysis" | "timeline" | "report",
           entity_id: input.entity_id as string | undefined,
           options: input.options as Record<string, unknown> | undefined,
         });
         return { success: true, result };
+      }
+
+      // ===== Integration Adapter Framework =====
+      case "integration_execute": {
+        const result = await integrationRegistry.executeAction(
+          input.integration as string,
+          input.action as string,
+          input.input
+        );
+        return { success: true, result };
+      }
+
+      case "integration_auth": {
+        const auth = await integrationRegistry.authenticate(
+          input.integration as string,
+          input.credentials as Record<string, string>
+        );
+        return { success: true, result: { authenticated: true, expiresAt: auth.expiresAt } };
+      }
+
+      case "integration_list": {
+        const category = input.category as string | undefined;
+        const integrations = category
+          ? integrationRegistry.listByCategory(category).map((a) => a.metadata)
+          : integrationRegistry.list();
+        return { success: true, result: integrations };
+      }
+
+      // ===== Logic Rule Automation Engine =====
+      case "automation_rule": {
+        const action = input.action as string;
+        switch (action) {
+          case "create": {
+            const rule = createRule(input.rule as any);
+            return { success: true, result: rule };
+          }
+          case "get": {
+            const rule = getRule(input.id as string);
+            return { success: true, result: rule };
+          }
+          case "update": {
+            const rule = updateRule(input.id as string, input.rule as any);
+            return { success: true, result: rule };
+          }
+          case "delete": {
+            const deleted = deleteRule(input.id as string);
+            return { success: true, result: { deleted } };
+          }
+          case "list": {
+            const rules = listRules(input as any);
+            return { success: true, result: rules };
+          }
+          case "process_trigger": {
+            const triggerResult = await processTrigger(
+              input.trigger as RuleTrigger,
+              (input.context as Record<string, unknown>) || {}
+            );
+            return { success: true, result: triggerResult };
+          }
+          case "import": {
+            const imported = importRules(input.rules as any[]);
+            return { success: true, result: { imported: imported.length } };
+          }
+          case "export": {
+            return { success: true, result: exportRules() };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown automation_rule action: ${action}` };
+        }
+      }
+
+      // ===== Approval Workflow Engine =====
+      case "approval_workflow": {
+        const action = input.action as string;
+        switch (action) {
+          case "submit": {
+            const result = await submitForApproval({
+              entityType: input.entity_type as string,
+              entityId: input.entity_id as string,
+              requesterId: input.user_id as string,
+              entityData: input.entity_data as Record<string, unknown>,
+            });
+            return { success: true, result };
+          }
+          case "approve":
+          case "reject": {
+            const result = await processApproval(
+              input.request_id as string,
+              action === "approve" ? "approved" : "rejected",
+              input.comments as string | undefined,
+              input.user_id as string
+            );
+            return { success: true, result };
+          }
+          case "pending": {
+            return { success: true, result: getPendingApprovals(input.user_id as string) };
+          }
+          case "history": {
+            return { success: true, result: getApprovalHistory(input.entity_type as string, input.entity_id as string) };
+          }
+          case "add_rule": {
+            const rule = addApprovalRule(input.rule as any);
+            return { success: true, result: rule };
+          }
+          case "remove_rule": {
+            return { success: true, result: { removed: removeApprovalRule(input.id as string) } };
+          }
+          case "list_rules": {
+            return { success: true, result: listApprovalRules(input.entity_type as string) };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown approval action: ${action}` };
+        }
+      }
+
+      // ===== Enhanced RAG Pipeline =====
+      case "rag_pipeline": {
+        const action = input.action as string;
+        switch (action) {
+          case "add": {
+            const docs = await ragPipeline.addDocument(
+              input.content as string,
+              (input.metadata as Record<string, unknown>) || {},
+              input.chunk_size ? { chunkSize: input.chunk_size as number, chunkOverlap: 50 } : undefined
+            );
+            return { success: true, result: { added: docs.length, ids: docs.map((d) => d.id) } };
+          }
+          case "search": {
+            const results = await ragPipeline.search(input.query as string, {
+              topK: input.top_k as number,
+            });
+            return { success: true, result: results.map((r) => ({ content: r.document.content, score: r.score, matchType: r.matchType, metadata: r.document.metadata })) };
+          }
+          case "search_vector": {
+            const results = await ragPipeline.searchVector(input.query as string, input.top_k as number);
+            return { success: true, result: results.map((r) => ({ content: r.document.content, score: r.score })) };
+          }
+          case "search_keyword": {
+            const results = ragPipeline.searchKeyword(input.query as string, input.top_k as number);
+            return { success: true, result: results.map((r) => ({ content: r.document.content, score: r.score })) };
+          }
+          case "clear": {
+            ragPipeline.clear();
+            return { success: true, result: { cleared: true } };
+          }
+          case "stats": {
+            return { success: true, result: { documentCount: ragPipeline.size } };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown rag_pipeline action: ${action}` };
+        }
+      }
+
+      // ===== Risk Engine =====
+      case "risk_evaluate": {
+        const action = input.action as string;
+        switch (action) {
+          case "evaluate": {
+            const decision = await riskEngine.evaluate(input.context as any);
+            return { success: true, result: decision };
+          }
+          case "config": {
+            if (input.config) riskEngine.updateConfig(input.config as any);
+            return { success: true, result: riskEngine.getConfig() };
+          }
+          case "audit": {
+            return { success: true, result: riskEngine.getAuditLog(input.limit as number) };
+          }
+          case "block_tool": {
+            riskEngine.blockTool(input.tool_name as string);
+            return { success: true, result: { blocked: input.tool_name } };
+          }
+          case "unblock_tool": {
+            riskEngine.unblockTool(input.tool_name as string);
+            return { success: true, result: { unblocked: input.tool_name } };
+          }
+          case "safe_mode": {
+            if (input.enabled) riskEngine.enableSafeMode();
+            else riskEngine.disableSafeMode();
+            return { success: true, result: { safeMode: input.enabled } };
+          }
+          case "kill_switch": {
+            if (input.enabled) riskEngine.activateKillSwitch();
+            else riskEngine.deactivateKillSwitch();
+            return { success: true, result: { killSwitch: input.enabled } };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown risk action: ${action}` };
+        }
+      }
+
+      // ===== Graph RAG =====
+      case "graph_rag": {
+        const action = input.action as string;
+        switch (action) {
+          case "ingest": {
+            const doc = await graphRAG.ingestDocument(
+              input.content as string,
+              (input.metadata as Record<string, unknown>) || {}
+            );
+            return { success: true, result: { documentId: doc.id, entities: doc.entities.length, category: doc.category } };
+          }
+          case "search": {
+            const results = await graphRAG.search(input.query as string, {
+              maxHops: input.max_hops as number,
+            });
+            return { success: true, result: results };
+          }
+          case "traverse": {
+            const traversal = graphRAG.traverse(input.entity_id as string, input.max_hops as number);
+            return { success: true, result: traversal };
+          }
+          case "entity": {
+            const entity = graphRAG.getEntity(input.entity_id as string);
+            return { success: true, result: entity };
+          }
+          case "stats": {
+            return { success: true, result: graphRAG.getStats() };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown graph_rag action: ${action}` };
+        }
+      }
+
+      // ===== Strategy Orchestrator =====
+      case "strategy_orchestrator": {
+        const action = input.action as string;
+        switch (action) {
+          case "list": {
+            return { success: true, result: strategyOrchestrator.list() };
+          }
+          case "run_one": {
+            const result = await strategyOrchestrator.runOne(input.strategy_name as string, {
+              query: input.query as string,
+              parameters: (input.parameters as Record<string, unknown>) || {},
+            });
+            return { success: true, result };
+          }
+          case "run_all": {
+            const results = await strategyOrchestrator.runAll(
+              { query: input.query as string, parameters: (input.parameters as Record<string, unknown>) || {} },
+              { timeoutMs: input.timeout_ms as number }
+            );
+            return { success: true, result: results };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown strategy action: ${action}` };
+        }
+      }
+
+      // ===== Pattern Analyzer =====
+      case "pattern_analyzer": {
+        const action = input.action as string;
+        switch (action) {
+          case "record": {
+            const event = input.event as any;
+            patternAnalyzer.recordEvent({
+              type: event.type,
+              action: event.action,
+              userId: event.userId || input.user_id as string,
+              timestamp: new Date(),
+              metadata: event.metadata || {},
+              correction: event.correction,
+            });
+            return { success: true, result: { recorded: true } };
+          }
+          case "analyze": {
+            const patterns = patternAnalyzer.analyzePatterns(input.user_id as string);
+            return { success: true, result: patterns };
+          }
+          case "predict": {
+            const predictions = patternAnalyzer.predict(
+              input.user_id as string,
+              (input.context as Record<string, unknown>) || {}
+            );
+            return { success: true, result: predictions };
+          }
+          case "detect_anomaly": {
+            const anomaly = patternAnalyzer.detectAnomaly(input.event as any);
+            return { success: true, result: anomaly };
+          }
+          case "patterns": {
+            return { success: true, result: patternAnalyzer.getPatterns(input.user_id as string) };
+          }
+          case "corrections": {
+            return { success: true, result: patternAnalyzer.getCorrections() };
+          }
+          case "stats": {
+            return { success: true, result: patternAnalyzer.getStats() };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown pattern action: ${action}` };
+        }
+      }
+
+      // ===== Event Bus =====
+      case "event_bus": {
+        const action = input.action as string;
+        switch (action) {
+          case "emit": {
+            await eventBus.emit(
+              input.event_type as string,
+              input.payload || {},
+              { source: "tool" }
+            );
+            return { success: true, result: { emitted: true } };
+          }
+          case "history": {
+            return { success: true, result: eventBus.getHistory(input.limit as number) };
+          }
+          case "replay": {
+            const count = await eventBus.replay({
+              eventType: input.event_type as string,
+              since: input.since ? new Date(input.since as string) : undefined,
+            });
+            return { success: true, result: { replayed: count } };
+          }
+          case "dead_letters": {
+            return { success: true, result: eventBus.getDeadLetters(input.limit as number) };
+          }
+          case "stats": {
+            return { success: true, result: eventBus.getStats() };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown event_bus action: ${action}` };
+        }
+      }
+
+      // ===== Auto-Responder =====
+      case "auto_responder": {
+        const action = input.action as string;
+        switch (action) {
+          case "add_rule": {
+            const rule = autoResponder.addRule(input.rule as any);
+            return { success: true, result: rule };
+          }
+          case "remove_rule": {
+            return { success: true, result: { removed: autoResponder.removeRule(input.rule_id as string) } };
+          }
+          case "update_rule": {
+            const updated = autoResponder.updateRule(input.rule_id as string, input.rule as any);
+            return { success: true, result: updated };
+          }
+          case "list_rules": {
+            return { success: true, result: autoResponder.listRules() };
+          }
+          case "process": {
+            const response = await autoResponder.processMessage({
+              message: input.message as string,
+              channel: input.channel as string,
+              userId: input.user_id as string,
+            });
+            return { success: true, result: response };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown auto_responder action: ${action}` };
+        }
+      }
+
+      // ===== DAG Workflow Engine =====
+      case "dag_workflow": {
+        const action = input.action as string;
+        switch (action) {
+          case "create": {
+            const wf = dagEngine.createWorkflow(input.workflow as any);
+            return { success: true, result: { id: wf.id, name: wf.name } };
+          }
+          case "execute": {
+            const execution = await dagEngine.execute(
+              input.workflow_id as string,
+              (input.trigger_data as Record<string, unknown>) || {}
+            );
+            return { success: true, result: execution };
+          }
+          case "get": {
+            return { success: true, result: dagEngine.getWorkflow(input.workflow_id as string) };
+          }
+          case "list": {
+            return { success: true, result: dagEngine.listWorkflows().map((w) => ({ id: w.id, name: w.name, description: w.description })) };
+          }
+          case "delete": {
+            return { success: true, result: { deleted: dagEngine.deleteWorkflow(input.workflow_id as string) } };
+          }
+          case "executions": {
+            return { success: true, result: dagEngine.getExecutions(input.workflow_id as string) };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown dag_workflow action: ${action}` };
+        }
+      }
+
+      // ===== Crypto Utilities =====
+      case "crypto_utils": {
+        const action = input.action as string;
+        switch (action) {
+          case "encrypt": {
+            const encrypted = encrypt(input.plaintext as string, input.password as string);
+            return { success: true, result: { encrypted } };
+          }
+          case "decrypt": {
+            const decrypted = decrypt(input.ciphertext as string, input.password as string);
+            return { success: true, result: { decrypted } };
+          }
+          case "sign_webhook": {
+            const sig = signWebhook(input.payload as string, input.secret as string);
+            return { success: true, result: { signature: sig } };
+          }
+          case "verify_webhook": {
+            const valid = verifyWebhookSignature(input.payload as string, input.signature as string, input.secret as string);
+            return { success: true, result: { valid } };
+          }
+          case "generate_api_key": {
+            return { success: true, result: { apiKey: generateApiKey(input.prefix as string) } };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown crypto action: ${action}` };
+        }
+      }
+
+      // ===== Audit Trail =====
+      case "audit_trail": {
+        const action = input.action as string;
+        switch (action) {
+          case "log": {
+            const entry = logAuditAction(
+              input.log_action as string,
+              input.entity as string,
+              input.entity_id as string,
+              input.user_id as string,
+              input.metadata as Record<string, unknown>
+            );
+            return { success: true, result: entry };
+          }
+          case "query": {
+            return { success: true, result: queryAudit(input as any) };
+          }
+          case "entity_trail": {
+            return { success: true, result: queryAudit({ entity: input.entity as string, entityId: input.entity_id as string }) };
+          }
+          case "user_actions": {
+            return { success: true, result: queryAudit({ userId: input.user_id as string, limit: input.limit as number }) };
+          }
+          case "stats": {
+            return { success: true, result: getAuditStats() };
+          }
+          case "export": {
+            return { success: true, result: exportAuditLog(input as any) };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown audit action: ${action}` };
+        }
+      }
+
+      // ===== Multi-Device Sync =====
+      case "device_sync": {
+        const action = input.action as string;
+        switch (action) {
+          case "upsert": {
+            const doc = syncEngine.upsert(input.document_id as string, input.data as Record<string, unknown>);
+            return { success: true, result: doc };
+          }
+          case "get": {
+            return { success: true, result: syncEngine.get(input.document_id as string) };
+          }
+          case "delete": {
+            return { success: true, result: { deleted: syncEngine.delete(input.document_id as string) } };
+          }
+          case "receive_remote": {
+            const result = syncEngine.receiveRemote(input.remote_document as any);
+            return { success: true, result };
+          }
+          case "changes_since": {
+            const changes = syncEngine.getChangedSince(new Date(input.since as string));
+            return { success: true, result: changes };
+          }
+          case "conflicts": {
+            return { success: true, result: syncEngine.getConflicts() };
+          }
+          case "resolve_conflict": {
+            const resolved = syncEngine.resolveManualConflict(
+              input.document_id as string,
+              input.resolved_data as Record<string, unknown>
+            );
+            return { success: true, result: resolved };
+          }
+          case "stats": {
+            return { success: true, result: syncEngine.getStats() };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown sync action: ${action}` };
+        }
+      }
+
+      // ===== Spotify =====
+      case "spotify": {
+        const spotify = getSpotifyClient();
+        const action = input.action as string;
+
+        if (!spotify.isAuthenticated() && action !== "devices") {
+          return {
+            success: false,
+            result: {
+              needsAuth: true,
+              authUrl: spotify.getAuthorizationUrl(),
+              message: "Spotify not authenticated. Direct the user to the authorization URL to connect their Spotify account.",
+            },
+          };
+        }
+
+        switch (action) {
+          case "play": {
+            const query = input.query as string;
+            const type = (input.type as string) || "track";
+            if (!query) {
+              await spotify.player.play();
+              return { success: true, result: { message: "Playback resumed" } };
+            }
+            if (type === "track") {
+              const track = await spotify.playTrackByName(query, input.device_id as string | undefined);
+              return { success: true, result: { message: `Now playing: ${track.name} by ${track.artists.map((a: any) => a.name).join(", ")}`, track: { name: track.name, artists: track.artists.map((a: any) => a.name), album: (track as any).album?.name } } };
+            } else if (type === "album") {
+              const album = await spotify.playAlbumByName(query, input.device_id as string | undefined);
+              return { success: true, result: { message: `Now playing album: ${album.name}`, album: { name: album.name, artists: album.artists.map((a: any) => a.name) } } };
+            } else if (type === "artist") {
+              const artist = await spotify.playArtistByName(query, input.device_id as string | undefined);
+              return { success: true, result: { message: `Now playing: ${artist.name}`, artist: { name: artist.name } } };
+            } else if (type === "playlist") {
+              const playlist = await spotify.playPlaylistByName(query, input.device_id as string | undefined);
+              return { success: true, result: { message: `Now playing playlist: ${playlist.name}`, playlist: { name: playlist.name } } };
+            }
+            return { success: false, result: null, error: `Unknown play type: ${type}` };
+          }
+          case "pause":
+            await spotify.player.pause();
+            return { success: true, result: { message: "Playback paused" } };
+          case "next":
+            await spotify.player.next();
+            return { success: true, result: { message: "Skipped to next track" } };
+          case "previous":
+            await spotify.player.previous();
+            return { success: true, result: { message: "Playing previous track" } };
+          case "now_playing": {
+            const np = await spotify.getNowPlaying();
+            if (!np || !np.track) return { success: true, result: { isPlaying: false, message: "Nothing is currently playing" } };
+            return {
+              success: true,
+              result: {
+                isPlaying: np.isPlaying,
+                track: { name: np.track.name, artists: (np.track as any).artists?.map((a: any) => a.name) || [] },
+                progress: np.progress,
+                device: np.device ? { name: np.device.name, type: np.device.type, volume: np.device.volume_percent } : null,
+                shuffle: np.shuffle,
+                repeat: np.repeat,
+              },
+            };
+          }
+          case "search": {
+            if (!input.query) return { success: false, result: null, error: "'query' required" };
+            const type = (input.type as string) || "track";
+            const limit = (input.limit as number) || 10;
+            const results = await spotify.search.search(input.query as string, [type as any], { limit });
+            const key = `${type}s`;
+            const items = (results as any)[key]?.items || [];
+            return {
+              success: true,
+              result: {
+                type,
+                query: input.query,
+                count: items.length,
+                results: items.slice(0, limit).map((item: any) => ({
+                  name: item.name,
+                  id: item.id,
+                  uri: item.uri,
+                  artists: item.artists?.map((a: any) => a.name),
+                  album: item.album?.name,
+                  popularity: item.popularity,
+                })),
+              },
+            };
+          }
+          case "queue": {
+            if (input.query) {
+              const track = await spotify.queueTrackByName(input.query as string, input.device_id as string | undefined);
+              return { success: true, result: { message: `Added to queue: ${track.name}`, track: { name: track.name } } };
+            }
+            const queue = await spotify.player.getQueue();
+            return {
+              success: true,
+              result: {
+                currentlyPlaying: queue.currently_playing ? { name: (queue.currently_playing as any).name } : null,
+                queue: (queue.queue || []).slice(0, 10).map((t: any) => ({ name: t.name, artists: t.artists?.map((a: any) => a.name) })),
+              },
+            };
+          }
+          case "volume":
+            if (input.volume === undefined) return { success: false, result: null, error: "'volume' required (0-100)" };
+            await spotify.player.setVolume(input.volume as number, input.device_id as string | undefined);
+            return { success: true, result: { message: `Volume set to ${input.volume}%` } };
+          case "shuffle":
+            await spotify.player.setShuffle(input.state !== false, input.device_id as string | undefined);
+            return { success: true, result: { message: `Shuffle ${input.state !== false ? "on" : "off"}` } };
+          case "repeat":
+            await spotify.player.setRepeat((input.repeat_mode as any) || "off", input.device_id as string | undefined);
+            return { success: true, result: { message: `Repeat set to ${input.repeat_mode || "off"}` } };
+          case "devices": {
+            const devices = await spotify.player.getDevices();
+            return { success: true, result: { devices: devices.map((d) => ({ id: d.id, name: d.name, type: d.type, active: d.is_active, volume: d.volume_percent })) } };
+          }
+          case "playlists": {
+            const playlists = await spotify.playlists.getMyPlaylists({ limit: (input.limit as number) || 20 });
+            return {
+              success: true,
+              result: {
+                count: playlists.total,
+                playlists: playlists.items.map((p) => ({ id: p.id, name: p.name, tracks: p.tracks?.total, owner: p.owner?.display_name, public: p.public })),
+              },
+            };
+          }
+          case "create_playlist": {
+            if (!input.playlist_name) return { success: false, result: null, error: "'playlist_name' required" };
+            const pl = await spotify.playlists.createMyPlaylist({
+              name: input.playlist_name as string,
+              description: input.playlist_description as string | undefined,
+              public: false,
+            });
+            return { success: true, result: { message: `Playlist created: ${pl.name}`, id: pl.id, name: pl.name } };
+          }
+          case "like": {
+            const liked = await spotify.likeCurrentTrack();
+            return liked
+              ? { success: true, result: { message: `Liked: ${liked.name}`, track: { name: liked.name } } }
+              : { success: false, result: null, error: "Nothing is currently playing" };
+          }
+          case "profile": {
+            const profile = await spotify.getMusicProfile();
+            return {
+              success: true,
+              result: {
+                topArtists: profile.topArtists.slice(0, 5).map((a) => a.name),
+                topTracks: profile.topTracks.slice(0, 5).map((t) => `${t.name} - ${t.artists.map((a: any) => a.name).join(", ")}`),
+                topGenres: profile.topGenres.slice(0, 10),
+                savedTracks: profile.savedTracksCount,
+                playlists: profile.playlistCount,
+              },
+            };
+          }
+          case "recommendations": {
+            const playlist = await spotify.createRecommendedPlaylist(
+              input.playlist_name as string || "OpenSentinel Recommendations",
+              { limit: (input.limit as number) || 20 }
+            );
+            return { success: true, result: { message: `Recommendation playlist created: ${playlist.name}`, id: playlist.id, tracks: playlist.tracks?.total } };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown spotify action: ${action}` };
+        }
+      }
+
+      // ===== Twilio SMS/Voice =====
+      case "twilio": {
+        if (!twilioService.isConfigured()) {
+          return { success: false, result: null, error: "Twilio not configured. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER in .env" };
+        }
+        const action = input.action as string;
+        switch (action) {
+          case "send_sms": {
+            if (!input.to || !input.body) return { success: false, result: null, error: "'to' and 'body' required" };
+            const result = await twilioService.sendSMS({ to: input.to as string, body: input.body as string });
+            return {
+              success: result.success,
+              result: result.success
+                ? { message: `SMS sent to ${input.to}`, sid: result.messageSid, status: result.status }
+                : null,
+              error: result.error,
+            };
+          }
+          case "send_mms": {
+            if (!input.to || !input.body || !input.media_urls) return { success: false, result: null, error: "'to', 'body', and 'media_urls' required" };
+            const result = await twilioService.sendMMS(input.to as string, input.body as string, input.media_urls as string[]);
+            return {
+              success: result.success,
+              result: result.success ? { message: `MMS sent to ${input.to}`, sid: result.messageSid } : null,
+              error: result.error,
+            };
+          }
+          case "make_call": {
+            if (!input.to || !input.message) return { success: false, result: null, error: "'to' and 'message' required" };
+            const result = await makeCallWithTTS(input.to as string, input.message as string);
+            return {
+              success: result.success,
+              result: result.success ? { message: `Call initiated to ${input.to}`, sid: result.callSid, status: result.status } : null,
+              error: result.error,
+            };
+          }
+          case "call_status": {
+            if (!input.call_sid) return { success: false, result: null, error: "'call_sid' required" };
+            const result = await getCallStatus(input.call_sid as string);
+            return { success: result.success, result: result.success ? { sid: result.callSid, status: result.status } : null, error: result.error };
+          }
+          case "end_call": {
+            if (!input.call_sid) return { success: false, result: null, error: "'call_sid' required" };
+            const result = await endCall(input.call_sid as string);
+            return { success: result.success, result: result.success ? { message: "Call ended", sid: result.callSid } : null, error: result.error };
+          }
+          case "message_status": {
+            if (!input.message_sid) return { success: false, result: null, error: "'message_sid' required" };
+            const { getMessageStatus } = await import("../integrations/twilio/sms");
+            const result = await getMessageStatus(input.message_sid as string);
+            return { success: result.success, result: result.success ? { sid: result.messageSid, status: result.status } : null, error: result.error };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown twilio action: ${action}` };
+        }
+      }
+
+      // ===== Notion =====
+      case "notion": {
+        // Lazy-init Notion client
+        if (!isNotionInitialized()) {
+          try { initNotionFromEnv(); } catch (e: any) {
+            return { success: false, result: null, error: `Notion not configured: ${e.message}` };
+          }
+        }
+        const action = input.action as string;
+        switch (action) {
+          case "search": {
+            const results = input.query
+              ? await notionSearch.searchAll(input.query as string)
+              : await notionSearch.getRecentlyEditedPages(input.limit as number || 20);
+            return {
+              success: true,
+              result: {
+                count: results.length,
+                results: results.slice(0, input.limit as number || 20).map((r: any) => ({
+                  id: r.id,
+                  title: r.title,
+                  type: r.object,
+                  url: r.url,
+                  lastEdited: r.lastEditedTime,
+                })),
+              },
+            };
+          }
+          case "get_page": {
+            if (!input.page_id) return { success: false, result: null, error: "'page_id' required" };
+            const page = await notionPages.getPage(input.page_id as string);
+            return { success: true, result: page };
+          }
+          case "create_page": {
+            if (!input.title) return { success: false, result: null, error: "'title' required" };
+            const page = await notionPages.createPage({
+              title: input.title as string,
+              content: input.content as string | undefined,
+              parentPageId: input.parent_page_id as string | undefined,
+            });
+            return { success: true, result: { message: `Page created: ${input.title}`, id: page.id, url: page.url } };
+          }
+          case "update_page": {
+            if (!input.page_id) return { success: false, result: null, error: "'page_id' required" };
+            const page = await notionPages.updatePage(input.page_id as string, {
+              title: input.title as string | undefined,
+              properties: input.properties as Record<string, any> | undefined,
+            });
+            return { success: true, result: { message: "Page updated", id: page.id } };
+          }
+          case "append_to_page": {
+            if (!input.page_id || !input.content) return { success: false, result: null, error: "'page_id' and 'content' required" };
+            await notionPages.appendToPage(input.page_id as string, input.content as string);
+            return { success: true, result: { message: "Content appended to page" } };
+          }
+          case "query_database": {
+            if (!input.database_id) return { success: false, result: null, error: "'database_id' required" };
+            const results = await notionDatabases.queryDatabase(input.database_id as string, {
+              filter: input.filter as any,
+              sorts: input.sorts as any,
+              pageSize: input.limit as number || 20,
+            });
+            return {
+              success: true,
+              result: {
+                count: results.results.length,
+                hasMore: results.hasMore,
+                entries: results.results.map((e: any) => ({ id: e.id, properties: e.properties })),
+              },
+            };
+          }
+          case "create_entry": {
+            if (!input.database_id || !input.properties) return { success: false, result: null, error: "'database_id' and 'properties' required" };
+            const entry = await notionDatabases.createDatabaseEntry({
+              databaseId: input.database_id as string,
+              properties: input.properties as Record<string, any>,
+            });
+            return { success: true, result: { message: "Database entry created", id: entry.id } };
+          }
+          case "list_databases": {
+            const dbs = await notionSearch.searchDatabases(input.query as string);
+            return {
+              success: true,
+              result: {
+                count: dbs.length,
+                databases: dbs.map((d: any) => ({ id: d.id, title: d.title, url: d.url })),
+              },
+            };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown notion action: ${action}` };
+        }
+      }
+
+      // ===== Smart Home (Home Assistant) =====
+      case "smart_home": {
+        const ha = getHomeAssistant();
+        const action = input.action as string;
+
+        // Ensure connected
+        try { await ha.connect(); } catch (e: any) {
+          return { success: false, result: null, error: `Home Assistant connection failed: ${e.message}` };
+        }
+
+        switch (action) {
+          case "list_devices": {
+            const domain = input.domain as string | undefined;
+            const entities = domain
+              ? await ha.entities.getEntitiesByDomain(domain)
+              : await ha.entities.getAllEntities();
+            const filtered = input.query
+              ? entities.filter((e) => e.entity_id.includes(input.query as string) || String(e.attributes?.friendly_name || "").toLowerCase().includes((input.query as string).toLowerCase()))
+              : entities;
+            return {
+              success: true,
+              result: {
+                count: filtered.length,
+                devices: filtered.slice(0, 50).map((e) => ({
+                  entity_id: e.entity_id,
+                  name: e.attributes?.friendly_name || e.entity_id,
+                  state: e.state,
+                  domain: e.entity_id.split(".")[0],
+                })),
+              },
+            };
+          }
+          case "get_state": {
+            if (!input.entity_id) return { success: false, result: null, error: "'entity_id' required" };
+            const state = await ha.entities.getEntityFresh(input.entity_id as string);
+            return {
+              success: true,
+              result: {
+                entity_id: state.entity_id,
+                name: state.attributes?.friendly_name || state.entity_id,
+                state: state.state,
+                attributes: state.attributes,
+                lastChanged: state.last_changed,
+              },
+            };
+          }
+          case "control": {
+            if (!input.entity_id || !input.service) return { success: false, result: null, error: "'entity_id' and 'service' required" };
+            const entityId = input.entity_id as string;
+            const domain = entityId.split(".")[0];
+            const result = await ha.services.callServiceOnEntities(
+              domain,
+              input.service as string,
+              entityId,
+              (input.data as Record<string, unknown>) || {}
+            );
+            return { success: true, result: { message: `${input.service} called on ${entityId}`, result } };
+          }
+          case "command": {
+            if (!input.command) return { success: false, result: null, error: "'command' required" };
+            const result = await ha.executeNaturalLanguage(input.command as string);
+            return { success: result.success, result: { message: result.message, entities: result.entities }, error: result.error };
+          }
+          case "automations": {
+            const automations = await ha.automations.getAutomations();
+            const filtered = input.query
+              ? automations.filter((a) => a.friendlyName.toLowerCase().includes((input.query as string).toLowerCase()))
+              : automations;
+            return {
+              success: true,
+              result: {
+                count: filtered.length,
+                automations: filtered.slice(0, 30).map((a) => ({
+                  entity_id: a.entityId,
+                  name: a.friendlyName,
+                  enabled: a.state === "on",
+                  lastTriggered: a.lastTriggered,
+                })),
+              },
+            };
+          }
+          case "scenes": {
+            const scenes = await ha.automations.getScenes();
+            return {
+              success: true,
+              result: {
+                count: scenes.length,
+                scenes: scenes.map((s) => ({ entity_id: s.entityId, name: s.friendlyName })),
+              },
+            };
+          }
+          case "activate_scene": {
+            if (!input.entity_id) return { success: false, result: null, error: "'entity_id' required" };
+            await ha.automations.activateScene(input.entity_id as string);
+            return { success: true, result: { message: `Scene activated: ${input.entity_id}` } };
+          }
+          case "history": {
+            if (!input.entity_id) return { success: false, result: null, error: "'entity_id' required" };
+            const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            const history = await ha.client.getHistory(since, [input.entity_id as string]);
+            return { success: true, result: { entity_id: input.entity_id, history: history[0]?.slice(0, 50) || [] } };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown smart_home action: ${action}` };
+        }
+      }
+
+      // ===== Cloud Storage =====
+      case "cloud_storage": {
+        const storage = getUnifiedCloudStorage();
+        const action = input.action as string;
+        const providerMap: Record<string, string> = { google_drive: "gdrive", dropbox: "dropbox" };
+        const provider = input.provider ? (providerMap[input.provider as string] || input.provider) as any : undefined;
+
+        switch (action) {
+          case "providers": {
+            return {
+              success: true,
+              result: {
+                initialized: storage.getInitializedProviders(),
+                default: storage.getDefaultProvider(),
+              },
+            };
+          }
+          case "list": {
+            const result = await storage.listFiles({
+              path: input.path as string | undefined,
+              pageSize: input.limit as number || 50,
+            }, provider);
+            return {
+              success: true,
+              result: {
+                count: result.files.length,
+                files: result.files.map((f: any) => ({
+                  id: f.id,
+                  name: f.name,
+                  type: f.type,
+                  size: f.size,
+                  modified: f.modifiedTime,
+                  path: f.path,
+                })),
+              },
+            };
+          }
+          case "search": {
+            if (!input.query) return { success: false, result: null, error: "'query' required" };
+            const files = await storage.searchFiles(input.query as string, { maxResults: input.limit as number || 20 }, provider);
+            return {
+              success: true,
+              result: {
+                count: files.length,
+                files: files.map((f: any) => ({ id: f.id, name: f.name, type: f.type, size: f.size, path: f.path })),
+              },
+            };
+          }
+          case "upload": {
+            if (!input.content || !input.filename) return { success: false, result: null, error: "'content' and 'filename' required" };
+            const file = await storage.uploadFile(
+              Buffer.from(input.content as string, "utf-8"),
+              { name: input.filename as string, parentPath: input.parent_path as string | undefined },
+              provider
+            );
+            return { success: true, result: { message: `Uploaded: ${file.name}`, id: file.id, name: file.name } };
+          }
+          case "download": {
+            if (!input.path) return { success: false, result: null, error: "'path' (file ID) required" };
+            const result = await storage.downloadFile(input.path as string, {}, provider);
+            const text = result.content.toString("utf-8").slice(0, 100000);
+            return { success: true, result: { name: result.name, mimeType: result.mimeType, content: text, truncated: result.content.length > 100000 } };
+          }
+          case "create_folder": {
+            if (!input.folder_name) return { success: false, result: null, error: "'folder_name' required" };
+            const folder = await storage.createFolder(input.folder_name as string, { parentPath: input.parent_path as string | undefined }, provider);
+            return { success: true, result: { message: `Folder created: ${folder.name}`, id: folder.id } };
+          }
+          case "delete": {
+            if (!input.path) return { success: false, result: null, error: "'path' (file ID) required" };
+            await storage.deleteFile(input.path as string, { permanent: false }, provider);
+            return { success: true, result: { message: `Deleted: ${input.path}` } };
+          }
+          case "share": {
+            if (!input.path || !input.email) return { success: false, result: null, error: "'path' and 'email' required" };
+            const share = await storage.shareFile(input.path as string, {
+              access: (input.role as string) === "writer" ? "edit" : "view",
+              type: input.email ? "user" : "anyone",
+              email: input.email as string,
+            }, provider);
+            return { success: true, result: { message: `Shared with ${input.email}`, link: share.url } };
+          }
+          case "quota": {
+            const quotas = await storage.getAllStorageQuotas();
+            return {
+              success: true,
+              result: quotas.map((q: any) => ({
+                provider: q.provider,
+                used: q.used,
+                total: q.total,
+                usedPercent: q.total > 0 ? Math.round((q.used / q.total) * 100) : 0,
+              })),
+            };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown cloud_storage action: ${action}` };
+        }
+      }
+
+      // ===== Calendar =====
+      case "calendar": {
+        const action = input.action as string;
+        const provider = (input.provider as string) || "google";
+
+        if (provider === "ical") {
+          if (!input.ical_url) return { success: false, result: null, error: "'ical_url' required for ical provider" };
+          const cal = await fetchICalFromUrl(input.ical_url as string);
+          switch (action) {
+            case "today": {
+              const events = getTodaysICalEvents(cal.events);
+              return { success: true, result: { count: events.length, events: events.map(formatEvent) } };
+            }
+            case "upcoming": {
+              const events = getUpcomingICalEvents(cal.events, (input.days as number) || 10);
+              return { success: true, result: { count: events.length, events: events.map(formatEvent) } };
+            }
+            default:
+              return { success: true, result: { calendarName: cal.name, totalEvents: cal.events.length } };
+          }
+        }
+
+        if (provider === "outlook") {
+          const outlook = getOutlookCalendar();
+          switch (action) {
+            case "today": {
+              const events = await outlook.getTodaysEvents(input.calendar_id as string | undefined);
+              return { success: true, result: { provider: "outlook", count: events.length, events: events.map(formatEvent) } };
+            }
+            case "upcoming": {
+              const events = await outlook.getUpcomingEvents((input.days as number) || 7, input.calendar_id as string | undefined);
+              return { success: true, result: { provider: "outlook", count: events.length, events: events.map(formatEvent) } };
+            }
+            case "list_calendars": {
+              const calendars = await outlook.listCalendars();
+              return { success: true, result: { provider: "outlook", calendars } };
+            }
+            case "events": {
+              const start = input.start_date ? new Date(input.start_date as string) : undefined;
+              const end = input.end_date ? new Date(input.end_date as string) : undefined;
+              const events = await outlook.getEvents(input.calendar_id as string | undefined, start, end);
+              return { success: true, result: { provider: "outlook", count: events.length, events: events.map(formatEvent) } };
+            }
+            default:
+              return { success: false, result: null, error: `Unknown calendar action: ${action}` };
+          }
+        }
+
+        // Default: Google Calendar
+        const gcal = getGoogleCalendar();
+        switch (action) {
+          case "today": {
+            const events = await gcal.getTodaysEvents(input.calendar_id as string | undefined);
+            return { success: true, result: { provider: "google", count: events.length, events: events.map(formatEvent) } };
+          }
+          case "upcoming": {
+            const events = await gcal.getUpcomingEvents((input.days as number) || 7, input.calendar_id as string | undefined);
+            return { success: true, result: { provider: "google", count: events.length, events: events.map(formatEvent) } };
+          }
+          case "list_calendars": {
+            const calendars = await gcal.listCalendars();
+            return { success: true, result: { provider: "google", calendars } };
+          }
+          case "events": {
+            const start = input.start_date ? new Date(input.start_date as string) : undefined;
+            const end = input.end_date ? new Date(input.end_date as string) : undefined;
+            const events = await gcal.getEvents(input.calendar_id as string | undefined, start, end);
+            return { success: true, result: { provider: "google", count: events.length, events: events.map(formatEvent) } };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown calendar action: ${action}` };
+        }
+      }
+
+      // ===== Persona / Personality =====
+      case "persona": {
+        const action = input.action as string;
+        const userId = (input.user_id as string) || "default";
+
+        switch (action) {
+          case "list": {
+            const personas = await getUserPersonas(userId);
+            return {
+              success: true,
+              result: {
+                count: personas.length,
+                personas: personas.map((p: any) => ({ id: p.id, name: p.name, description: p.description, active: p.active })),
+              },
+            };
+          }
+          case "activate": {
+            if (!input.persona_id) return { success: false, result: null, error: "'persona_id' required" };
+            await activatePersona(userId, input.persona_id as string);
+            return { success: true, result: { message: `Persona activated: ${input.persona_id}` } };
+          }
+          case "deactivate": {
+            await deactivatePersonas(userId);
+            return { success: true, result: { message: "All personas deactivated, reverted to default" } };
+          }
+          case "create": {
+            if (!input.name) return { success: false, result: null, error: "'name' required" };
+            const id = await createPersona(userId, {
+              name: input.name as string,
+              description: input.description as string || "",
+              systemPromptModifier: input.description as string || `Respond as ${input.name}`,
+              traits: (input.traits as any[]) || [],
+            });
+            return { success: true, result: { message: `Persona created: ${input.name}`, id } };
+          }
+          case "delete": {
+            if (!input.persona_id) return { success: false, result: null, error: "'persona_id' required" };
+            await deletePersona(input.persona_id as string);
+            return { success: true, result: { message: `Persona deleted: ${input.persona_id}` } };
+          }
+          case "current": {
+            const active = await getActivePersona(userId);
+            if (!active) return { success: true, result: { message: "No persona active, using default" } };
+            return { success: true, result: { id: active.id, name: (active as any).name, description: (active as any).description } };
+          }
+          case "detect_mood": {
+            if (!input.message) return { success: false, result: null, error: "'message' required" };
+            const mood = detectMood(input.message as string);
+            return { success: true, result: mood };
+          }
+          case "mood_trend": {
+            if (!input.messages || !(input.messages as string[]).length) return { success: false, result: null, error: "'messages' array required" };
+            const trend = analyzeMoodTrend(input.messages as string[]);
+            return { success: true, result: trend };
+          }
+          case "domain_expert": {
+            if (!input.expert_type) return { success: false, result: null, error: "'expert_type' required" };
+            const expert = await activateDomainExpert(userId, input.expert_type as any);
+            return { success: true, result: { message: `Domain expert activated: ${expert.name}`, expert: { name: expert.name, description: expert.description } } };
+          }
+          case "list_experts": {
+            const experts = listDomainExperts();
+            return {
+              success: true,
+              result: {
+                count: experts.length,
+                experts: experts.map((e) => ({ type: e.type, name: e.name, description: e.description })),
+              },
+            };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown persona action: ${action}` };
+        }
+      }
+
+      // ===== iCal Generation =====
+      case "generate_ical": {
+        const events = input.events as ICalEvent[];
+        if (!events || !Array.isArray(events) || events.length === 0) {
+          return { success: false, result: null, error: "At least one event is required" };
+        }
+        const result = await generateICal(events, input.filename as string | undefined, {
+          calendarName: input.calendar_name as string | undefined,
+          timezone: input.timezone as string | undefined,
+        });
+        return {
+          success: result.success,
+          result: result.success ? { filePath: result.filePath, eventCount: result.eventCount } : null,
+          error: result.error,
+        };
+      }
+
+      // ===== HTML Report =====
+      case "generate_report": {
+        const sections = input.sections as ReportSection[];
+        if (!sections || !Array.isArray(sections)) {
+          return { success: false, result: null, error: "'sections' array is required" };
+        }
+        const result = await generateReport(sections, input.filename as string | undefined, {
+          title: input.title as string || "Report",
+          subtitle: input.subtitle as string | undefined,
+          theme: input.theme as "light" | "dark" | "corporate" | "minimal" | undefined,
+          author: input.author as string | undefined,
+        });
+        return {
+          success: result.success,
+          result: result.success ? { filePath: result.filePath, message: `Report generated: ${input.title}` } : null,
+          error: result.error,
+        };
+      }
+
+      // ===== Math-to-Speech =====
+      case "math_to_speech": {
+        if (input.expressions && Array.isArray(input.expressions)) {
+          const results = (input.expressions as string[]).map((expr) => ({
+            latex: expr,
+            spoken: latexToSpeech(expr),
+          }));
+          return { success: true, result: { conversions: results } };
+        }
+        if (input.latex) {
+          const spoken = latexToSpeech(input.latex as string);
+          return { success: true, result: { latex: input.latex, spoken } };
+        }
+        return { success: false, result: null, error: "Provide 'latex' or 'expressions'" };
+      }
+
+      // ===== Tree-of-Thought =====
+      case "tree_of_thought": {
+        if (!input.problem) return { success: false, result: null, error: "'problem' is required" };
+        const config: ToTConfig = {
+          maxDepth: input.max_depth as number | undefined,
+          branchingFactor: input.branching_factor as number | undefined,
+          strategy: input.strategy as "bfs" | "dfs" | undefined,
+          maxNodes: input.max_nodes as number | undefined,
+          pruneThreshold: input.prune_threshold as number | undefined,
+        };
+        const result = await treeOfThought(input.problem as string, config);
+        return {
+          success: result.success,
+          result: {
+            solution: formatToTResult(result),
+            bestScore: result.bestScore,
+            nodesExplored: result.allNodes.length,
+            llmCalls: result.llmCalls,
+            tokensUsed: result.tokensUsed,
+            bestPath: result.bestPath.slice(1).map((n) => ({
+              thought: n.thought,
+              score: n.score,
+              evaluation: n.evaluation,
+            })),
+          },
+          error: result.error,
+        };
+      }
+
+      // ===== Adaptive Feedback =====
+      case "adaptive_feedback": {
+        const action = input.action as string;
+        const uid = input.user_id as string;
+        if (!uid) return { success: false, result: null, error: "'user_id' required" };
+
+        switch (action) {
+          case "get_profile": {
+            const profile = getAdaptiveProfile(uid);
+            if (!profile) return { success: true, result: { message: "No profile yet — interact first", profile: null } };
+            return {
+              success: true,
+              result: {
+                verbosity: profile.verbosity,
+                technicalLevel: profile.technicalLevel,
+                formality: profile.formality,
+                proactivity: profile.proactivity,
+                preferredLength: Math.round(profile.preferredLength),
+                interactionCount: profile.interactionCount,
+              },
+            };
+          }
+          case "get_modifier": {
+            const modifier = getPromptModifier(uid);
+            return { success: true, result: { systemSuffix: modifier.systemSuffix, tokenRatio: modifier.tokenRatio } };
+          }
+          case "process_message": {
+            if (!input.message) return { success: false, result: null, error: "'message' required" };
+            const profile = adaptiveProcessMessage(uid, input.message as string, input.response_time_ms as number | undefined);
+            return {
+              success: true,
+              result: {
+                verbosity: profile.verbosity,
+                technicalLevel: profile.technicalLevel,
+                formality: profile.formality,
+                proactivity: profile.proactivity,
+                interactionCount: profile.interactionCount,
+              },
+            };
+          }
+          case "reset": {
+            resetAdaptiveProfile(uid);
+            return { success: true, result: { message: `Adaptive profile reset for ${uid}` } };
+          }
+          case "frequent_topics": {
+            return { success: true, result: { topics: getTopFrequentTopics(uid) } };
+          }
+          case "frequent_tools": {
+            return { success: true, result: { tools: getTopFrequentTools(uid) } };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown adaptive_feedback action: ${action}` };
+        }
+      }
+
+      // ===== Spaced Repetition =====
+      case "spaced_repetition": {
+        const action = input.action as string;
+        const uid = input.user_id as string;
+        if (!uid) return { success: false, result: null, error: "'user_id' required" };
+
+        switch (action) {
+          case "add": {
+            if (!input.front || !input.back) return { success: false, result: null, error: "'front' and 'back' required" };
+            const item = srAddItem(uid, input.front as string, input.back as string, input.category as string | undefined);
+            return { success: true, result: { message: "Item added", id: item.id, nextReview: item.nextReview.toISOString() } };
+          }
+          case "review": {
+            if (!input.item_id || input.quality === undefined) return { success: false, result: null, error: "'item_id' and 'quality' (0-5) required" };
+            const result = srReviewItem(input.item_id as string, input.quality as 0 | 1 | 2 | 3 | 4 | 5);
+            if (!result) return { success: false, result: null, error: `Item not found: ${input.item_id}` };
+            return {
+              success: true,
+              result: {
+                message: `Reviewed. Next in ${result.newInterval} day(s)`,
+                previousInterval: result.previousInterval,
+                newInterval: result.newInterval,
+                nextReview: result.nextReview.toISOString(),
+                easeFactor: result.item.easeFactor.toFixed(2),
+              },
+            };
+          }
+          case "due": {
+            const items = srGetDueItems(uid, input.limit as number || 20);
+            return {
+              success: true,
+              result: {
+                count: items.length,
+                items: items.map((i) => ({ id: i.id, front: i.front, category: i.category, interval: i.interval, easeFactor: i.easeFactor.toFixed(2) })),
+              },
+            };
+          }
+          case "list": {
+            const items = srGetUserItems(uid, input.category as string | undefined);
+            return {
+              success: true,
+              result: {
+                count: items.length,
+                items: items.map((i) => ({
+                  id: i.id, front: i.front, back: i.back, category: i.category,
+                  interval: i.interval, nextReview: i.nextReview.toISOString(),
+                  totalReviews: i.totalReviews,
+                })),
+              },
+            };
+          }
+          case "stats": {
+            const stats = srGetStats(uid);
+            return { success: true, result: stats };
+          }
+          case "delete": {
+            if (!input.item_id) return { success: false, result: null, error: "'item_id' required" };
+            const deleted = srDeleteItem(input.item_id as string);
+            return { success: deleted, result: deleted ? { message: "Item deleted" } : null, error: deleted ? undefined : "Item not found" };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown spaced_repetition action: ${action}` };
+        }
+      }
+
+      // ===== Struggle Detection =====
+      case "struggle_detection": {
+        const action = input.action as string;
+        const uid = input.user_id as string;
+        if (!uid) return { success: false, result: null, error: "'user_id' required" };
+
+        switch (action) {
+          case "process": {
+            if (!input.message) return { success: false, result: null, error: "'message' required" };
+            const adjustment = processAndAdjust(uid, input.message as string, input.topic as string | undefined, input.response_time_ms as number | undefined);
+            return {
+              success: true,
+              result: {
+                difficulty: adjustment.level,
+                struggleLevel: adjustment.struggleLevel,
+                hintLevel: adjustment.hintLevel,
+                shouldOfferHelp: adjustment.shouldOfferHelp,
+                suggestion: adjustment.suggestion,
+                promptModifier: adjustment.promptModifier,
+              },
+            };
+          }
+          case "get_adjustment": {
+            const adjustment = getDifficultyAdjustment(uid);
+            return {
+              success: true,
+              result: {
+                difficulty: adjustment.level,
+                struggleLevel: adjustment.struggleLevel,
+                hintLevel: adjustment.hintLevel,
+                shouldOfferHelp: adjustment.shouldOfferHelp,
+                suggestion: adjustment.suggestion,
+              },
+            };
+          }
+          case "get_state": {
+            const state = getStruggleState(uid);
+            if (!state) return { success: true, result: { message: "No state yet", state: null } };
+            return {
+              success: true,
+              result: {
+                difficulty: state.difficulty,
+                struggleLevel: state.struggleLevel,
+                confusionStreak: state.confusionStreak,
+                successStreak: state.successStreak,
+                hintLevel: state.hintLevel,
+                totalInteractions: state.totalInteractions,
+              },
+            };
+          }
+          case "reset": {
+            resetStruggleState(uid);
+            return { success: true, result: { message: `Struggle state reset for ${uid}` } };
+          }
+          case "struggle_topics": {
+            const topics = getStruggleTopics(uid);
+            return { success: true, result: { topics } };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown struggle_detection action: ${action}` };
+        }
+      }
+
+      // === New v2.7 tools ===
+
+      case "gif_search": {
+        const results = await searchGifs({
+          query: input.query as string,
+          provider: input.provider as "tenor" | "giphy" | "auto" | undefined,
+          limit: input.limit as number | undefined,
+          rating: input.rating as string | undefined,
+        });
+        return { success: true, result: { query: input.query, count: results.length, gifs: results } };
+      }
+
+      case "places_lookup": {
+        const plAction = input.action as string;
+        switch (plAction) {
+          case "search":
+          case "geocode": {
+            if (!input.query) return { success: false, result: null, error: "'query' required for search/geocode" };
+            const places = await searchPlaces(input.query as string, (input.limit as number) || 10);
+            return { success: true, result: { count: places.length, places } };
+          }
+          case "reverse_geocode": {
+            if (input.lat === undefined || input.lon === undefined) return { success: false, result: null, error: "'lat' and 'lon' required" };
+            const place = await reverseGeocode(input.lat as number, input.lon as number);
+            return { success: true, result: place };
+          }
+          case "nearby": {
+            if (input.lat === undefined || input.lon === undefined) return { success: false, result: null, error: "'lat' and 'lon' required" };
+            const nearby = await findNearby(input.lat as number, input.lon as number, (input.category as string) || "any", (input.radius as number) || 1000, (input.limit as number) || 10);
+            return { success: true, result: { count: nearby.length, places: nearby } };
+          }
+          case "directions": {
+            let destLat = input.dest_lat as number | undefined;
+            let destLon = input.dest_lon as number | undefined;
+            if (!destLat && input.dest_query) {
+              const results = await searchPlaces(input.dest_query as string, 1);
+              if (results.length > 0) { destLat = results[0].lat; destLon = results[0].lon; }
+            }
+            if (input.lat === undefined || input.lon === undefined || !destLat || !destLon) return { success: false, result: null, error: "Origin lat/lon and destination required" };
+            const route = await getDirections(input.lat as number, input.lon as number, destLat, destLon);
+            return { success: true, result: route };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown places_lookup action: ${plAction}` };
+        }
+      }
+
+      case "spotify_cli": {
+        const parsed = parseSpotifyCommand(input.command as string);
+        return executeTool("spotify", parsed as unknown as Record<string, unknown>);
+      }
+
+      case "token_dashboard": {
+        const dashboard = await getTokenDashboard((input.period as string) || "day", (input.format as string) || "summary");
+        return { success: true, result: dashboard };
+      }
+
+      case "terminal_agent": {
+        const termResult = await executeTerminalCommand({
+          command: input.command as string,
+          shell: input.shell as string | undefined,
+          cwd: input.cwd as string | undefined,
+          timeout: input.timeout as number | undefined,
+          preferLocal: input.prefer_local as boolean | undefined,
+        });
+        return { success: termResult.success, result: termResult, error: termResult.success ? undefined : termResult.stderr };
+      }
+
+      case "camera_monitor": {
+        const cam = await import("./camera-monitor");
+        const camAction = input.action as string;
+        switch (camAction) {
+          case "capture": {
+            const result = await cam.captureFromWebcam({ device: input.device as string | undefined, resolution: input.resolution as string | undefined, format: input.format as string | undefined });
+            return { success: result.success, result, error: result.error };
+          }
+          case "burst": {
+            const result = await cam.burstCapture((input.frame_count as number) || 5, { device: input.device as string | undefined, resolution: input.resolution as string | undefined, format: input.format as string | undefined });
+            return { success: result.success, result, error: result.error };
+          }
+          case "snapshot_rtsp": {
+            const result = await cam.snapshotRTSP(input.rtsp_url as string, (input.format as string) || "jpg");
+            return { success: result.success, result, error: result.error };
+          }
+          case "snapshot_ha": {
+            const result = await cam.snapshotHA(input.entity_id as string, env.HOME_ASSISTANT_URL || "", env.HOME_ASSISTANT_TOKEN || "");
+            return { success: result.success, result, error: result.error };
+          }
+          case "list_devices": {
+            const devices = await cam.listCameraDevices(env.HOME_ASSISTANT_URL, env.HOME_ASSISTANT_TOKEN);
+            return { success: true, result: { count: devices.length, devices } };
+          }
+          case "motion_detect": {
+            const result = await cam.detectMotion((input.duration as number) || 10, (input.threshold as number) || 0.1, { device: input.device as string | undefined, resolution: input.resolution as string | undefined });
+            return { success: result.success, result, error: result.error };
+          }
+          case "capabilities": {
+            const ffmpeg = await cam.isFFmpegAvailable();
+            return { success: true, result: { ffmpegAvailable: ffmpeg, platform: process.platform } };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown camera_monitor action: ${camAction}` };
+        }
+      }
+
+      case "google_services": {
+        const gService = input.service as string;
+        const gAction = input.action as string;
+        let google: GoogleServicesClient;
+        try {
+          google = getGoogleServices();
+        } catch {
+          // Not configured — return auth URL if possible
+          const clientId = (env as any).GOOGLE_CLIENT_ID || env.GOOGLE_DRIVE_CLIENT_ID || env.GOOGLE_CALENDAR_CLIENT_ID;
+          if (clientId) {
+            const tempAuth = createGoogleServices({ clientId, clientSecret: "", redirectUri: "" });
+            return { success: false, result: { needsAuth: true, message: "Google not authenticated. Set GOOGLE_REFRESH_TOKEN in .env." } };
+          }
+          return { success: false, result: null, error: "Google not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env" };
+        }
+
+        if (!google.auth.isAuthenticated()) {
+          return { success: false, result: { needsAuth: true, authUrl: google.auth.getAuthorizationUrl(), message: "Google not authenticated. Direct user to the authorization URL." } };
+        }
+
+        switch (gService) {
+          case "gmail": {
+            switch (gAction) {
+              case "list": return { success: true, result: await google.gmail.listEmails(input.query as string | undefined, (input.limit as number) || 20) };
+              case "read": {
+                if (!input.message_id) return { success: false, result: null, error: "'message_id' required" };
+                return { success: true, result: await google.gmail.readEmail(input.message_id as string) };
+              }
+              case "send": {
+                if (!input.to || !input.subject) return { success: false, result: null, error: "'to' and 'subject' required" };
+                return { success: true, result: await google.gmail.sendEmail(input.to as string, input.subject as string, (input.body as string) || "") };
+              }
+              case "search": {
+                if (!input.query) return { success: false, result: null, error: "'query' required" };
+                return { success: true, result: await google.gmail.searchEmails(input.query as string, (input.limit as number) || 20) };
+              }
+              case "reply": {
+                if (!input.message_id || !input.body) return { success: false, result: null, error: "'message_id' and 'body' required" };
+                return { success: true, result: await google.gmail.replyToEmail(input.message_id as string, input.body as string) };
+              }
+              case "labels": return { success: true, result: await google.gmail.getLabels() };
+              default: return { success: false, result: null, error: `Unknown Gmail action: ${gAction}` };
+            }
+          }
+          case "calendar": {
+            switch (gAction) {
+              case "events":
+              case "list": return { success: true, result: await google.calendar.listEvents((input.calendar_id as string) || "primary", input.start_time as string | undefined, input.end_time as string | undefined, (input.limit as number) || 20) };
+              case "create_event": {
+                if (!input.title || !input.start_time || !input.end_time) return { success: false, result: null, error: "'title', 'start_time', and 'end_time' required" };
+                return { success: true, result: await google.calendar.createEvent({ summary: input.title as string, description: input.body as string | undefined, start: input.start_time as string, end: input.end_time as string, calendarId: input.calendar_id as string | undefined }) };
+              }
+              case "update_event": {
+                if (!input.event_id) return { success: false, result: null, error: "'event_id' required" };
+                return { success: true, result: await google.calendar.updateEvent(input.event_id as string, { summary: input.title as string | undefined, description: input.body as string | undefined, start: input.start_time as string | undefined, end: input.end_time as string | undefined }, (input.calendar_id as string) || "primary") };
+              }
+              case "delete_event": {
+                if (!input.event_id) return { success: false, result: null, error: "'event_id' required" };
+                await google.calendar.deleteEvent(input.event_id as string, (input.calendar_id as string) || "primary");
+                return { success: true, result: { deleted: input.event_id } };
+              }
+              default: return { success: false, result: null, error: `Unknown Calendar action: ${gAction}` };
+            }
+          }
+          case "drive": {
+            switch (gAction) {
+              case "list_files":
+              case "list": return { success: true, result: await google.drive.listFiles(input.file_id as string | undefined, (input.limit as number) || 20) };
+              case "search_files":
+              case "search": {
+                if (!input.query) return { success: false, result: null, error: "'query' required" };
+                return { success: true, result: await google.drive.searchFiles(input.query as string, (input.limit as number) || 20) };
+              }
+              case "upload": {
+                if (!input.file_path) return { success: false, result: null, error: "'file_path' required" };
+                return { success: true, result: await google.drive.uploadFile(input.file_path as string, input.title as string | undefined, input.file_id as string | undefined) };
+              }
+              case "download": {
+                if (!input.file_id) return { success: false, result: null, error: "'file_id' required" };
+                return { success: true, result: await google.drive.downloadFile(input.file_id as string, input.file_path as string | undefined) };
+              }
+              case "share": {
+                if (!input.file_id || !input.to) return { success: false, result: null, error: "'file_id' and 'to' (email) required" };
+                return { success: true, result: await google.drive.shareFile(input.file_id as string, input.to as string) };
+              }
+              default: return { success: false, result: null, error: `Unknown Drive action: ${gAction}` };
+            }
+          }
+          default:
+            return { success: false, result: null, error: `Unknown Google service: ${gService}` };
+        }
       }
 
       default:
