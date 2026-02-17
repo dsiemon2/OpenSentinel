@@ -9,6 +9,7 @@ interface ServerWebSocket<T = unknown> {
   data: T;
 }
 import { nanoid } from "nanoid";
+import { getGatewayToken, timingSafeEqual } from "../../core/security/gateway-utils";
 import {
   type WSClientMessage,
   type ConnectionState,
@@ -219,11 +220,18 @@ export function handleUpgrade(
     return undefined;
   }
 
-  // Optional: Add authentication here
-  // const token = url.searchParams.get("token");
-  // if (!validateToken(token)) {
-  //   return new Response("Unauthorized", { status: 401 });
-  // }
+  // Gateway token auth for WebSocket connections
+  const gwToken = getGatewayToken();
+  if (gwToken) {
+    const tokenParam = url.searchParams.get("token");
+    const authHeader = req.headers.get("Authorization");
+    const headerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    const providedToken = tokenParam || headerToken;
+
+    if (!providedToken || !timingSafeEqual(providedToken, gwToken)) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+  }
 
   const state = createConnectionState();
   const success = server.upgrade(req, { data: state });

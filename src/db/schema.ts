@@ -56,6 +56,7 @@ export const messages = pgTable(
     content: text("content").notNull(),
     tokenCount: integer("token_count"),
     metadata: jsonb("metadata"),
+    encrypted: boolean("encrypted").default(false).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [index("messages_conversation_idx").on(table.conversationId)]
@@ -77,6 +78,7 @@ export const memories = pgTable(
     source: text("source"), // Where this memory came from
     provenance: text("provenance"), // Origin tracking: "conversation:id", "api:manual", "extraction:auto"
     metadata: jsonb("metadata"),
+    encrypted: boolean("encrypted").default(false).notNull(),
     lastAccessed: timestamp("last_accessed").defaultNow(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
@@ -157,11 +159,16 @@ export const auditLogs = pgTable(
     userAgent: text("user_agent"),
     success: boolean("success").default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    // Tamper-proof chain fields (SOC 2)
+    sequenceNumber: integer("sequence_number"),
+    entryHash: text("entry_hash"),
+    previousHash: text("previous_hash"),
   },
   (table) => [
     index("audit_logs_user_idx").on(table.userId),
     index("audit_logs_action_idx").on(table.action),
     index("audit_logs_created_idx").on(table.createdAt),
+    index("audit_logs_sequence_idx").on(table.sequenceNumber),
   ]
 );
 
@@ -714,3 +721,110 @@ export type Document = typeof documents.$inferSelect;
 export type NewDocument = typeof documents.$inferInsert;
 export type DocumentChunk = typeof documentChunks.$inferSelect;
 export type NewDocumentChunk = typeof documentChunks.$inferInsert;
+
+// ============================================
+// SOC 2 COMPLIANCE TABLES
+// ============================================
+
+// Two-factor authentication (persisted, encrypted secrets)
+export const twoFactorAuth = pgTable(
+  "two_factor_auth",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull()
+      .unique(),
+    secretEncrypted: text("secret_encrypted").notNull(),
+    recoveryCodes: jsonb("recovery_codes").$type<string[]>().notNull(),
+    enabledAt: timestamp("enabled_at").notNull(),
+    lastVerifiedAt: timestamp("last_verified_at"),
+    keyVersion: integer("key_version").default(1).notNull(),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [index("two_factor_auth_user_idx").on(table.userId)]
+);
+
+// Security incidents tracking
+export const securityIncidents = pgTable(
+  "security_incidents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    incidentNumber: text("incident_number").notNull().unique(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    type: text("type")
+      .notNull()
+      .$type<
+        | "brute_force"
+        | "unauthorized_access"
+        | "data_breach"
+        | "suspicious_activity"
+        | "system_compromise"
+        | "policy_violation"
+      >(),
+    severity: text("severity")
+      .notNull()
+      .$type<"low" | "medium" | "high" | "critical">(),
+    status: text("status")
+      .notNull()
+      .$type<"open" | "investigating" | "contained" | "resolved" | "closed">()
+      .default("open"),
+    userId: uuid("user_id").references(() => users.id),
+    assignedTo: uuid("assigned_to").references(() => users.id),
+    source: text("source").notNull(),
+    sourceData: jsonb("source_data"),
+    impactAssessment: text("impact_assessment"),
+    containmentActions: jsonb("containment_actions"),
+    resolutionNotes: text("resolution_notes"),
+    relatedIncidents: jsonb("related_incidents").$type<string[]>(),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    investigatedAt: timestamp("investigated_at"),
+    containedAt: timestamp("contained_at"),
+    resolvedAt: timestamp("resolved_at"),
+    closedAt: timestamp("closed_at"),
+  },
+  (table) => [
+    index("security_incidents_status_idx").on(table.status),
+    index("security_incidents_severity_idx").on(table.severity),
+    index("security_incidents_created_idx").on(table.createdAt),
+  ]
+);
+
+// Incident timeline events
+export const incidentTimeline = pgTable(
+  "incident_timeline",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    incidentId: uuid("incident_id")
+      .references(() => securityIncidents.id, { onDelete: "cascade" })
+      .notNull(),
+    eventType: text("event_type")
+      .notNull()
+      .$type<
+        | "created"
+        | "status_change"
+        | "assignment"
+        | "comment"
+        | "action_taken"
+        | "escalation"
+        | "resolution"
+      >(),
+    description: text("description").notNull(),
+    performedBy: uuid("performed_by").references(() => users.id),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("incident_timeline_incident_idx").on(table.incidentId)]
+);
+
+// SOC 2 types
+export type TwoFactorAuthRecord = typeof twoFactorAuth.$inferSelect;
+export type NewTwoFactorAuthRecord = typeof twoFactorAuth.$inferInsert;
+export type SecurityIncident = typeof securityIncidents.$inferSelect;
+export type NewSecurityIncident = typeof securityIncidents.$inferInsert;
+export type IncidentTimelineEvent = typeof incidentTimeline.$inferSelect;

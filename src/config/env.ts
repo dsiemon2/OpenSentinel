@@ -203,6 +203,10 @@ const envSchema = z.object({
   PAIRING_ENABLED: z.coerce.boolean().optional().default(false),
   PAIRING_CODE_LIFETIME_MINUTES: z.coerce.number().optional().default(5),
 
+  // Gateway Authentication (OpenClaw-style)
+  // If set, web UI and API requests require this token. Unset = open access (localhost-friendly).
+  GATEWAY_TOKEN: z.string().optional(),
+
   // Matrix (optional)
   MATRIX_ENABLED: z.coerce.boolean().optional().default(false),
   MATRIX_HOMESERVER_URL: z.string().optional(),
@@ -242,6 +246,10 @@ const envSchema = z.object({
   MULTISTEP_MAX_STEPS: z.coerce.number().optional().default(2),
   RETRIEVAL_CACHE_ENABLED: z.coerce.boolean().optional().default(false),
   CONTEXTUAL_QUERY_ENABLED: z.coerce.boolean().optional().default(false),
+
+  // SOC 2 Encryption & Audit
+  ENCRYPTION_MASTER_KEY: z.string().optional(), // 32-byte base64 key for field encryption
+  AUDIT_SIGNING_KEY: z.string().optional(), // HMAC key for tamper-proof audit logs
 
   // Server
   PORT: z.coerce.number().default(8030),

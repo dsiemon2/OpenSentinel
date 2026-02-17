@@ -1,8 +1,9 @@
 import { db } from "../../db";
-import { users } from "../../db/schema";
+import { users, twoFactorAuth } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { randomBytes, createHmac } from "crypto";
 import { logAudit } from "./audit-logger";
+import { encryptField, decryptField } from "./field-encryption";
 
 // TOTP Configuration
 const TOTP_DIGITS = 6;
@@ -33,10 +34,73 @@ export interface TwoFactorConfig {
   lastVerified?: Date;
 }
 
-// In-memory store for 2FA configs (in production, store encrypted in database)
-const twoFactorConfigs = new Map<string, TwoFactorConfig>();
+// --- DB persistence helpers (replace in-memory Map) ---
 
-// Pending setup secrets (temporary, cleared after setup or timeout)
+async function load2FAConfig(userId: string): Promise<TwoFactorConfig | null> {
+  const [row] = await db
+    .select()
+    .from(twoFactorAuth)
+    .where(eq(twoFactorAuth.userId, userId))
+    .limit(1);
+
+  if (!row) return null;
+
+  const secret = decryptField(row.secretEncrypted);
+  if (!secret) return null;
+
+  return {
+    userId: row.userId,
+    secret,
+    recoveryCodes: row.recoveryCodes,
+    enabledAt: row.enabledAt,
+    lastVerified: row.lastVerifiedAt ?? undefined,
+  };
+}
+
+async function store2FAConfig(config: TwoFactorConfig): Promise<void> {
+  const secretEncrypted = encryptField(config.secret);
+  if (!secretEncrypted) throw new Error("Failed to encrypt 2FA secret");
+
+  await db
+    .insert(twoFactorAuth)
+    .values({
+      userId: config.userId,
+      secretEncrypted,
+      recoveryCodes: config.recoveryCodes,
+      enabledAt: config.enabledAt,
+      lastVerifiedAt: config.lastVerified ?? null,
+      keyVersion: 1,
+    })
+    .onConflictDoUpdate({
+      target: twoFactorAuth.userId,
+      set: {
+        secretEncrypted,
+        recoveryCodes: config.recoveryCodes,
+        lastVerifiedAt: config.lastVerified ?? null,
+        updatedAt: new Date(),
+      },
+    });
+}
+
+async function delete2FAConfig(userId: string): Promise<void> {
+  await db.delete(twoFactorAuth).where(eq(twoFactorAuth.userId, userId));
+}
+
+async function update2FALastVerified(userId: string): Promise<void> {
+  await db
+    .update(twoFactorAuth)
+    .set({ lastVerifiedAt: new Date(), updatedAt: new Date() })
+    .where(eq(twoFactorAuth.userId, userId));
+}
+
+async function update2FARecoveryCodes(userId: string, codes: string[]): Promise<void> {
+  await db
+    .update(twoFactorAuth)
+    .set({ recoveryCodes: codes, updatedAt: new Date() })
+    .where(eq(twoFactorAuth.userId, userId));
+}
+
+// Pending setup secrets (temporary, cleared after setup or timeout — intentionally in-memory)
 const pendingSetups = new Map<string, { secret: string; recoveryCodes: string[]; expiresAt: Date }>();
 
 /**
@@ -171,8 +235,9 @@ function verifyTOTP(secret: string, code: string, timestamp: number = Date.now()
  * Returns secret and recovery codes - user must verify before enabling
  */
 export async function initializeTwoFactor(userId: string): Promise<TwoFactorSecret> {
-  // Check if already enabled
-  if (twoFactorConfigs.has(userId)) {
+  // Check if already enabled (DB lookup)
+  const existing = await load2FAConfig(userId);
+  if (existing) {
     throw new Error("Two-factor authentication is already enabled");
   }
 
@@ -259,7 +324,7 @@ export async function verifyTwoFactorCode(
   userId: string,
   code: string
 ): Promise<{ valid: boolean; method: "totp" | "recovery" }> {
-  const config = twoFactorConfigs.get(userId);
+  const config = await load2FAConfig(userId);
 
   if (!config) {
     throw new Error("Two-factor authentication is not enabled");
@@ -271,7 +336,7 @@ export async function verifyTwoFactorCode(
   if (normalizedCode.length === TOTP_DIGITS && /^\d+$/.test(normalizedCode)) {
     const isValid = verifyTOTP(config.secret, normalizedCode);
     if (isValid) {
-      config.lastVerified = new Date();
+      await update2FALastVerified(userId);
       await logAudit({
         userId,
         action: "login",
@@ -287,9 +352,10 @@ export async function verifyTwoFactorCode(
   const recoveryIndex = config.recoveryCodes.indexOf(hashedInput);
 
   if (recoveryIndex !== -1) {
-    // Remove used recovery code
+    // Remove used recovery code and persist
     config.recoveryCodes.splice(recoveryIndex, 1);
-    config.lastVerified = new Date();
+    await update2FARecoveryCodes(userId, config.recoveryCodes);
+    await update2FALastVerified(userId);
 
     await logAudit({
       userId,
@@ -319,8 +385,8 @@ export async function verifyTwoFactorCode(
 /**
  * Check if 2FA is enabled for a user
  */
-export function getTwoFactorStatus(userId: string): TwoFactorStatus {
-  const config = twoFactorConfigs.get(userId);
+export async function getTwoFactorStatus(userId: string): Promise<TwoFactorStatus> {
+  const config = await load2FAConfig(userId);
 
   if (!config) {
     return { enabled: false };
@@ -344,7 +410,7 @@ export async function disableTwoFactor(userId: string, verificationCode: string)
     throw new Error("Invalid verification code");
   }
 
-  twoFactorConfigs.delete(userId);
+  await delete2FAConfig(userId);
 
   await logAudit({
     userId,
@@ -369,13 +435,14 @@ export async function regenerateRecoveryCodes(
     throw new Error("Invalid verification code");
   }
 
-  const config = twoFactorConfigs.get(userId);
+  const config = await load2FAConfig(userId);
   if (!config) {
     throw new Error("Two-factor authentication is not enabled");
   }
 
   const newCodes = generateRecoveryCodes();
-  config.recoveryCodes = newCodes.map(hashRecoveryCode);
+  const hashedCodes = newCodes.map(hashRecoveryCode);
+  await update2FARecoveryCodes(userId, hashedCodes);
 
   await logAudit({
     userId,
@@ -428,7 +495,7 @@ export async function verifySensitiveOperation(
   operation: SensitiveOperation,
   verificationCode?: string
 ): Promise<{ allowed: boolean; reason?: string }> {
-  const status = getTwoFactorStatus(userId);
+  const status = await getTwoFactorStatus(userId);
 
   // If 2FA is not enabled, allow the operation
   if (!status.enabled) {
@@ -488,14 +555,15 @@ export async function completeTwoFactorSetup(
   const pending = pendingSetups.get(userId);
   const recoveryCodes = pending?.recoveryCodes || generateRecoveryCodes().map(hashRecoveryCode);
 
-  // Store the configuration
-  twoFactorConfigs.set(userId, {
+  // Store the configuration (encrypted, persisted to DB)
+  const config: TwoFactorConfig = {
     userId,
     secret,
     recoveryCodes,
     enabledAt: new Date(),
     lastVerified: new Date(),
-  });
+  };
+  await store2FAConfig(config);
 
   // Clear pending setup
   pendingSetups.delete(userId);

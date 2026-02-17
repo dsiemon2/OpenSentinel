@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-02-17
+
+### Added
+- **Gateway Token Auth**: OpenClaw-style optional authentication for web UI and API
+  - Disabled by default for localhost/self-hosted (open access)
+  - Set `GATEWAY_TOKEN` env var to require token for web and API access
+  - Web UI shows token prompt when gateway auth is enabled
+  - Token stored in localStorage, auto-injected on all API and WebSocket requests
+  - Timing-safe token comparison to prevent timing attacks
+- **SOC 2 Compliance**: 5 critical security blockers resolved
+  - **AES-256-GCM Field Encryption**: Encrypt sensitive data at rest (memory content, 2FA secrets)
+  - **Tamper-Proof Audit Logs**: HMAC-SHA256 chain integrity with sequence numbers and hash linking
+  - **Incident Response System**: Automated detection, escalation, and notification for security incidents
+  - **2FA Database Persistence**: TOTP secrets encrypted and stored in PostgreSQL (was in-memory)
+  - **Memory Encryption at Rest**: Memory content encrypted before database insertion
+- **Auth Middleware Rewrite**: Gateway token first, session/API-key fallback, open mode when unconfigured
+- **WebSocket Token Auth**: Gateway token check on `/ws` upgrade via `?token=` query param
+- **Web Auth Gate**: App checks auth requirement on load, shows token prompt or loads directly
+- **API Fetch Wrapper**: `apiFetch()` utility auto-injects auth headers on all web UI API calls
+- 119 new security tests across 6 test files
+
+### Changed
+- Auth middleware no longer requires API key for every request (gateway token or open mode)
+- Web Chat uses `apiFetch()` wrapper instead of raw `fetch()` for all API calls
+- WebSocket URL construction uses `getWebSocketUrl()` with token injection
+- Test count: 4,617+ → 4,787+ across 139 files
+
+### Security
+- AES-256-GCM encryption for memory content and 2FA secrets at rest
+- HMAC-SHA256 audit log chain prevents tampering with historical records
+- Constant-time string comparison for gateway token validation
+- Incident response with automatic severity classification and escalation
+
 ## [2.7.0] - 2026-02-17
 
 ### Added
@@ -205,7 +238,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Desktop app (Electron)
 - Browser extension (Chrome/Firefox)
 
-[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v2.5.1...HEAD
+[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v2.8.0...HEAD
+[2.8.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.7.0...v2.8.0
+[2.7.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.5.1...v2.7.0
 [2.5.1]: https://github.com/dsiemon2/OpenSentinel/compare/v2.5.0...v2.5.1
 [2.5.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.2.1...v2.5.0
 [2.2.1]: https://github.com/dsiemon2/OpenSentinel/compare/v2.2.0...v2.2.1

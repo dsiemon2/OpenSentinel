@@ -355,6 +355,8 @@ console.<span class="cf">log</span>(response.text);</code></pre>
             <tr><td><code>PROMETHEUS_ENABLED</code></td><td>Enable Prometheus metrics at /metrics</td><td>For monitoring</td></tr>
             <tr><td><code>MATRIX_ENABLED</code></td><td>Enable Matrix messaging channel</td><td>For Matrix</td></tr>
             <tr><td><code>PAIRING_ENABLED</code></td><td>Enable device pairing auth</td><td>For pairing</td></tr>
+            <tr><td><code>GATEWAY_TOKEN</code></td><td>Shared secret for web UI/API auth (disabled = open access)</td><td>For remote access</td></tr>
+            <tr><td><code>FIELD_ENCRYPTION_KEY</code></td><td>AES-256 key for encrypting sensitive fields at rest</td><td>For SOC 2</td></tr>
             <tr><td><code>HYDE_ENABLED</code></td><td>HyDE — generate ideal answer before searching memory</td><td>For better recall</td></tr>
             <tr><td><code>RERANK_ENABLED</code></td><td>LLM re-ranking — score results 0-10 for true relevance</td><td>For precision</td></tr>
             <tr><td><code>CONTEXTUAL_QUERY_ENABLED</code></td><td>Rewrite queries using conversation context</td><td>For follow-ups</td></tr>

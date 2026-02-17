@@ -2,6 +2,8 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import Chat from "./components/Chat";
 import MemoryExplorer from "./components/MemoryExplorer";
 import Settings from "./components/Settings";
+import GatewayAuth from "./components/GatewayAuth";
+import { isAuthRequired, apiFetch, clearStoredToken } from "./lib/api";
 
 const GraphExplorer = lazy(() => import("./components/GraphExplorer"));
 
@@ -16,24 +18,54 @@ interface SystemStatus {
 function App() {
   const [view, setView] = useState<View>("chat");
   const [status, setStatus] = useState<SystemStatus | null>(null);
+  const [authState, setAuthState] = useState<"checking" | "required" | "authenticated">("checking");
 
   useEffect(() => {
-    // Check system status
-    fetch("/api/system/status")
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const required = await isAuthRequired();
+    setAuthState(required ? "required" : "authenticated");
+    if (!required) {
+      startStatusPolling();
+    }
+  };
+
+  const startStatusPolling = () => {
+    // Initial fetch
+    apiFetch("/api/system/status")
       .then((r) => r.json())
       .then(setStatus)
       .catch(() => setStatus(null));
 
-    // Poll status every 30 seconds
+    // Poll every 30 seconds
     const interval = setInterval(() => {
-      fetch("/api/system/status")
+      apiFetch("/api/system/status")
         .then((r) => r.json())
         .then(setStatus)
         .catch(() => setStatus(null));
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  };
+
+  const handleAuthenticated = () => {
+    setAuthState("authenticated");
+    startStatusPolling();
+  };
+
+  if (authState === "checking") {
+    return (
+      <div className="app" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ color: "var(--text-secondary)" }}>Connecting...</p>
+      </div>
+    );
+  }
+
+  if (authState === "required") {
+    return <GatewayAuth onAuthenticated={handleAuthenticated} />;
+  }
 
   return (
     <div className="app">

@@ -1,6 +1,8 @@
+import { createHmac, randomUUID } from "crypto";
 import { db } from "../../db";
 import { auditLogs, NewAuditLog } from "../../db/schema";
-import { eq, and, gte, lte, desc } from "drizzle-orm";
+import { eq, and, gte, lte, desc, count, min, max, asc } from "drizzle-orm";
+import { env } from "../../config/env";
 
 export type AuditAction =
   | "login"
@@ -49,7 +51,88 @@ export interface AuditLogEntry {
   success?: boolean;
 }
 
+// --- Tamper-proof chain hashing helpers (SOC 2 compliance) ---
+
+let _cachedSigningKey: string | null = null;
+
+function getAuditSigningKey(): string {
+  if (_cachedSigningKey) return _cachedSigningKey;
+  if (env.AUDIT_SIGNING_KEY) {
+    _cachedSigningKey = env.AUDIT_SIGNING_KEY;
+    return _cachedSigningKey;
+  }
+  _cachedSigningKey = randomUUID();
+  console.warn(
+    "[audit-logger] AUDIT_SIGNING_KEY not set — using a random ephemeral key. " +
+      "Set AUDIT_SIGNING_KEY in .env for persistent tamper-proof audit chains."
+  );
+  return _cachedSigningKey;
+}
+
+function signAuditEntry(
+  sequenceNumber: number,
+  action: string,
+  userId: string | undefined,
+  resource: string | undefined,
+  detailsJson: string,
+  timestamp: string,
+  previousHash: string | null
+): string {
+  const key = getAuditSigningKey();
+  const data = [
+    String(sequenceNumber),
+    action,
+    userId ?? "",
+    resource ?? "",
+    detailsJson,
+    timestamp,
+    previousHash ?? "",
+  ].join("|");
+  return createHmac("sha256", key).update(data).digest("hex");
+}
+
+async function getLastAuditEntry(): Promise<{
+  sequenceNumber: number;
+  entryHash: string;
+} | null> {
+  const [last] = await db
+    .select({
+      sequenceNumber: auditLogs.sequenceNumber,
+      entryHash: auditLogs.entryHash,
+    })
+    .from(auditLogs)
+    .orderBy(desc(auditLogs.sequenceNumber))
+    .limit(1);
+
+  if (!last || last.sequenceNumber == null || last.entryHash == null) {
+    return null;
+  }
+
+  return {
+    sequenceNumber: last.sequenceNumber,
+    entryHash: last.entryHash,
+  };
+}
+
 export async function logAudit(entry: AuditLogEntry): Promise<string> {
+  // Fetch previous chain entry for tamper-proof linking
+  const last = await getLastAuditEntry();
+  const sequenceNumber = (last?.sequenceNumber ?? 0) + 1;
+  const previousHash = last?.entryHash ?? null;
+
+  const timestamp = new Date().toISOString();
+  const detailsJson = entry.details ? JSON.stringify(entry.details) : "{}";
+
+  const entryHash = signAuditEntry(
+    sequenceNumber,
+    entry.action,
+    entry.userId,
+    entry.resource,
+    detailsJson,
+    timestamp,
+    previousHash
+  );
+
   const [log] = await db
     .insert(auditLogs)
     .values({
@@ -62,6 +145,10 @@ export async function logAudit(entry: AuditLogEntry): Promise<string> {
       ipAddress: entry.ipAddress,
       userAgent: entry.userAgent,
       success: entry.success ?? true,
+      createdAt: new Date(timestamp),
+      sequenceNumber,
+      entryHash,
+      previousHash,
     })
     .returning();
 
@@ -161,6 +248,145 @@ export async function countActionsByType(
   }
 
   return counts;
+}
+
+// --- Audit chain verification (SOC 2 compliance) ---
+
+export async function verifyAuditChain(
+  options?: { fromSequence?: number; limit?: number }
+): Promise<{
+  valid: boolean;
+  totalChecked: number;
+  firstInvalid?: number;
+  errors: Array<{ sequenceNumber: number; error: string }>;
+}> {
+  const fromSequence = options?.fromSequence ?? 1;
+  const batchLimit = options?.limit ?? 10000;
+
+  // Fetch the entry just before fromSequence to get its hash for linkage check
+  let expectedPreviousHash: string | null = null;
+  let expectedSequence = fromSequence;
+
+  if (fromSequence > 1) {
+    const [prev] = await db
+      .select({
+        sequenceNumber: auditLogs.sequenceNumber,
+        entryHash: auditLogs.entryHash,
+      })
+      .from(auditLogs)
+      .where(eq(auditLogs.sequenceNumber, fromSequence - 1))
+      .limit(1);
+
+    expectedPreviousHash = prev?.entryHash ?? null;
+  }
+
+  const entries = await db
+    .select()
+    .from(auditLogs)
+    .where(gte(auditLogs.sequenceNumber, fromSequence))
+    .orderBy(asc(auditLogs.sequenceNumber))
+    .limit(batchLimit);
+
+  const errors: Array<{ sequenceNumber: number; error: string }> = [];
+
+  for (const entry of entries) {
+    const seq = entry.sequenceNumber;
+
+    if (seq == null) {
+      errors.push({
+        sequenceNumber: expectedSequence,
+        error: "Missing sequence number",
+      });
+      expectedSequence++;
+      continue;
+    }
+
+    // Check sequence continuity
+    if (seq !== expectedSequence) {
+      errors.push({
+        sequenceNumber: expectedSequence,
+        error: `Sequence gap: expected ${expectedSequence}, got ${seq}`,
+      });
+      expectedSequence = seq; // re-sync
+    }
+
+    // Check previousHash linkage
+    if ((entry.previousHash ?? null) !== expectedPreviousHash) {
+      errors.push({
+        sequenceNumber: seq,
+        error: `Previous hash mismatch: expected ${expectedPreviousHash ?? "(null)"}, got ${entry.previousHash ?? "(null)"}`,
+      });
+    }
+
+    // Recompute and verify entryHash
+    const detailsJson = entry.details ? JSON.stringify(entry.details) : "{}";
+    const timestamp = entry.createdAt.toISOString();
+
+    const recomputed = signAuditEntry(
+      seq,
+      entry.action,
+      entry.userId ?? undefined,
+      entry.resource ?? undefined,
+      detailsJson,
+      timestamp,
+      entry.previousHash
+    );
+
+    if (recomputed !== entry.entryHash) {
+      errors.push({
+        sequenceNumber: seq,
+        error: "Entry hash mismatch — record may have been tampered with",
+      });
+    }
+
+    // Advance expectations
+    expectedPreviousHash = entry.entryHash;
+    expectedSequence = seq + 1;
+  }
+
+  return {
+    valid: errors.length === 0,
+    totalChecked: entries.length,
+    firstInvalid: errors.length > 0 ? errors[0].sequenceNumber : undefined,
+    errors,
+  };
+}
+
+export async function getAuditChainIntegrity(): Promise<{
+  totalEntries: number;
+  oldestEntry: Date | null;
+  newestEntry: Date | null;
+  lastVerified: number;
+  chainValid: boolean;
+  lastSequence: number;
+}> {
+  const [stats] = await db
+    .select({
+      totalEntries: count(auditLogs.id),
+      oldestEntry: min(auditLogs.createdAt),
+      newestEntry: max(auditLogs.createdAt),
+      lastSequence: max(auditLogs.sequenceNumber),
+    })
+    .from(auditLogs);
+
+  const totalEntries = Number(stats.totalEntries ?? 0);
+  const lastSequence = stats.lastSequence ?? 0;
+
+  // Verify the last 1000 entries
+  const verifyFrom = Math.max(1, lastSequence - 999);
+  const verification = await verifyAuditChain({
+    fromSequence: verifyFrom,
+    limit: 1000,
+  });
+
+  return {
+    totalEntries,
+    oldestEntry: stats.oldestEntry ? new Date(stats.oldestEntry) : null,
+    newestEntry: stats.newestEntry ? new Date(stats.newestEntry) : null,
+    lastVerified: verification.totalChecked,
+    chainValid: verification.valid,
+    lastSequence,
+  };
 }
 
 // Convenience functions for common audit events
