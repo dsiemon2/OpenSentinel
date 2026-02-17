@@ -104,7 +104,7 @@ OpenSentinel is a **completely custom, self-contained AI assistant** built from 
 ### Architecture
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    OpenSentinel v2.1.1                        │
+│                    OpenSentinel v2.7.0                        │
 ├─────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs        │
 │  ──────              │  ────               │  ───────        │
@@ -116,7 +116,7 @@ OpenSentinel is a **completely custom, self-contained AI assistant** built from 
 │  • Voice (Wake Word) │  • Plugin System    │                 │
 │  • Device Triggers   │  • Workflows        │                 │
 ├─────────────────────────────────────────────────────────────┤
-│  Tools (30+): Shell, Files, Browser, Search, OCR,           │
+│  Tools (121): Shell, Files, Browser, Search, OCR,           │
 │               Screenshots, Video, Image Gen, Charts          │
 ├─────────────────────────────────────────────────────────────┤
 │  Intelligence: Predictive, Relationship Graph, Temporal,     │
@@ -133,14 +133,14 @@ OpenSentinel is a **completely custom, self-contained AI assistant** built from 
 ### Key Statistics
 | Metric | Value |
 |--------|-------|
-| Total Features | 250+ |
-| Tools | 30+ |
+| Total Features | 300+ |
+| Tools | 121 |
 | Integrations | 15+ |
 | Domain Experts | 15 |
 | Sub-Agents | 4 |
-| Source Files | 150+ |
+| Source Files | 349 |
 | Lines of Code | ~52,000 |
-| Unit Tests | 2,793 |
+| Unit Tests | 4,617+ |
 
 ---
 
@@ -305,14 +305,14 @@ Integrate OpenClaw's MCP (Model Context Protocol) servers as tool providers.
 
 | Pros | Cons |
 |------|------|
-| All 250+ features preserved | No WhatsApp/Signal/iMessage |
+| All 300+ features preserved | No WhatsApp/Signal/iMessage |
 | Advanced RAG memory system | Smaller community (just us) |
 | Enterprise-ready (multi-user, SSO) | No MCP support yet |
 | PostgreSQL + pgvector | No mobile apps |
 | Sub-agent collaboration | More maintenance burden |
 | Workflow automation | |
 | Full observability | |
-| 2,793 unit tests | |
+| 4,617+ unit tests | |
 
 ---
 
@@ -392,7 +392,7 @@ From various security analyses:
 ### Why NOT Migrate to OpenClaw
 1. We lose PostgreSQL + pgvector RAG (our memory system is more sophisticated)
 2. We lose enterprise features (multi-user, SSO, quotas, Kubernetes)
-3. We lose 2,793 unit tests and known stability
+3. We lose 4,617+ unit tests and known stability
 4. We lose workflow automation
 5. We lose 15 domain experts and 4 sub-agents
 6. Migration effort (3-6 months) outweighs benefits

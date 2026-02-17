@@ -2,6 +2,37 @@
 
 All notable changes to OpenSentinel are documented here.
 
+## [2.7.0] - 2026-02-17
+
+### Added
+- **7 New Tools**: gif_search, places_lookup, spotify_cli, token_dashboard, terminal_agent, camera_monitor, google_services
+- **14 Enterprise Adapters**: Stripe, Shopify, QuickBooks, Xero, Jira, HubSpot, Salesforce, SendGrid, Mailchimp, Zapier, AWS S3, Google Workspace, Microsoft 365, Twilio — with base-adapter pattern and registry
+- **Local Action Executor**: Desktop WebSocket bridge for executing tools locally via Electron app
+- **Intelligence Modules**: Adaptive feedback, graph RAG, pattern analyzer, RAG pipeline, risk engine, spaced repetition, strategy plugins, struggle detection
+- **Tree-of-Thought Reasoning**: Multi-path reasoning engine for complex problem solving
+- **Automation Engine**: Approval engine and logic rules for workflow automation
+- **Multi-Provider Embeddings**: Pluggable embedding system with adapter, provider, and registry
+- **Event System**: Event bus with auto-responder for real-time event processing
+- **Multi-Device Sync**: Cross-device state synchronization
+- **DAG Workflow Engine**: Directed acyclic graph execution for complex workflows
+- **WebSocket Tool Router**: Route tool execution between server and desktop clients
+- **Google Services Integration**: Gmail, Google Calendar, Google Drive via OAuth2
+- **Enhanced Security**: Audit trail, crypto utilities, enhanced rate limiter
+- **File Generation**: HTML reports and iCal calendar file generation
+- Expanded brain system prompt to list all 120+ tool categories for better tool selection
+- Natural language Spotify CLI with command parsing
+
+### Changed
+- Renamed entire "Molt" system to "Evolution" (directories, types, variables, docs)
+- Discord bot renamed from "MoltBot" to "OpenSentinel"
+- Git remote renamed from GoGreen-Moltbot to OpenSentinel
+- `moltModes` schema variable renamed to `evolutionModes` (DB table name preserved)
+- `MoltMode`/`NewMoltMode` types renamed to `EvolutionMode`/`NewEvolutionMode`
+- Version bumped to 2.7.0
+- Tool count increased from 93 to 121
+- Test count increased from 3,800+ to 4,617+
+- Feature count increased from 280+ to 300+
+
 ## [2.5.0] - 2026-02-15
 
 ### Added

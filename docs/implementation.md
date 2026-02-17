@@ -1,6 +1,6 @@
 # OpenSentinel Technical Implementation
 
-**Status: COMPLETE** (v2.1.1)
+**Status: COMPLETE** (v2.7.0)
 
 ## Architecture Overview
 
@@ -87,7 +87,7 @@ RAG-based memory using PostgreSQL with pgvector.
 
 ### 3. Tool System (`src/tools/`)
 
-30+ tools defined using Claude's tool_use format:
+121 tools defined using Claude's tool_use format:
 
 | Tool | File | Purpose |
 |------|------|---------|

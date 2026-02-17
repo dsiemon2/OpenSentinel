@@ -1,7 +1,7 @@
 # OpenSentinel — Complete Feature Reference
 
-> **Version 2.5.0** | February 2026
-> Self-hosted AI assistant powered by Claude with 280+ features, 93 tools, 15 MCP servers, 25 built-in skills, and 3,457+ tests.
+> **Version 2.7.0** | February 2026
+> Self-hosted AI assistant powered by Claude with 300+ features, 121 tools, 15 MCP servers, 25 built-in skills, and 4,617+ tests.
 > Intelligent model routing, self-correcting reasoning, and context compaction built in.
 > Talk to it via Telegram, Discord, Slack, Web, Voice, or API — it does the rest.
 
@@ -45,8 +45,8 @@
 OpenSentinel is a self-hosted personal AI assistant — a JARVIS-style hub that connects to everything in your digital life. It runs on your own server, keeps all data private, and can be reached from any device via Telegram, Discord, Slack, a web dashboard, voice commands, desktop app, browser extension, or REST API.
 
 **Key numbers:**
-- 280+ features
-- 93 total tools (33 built-in + 22 custom + 71 MCP)
+- 300+ features
+- 121 total tools (33 built-in + 22 custom + 71 MCP)
 - 30+ app integrations via SDK
 - 15 MCP servers (Filesystem, GitHub, Memory, Puppeteer, Brave Search, Slack, PostgreSQL, Fetch, Time, Google Maps, SQLite, Redis, Sentry, and more)
 - 25 built-in skills (research, productivity, development, communication, utility)
@@ -56,7 +56,7 @@ OpenSentinel is a self-hosted personal AI assistant — a JARVIS-style hub that 
 - Intelligent model routing (Haiku / Sonnet / Opus)
 - ReAct reasoning with self-correction
 - Context compaction for unlimited-length conversations
-- 3,800+ unit tests across 120+ test files
+- 4,617+ unit tests across 133 test files
 
 **Tech stack:** Bun, TypeScript, Hono, PostgreSQL 16 + pgvector, Redis 7, React + Vite
 
@@ -1312,7 +1312,7 @@ bun run db:migrate   # Apply migrations
 ## 27. Test Coverage
 
 ### Overview
-- **3,800+ tests** across **120+ test files**
+- **4,617+ tests** across **133 test files**
 - **572 Advanced RAG tests** across 8 dedicated test files
 - **366 custom tool tests** across 18 dedicated test files
 - **181 core system tests** across 4 dedicated test files
@@ -1452,6 +1452,6 @@ OpenSentinel serves as the central AI hub for an entire application ecosystem. A
 
 ---
 
-*OpenSentinel v2.5.0 — Self-hosted AI assistant with 280+ features, 93 tools, 15 MCP servers, 25 built-in skills, and 3,457+ tests.*
+*OpenSentinel v2.7.0 — Self-hosted AI assistant with 300+ features, 121 tools, 15 MCP servers, 25 built-in skills, and 4,617+ tests.*
 *Intelligent model routing, ReAct reasoning with self-correction, and context compaction.*
 *Built with Bun, TypeScript, Claude (Haiku/Sonnet/Opus), PostgreSQL, and Redis.*

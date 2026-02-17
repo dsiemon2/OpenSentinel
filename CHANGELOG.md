@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-02-17
+
+### Added
+- **7 New Tools**: gif_search, places_lookup, spotify_cli, token_dashboard, terminal_agent, camera_monitor, google_services
+- **14 Enterprise Adapters**: Stripe, Shopify, QuickBooks, Xero, Jira, HubSpot, Salesforce, SendGrid, Mailchimp, Zapier, AWS S3, Google Workspace, Microsoft 365, Twilio
+- **Local Action Executor**: Desktop WebSocket bridge for local tool execution
+- **Intelligence Modules**: Adaptive feedback, graph RAG, pattern analyzer, RAG pipeline, risk engine, spaced repetition, strategy plugins, struggle detection
+- **Tree-of-Thought Reasoning**: Multi-path reasoning engine
+- **Automation Engine**: Approval engine and logic rules
+- **Multi-Provider Embeddings**: Pluggable embedding system with adapter/provider/registry
+- **Event System**: Event bus with auto-responder
+- **Multi-Device Sync**: Cross-device state synchronization
+- **DAG Workflow Engine**: Directed acyclic graph execution
+- **Google Services Integration**: Gmail, Google Calendar, Google Drive via OAuth2
+- **Enhanced Security**: Audit trail, crypto utilities, enhanced rate limiter
+- **File Generation**: HTML reports and iCal calendar files
+- Expanded brain system prompt for better tool selection across 120+ tools
+
+### Changed
+- Renamed "Molt" system to "Evolution" across all code, docs, and Discord
+- Tool count: 93 → 121
+- Test count: 3,800+ → 4,617+ across 133 files
+- Feature count: 280+ → 300+
+
 ## [2.5.1] - 2026-02-16
 
 ### Added

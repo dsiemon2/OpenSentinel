@@ -1,6 +1,6 @@
 # Security
 
-This document describes the security features and architecture of OpenSentinel v2.1.1. As a self-hosted application, OpenSentinel keeps all data on your infrastructure. The security module is implemented across multiple files in `src/core/security/`.
+This document describes the security features and architecture of OpenSentinel v2.7.0. As a self-hosted application, OpenSentinel keeps all data on your infrastructure. The security module is implemented across multiple files in `src/core/security/`.
 
 ## Table of Contents
 
