@@ -1,6 +1,6 @@
 # OpenSentinel Architecture
 
-This document describes the internal architecture of OpenSentinel v2.1.1, covering data flow, core components, and the overall system design.
+This document describes the internal architecture of OpenSentinel v2.7.0, covering data flow, core components, and the overall system design.
 
 ---
 
@@ -388,7 +388,7 @@ Each input channel follows the same pattern:
 
 ## Tool System
 
-OpenSentinel provides 60+ built-in tools defined in `src/tools/index.ts`.
+OpenSentinel provides 121 tools defined in `src/tools/index.ts`.
 
 **How tools work:**
 
@@ -663,7 +663,7 @@ opensentinel/
 +-- plugins/                               # Plugin directory
 +-- docker/                                # Docker configs (init-db, nginx)
 +-- docker-compose.yml                     # Full stack orchestration
-+-- tests/                                 # Test suite (2793 tests)
++-- tests/                                 # Test suite (4617+ tests)
 +-- docs/                                  # Documentation
 +-- package.json                           # NPM package (opensentinel)
 +-- drizzle.config.ts                      # Drizzle ORM configuration

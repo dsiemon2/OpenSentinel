@@ -296,7 +296,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 119 test files, 3,800+ tests
+tests/                          # 133 test files, 4,617+ tests
 ```
 
 ## Ports

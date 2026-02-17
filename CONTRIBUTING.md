@@ -8,7 +8,7 @@ Thank you for your interest in contributing to OpenSentinel!
 git clone <repo-url>
 cd OpenSentinel
 bun install
-bun test              # Run 2793 tests
+bun test              # Run 4617+ tests
 bun run dev           # Start dev server
 ```
 

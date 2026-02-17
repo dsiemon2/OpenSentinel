@@ -1,8 +1,8 @@
 # OpenSentinel Documentation
 
-**Version 2.1.1** | [GitHub](https://github.com/dsiemon2/OpenSentinel) | [Website](https://opensentinel.ai) | [App](https://app.opensentinel.ai) | [MIT License](../LICENSE)
+**Version 2.7.0** | [GitHub](https://github.com/dsiemon2/OpenSentinel) | [Website](https://opensentinel.ai) | [App](https://app.opensentinel.ai) | [MIT License](../LICENSE)
 
-OpenSentinel is a self-hosted personal AI assistant powered by Claude. It supports 9 communication channels (Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Zalo, Web, and REST API), 250+ features, 33 built-in tools, and a full plugin/skill ecosystem. Built with Bun, TypeScript, Hono, and React, it runs entirely on your own infrastructure with PostgreSQL and Redis.
+OpenSentinel is a self-hosted personal AI assistant powered by Claude. It supports 9 communication channels (Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Zalo, Web, and REST API), 300+ features, 121 tools, and a full plugin/skill ecosystem. Built with Bun, TypeScript, Hono, and React, it runs entirely on your own infrastructure with PostgreSQL and Redis.
 
 ---
 
@@ -13,7 +13,7 @@ OpenSentinel is a self-hosted personal AI assistant powered by Claude. It suppor
 | [Getting Started](GETTING_STARTED.md) | Installation, setup, and first run |
 | [Architecture](ARCHITECTURE.md) | System design and component deep dive |
 | [API Reference](API.md) | REST API and WebSocket documentation |
-| [Features Overview](features.md) | Complete list of 250+ features |
+| [Features Overview](features.md) | Complete list of 300+ features |
 
 ---
 
@@ -44,7 +44,7 @@ OpenSentinel is a self-hosted personal AI assistant powered by Claude. It suppor
 
 | Document | Description |
 |----------|-------------|
-| [Tools Reference](TOOLS.md) | All 33 built-in tools: shell, files, web, vision, generation, agents, and more |
+| [Tools Reference](TOOLS.md) | All 121 tools: shell, files, web, vision, generation, agents, and more |
 | [Skills System](SKILLS.md) | User-teachable skills, skill registry, and the Sentinel Hub marketplace |
 | [Hooks & SOUL](HOOKS.md) | Lifecycle hooks, before/after events, and SOUL personality injection |
 | [Plugins](PLUGINS.md) | Plugin system: loader, sandbox, API, and writing custom plugins |
@@ -61,7 +61,7 @@ OpenSentinel is a self-hosted personal AI assistant powered by Claude. It suppor
 
 | Document | Description |
 |----------|-------------|
-| [Testing](TESTING.md) | Running the 2793-test suite, writing tests, and coverage |
+| [Testing](TESTING.md) | Running the 4617+-test suite, writing tests, and coverage |
 | [Contributing](CONTRIBUTING.md) | Code style, PR process, and development workflow |
 | [Changelog](CHANGELOG.md) | Version history and release notes |
 
@@ -69,6 +69,6 @@ OpenSentinel is a self-hosted personal AI assistant powered by Claude. It suppor
 
 | Document | Description |
 |----------|-------------|
-| [Features](features.md) | Complete feature inventory (all implemented in v2.1.1) |
+| [Features](features.md) | Complete feature inventory (all implemented in v2.7.0) |
 | [Roadmap](roadmap.md) | Future development plans |
 | [Future](future.md) | Long-term vision and experimental ideas |
