@@ -190,7 +190,7 @@ export class WakeWordDetector {
   private wakeWord: string;
   private isListening: boolean = false;
 
-  constructor(wakeWord: string = "hey molt") {
+  constructor(wakeWord: string = "hey sentinel") {
     this.wakeWord = wakeWord.toLowerCase();
   }
 

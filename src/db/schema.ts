@@ -247,7 +247,7 @@ export const errorLogs = pgTable(
 );
 
 // ============================================
-// MOLT SYSTEM TABLES (Phase 2)
+// EVOLUTION SYSTEM TABLES (Phase 2)
 // ============================================
 
 // Usage patterns for evolution tracking
@@ -308,7 +308,7 @@ export const userAchievements = pgTable(
   (table) => [index("user_achievements_user_idx").on(table.userId)]
 );
 
-// Molt transformation modes
+// Evolution transformation modes
 export const moltModes = pgTable(
   "molt_modes",
   {
@@ -679,7 +679,7 @@ export type NewMetric = typeof metrics.$inferInsert;
 export type ErrorLog = typeof errorLogs.$inferSelect;
 export type NewErrorLog = typeof errorLogs.$inferInsert;
 
-// Molt system types
+// Evolution system types
 export type UsagePattern = typeof usagePatterns.$inferSelect;
 export type NewUsagePattern = typeof usagePatterns.$inferInsert;
 export type Achievement = typeof achievements.$inferSelect;

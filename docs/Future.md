@@ -6,7 +6,7 @@ Long-term goals and advanced features for OpenSentinel beyond the current roadma
 
 ---
 
-## The "Molt" Concept ✅ COMPLETE
+## The "Evolution" Concept ✅ COMPLETE
 
 Leaning into the transformation/growth theme:
 
@@ -14,32 +14,32 @@ Leaning into the transformation/growth theme:
 - [x] Track how usage patterns change over time
 - [x] Visualize growth in capabilities and knowledge
 - [x] Show progression from basic assistant to personalized AI companion
-- **Implementation**: `src/core/molt/evolution-tracker.ts`
+- **Implementation**: `src/core/evolution/evolution-tracker.ts`
 
 ### Skill Unlocking ✅
 - [x] As OpenSentinel learns preferences, new capabilities unlock
 - [x] Gamification of assistant relationship
 - [x] Achievement system for milestones
-- **Implementation**: `src/core/molt/achievement-system.ts`
+- **Implementation**: `src/core/evolution/achievement-system.ts`
 
 ### Growth Reports ✅
 - [x] Monthly digest of what OpenSentinel learned
 - [x] Insights into conversation patterns
 - [x] Suggestions for better utilization
-- **Implementation**: `src/core/molt/growth-reporter.ts`
+- **Implementation**: `src/core/evolution/growth-reporter.ts`
 
 ### Shedding Old Patterns ✅
 - [x] Suggest deprecated workflows to clean up
 - [x] Archive stale memories
 - [x] Optimize context based on actual usage
-- **Implementation**: `src/core/molt/memory-shedder.ts`
+- **Implementation**: `src/core/evolution/memory-shedder.ts`
 
 ### Transformation Modes ✅
-- [x] **Productivity Molt**: Focus on task completion, minimal chat
-- [x] **Creative Molt**: Brainstorming, ideation, exploration
-- [x] **Research Molt**: Deep investigation, source gathering
-- [x] **Learning Molt**: Teaching mode, explanations, tutorials
-- **Implementation**: `src/core/molt/mode-manager.ts`
+- [x] **Productivity Mode**: Focus on task completion, minimal chat
+- [x] **Creative Mode**: Brainstorming, ideation, exploration
+- [x] **Research Mode**: Deep investigation, source gathering
+- [x] **Learning Mode**: Teaching mode, explanations, tutorials
+- **Implementation**: `src/core/evolution/mode-manager.ts`
 
 ---
 

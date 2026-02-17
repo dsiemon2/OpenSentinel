@@ -263,11 +263,11 @@ export class AdvancedWakeWordDetector extends EventEmitter {
     const syntheticSamples = Math.floor(this.config.sampleRate * syntheticDuration);
     const syntheticBuffer = Buffer.alloc(syntheticSamples * 2);
 
-    // Generate a synthetic waveform pattern for "hey molt"
+    // Generate a synthetic waveform pattern for "hey sentinel"
     // This represents typical spectral characteristics
     for (let i = 0; i < syntheticSamples; i++) {
       const t = i / this.config.sampleRate;
-      // Simulate formant frequencies for "hey molt"
+      // Simulate formant frequencies for "hey sentinel"
       const f1 = 400 + 200 * Math.sin(2 * Math.PI * 2 * t); // Low formant
       const f2 = 2000 + 500 * Math.sin(2 * Math.PI * 3 * t); // High formant
       const amplitude = Math.sin(2 * Math.PI * t * 3) * 0.5 + 0.5; // Envelope

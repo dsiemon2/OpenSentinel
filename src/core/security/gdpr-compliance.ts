@@ -720,7 +720,7 @@ async function executeDataDeletion(request: DataDeletionRequest): Promise<void> 
       case "preferences": {
         // Delete personas
         await db.delete(personas).where(eq(personas.userId, userId));
-        // Delete molt modes
+        // Delete evolution modes
         await db.delete(moltModes).where(eq(moltModes.userId, userId));
         // Clear user preferences
         await db

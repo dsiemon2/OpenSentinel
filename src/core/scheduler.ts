@@ -4,8 +4,8 @@ import { env } from "../config/env";
 import { chat } from "./brain";
 import { startAgentWorker, stopAgentWorker } from "./agents/agent-worker";
 import { processCalendarTriggers, generateDailyBriefing } from "../inputs/calendar/trigger-processor";
-import { autoShed } from "./molt/memory-shedder";
-import { generateWeeklyReport, generateMonthlyReport } from "./molt/growth-reporter";
+import { autoShed } from "./evolution/memory-shedder";
+import { generateWeeklyReport, generateMonthlyReport } from "./evolution/growth-reporter";
 import { resetMonthlyUsage } from "./permissions/permission-manager";
 import { flushMetrics } from "./observability/metrics";
 

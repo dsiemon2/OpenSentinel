@@ -76,7 +76,7 @@ All notable changes to OpenSentinel are documented here.
 - Added `website/install.sh` to repo (one-line installer: installs Bun + OpenSentinel + runs setup wizard)
 
 ### Changed
-- Web dashboard: replaced "Moltbot" sidebar logo with OpenSentinel compass SVG icon + text (matches opensentinel.ai branding)
+- Web dashboard: replaced "OpenSentinel (formerly Moltbot)" sidebar logo with OpenSentinel compass SVG icon + text (matches opensentinel.ai branding)
 - Web dashboard: added OpenSentinel favicon.svg (emerald-to-cyan gradient compass)
 - Web dashboard: updated logo CSS with flexbox layout and brand color (#10b981)
 - Fixed favicon reference from broken `/vite.svg` to `/favicon.svg`

@@ -3,11 +3,11 @@ import {
   MODE_CONFIGS,
   getModeConfig,
   suggestMode,
-} from "../src/core/molt/mode-manager";
-import type { MoltMode, ModeConfig } from "../src/core/molt/mode-manager";
+} from "../src/core/evolution/mode-manager";
+import type { EvolutionMode, ModeConfig } from "../src/core/evolution/mode-manager";
 
 describe("Mode Manager - Elevated Mode & suggestMode", () => {
-  describe("MoltMode type includes elevated", () => {
+  describe("EvolutionMode type includes elevated", () => {
     test("MODE_CONFIGS should have an 'elevated' key", () => {
       // Arrange & Act
       const hasElevated = "elevated" in MODE_CONFIGS;

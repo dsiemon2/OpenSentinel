@@ -106,7 +106,7 @@ src/
 │   ├── agents/                 # Sub-agent system
 │   ├── enterprise/             # Multi-user, SSO, quotas
 │   ├── intelligence/           # Predictive, relationship, temporal
-│   ├── molt/                   # Evolution, achievements, modes
+│   ├── evolution/              # Evolution, achievements, modes
 │   ├── observability/          # Metrics, replay, alerting
 │   ├── personality/            # Personas, mood, domain experts
 │   ├── plugins/                # Plugin system
