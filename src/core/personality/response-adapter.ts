@@ -1,6 +1,6 @@
 import { getActivePersona, Persona, PersonaTrait } from "./persona-manager";
 import { detectMood, getMoodBasedSuggestions, Mood, MoodAnalysis } from "./mood-detector";
-import { getCurrentMode, getModeConfig, MoltMode } from "../molt/mode-manager";
+import { getCurrentMode, getModeConfig, EvolutionMode } from "../evolution/mode-manager";
 
 export interface ResponseContext {
   userId: string;
@@ -13,7 +13,7 @@ export interface AdaptedResponse {
   suggestedTone: string;
   moodAnalysis: MoodAnalysis;
   activePersona: Persona | null;
-  activeMode: MoltMode | null;
+  activeMode: EvolutionMode | null;
 }
 
 // Build adaptive system prompt additions based on context

@@ -51,7 +51,7 @@
 - [x] Memory decay for low-importance items
 - [x] Memory consolidation (nightly job)
 - [x] Contradiction detection
-- **Implementation**: `src/core/molt/memory-shedder.ts`
+- **Implementation**: `src/core/evolution/memory-shedder.ts`
 
 ### Telegram Enhancements
 - [x] Inline keyboard responses
@@ -82,7 +82,7 @@
 - [x] Research mode (multi-step)
 - [x] Planning mode
 - [x] Debate mode (multiple perspectives)
-- **Implementation**: `src/core/molt/mode-manager.ts`
+- **Implementation**: `src/core/evolution/mode-manager.ts`
 
 ### Context Management
 - [x] Sliding window with smart compression

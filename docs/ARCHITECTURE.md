@@ -607,7 +607,7 @@ opensentinel/
 |   |   +-- hub/                           # Community marketplace
 |   |   +-- intelligence/                  # Predictive, temporal, multilingual
 |   |   +-- personality/                   # Personas, mood, domain experts
-|   |   +-- molt/                          # Evolution, achievements, modes
+|   |   +-- evolution/                     # Evolution, achievements, modes
 |   |   +-- security/                      # 2FA, vault, audit, GDPR
 |   |   +-- enterprise/                    # Multi-user, SSO, quotas, K8s
 |   |   +-- observability/                 # Metrics, alerting, replay, debug

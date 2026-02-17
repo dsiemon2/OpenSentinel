@@ -3,7 +3,7 @@ import { moltModes, users } from "../../db/schema";
 import { eq, and, isNull, desc } from "drizzle-orm";
 import { audit } from "../security/audit-logger";
 
-export type MoltMode = "productivity" | "creative" | "research" | "learning" | "elevated";
+export type EvolutionMode = "productivity" | "creative" | "research" | "learning" | "elevated";
 
 export interface ModeConfig {
   name: string;
@@ -17,7 +17,7 @@ export interface ModeConfig {
   };
 }
 
-export const MODE_CONFIGS: Record<MoltMode, ModeConfig> = {
+export const MODE_CONFIGS: Record<EvolutionMode, ModeConfig> = {
   productivity: {
     name: "Productivity Mode",
     description: "Focus on task completion with minimal chitchat",
@@ -112,7 +112,7 @@ export const MODE_CONFIGS: Record<MoltMode, ModeConfig> = {
   },
 };
 
-export async function getCurrentMode(userId: string): Promise<MoltMode | null> {
+export async function getCurrentMode(userId: string): Promise<EvolutionMode | null> {
   const [activeMode] = await db
     .select()
     .from(moltModes)
@@ -120,12 +120,12 @@ export async function getCurrentMode(userId: string): Promise<MoltMode | null> {
     .orderBy(desc(moltModes.activatedAt))
     .limit(1);
 
-  return activeMode?.mode as MoltMode | null;
+  return activeMode?.mode as EvolutionMode | null;
 }
 
 export async function activateMode(
   userId: string,
-  mode: MoltMode,
+  mode: EvolutionMode,
   metadata?: Record<string, unknown>
 ): Promise<void> {
   // Get current mode for audit
@@ -158,7 +158,7 @@ export async function deactivateCurrentMode(userId: string): Promise<boolean> {
 export async function getModeHistory(
   userId: string,
   limit: number = 20
-): Promise<Array<{ mode: MoltMode; activatedAt: Date; deactivatedAt: Date | null }>> {
+): Promise<Array<{ mode: EvolutionMode; activatedAt: Date; deactivatedAt: Date | null }>> {
   const history = await db
     .select()
     .from(moltModes)
@@ -167,24 +167,24 @@ export async function getModeHistory(
     .limit(limit);
 
   return history.map((h) => ({
-    mode: h.mode as MoltMode,
+    mode: h.mode as EvolutionMode,
     activatedAt: h.activatedAt,
     deactivatedAt: h.deactivatedAt,
   }));
 }
 
-export function getModeSystemPrompt(mode: MoltMode | null): string {
+export function getModeSystemPrompt(mode: EvolutionMode | null): string {
   if (!mode) return "";
   return MODE_CONFIGS[mode].systemPromptModifier;
 }
 
-export function getModeConfig(mode: MoltMode): ModeConfig {
+export function getModeConfig(mode: EvolutionMode): ModeConfig {
   return MODE_CONFIGS[mode];
 }
 
-export function getAllModes(): Array<{ mode: MoltMode; config: ModeConfig }> {
+export function getAllModes(): Array<{ mode: EvolutionMode; config: ModeConfig }> {
   return Object.entries(MODE_CONFIGS).map(([mode, config]) => ({
-    mode: mode as MoltMode,
+    mode: mode as EvolutionMode,
     config,
   }));
 }
@@ -201,13 +201,13 @@ export async function buildModeContext(userId: string): Promise<string> {
 // Get mode usage statistics
 export async function getModeStats(
   userId: string
-): Promise<Record<MoltMode, { totalSessions: number; totalMinutes: number }>> {
+): Promise<Record<EvolutionMode, { totalSessions: number; totalMinutes: number }>> {
   const history = await db
     .select()
     .from(moltModes)
     .where(eq(moltModes.userId, userId));
 
-  const stats: Record<MoltMode, { totalSessions: number; totalMinutes: number }> = {
+  const stats: Record<EvolutionMode, { totalSessions: number; totalMinutes: number }> = {
     productivity: { totalSessions: 0, totalMinutes: 0 },
     creative: { totalSessions: 0, totalMinutes: 0 },
     research: { totalSessions: 0, totalMinutes: 0 },
@@ -216,7 +216,7 @@ export async function getModeStats(
   };
 
   for (const entry of history) {
-    const mode = entry.mode as MoltMode;
+    const mode = entry.mode as EvolutionMode;
     stats[mode].totalSessions++;
 
     if (entry.deactivatedAt) {
@@ -231,7 +231,7 @@ export async function getModeStats(
 }
 
 // Suggest mode based on user input
-export function suggestMode(userMessage: string): MoltMode | null {
+export function suggestMode(userMessage: string): EvolutionMode | null {
   const lowerMessage = userMessage.toLowerCase();
 
   // Productivity keywords

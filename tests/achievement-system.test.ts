@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, mock } from "bun:test";
 import {
   DEFAULT_ACHIEVEMENTS,
-} from "../src/core/molt/achievement-system";
+} from "../src/core/evolution/achievement-system";
 
 describe("Achievement System", () => {
   describe("DEFAULT_ACHIEVEMENTS", () => {

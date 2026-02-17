@@ -2,7 +2,7 @@ import { describe, test, expect } from "bun:test";
 import {
   MODE_CONFIGS,
   getModeConfig,
-} from "../src/core/molt/mode-manager";
+} from "../src/core/evolution/mode-manager";
 
 describe("Mode Manager", () => {
   describe("MODE_CONFIGS", () => {
@@ -163,27 +163,27 @@ describe("Mode Manager", () => {
 
   describe("Module exports", () => {
     test("should export activateMode function", async () => {
-      const module = await import("../src/core/molt/mode-manager");
+      const module = await import("../src/core/evolution/mode-manager");
       expect(typeof module.activateMode).toBe("function");
     });
 
     test("should export getCurrentMode function", async () => {
-      const module = await import("../src/core/molt/mode-manager");
+      const module = await import("../src/core/evolution/mode-manager");
       expect(typeof module.getCurrentMode).toBe("function");
     });
 
     test("should export deactivateCurrentMode function", async () => {
-      const module = await import("../src/core/molt/mode-manager");
+      const module = await import("../src/core/evolution/mode-manager");
       expect(typeof module.deactivateCurrentMode).toBe("function");
     });
 
     test("should export getModeHistory function", async () => {
-      const module = await import("../src/core/molt/mode-manager");
+      const module = await import("../src/core/evolution/mode-manager");
       expect(typeof module.getModeHistory).toBe("function");
     });
 
     test("should export suggestMode function", async () => {
-      const module = await import("../src/core/molt/mode-manager");
+      const module = await import("../src/core/evolution/mode-manager");
       expect(typeof module.suggestMode).toBe("function");
     });
   });

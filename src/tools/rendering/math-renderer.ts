@@ -127,6 +127,67 @@ export const MATH_SYMBOLS = {
   exists: "\\exists",
 };
 
+/**
+ * Convert LaTeX expression to spoken/readable text.
+ * Handles common math notation like fractions, superscripts, Greek letters, etc.
+ */
+export function latexToSpeech(latex: string): string {
+  if (!latex) return "";
+  let s = latex.trim();
+
+  // Remove display-mode delimiters
+  s = s.replace(/^\$\$?|\$\$?$/g, "").trim();
+  s = s.replace(/^\\[(\[]|\\[)\]]$/g, "").trim();
+
+  // Fractions
+  s = s.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, "$1 over $2");
+  // Square roots
+  s = s.replace(/\\sqrt\[([^\]]+)\]\{([^}]+)\}/g, "the $1th root of $2");
+  s = s.replace(/\\sqrt\{([^}]+)\}/g, "the square root of $1");
+  // Superscripts
+  s = s.replace(/\^{([^}]+)}/g, " to the power of $1");
+  s = s.replace(/\^(\d)/g, " to the power of $1");
+  s = s.replace(/\^2/g, " squared");
+  s = s.replace(/\^3/g, " cubed");
+  // Subscripts
+  s = s.replace(/_{([^}]+)}/g, " sub $1");
+  s = s.replace(/_(\w)/g, " sub $1");
+  // Summation/product/integral
+  s = s.replace(/\\sum/g, "the sum of");
+  s = s.replace(/\\prod/g, "the product of");
+  s = s.replace(/\\int/g, "the integral of");
+  s = s.replace(/\\lim/g, "the limit of");
+  // Greek letters
+  const greekMap: Record<string, string> = {
+    "\\alpha": "alpha", "\\beta": "beta", "\\gamma": "gamma", "\\delta": "delta",
+    "\\epsilon": "epsilon", "\\theta": "theta", "\\lambda": "lambda", "\\mu": "mu",
+    "\\pi": "pi", "\\sigma": "sigma", "\\omega": "omega", "\\phi": "phi",
+    "\\psi": "psi", "\\rho": "rho", "\\tau": "tau",
+  };
+  for (const [tex, word] of Object.entries(greekMap)) {
+    s = s.replaceAll(tex, word);
+  }
+  // Common operators
+  s = s.replace(/\\times/g, " times ");
+  s = s.replace(/\\cdot/g, " times ");
+  s = s.replace(/\\div/g, " divided by ");
+  s = s.replace(/\\pm/g, " plus or minus ");
+  s = s.replace(/\\leq/g, " is less than or equal to ");
+  s = s.replace(/\\geq/g, " is greater than or equal to ");
+  s = s.replace(/\\neq/g, " is not equal to ");
+  s = s.replace(/\\approx/g, " is approximately ");
+  s = s.replace(/\\infty/g, "infinity");
+  s = s.replace(/=/g, " equals ");
+  s = s.replace(/\+/g, " plus ");
+  s = s.replace(/-/g, " minus ");
+  // Clean up remaining LaTeX commands and braces
+  s = s.replace(/\\[a-zA-Z]+/g, "");
+  s = s.replace(/[{}]/g, "");
+  // Normalize whitespace
+  s = s.replace(/\s+/g, " ").trim();
+  return s;
+}
+
 // Render LaTeX expression
 export async function renderMath(
   latex: string,
