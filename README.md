@@ -85,7 +85,11 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Verbosity and humor controls
 
 ### Security
-- 2FA for sensitive operations
+- **Gateway token auth** (optional, disabled by default for self-hosted)
+- **AES-256-GCM field encryption** for data at rest
+- **Tamper-proof audit logs** with HMAC-SHA256 chain integrity
+- **Incident response system** with automated detection and escalation
+- 2FA for sensitive operations (DB-persisted, encrypted secrets)
 - Biometric verification
 - Memory vault (encrypted storage)
 - Audit logging
@@ -189,6 +193,8 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 ### Web Dashboard
 1. Open http://localhost:8030 in your browser
 2. Type a message and click Send
+
+> **Note**: By default, no authentication is required (open access for self-hosted use). To secure the web dashboard, set the `GATEWAY_TOKEN` environment variable. When set, the UI will prompt for the token on first visit.
 
 ### API
 ```bash
@@ -296,7 +302,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 133 test files, 4,617+ tests
+tests/                          # 139 test files, 4,787+ tests
 ```
 
 ## Ports

@@ -11,15 +11,20 @@ try {
   serveStatic = () => async (_c: any, next: any) => next();
 }
 import { chat, chatWithTools, streamChat, type Message } from "../../core/brain";
+import { transcribeAudio } from "../../outputs/stt";
+import { textToSpeech } from "../../outputs/tts";
 import { db, conversations, messages, memories } from "../../db";
 import { desc, eq } from "drizzle-orm";
 import { searchMemories, storeMemory, updateMemory, deleteMemory, exportMemories, getMemoryById } from "../../core/memory";
+import { authMiddleware, requirePermission, getAuthUserId } from "../../core/security/auth-middleware";
+import { decryptField } from "../../core/security/field-encryption";
 
 const app = new Hono();
 
 // Middleware
 app.use("*", logger());
 app.use("/api/*", cors());
+app.use("/api/*", authMiddleware());
 
 // Health check
 app.get("/health", (c) => {
@@ -56,7 +61,7 @@ app.post("/api/chat", async (c) => {
 });
 
 // Chat with tools endpoint
-app.post("/api/chat/tools", async (c) => {
+app.post("/api/chat/tools", requirePermission("chat:tools" as any), async (c) => {
   try {
     const body = await c.req.json<{
       messages: Message[];
@@ -155,7 +160,19 @@ app.get("/api/conversations/:id", async (c) => {
       .where(eq(messages.conversationId, id))
       .orderBy(messages.createdAt);
 
-    return c.json({ conversation: convo[0], messages: msgs });
+    // Decrypt encrypted messages
+    const decryptedMsgs = msgs.map((m) => {
+      if ((m as any).encrypted && m.content) {
+        try {
+          return { ...m, content: decryptField(m.content) ?? m.content };
+        } catch {
+          return m;
+        }
+      }
+      return m;
+    });
+
+    return c.json({ conversation: convo[0], messages: decryptedMsgs });
   } catch (error) {
     console.error("Error fetching conversation:", error);
     return c.json({ error: "Internal server error" }, 500);
@@ -283,7 +300,7 @@ app.put("/api/memories/:id", async (c) => {
 });
 
 // Delete a memory (soft-delete to archive)
-app.delete("/api/memories/:id", async (c) => {
+app.delete("/api/memories/:id", requirePermission("memories:delete" as any), async (c) => {
   try {
     const id = c.req.param("id");
     const deleted = await deleteMemory(id);
@@ -403,6 +420,120 @@ app.route("/api/osint", osintRoutes);
 import { sdkRoutes } from "./routes/sdk";
 app.route("/api/sdk", sdkRoutes);
 
+// ===== Incident Response API =====
+
+app.get("/api/incidents", requirePermission("admin:settings" as any), async (c) => {
+  try {
+    const { getOpenIncidents } = await import("../../core/security/incident-response");
+    const severity = c.req.query("severity") as any;
+    const type = c.req.query("type") as any;
+    const incidents = await getOpenIncidents({ severity, type, limit: 50 });
+    return c.json(incidents);
+  } catch (error) {
+    return c.json({ error: "Incident system not available" }, 500);
+  }
+});
+
+app.get("/api/incidents/:id", requirePermission("admin:settings" as any), async (c) => {
+  try {
+    const { generateIncidentReport } = await import("../../core/security/incident-response");
+    const id = c.req.param("id");
+    const report = await generateIncidentReport(id);
+    return c.json(report);
+  } catch (error) {
+    return c.json({ error: "Incident not found" }, 404);
+  }
+});
+
+app.post("/api/incidents/:id/status", requirePermission("admin:settings" as any), async (c) => {
+  try {
+    const { updateIncidentStatus } = await import("../../core/security/incident-response");
+    const id = c.req.param("id");
+    const body = await c.req.json<{ status: string; notes?: string }>();
+    const userId = getAuthUserId(c);
+    const updated = await updateIncidentStatus(id, body.status as any, userId, body.notes);
+    return c.json(updated);
+  } catch (error) {
+    return c.json({ error: "Failed to update incident" }, 500);
+  }
+});
+
+app.post("/api/incidents/:id/resolve", requirePermission("admin:settings" as any), async (c) => {
+  try {
+    const { resolveIncident } = await import("../../core/security/incident-response");
+    const id = c.req.param("id");
+    const body = await c.req.json<{ notes: string }>();
+    const userId = getAuthUserId(c);
+    const resolved = await resolveIncident(id, body.notes, userId);
+    return c.json(resolved);
+  } catch (error) {
+    return c.json({ error: "Failed to resolve incident" }, 500);
+  }
+});
+
+// ===== Audit Chain Integrity API =====
+
+app.get("/api/audit/integrity", requirePermission("admin:settings" as any), async (c) => {
+  try {
+    const { getAuditChainIntegrity } = await import("../../core/security/audit-logger");
+    const integrity = await getAuditChainIntegrity();
+    return c.json(integrity);
+  } catch (error) {
+    return c.json({ error: "Audit system not available" }, 500);
+  }
+});
+
+// ===== Voice API (STT / TTS) =====
+
+app.post("/api/transcribe", async (c) => {
+  try {
+    const formData = await c.req.formData();
+    const audioFile = formData.get("audio");
+
+    if (!audioFile || !(audioFile instanceof File)) {
+      return c.json({ error: "audio file is required" }, 400);
+    }
+
+    const buffer = Buffer.from(await audioFile.arrayBuffer());
+    const text = await transcribeAudio(buffer);
+
+    if (!text) {
+      return c.json({ error: "Could not transcribe audio" }, 500);
+    }
+
+    return c.json({ text });
+  } catch (error) {
+    console.error("Transcribe API error:", error);
+    return c.json({ error: "Transcription failed" }, 500);
+  }
+});
+
+app.post("/api/tts", async (c) => {
+  try {
+    const body = await c.req.json<{ text: string }>();
+
+    if (!body.text) {
+      return c.json({ error: "text is required" }, 400);
+    }
+
+    const audioBuffer = await textToSpeech(body.text);
+
+    if (!audioBuffer) {
+      return c.json({ error: "Text-to-speech failed" }, 500);
+    }
+
+    return new Response(new Uint8Array(audioBuffer), {
+      headers: {
+        "Content-Type": "audio/mpeg",
+        "Content-Length": String(audioBuffer.length),
+      },
+    });
+  } catch (error) {
+    console.error("TTS API error:", error);
+    return c.json({ error: "TTS failed" }, 500);
+  }
+});
+
 // ===== System API =====
 
 app.get("/api/system/status", async (c) => {
@@ -411,7 +542,7 @@ app.get("/api/system/status", async (c) => {
   if (authHeader?.startsWith("Bearer ")) {
     return c.json({
       status: "online",
-      version: "2.1.1",
+      version: "2.7.0",
       uptime: process.uptime(),
       memory: process.memoryUsage(),
     });
@@ -419,7 +550,7 @@ app.get("/api/system/status", async (c) => {
   // Public: only expose status and version (no runtime details)
   return c.json({
     status: "online",
-    version: "2.1.1",
+    version: "2.7.0",
   });
 });
 

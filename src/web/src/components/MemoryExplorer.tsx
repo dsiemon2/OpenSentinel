@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiFetch } from "../lib/api";
 
 interface Memory {
   id: string;
@@ -21,7 +22,7 @@ export default function MemoryExplorer() {
   const fetchMemories = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/memories?limit=50");
+      const response = await apiFetch("/api/memories?limit=50");
       const data = await response.json();
       setMemories(data);
     } catch (error) {
@@ -39,7 +40,7 @@ export default function MemoryExplorer() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/memories/search", {
+      const response = await apiFetch("/api/memories/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: searchQuery }),

@@ -2,6 +2,7 @@ import { db, memories, archivedMemories, type NewMemory, type Memory } from "../
 import { eq, desc, sql, and } from "drizzle-orm";
 import OpenAI from "openai";
 import { env } from "../config/env";
+import { encryptField, decryptField, isEncryptionAvailable } from "./security/field-encryption";
 
 // Lazy OpenAI client — created on first use
 let _openai: OpenAI | null = null;
@@ -32,21 +33,29 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 // Store a new memory with embedding and tsvector
+// Content is encrypted at rest when ENCRYPTION_MASTER_KEY is configured
 export async function storeMemory(
   memory: Omit<NewMemory, "embedding" | "searchVector">
 ): Promise<Memory> {
+  // Generate embedding from plaintext BEFORE encryption (vectors can't be encrypted)
   const embedding = await generateEmbedding(memory.content);
+
+  // Encrypt content at rest if encryption is available
+  const shouldEncrypt = isEncryptionAvailable();
+  const contentForDb = shouldEncrypt ? encryptField(memory.content)! : memory.content;
 
   const [stored] = await db
     .insert(memories)
     .values({
       ...memory,
+      content: contentForDb,
+      encrypted: shouldEncrypt,
       embedding,
       provenance: memory.provenance || `${memory.source || "unknown"}:auto`,
     })
     .returning();
 
-  // Update tsvector for full-text search
+  // Update tsvector for full-text search (uses plaintext for indexing)
   try {
     await db.execute(sql`
       UPDATE memories
@@ -57,7 +66,8 @@ export async function storeMemory(
     // tsvector update is non-critical
   }
 
-  return stored;
+  // Return with plaintext content (caller expects readable content)
+  return { ...stored, content: memory.content };
 }
 
 // Update an existing memory
@@ -128,6 +138,17 @@ export async function exportMemories(
     .where(userId ? eq(memories.userId, userId) : undefined)
     .orderBy(desc(memories.createdAt));
 
+  // Decrypt encrypted memories
+  for (const m of mems) {
+    if ((m as any).encrypted) {
+      try {
+        (m as any).content = decryptField(m.content) ?? m.content;
+      } catch {
+        // If decryption fails, return as-is
+      }
+    }
+  }
+
   if (format === "json") {
     return JSON.stringify(
       mems.map((m) => ({
@@ -193,6 +214,17 @@ export async function searchMemories(
     `);
   }
 
+  // Decrypt content for any encrypted memories
+  for (const row of rows) {
+    if (row.encrypted) {
+      try {
+        row.content = decryptField(row.content) ?? row.content;
+      } catch {
+        // If decryption fails, return as-is
+      }
+    }
+  }
+
   return rows as Memory[];
 }
 
@@ -201,7 +233,15 @@ export async function getMemoryById(id: string): Promise<Memory | null> {
   const result = await db.execute(sql`
     SELECT * FROM memories WHERE id = ${id}
   `);
-  return (result as any[])[0] || null;
+  const row = (result as any[])[0] || null;
+  if (row && row.encrypted) {
+    try {
+      row.content = decryptField(row.content) ?? row.content;
+    } catch {
+      // If decryption fails, return as-is
+    }
+  }
+  return row;
 }
 
 // Get recent memories for a user

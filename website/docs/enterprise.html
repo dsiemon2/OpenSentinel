@@ -200,8 +200,20 @@
         <h2 id="security">Security</h2>
         <p>OpenSentinel includes multiple layers of security to protect your data and infrastructure. Every security feature can be enabled independently.</p>
 
+        <h3>Gateway Token Authentication</h3>
+        <p>Optional shared-secret authentication for the web UI and API. Disabled by default for self-hosted/localhost use. Set <code>GATEWAY_TOKEN</code> in your environment to require authentication. When enabled, the web UI prompts for the token on first visit and stores it in localStorage for subsequent requests. Uses constant-time comparison to prevent timing attacks.</p>
+
+        <h3>AES-256-GCM Field Encryption</h3>
+        <p>Sensitive data is encrypted at rest using AES-256-GCM. Memory content, 2FA secrets, and other sensitive fields are encrypted before database insertion and decrypted transparently on read. Set <code>FIELD_ENCRYPTION_KEY</code> to enable.</p>
+
+        <h3>Tamper-Proof Audit Logs</h3>
+        <p>Audit log entries are chained using HMAC-SHA256 hashes with sequence numbers. Each entry references the previous entry's hash, forming an immutable chain. Any tampering with historical records is detectable via chain integrity verification.</p>
+
+        <h3>Incident Response System</h3>
+        <p>Automated security incident detection, classification, and escalation. Incidents are categorized by severity (low/medium/high/critical) with configurable notification channels and response playbooks.</p>
+
         <h3>Two-Factor Authentication (2FA)</h3>
-        <p>TOTP-based 2FA compatible with Google Authenticator, Authy, and other authenticator apps. Required for admin accounts by default.</p>
+        <p>TOTP-based 2FA compatible with Google Authenticator, Authy, and other authenticator apps. Secrets are encrypted at rest and persisted in the database. Required for admin accounts by default.</p>
 
         <h3>Biometric Verification</h3>
         <p>Optional biometric verification for sensitive operations using WebAuthn/FIDO2. Supports fingerprint readers, Face ID, and hardware security keys.</p>
