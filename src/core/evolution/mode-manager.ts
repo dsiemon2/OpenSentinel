@@ -1,5 +1,5 @@
 import { db } from "../../db";
-import { moltModes, users } from "../../db/schema";
+import { evolutionModes, users } from "../../db/schema";
 import { eq, and, isNull, desc } from "drizzle-orm";
 import { audit } from "../security/audit-logger";
 
@@ -115,9 +115,9 @@ export const MODE_CONFIGS: Record<EvolutionMode, ModeConfig> = {
 export async function getCurrentMode(userId: string): Promise<EvolutionMode | null> {
   const [activeMode] = await db
     .select()
-    .from(moltModes)
-    .where(and(eq(moltModes.userId, userId), isNull(moltModes.deactivatedAt)))
-    .orderBy(desc(moltModes.activatedAt))
+    .from(evolutionModes)
+    .where(and(eq(evolutionModes.userId, userId), isNull(evolutionModes.deactivatedAt)))
+    .orderBy(desc(evolutionModes.activatedAt))
     .limit(1);
 
   return activeMode?.mode as EvolutionMode | null;
@@ -135,7 +135,7 @@ export async function activateMode(
   await deactivateCurrentMode(userId);
 
   // Activate new mode
-  await db.insert(moltModes).values({
+  await db.insert(evolutionModes).values({
     userId,
     mode,
     metadata,
@@ -147,9 +147,9 @@ export async function activateMode(
 
 export async function deactivateCurrentMode(userId: string): Promise<boolean> {
   const [deactivated] = await db
-    .update(moltModes)
+    .update(evolutionModes)
     .set({ deactivatedAt: new Date() })
-    .where(and(eq(moltModes.userId, userId), isNull(moltModes.deactivatedAt)))
+    .where(and(eq(evolutionModes.userId, userId), isNull(evolutionModes.deactivatedAt)))
     .returning();
 
   return !!deactivated;
@@ -161,9 +161,9 @@ export async function getModeHistory(
 ): Promise<Array<{ mode: EvolutionMode; activatedAt: Date; deactivatedAt: Date | null }>> {
   const history = await db
     .select()
-    .from(moltModes)
-    .where(eq(moltModes.userId, userId))
-    .orderBy(desc(moltModes.activatedAt))
+    .from(evolutionModes)
+    .where(eq(evolutionModes.userId, userId))
+    .orderBy(desc(evolutionModes.activatedAt))
     .limit(limit);
 
   return history.map((h) => ({
@@ -204,8 +204,8 @@ export async function getModeStats(
 ): Promise<Record<EvolutionMode, { totalSessions: number; totalMinutes: number }>> {
   const history = await db
     .select()
-    .from(moltModes)
-    .where(eq(moltModes.userId, userId));
+    .from(evolutionModes)
+    .where(eq(evolutionModes.userId, userId));
 
   const stats: Record<EvolutionMode, { totalSessions: number; totalMinutes: number }> = {
     productivity: { totalSessions: 0, totalMinutes: 0 },

@@ -14,7 +14,7 @@ import {
   agentProgress,
   usagePatterns,
   userAchievements,
-  moltModes,
+  evolutionModes,
   personas,
   organizationMembers,
 } from "../../db/schema";
@@ -721,7 +721,7 @@ async function executeDataDeletion(request: DataDeletionRequest): Promise<void> 
         // Delete personas
         await db.delete(personas).where(eq(personas.userId, userId));
         // Delete evolution modes
-        await db.delete(moltModes).where(eq(moltModes.userId, userId));
+        await db.delete(evolutionModes).where(eq(evolutionModes.userId, userId));
         // Clear user preferences
         await db
           .update(users)

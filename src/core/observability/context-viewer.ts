@@ -6,7 +6,7 @@
  */
 
 import { db } from "../../db";
-import { conversations, messages, memories, toolLogs, moltModes, personas } from "../../db/schema";
+import { conversations, messages, memories, toolLogs, evolutionModes, personas } from "../../db/schema";
 import { eq, asc, and, lte, desc } from "drizzle-orm";
 import type { MessageParam, ContentBlockParam } from "@anthropic-ai/sdk/resources/messages";
 
@@ -430,20 +430,20 @@ async function buildModeContext(userId?: string): Promise<ModeContext> {
   // Get active mode
   const [activeMode] = await db
     .select()
-    .from(moltModes)
+    .from(evolutionModes)
     .where(and(
-      eq(moltModes.userId, userId),
-      eq(moltModes.deactivatedAt, null as unknown as Date)
+      eq(evolutionModes.userId, userId),
+      eq(evolutionModes.deactivatedAt, null as unknown as Date)
     ))
-    .orderBy(desc(moltModes.activatedAt))
+    .orderBy(desc(evolutionModes.activatedAt))
     .limit(1);
 
   // Get mode history
   const modeHistory = await db
     .select()
-    .from(moltModes)
-    .where(eq(moltModes.userId, userId))
-    .orderBy(desc(moltModes.activatedAt))
+    .from(evolutionModes)
+    .where(eq(evolutionModes.userId, userId))
+    .orderBy(desc(evolutionModes.activatedAt))
     .limit(10);
 
   return {

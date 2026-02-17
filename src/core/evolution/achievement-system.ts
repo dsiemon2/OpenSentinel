@@ -6,7 +6,7 @@ import {
   toolLogs,
   memories,
   conversations,
-  moltModes,
+  evolutionModes,
 } from "../../db/schema";
 import { eq, and, count, gte, sql } from "drizzle-orm";
 
@@ -338,10 +338,10 @@ export async function checkAchievements(
 
       case "unique_modes":
         const modes = await db
-          .select({ mode: moltModes.mode })
-          .from(moltModes)
-          .where(eq(moltModes.userId, userId))
-          .groupBy(moltModes.mode);
+          .select({ mode: evolutionModes.mode })
+          .from(evolutionModes)
+          .where(eq(evolutionModes.userId, userId))
+          .groupBy(evolutionModes.mode);
         shouldUnlock = modes.length >= criteria.threshold;
         break;
     }

@@ -309,7 +309,7 @@ export const userAchievements = pgTable(
 );
 
 // Evolution transformation modes
-export const moltModes = pgTable(
+export const evolutionModes = pgTable(
   "molt_modes",
   {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -685,8 +685,8 @@ export type NewUsagePattern = typeof usagePatterns.$inferInsert;
 export type Achievement = typeof achievements.$inferSelect;
 export type NewAchievement = typeof achievements.$inferInsert;
 export type UserAchievement = typeof userAchievements.$inferSelect;
-export type MoltMode = typeof moltModes.$inferSelect;
-export type NewMoltMode = typeof moltModes.$inferInsert;
+export type EvolutionMode = typeof evolutionModes.$inferSelect;
+export type NewEvolutionMode = typeof evolutionModes.$inferInsert;
 
 // Sub-agent types
 export type SubAgent = typeof subAgents.$inferSelect;
