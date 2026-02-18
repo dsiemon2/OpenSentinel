@@ -279,10 +279,10 @@ function getSpotifyClient(): SpotifyClient {
     spotifyClient = createSpotifyClient({
       clientId: env.SPOTIFY_CLIENT_ID,
       clientSecret: env.SPOTIFY_CLIENT_SECRET,
-      redirectUri: env.SPOTIFY_REDIRECT_URI || `https://app.opensentinel.ai/api/callbacks/spotify`,
+      redirectUri: env.SPOTIFY_REDIRECT_URI || `http://localhost:${env.PORT}/api/callbacks/spotify`,
     });
     // Seed refresh token from env if available (skips interactive OAuth flow)
-    const refreshToken = (env as any).SPOTIFY_REFRESH_TOKEN;
+    const refreshToken = env.SPOTIFY_REFRESH_TOKEN;
     if (refreshToken) {
       spotifyClient.auth.setTokens({
         accessToken: "",
