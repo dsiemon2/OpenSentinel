@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect, beforeAll } from "bun:test";
 
 // ============================================================================
 // RAG Retrieval Cache & Contextual Query — Comprehensive Tests
@@ -6,10 +6,20 @@ import { describe, test, expect } from "bun:test";
 // Tests cover the RetrievalCache class (Redis-backed caching for RAG search
 // results) and the buildContextualQuery function (LLM-based query rewriting).
 //
-// All tests run with default env values (features disabled, no Redis/LLM),
+// All tests run with features explicitly disabled (no Redis/LLM),
 // so they validate feature gating, interface contracts, error resilience,
 // and edge-case behavior without requiring external services.
 // ============================================================================
+
+// Ensure RAG features are disabled for these tests (they test disabled behavior)
+beforeAll(async () => {
+  const { configure } = await import("../src/config/env");
+  configure({
+    CLAUDE_API_KEY: "test-key",
+    RETRIEVAL_CACHE_ENABLED: false,
+    CONTEXTUAL_QUERY_ENABLED: false,
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Retrieval Cache

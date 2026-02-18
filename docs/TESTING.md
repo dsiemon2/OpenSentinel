@@ -2,7 +2,7 @@
 
 ## Overview
 
-OpenSentinel has a comprehensive test suite with **4,617+ tests** containing **11,464+ assertions** across **133 test files**. Tests cover the core brain, all input channels, integrations, tools, and utility modules.
+OpenSentinel v3.0.0 has a comprehensive test suite with **5,000+ tests** across **145+ test files**. Tests cover the core brain, all input channels, integrations, tools, and utility modules.
 
 ## Test Framework
 

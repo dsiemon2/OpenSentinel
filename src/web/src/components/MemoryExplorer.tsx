@@ -14,6 +14,7 @@ export default function MemoryExplorer() {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMemories();
@@ -21,12 +22,19 @@ export default function MemoryExplorer() {
 
   const fetchMemories = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await apiFetch("/api/memories?limit=50");
+      if (!response.ok) throw new Error(`Server returned ${response.status}`);
       const data = await response.json();
-      setMemories(data);
-    } catch (error) {
-      console.error("Error fetching memories:", error);
+      if (Array.isArray(data)) {
+        setMemories(data);
+      } else {
+        setMemories([]);
+      }
+    } catch (err) {
+      console.error("Error fetching memories:", err);
+      setError("Failed to load memories. Check database connection.");
     } finally {
       setLoading(false);
     }
@@ -47,8 +55,9 @@ export default function MemoryExplorer() {
       });
       const data = await response.json();
       setMemories(data);
-    } catch (error) {
-      console.error("Error searching memories:", error);
+    } catch (err) {
+      console.error("Error searching memories:", err);
+      setError("Search failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -91,12 +100,16 @@ export default function MemoryExplorer() {
         </button>
       </div>
 
+      {error && (
+        <p style={{ color: "#ef4444", marginBottom: "1rem" }}>{error}</p>
+      )}
+
       {loading ? (
         <div className="loading">
           <div className="spinner" />
           Loading memories...
         </div>
-      ) : memories.length === 0 ? (
+      ) : memories.length === 0 && !error ? (
         <p style={{ color: "var(--text-secondary)" }}>
           No memories found. Memories are automatically extracted from
           conversations.

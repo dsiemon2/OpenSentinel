@@ -220,7 +220,7 @@ export async function checkRedis(): Promise<{ installed: boolean; running: boole
 export function printBanner() {
   console.log(`
 ${colors.cyan}${colors.bold}╔══════════════════════════════════════════╗
-║           OPENSENTINEL v2.0.0            ║
+║           OPENSENTINEL v3.0.0            ║
 ║       Your Personal AI Assistant         ║
 ╚══════════════════════════════════════════╝${colors.reset}
 `);

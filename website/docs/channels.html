@@ -572,12 +572,14 @@ signal-cli -u +1234567890 jsonRpc
         <!-- ========== Web Dashboard ========== -->
         <h2 id="web-dashboard">Web Dashboard</h2>
 
-        <p>OpenSentinel includes a built-in React web dashboard accessible at <code>http://localhost:8030</code>. It provides a full chat interface, memory explorer, and settings management. The dashboard is always available when the server is running.</p>
+        <p>OpenSentinel includes a built-in React web dashboard accessible at <code>http://localhost:8030</code>. It provides five views: Chat, Memories, Graph, Email, and Settings. The dashboard is always available when the server is running.</p>
 
         <h3>Features</h3>
         <ul>
           <li><strong>Chat interface</strong> &mdash; Full-featured chat UI with markdown rendering, code highlighting, and file attachments</li>
           <li><strong>Memory explorer</strong> &mdash; Browse and search the RAG vector memory system</li>
+          <li><strong>OSINT Graph Explorer</strong> &mdash; Interactive D3 visualization of entity relationships and knowledge graph</li>
+          <li><strong>Web email client</strong> &mdash; Browse inbox, read HTML emails, download/view attachments, compose with attachments, reply, and forward</li>
           <li><strong>Settings panel</strong> &mdash; Configure personality, active tools, and channel preferences</li>
           <li><strong>Real-time streaming</strong> &mdash; Uses the WebSocket channel under the hood for token-by-token streaming</li>
           <li><strong>Mobile responsive</strong> &mdash; Works on phones and tablets</li>

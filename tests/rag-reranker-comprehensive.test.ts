@@ -1,6 +1,14 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect, beforeAll } from "bun:test";
 import type { HybridSearchResult } from "../src/core/memory/hybrid-search";
 import type { RankedResult, RerankOptions } from "../src/core/memory/reranker";
+
+beforeAll(async () => {
+  const { configure } = await import("../src/config/env");
+  configure({
+    CLAUDE_API_KEY: "test-key",
+    RERANK_ENABLED: false,
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -15,7 +15,7 @@ import { initializeProviders } from "./core/providers";
 export async function main() {
   console.log(`
 ╔══════════════════════════════════════════╗
-║           OPENSENTINEL v2.0.0            ║
+║           OPENSENTINEL v3.0.0            ║
 ║     Your Personal AI Assistant           ║
 ╚══════════════════════════════════════════╝
 `);
@@ -23,15 +23,26 @@ export async function main() {
   // Initialize LLM providers (Anthropic, OpenRouter, Groq, Mistral, Ollama, etc.)
   await initializeProviders();
 
-  // Start Telegram bot
-  console.log("[Telegram] Starting bot...");
-  const bot = createBot();
+  // Start Telegram bot (only if token is configured)
+  let bot: ReturnType<typeof createBot> | null = null;
+  if (env.TELEGRAM_BOT_TOKEN) {
+    console.log("[Telegram] Starting bot...");
+    bot = createBot();
+
+    bot.start({
+      onStart: (botInfo) => {
+        console.log(`[Telegram] Bot started as @${botInfo.username}`);
+      },
+    });
+  } else {
+    console.log("[Telegram] No bot token configured, skipping");
+  }
 
   // Start scheduler worker
   try {
     startWorker(async (task) => {
       console.log(`[Scheduler] Executing task: ${task.type}`);
-      if (task.chatId && task.message) {
+      if (task.chatId && task.message && bot) {
         try {
           await bot.api.sendMessage(task.chatId, `⏰ Reminder: ${task.message}`);
         } catch (err) {
@@ -42,12 +53,6 @@ export async function main() {
   } catch (err) {
     console.warn("[Scheduler] Could not start worker (Redis may be unavailable):", err);
   }
-
-  bot.start({
-    onStart: (botInfo) => {
-      console.log(`[Telegram] Bot started as @${botInfo.username}`);
-    },
-  });
 
   // Initialize MCP (Model Context Protocol) servers
   let mcpRegistry: MCPRegistry | null = null;
@@ -262,7 +267,7 @@ export async function main() {
 
   console.log("");
   const channels = [
-    "Telegram",
+    bot ? "Telegram" : null,
     discordBot ? "Discord" : null,
     slackBot ? "Slack" : null,
     whatsappBot ? "WhatsApp" : null,
@@ -283,7 +288,7 @@ export async function main() {
     stopWorker();
     wsHandler.closeAllConnections();
     if (mcpRegistry) await mcpRegistry.shutdown();
-    await bot.stop();
+    if (bot) await bot.stop();
     if (discordBot) await discordBot.stop();
     if (slackBot) await slackBot.stop();
     if (whatsappBot) await whatsappBot.stop();

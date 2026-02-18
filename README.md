@@ -23,7 +23,7 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Browse the web with Playwright
 - Search the internet
 - Set reminders and scheduled tasks
-- Remember things about you (advanced RAG: HyDE, re-ranking, multi-step, caching)
+- Remember things about you (advanced RAG: HyDE, re-ranking, multi-step, graph RAG, caching)
 - Respond with voice (JARVIS voice via ElevenLabs)
 
 ### Advanced Voice
@@ -114,7 +114,7 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Prometheus metrics export (GET /metrics)
 
 ### Integrations
-- **Email**: IMAP/SMTP with AI inbox summarization
+- **Email**: IMAP/SMTP with AI inbox summarization + web email client (read, compose, attachments)
 - **SMS/Phone**: Twilio for calls and texts
 - **GitHub**: Repos, issues, PRs, AI code review
 - **Notion**: Pages, databases, search, sync
@@ -302,7 +302,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 144 test files, 4,969+ tests
+tests/                          # 145+ test files, 5,000+ tests
 ```
 
 ## Ports

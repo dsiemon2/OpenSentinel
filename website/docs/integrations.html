@@ -127,7 +127,7 @@
         <table>
           <thead><tr><th>Integration</th><th>Category</th><th>Key Features</th></tr></thead>
           <tbody>
-            <tr><td><strong>Email</strong></td><td>Communication</td><td>Read inbox, send, AI summarization</td></tr>
+            <tr><td><strong>Email</strong></td><td>Communication</td><td>Web email client, inbox, send with attachments, AI summarization</td></tr>
             <tr><td><strong>Twilio</strong></td><td>Communication</td><td>SMS, phone calls, voice messages</td></tr>
             <tr><td><strong>GitHub</strong></td><td>Developer</td><td>Repos, issues, PRs, code review</td></tr>
             <tr><td><strong>Notion</strong></td><td>Productivity</td><td>Pages, databases, search, sync</td></tr>
@@ -143,15 +143,19 @@
 
 
         <!-- ========== Email ========== -->
-        <h2 id="email">Email (IMAP/SMTP)</h2>
-        <p>Read your inbox, send emails, and get AI-powered summaries of threads. OpenSentinel connects to any IMAP/SMTP provider including Gmail, Outlook, Fastmail, and self-hosted mail servers.</p>
+        <h2 id="email">Email (IMAP/SMTP + Web Client)</h2>
+        <p>Full email client built into the dashboard, plus IMAP/SMTP integration with any provider including Gmail, Outlook, Fastmail, and self-hosted mail servers. Browse your inbox, read HTML emails, download and view attachments, compose with attachments, reply, and forward &mdash; all from the web UI. Eight dedicated REST API endpoints at <code>/api/email/*</code> power the experience.</p>
 
         <h3>Capabilities</h3>
         <ul>
+          <li><strong>Web email client</strong> &mdash; full email interface in the dashboard with HTML rendering and attachment support</li>
           <li><strong>Read inbox</strong> &mdash; fetch recent emails, filter by sender, subject, or date</li>
-          <li><strong>Send emails</strong> &mdash; compose and send with optional attachments</li>
+          <li><strong>Send emails</strong> &mdash; compose and send with file attachments from the dashboard or API</li>
+          <li><strong>Reply &amp; forward</strong> &mdash; reply to and forward emails directly from the web client</li>
+          <li><strong>Attachments</strong> &mdash; download, view, and attach files with full MIME type support</li>
           <li><strong>AI summarization</strong> &mdash; get summaries of long threads or daily digests</li>
           <li><strong>Action extraction</strong> &mdash; automatically identify action items from emails</li>
+          <li><strong>8 REST API endpoints</strong> &mdash; <code>/api/email/inbox</code>, <code>/api/email/read</code>, <code>/api/email/send</code>, <code>/api/email/reply</code>, <code>/api/email/forward</code>, <code>/api/email/attachment</code>, <code>/api/email/search</code>, <code>/api/email/folders</code></li>
         </ul>
 
         <h3>Configuration</h3>

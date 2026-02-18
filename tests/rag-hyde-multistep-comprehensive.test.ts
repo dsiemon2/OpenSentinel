@@ -7,7 +7,16 @@
  * No mock() or spyOn() is used.
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect, beforeAll } from "bun:test";
+
+beforeAll(async () => {
+  const { configure } = await import("../src/config/env");
+  configure({
+    CLAUDE_API_KEY: "test-key",
+    HYDE_ENABLED: false,
+    MULTISTEP_RAG_ENABLED: false,
+  });
+});
 
 import {
   generateHypotheticalDocument,

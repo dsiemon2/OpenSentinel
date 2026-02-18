@@ -1,6 +1,6 @@
 # Configuration Reference
 
-This document provides a complete reference for all environment variables used by OpenSentinel v2.7.0. Configuration is managed through environment variables, validated at startup using Zod schemas defined in `src/config/env.ts`.
+This document provides a complete reference for all environment variables used by OpenSentinel v3.0.0. Configuration is managed through environment variables, validated at startup using Zod schemas defined in `src/config/env.ts`.
 
 ## Table of Contents
 
@@ -179,6 +179,24 @@ This document provides a complete reference for all environment variables used b
 |----------|-------------|---------|----------|
 | `MCP_ENABLED` | Enable or disable MCP server connections. Set to `false` to disable. | `true` | No |
 | `MCP_CONFIG_PATH` | Path to the MCP configuration JSON file that defines available MCP servers. | `./mcp.json` | No |
+
+## Advanced RAG Pipeline
+
+As of v3.0.0, all 5 RAG enhancement techniques are enabled by default.
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `HYDE_ENABLED` | Enable HyDE (Hypothetical Document Embeddings) for improved semantic matching. | `true` | No |
+| `RERANK_ENABLED` | Enable LLM cross-encoder re-ranking of retrieval results. | `true` | No |
+| `CONTEXTUAL_QUERY_ENABLED` | Enable contextual query rewriting from conversation history. | `true` | No |
+| `MULTISTEP_RAG_ENABLED` | Enable recursive multi-step RAG with automatic gap detection. | `true` | No |
+| `RETRIEVAL_CACHE_ENABLED` | Enable Redis-backed retrieval caching with TTL expiry. | `true` | No |
+
+## OSINT & Graph
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `OSINT_ENABLED` | Enable OSINT data mining and graph explorer features. | `true` | No |
 
 ## Application
 

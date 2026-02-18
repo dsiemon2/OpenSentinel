@@ -6,8 +6,9 @@ import GatewayAuth from "./components/GatewayAuth";
 import { isAuthRequired, apiFetch, clearStoredToken } from "./lib/api";
 
 const GraphExplorer = lazy(() => import("./components/GraphExplorer"));
+const Email = lazy(() => import("./components/Email"));
 
-type View = "chat" | "memories" | "graph" | "settings";
+type View = "chat" | "memories" | "graph" | "email" | "settings";
 
 interface SystemStatus {
   status: string;
@@ -108,6 +109,12 @@ function App() {
             Graph
           </div>
           <div
+            className={`nav-item ${view === "email" ? "active" : ""}`}
+            onClick={() => setView("email")}
+          >
+            Email
+          </div>
+          <div
             className={`nav-item ${view === "settings" ? "active" : ""}`}
             onClick={() => setView("settings")}
           >
@@ -131,6 +138,11 @@ function App() {
         {view === "graph" && (
           <Suspense fallback={<div style={{ padding: 24 }}>Loading Graph Explorer...</div>}>
             <GraphExplorer />
+          </Suspense>
+        )}
+        {view === "email" && (
+          <Suspense fallback={<div style={{ padding: 24 }}>Loading Email...</div>}>
+            <Email />
           </Suspense>
         )}
         {view === "settings" && <Settings />}

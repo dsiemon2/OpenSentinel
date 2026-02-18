@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-02-18
+
+### Added
+- **Email Web Interface**: Full email client in the web dashboard
+  - Browse inbox with folder navigation and search
+  - Read emails with HTML rendering (sandboxed iframe) and plain text fallback
+  - View and download attachments
+  - Compose new emails with file attachments (drag-and-drop + file picker)
+  - Reply, reply all, forward actions
+  - Mark read/unread, flag, delete
+  - 8 new REST API endpoints (`/api/email/*`) for email operations
+- **OSINT Graph Explorer Fix**: D3.js force-directed graph visualization now works in Vite/ESM
+- **Advanced RAG Pipeline Enabled**: All 5 RAG enhancement techniques enabled by default
+  - HyDE (Hypothetical Document Embeddings)
+  - Cross-Encoder Re-ranking
+  - Contextual Query Rewriting
+  - Multi-Step RAG with gap detection
+  - Redis-backed Retrieval Caching
+- **Database Migration**: New tables for document chunks, graph entities/relationships, security incidents, incident timeline, 2FA persistence
+
+### Fixed
+- **Graph page 403 error**: OSINT routes were gated behind `OSINT_ENABLED` (default false); now enabled
+- **Settings page crash**: Used raw `fetch()` without auth header, causing undefined access on `status.memory.heapUsed`; switched to `apiFetch()` with null-safe rendering
+- **Memories page silent failures**: Added error state display and response validation
+- **D3.js not loading**: Changed from CommonJS `require("d3")` to ES module `import * as d3` for Vite compatibility
+- **All dashboard API calls**: Graph Explorer, Settings, and Memory Explorer now use `apiFetch()` for consistent auth handling
+
+### Changed
+- Version bump: 2.9.0 → 3.0.0
+- Tool count: 126 → 126 (email uses existing tools, web UI is new frontend)
+- Dashboard views: 4 → 5 (added Email page)
+- All RAG feature flags default to `true` in `.env.example`
+- `.env.example` updated: Google Services unified OAuth2, exchange/DeFi/on-chain vars uncommented, Spotify redirect URI fixed, RAG flags section added
+
 ## [2.9.0] - 2026-02-18
 
 ### Added
@@ -276,7 +310,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Desktop app (Electron)
 - Browser extension (Chrome/Firefox)
 
-[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v2.9.0...HEAD
+[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.9.0...v3.0.0
 [2.9.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.5.1...v2.7.0

@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import * as d3 from "d3";
+import { apiFetch } from "../lib/api";
 import EntityDetailPanel from "./EntityDetailPanel";
 
 // ---------- Types ----------
@@ -78,14 +80,7 @@ const TYPE_COLORS: Record<string, string> = {
 
 const DEFAULT_COLOR = "#6b7280";
 
-// Try to import d3 — it may not be available
-let d3: typeof import("d3") | null = null;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  d3 = require("d3") as typeof import("d3");
-} catch {
-  // d3 not available — will show fallback
-}
+// d3 is imported as an ES module at the top of the file
 
 // ---------- Component ----------
 
@@ -112,7 +107,7 @@ export default function GraphExplorer() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/osint/graph");
+      const response = await apiFetch("/api/osint/graph");
       if (!response.ok) throw new Error("Failed to fetch graph data");
       const data: GraphData = await response.json();
       setGraphData(data);
@@ -132,7 +127,7 @@ export default function GraphExplorer() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/osint/search?q=${encodeURIComponent(searchQuery.trim())}`
       );
       if (!response.ok) throw new Error("Search request failed");
@@ -148,7 +143,7 @@ export default function GraphExplorer() {
 
   const fetchFinancialFlow = useCallback(async (entityId: string) => {
     try {
-      const response = await fetch(
+      const response = await apiFetch(
         `/api/osint/financial-flow?entityId=${encodeURIComponent(entityId)}`
       );
       if (!response.ok) throw new Error("Failed to fetch financial flow");
@@ -162,7 +157,7 @@ export default function GraphExplorer() {
 
   const handleEnrich = useCallback(async (entityId: string) => {
     try {
-      const response = await fetch("/api/osint/enrich", {
+      const response = await apiFetch("/api/osint/enrich", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entityId }),
@@ -191,7 +186,7 @@ export default function GraphExplorer() {
   // ------ D3 Force Graph Rendering ------
 
   const renderForceGraph = useCallback(() => {
-    if (!d3 || !graphData || !svgRef.current || !containerRef.current) return;
+    if (!graphData || !svgRef.current || !containerRef.current) return;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -335,7 +330,7 @@ export default function GraphExplorer() {
   // ------ Sankey / Financial Flow Rendering ------
 
   const renderSankey = useCallback(() => {
-    if (!d3 || !financialData || !svgRef.current || !containerRef.current)
+    if (!financialData || !svgRef.current || !containerRef.current)
       return;
 
     const svg = d3.select(svgRef.current);
@@ -489,36 +484,6 @@ export default function GraphExplorer() {
     totalSources: 0,
   };
 
-  // ------ Fallback if d3 is not available ------
-
-  if (!d3) {
-    return (
-      <div style={styles.wrapper}>
-        <div style={styles.fallback}>
-          <h2 style={{ margin: 0, color: "#f9fafb" }}>
-            OSINT Graph Explorer
-          </h2>
-          <p style={{ color: "#9ca3af", marginTop: 12 }}>
-            The D3.js library is required for graph visualization but could not
-            be loaded. Please install it:
-          </p>
-          <code
-            style={{
-              display: "block",
-              padding: 12,
-              backgroundColor: "#1f2937",
-              borderRadius: 8,
-              color: "#10b981",
-              marginTop: 8,
-            }}
-          >
-            bun add d3 @types/d3
-          </code>
-        </div>
-      </div>
-    );
-  }
-
   // ------ Render ------
 
   return (
@@ -668,16 +633,6 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#f9fafb",
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
-  fallback: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100%",
-    padding: 40,
-    textAlign: "center",
-  },
-
   // --- Toolbar ---
   toolbar: {
     display: "flex",

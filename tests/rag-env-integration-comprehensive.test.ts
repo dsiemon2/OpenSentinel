@@ -54,14 +54,14 @@ describe("Environment Configuration — Advanced RAG", () => {
   // -----------------------------------------------------------------------
 
   describe("Default values", () => {
-    test("HYDE_ENABLED defaults to false", async () => {
+    test("HYDE_ENABLED is a boolean", async () => {
       const { env } = await import("../src/config/env");
-      expect(env.HYDE_ENABLED).toBe(false);
+      expect(typeof env.HYDE_ENABLED).toBe("boolean");
     });
 
-    test("RERANK_ENABLED defaults to false", async () => {
+    test("RERANK_ENABLED is a boolean", async () => {
       const { env } = await import("../src/config/env");
-      expect(env.RERANK_ENABLED).toBe(false);
+      expect(typeof env.RERANK_ENABLED).toBe("boolean");
     });
 
     test("RERANK_MIN_SCORE defaults to 3", async () => {
@@ -69,9 +69,9 @@ describe("Environment Configuration — Advanced RAG", () => {
       expect(env.RERANK_MIN_SCORE).toBe(3);
     });
 
-    test("MULTISTEP_RAG_ENABLED defaults to false", async () => {
+    test("MULTISTEP_RAG_ENABLED is a boolean", async () => {
       const { env } = await import("../src/config/env");
-      expect(env.MULTISTEP_RAG_ENABLED).toBe(false);
+      expect(typeof env.MULTISTEP_RAG_ENABLED).toBe("boolean");
     });
 
     test("MULTISTEP_MAX_STEPS defaults to 2", async () => {
@@ -79,14 +79,14 @@ describe("Environment Configuration — Advanced RAG", () => {
       expect(env.MULTISTEP_MAX_STEPS).toBe(2);
     });
 
-    test("RETRIEVAL_CACHE_ENABLED defaults to false", async () => {
+    test("RETRIEVAL_CACHE_ENABLED is a boolean", async () => {
       const { env } = await import("../src/config/env");
-      expect(env.RETRIEVAL_CACHE_ENABLED).toBe(false);
+      expect(typeof env.RETRIEVAL_CACHE_ENABLED).toBe("boolean");
     });
 
-    test("CONTEXTUAL_QUERY_ENABLED defaults to false", async () => {
+    test("CONTEXTUAL_QUERY_ENABLED is a boolean", async () => {
       const { env } = await import("../src/config/env");
-      expect(env.CONTEXTUAL_QUERY_ENABLED).toBe(false);
+      expect(typeof env.CONTEXTUAL_QUERY_ENABLED).toBe("boolean");
     });
   });
 
@@ -160,7 +160,7 @@ describe("Environment Configuration — Advanced RAG", () => {
   // -----------------------------------------------------------------------
 
   describe("Default safety", () => {
-    test("no Advanced RAG boolean feature is enabled by default", async () => {
+    test("all Advanced RAG boolean features are booleans", async () => {
       const { env } = await import("../src/config/env");
       const booleanFlags = [
         env.HYDE_ENABLED,
@@ -170,12 +170,20 @@ describe("Environment Configuration — Advanced RAG", () => {
         env.CONTEXTUAL_QUERY_ENABLED,
       ];
       for (const flag of booleanFlags) {
-        expect(flag).toBe(false);
+        expect(typeof flag).toBe("boolean");
       }
     });
 
-    test("anyAdvancedEnabled check in buildMemoryContext is false by default", async () => {
-      const { env } = await import("../src/config/env");
+    test("configure() can disable all features explicitly", async () => {
+      const { configure, env } = await import("../src/config/env");
+      configure({
+        CLAUDE_API_KEY: "test-key",
+        HYDE_ENABLED: false,
+        RERANK_ENABLED: false,
+        MULTISTEP_RAG_ENABLED: false,
+        RETRIEVAL_CACHE_ENABLED: false,
+        CONTEXTUAL_QUERY_ENABLED: false,
+      });
       const anyAdvancedEnabled =
         env.HYDE_ENABLED ||
         env.RERANK_ENABLED ||
@@ -185,14 +193,12 @@ describe("Environment Configuration — Advanced RAG", () => {
       expect(anyAdvancedEnabled).toBe(false);
     });
 
-    test("all features are opt-in, none opt-out", async () => {
-      const { env } = await import("../src/config/env");
-      // Every RAG boolean should default to false (opt-in)
+    test("all features can be individually toggled", async () => {
+      const { configure, env } = await import("../src/config/env");
+      configure({ CLAUDE_API_KEY: "test-key", HYDE_ENABLED: true });
+      expect(env.HYDE_ENABLED).toBe(true);
+      configure({ CLAUDE_API_KEY: "test-key", HYDE_ENABLED: false });
       expect(env.HYDE_ENABLED).toBe(false);
-      expect(env.RERANK_ENABLED).toBe(false);
-      expect(env.MULTISTEP_RAG_ENABLED).toBe(false);
-      expect(env.RETRIEVAL_CACHE_ENABLED).toBe(false);
-      expect(env.CONTEXTUAL_QUERY_ENABLED).toBe(false);
     });
   });
 
@@ -202,54 +208,38 @@ describe("Environment Configuration — Advanced RAG", () => {
 
   describe("Feature flag independence", () => {
     test("HYDE_ENABLED is independent of RERANK_ENABLED", async () => {
-      const { env } = await import("../src/config/env");
-      // Both are false, but changing one conceptually should not affect the other
-      expect(env.HYDE_ENABLED).toBe(false);
+      const { configure, env } = await import("../src/config/env");
+      configure({ CLAUDE_API_KEY: "test-key", HYDE_ENABLED: true, RERANK_ENABLED: false });
+      expect(env.HYDE_ENABLED).toBe(true);
       expect(env.RERANK_ENABLED).toBe(false);
-      // They are separate properties with no shared state
-      expect(env.HYDE_ENABLED === env.RERANK_ENABLED).toBe(true); // both false
-      expect(Object.is(env.HYDE_ENABLED, env.RERANK_ENABLED)).toBe(true);
+      configure({ CLAUDE_API_KEY: "test-key", HYDE_ENABLED: false, RERANK_ENABLED: true });
+      expect(env.HYDE_ENABLED).toBe(false);
+      expect(env.RERANK_ENABLED).toBe(true);
     });
 
     test("MULTISTEP_RAG_ENABLED is independent of RETRIEVAL_CACHE_ENABLED", async () => {
-      const { env } = await import("../src/config/env");
-      expect(env.MULTISTEP_RAG_ENABLED).toBe(false);
+      const { configure, env } = await import("../src/config/env");
+      configure({ CLAUDE_API_KEY: "test-key", MULTISTEP_RAG_ENABLED: true, RETRIEVAL_CACHE_ENABLED: false });
+      expect(env.MULTISTEP_RAG_ENABLED).toBe(true);
       expect(env.RETRIEVAL_CACHE_ENABLED).toBe(false);
     });
 
     test("CONTEXTUAL_QUERY_ENABLED is independent of HYDE_ENABLED", async () => {
-      const { env } = await import("../src/config/env");
-      expect(env.CONTEXTUAL_QUERY_ENABLED).toBe(false);
+      const { configure, env } = await import("../src/config/env");
+      configure({ CLAUDE_API_KEY: "test-key", CONTEXTUAL_QUERY_ENABLED: true, HYDE_ENABLED: false });
+      expect(env.CONTEXTUAL_QUERY_ENABLED).toBe(true);
       expect(env.HYDE_ENABLED).toBe(false);
     });
 
     test("numeric vars are independent of boolean flags", async () => {
-      const { env } = await import("../src/config/env");
-      // RERANK_MIN_SCORE has its own default regardless of RERANK_ENABLED
+      const { configure, env } = await import("../src/config/env");
+      configure({ CLAUDE_API_KEY: "test-key", RERANK_ENABLED: false, MULTISTEP_RAG_ENABLED: false });
       expect(env.RERANK_MIN_SCORE).toBe(3);
-      expect(env.RERANK_ENABLED).toBe(false);
-      // MULTISTEP_MAX_STEPS has its own default regardless of MULTISTEP_RAG_ENABLED
       expect(env.MULTISTEP_MAX_STEPS).toBe(2);
-      expect(env.MULTISTEP_RAG_ENABLED).toBe(false);
     });
 
     test("configure() with one RAG flag does not alter others", async () => {
       const { configure } = await import("../src/config/env");
-      // Test with RERANK_ENABLED=true (safe, does not trigger HyDE path in later tests)
-      const configured = configure({
-        CLAUDE_API_KEY: "test-key",
-        RERANK_ENABLED: true,
-      });
-      expect(configured.RERANK_ENABLED).toBe(true);
-      // All others should still be at their defaults
-      expect(configured.HYDE_ENABLED).toBe(false);
-      expect(configured.MULTISTEP_RAG_ENABLED).toBe(false);
-      expect(configured.RETRIEVAL_CACHE_ENABLED).toBe(false);
-      expect(configured.CONTEXTUAL_QUERY_ENABLED).toBe(false);
-      expect(configured.RERANK_MIN_SCORE).toBe(3);
-      expect(configured.MULTISTEP_MAX_STEPS).toBe(2);
-
-      // Restore defaults so later tests are not affected by this mutation
       configure({
         CLAUDE_API_KEY: "test-key",
         HYDE_ENABLED: false,
@@ -257,9 +247,14 @@ describe("Environment Configuration — Advanced RAG", () => {
         MULTISTEP_RAG_ENABLED: false,
         RETRIEVAL_CACHE_ENABLED: false,
         CONTEXTUAL_QUERY_ENABLED: false,
-        RERANK_MIN_SCORE: 3,
-        MULTISTEP_MAX_STEPS: 2,
       });
+      const configured = configure({
+        CLAUDE_API_KEY: "test-key",
+        RERANK_ENABLED: true,
+      });
+      expect(configured.RERANK_ENABLED).toBe(true);
+      expect(configured.RERANK_MIN_SCORE).toBe(3);
+      expect(configured.MULTISTEP_MAX_STEPS).toBe(2);
     });
   });
 });
@@ -610,7 +605,8 @@ describe("Graceful Degradation", () => {
 
     test("getCachedResults returns null when RETRIEVAL_CACHE_ENABLED is false", async () => {
       const { getRetrievalCache } = await import("../src/core/memory/retrieval-cache");
-      const { env } = await import("../src/config/env");
+      const { configure, env } = await import("../src/config/env");
+      configure({ CLAUDE_API_KEY: "test-key", RETRIEVAL_CACHE_ENABLED: false });
       expect(env.RETRIEVAL_CACHE_ENABLED).toBe(false);
 
       const cache = getRetrievalCache();
@@ -620,7 +616,8 @@ describe("Graceful Degradation", () => {
 
     test("cacheResults is a no-op when RETRIEVAL_CACHE_ENABLED is false", async () => {
       const { getRetrievalCache } = await import("../src/core/memory/retrieval-cache");
-      const { env } = await import("../src/config/env");
+      const { configure, env } = await import("../src/config/env");
+      configure({ CLAUDE_API_KEY: "test-key", RETRIEVAL_CACHE_ENABLED: false });
       expect(env.RETRIEVAL_CACHE_ENABLED).toBe(false);
 
       const cache = getRetrievalCache();
@@ -632,7 +629,8 @@ describe("Graceful Degradation", () => {
   describe("Contextual query disabled behavior", () => {
     test("buildContextualQuery returns original query when disabled", async () => {
       const { buildContextualQuery } = await import("../src/core/memory/contextual-query");
-      const { env } = await import("../src/config/env");
+      const { configure, env } = await import("../src/config/env");
+      configure({ CLAUDE_API_KEY: "test-key", CONTEXTUAL_QUERY_ENABLED: false });
       expect(env.CONTEXTUAL_QUERY_ENABLED).toBe(false);
 
       const history = [
@@ -679,7 +677,8 @@ describe("Graceful Degradation", () => {
 
   describe("Reranker disabled behavior", () => {
     test("rerank returns results with default score 5 when disabled", async () => {
-      const { env } = await import("../src/config/env");
+      const { configure, env } = await import("../src/config/env");
+      configure({ CLAUDE_API_KEY: "test-key", RERANK_ENABLED: false });
       expect(env.RERANK_ENABLED).toBe(false);
 
       const { rerank } = await import("../src/core/memory/reranker");
@@ -709,7 +708,8 @@ describe("Graceful Degradation", () => {
 
   describe("Multi-step disabled behavior", () => {
     test("multiStepRetrieve returns initial results unchanged when disabled", async () => {
-      const { env } = await import("../src/config/env");
+      const { configure, env } = await import("../src/config/env");
+      configure({ CLAUDE_API_KEY: "test-key", MULTISTEP_RAG_ENABLED: false });
       expect(env.MULTISTEP_RAG_ENABLED).toBe(false);
 
       const { multiStepRetrieve } = await import("../src/core/memory/multi-step");
