@@ -91,6 +91,22 @@ const envSchema = z.object({
   // Finance (optional)
   ALPHA_VANTAGE_API_KEY: z.string().optional(),
 
+  // Exchange Trading (optional)
+  COINBASE_API_KEY: z.string().optional(),
+  COINBASE_PRIVATE_KEY: z.string().optional(),
+  BINANCE_API_KEY: z.string().optional(),
+  BINANCE_API_SECRET: z.string().optional(),
+  BINANCE_TESTNET: z.coerce.boolean().optional().default(false),
+  EXCHANGE_REQUIRE_CONFIRMATION: z.coerce.boolean().optional().default(true),
+
+  // DeFi (optional)
+  DEFILLAMA_API_KEY: z.string().optional(), // Pro tier
+
+  // On-Chain Analytics (optional)
+  ETHERSCAN_API_KEY: z.string().optional(),
+  ALCHEMY_API_KEY: z.string().optional(),
+  ALCHEMY_NETWORK: z.string().optional().default("eth-mainnet"),
+
   // Optional
   HUGGINGFACE_ACCESS_TOKEN: z.string().optional(),
   TWILIO_ACCOUNT_SID: z.string().optional(),

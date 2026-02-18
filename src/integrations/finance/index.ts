@@ -75,6 +75,88 @@ export {
   type AlertManagerConfig,
 } from "./alerts";
 
+// Exchange exports
+export {
+  ExchangeClient,
+  createExchangeClient,
+  ExchangeClientError,
+  exchangeOrders,
+  type ExchangeConfig,
+  type ExchangeBalance,
+  type OrderRequest,
+  type ExchangeOrder,
+  type ExchangeFill,
+  type ExchangeTicker,
+  type OrderPreview,
+} from "./exchange";
+
+// DeFi exports
+export {
+  DeFiClient,
+  createDeFiClient,
+  DeFiClientError,
+  type DeFiConfig,
+  type DeFiProtocol,
+  type DeFiProtocolDetail,
+  type ChainTVL,
+  type ChainTVLHistory,
+  type DeFiYield,
+  type TokenPrice,
+  type StablecoinData,
+  type DeFiSummary,
+} from "./defi";
+
+// On-Chain Analytics exports
+export {
+  OnChainClient,
+  createOnChainClient,
+  OnChainClientError,
+  type OnChainConfig,
+  type WalletBalance,
+  type Transaction,
+  type TokenTransfer,
+  type TokenBalance,
+  type GasOracle,
+  type AssetTransfer,
+  type WalletSummary,
+} from "./onchain";
+
+// Order Book exports
+export {
+  OrderBookClient,
+  createOrderBookClient,
+  OrderBookClientError,
+  toBinanceSymbol,
+  toCoinbaseProductId,
+  type OrderBookConfig,
+  type OrderBookLevel,
+  type OrderBook,
+  type AggregatedOrderBook,
+  type DepthVisualization,
+  type SpreadInfo,
+  type OrderWall,
+} from "./orderbook";
+
+// Backtesting exports
+export {
+  BacktestingEngine,
+  createBacktestingEngine,
+  BacktestingError,
+  backtestResults,
+  BUILTIN_STRATEGIES,
+  calculateSMA,
+  calculateRSI,
+  calculateStdDev,
+  type Strategy,
+  type StrategySignal,
+  type Position,
+  type BacktestOptions,
+  type BacktestResult,
+  type StrategyComparison,
+  type Trade,
+  type BacktestingConfig,
+} from "./backtesting";
+
 /**
  * Main Finance class that combines all financial functionality
  */
@@ -93,6 +175,11 @@ export interface FinanceConfig {
     rateLimitDelay?: number;
   };
   onAlertTriggered?: (alert: import("./alerts").TriggeredAlert) => Promise<void>;
+  exchangeOptions?: import("./exchange").ExchangeConfig;
+  defiOptions?: import("./defi").DeFiConfig;
+  onchainOptions?: import("./onchain").OnChainConfig;
+  orderbookOptions?: import("./orderbook").OrderBookConfig;
+  backtestingOptions?: import("./backtesting").BacktestingConfig;
 }
 
 import { CryptoClient } from "./crypto";
@@ -100,6 +187,11 @@ import { StockClient } from "./stocks";
 import { CurrencyClient } from "./currency";
 import { PortfolioManager } from "./portfolio";
 import { AlertManager } from "./alerts";
+import { ExchangeClient } from "./exchange";
+import { DeFiClient } from "./defi";
+import { OnChainClient } from "./onchain";
+import { OrderBookClient } from "./orderbook";
+import { BacktestingEngine } from "./backtesting";
 
 export class Finance {
   public readonly crypto: CryptoClient;
@@ -107,6 +199,11 @@ export class Finance {
   public readonly currency: CurrencyClient;
   public readonly portfolio: PortfolioManager;
   public readonly alerts: AlertManager;
+  public readonly exchange?: ExchangeClient;
+  public readonly defi: DeFiClient;
+  public readonly onchain?: OnChainClient;
+  public readonly orderbook: OrderBookClient;
+  public readonly backtesting: BacktestingEngine;
 
   constructor(config: FinanceConfig = {}) {
     this.crypto = new CryptoClient(config.cryptoOptions);
@@ -126,6 +223,25 @@ export class Finance {
       stockClientOptions: config.stockOptions,
       onAlertTriggered: config.onAlertTriggered,
     });
+
+    // Exchange (conditional on API keys)
+    if (config.exchangeOptions?.coinbaseApiKey || config.exchangeOptions?.binanceApiKey) {
+      this.exchange = new ExchangeClient(config.exchangeOptions);
+    }
+
+    // DeFi (always available - no auth required)
+    this.defi = new DeFiClient(config.defiOptions);
+
+    // On-Chain (conditional on API keys)
+    if (config.onchainOptions?.etherscanApiKey || config.onchainOptions?.alchemyApiKey) {
+      this.onchain = new OnChainClient(config.onchainOptions);
+    }
+
+    // Order Book (always available - public endpoints)
+    this.orderbook = new OrderBookClient(config.orderbookOptions);
+
+    // Backtesting (always available)
+    this.backtesting = new BacktestingEngine(config.backtestingOptions);
   }
 
   /**

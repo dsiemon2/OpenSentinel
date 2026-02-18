@@ -66,6 +66,11 @@ import {
   getMarketNews,
   detectAssetType,
 } from "./trading-researcher";
+import { createExchangeClient } from "../integrations/finance/exchange";
+import { createDeFiClient } from "../integrations/finance/defi";
+import { createOnChainClient } from "../integrations/finance/onchain";
+import { createOrderBookClient } from "../integrations/finance/orderbook";
+import { createBacktestingEngine } from "../integrations/finance/backtesting";
 import {
   analyzeSEO,
   analyzeContentForSEO,
@@ -2744,6 +2749,127 @@ export const TOOLS: Tool[] = [
         limit: { type: "number", description: "Max results (default: 20)" },
       },
       required: ["service", "action"],
+    },
+  },
+  // ── Crypto Exchange Trading Tool ───────────────────────────────────────
+  {
+    name: "crypto_exchange",
+    description:
+      "Trade cryptocurrencies on Coinbase and Binance. Check balances, place orders (with safety preview), cancel orders, view order history, fills, and ticker data. Orders require confirmation by default — first call returns a preview, second with confirmed=true executes.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["balances", "place_order", "cancel_order", "order_status", "order_history", "fills", "ticker"],
+          description: "Action to perform",
+        },
+        exchange: {
+          type: "string",
+          enum: ["coinbase", "binance"],
+          description: "Exchange to use",
+        },
+        symbol: { type: "string", description: "Trading pair (e.g., 'BTC/USDT', 'ETH-USD')" },
+        side: { type: "string", enum: ["buy", "sell"], description: "Order side" },
+        order_type: { type: "string", enum: ["market", "limit", "stop_limit"], description: "Order type" },
+        quantity: { type: "number", description: "Order quantity" },
+        price: { type: "number", description: "Limit price (required for limit/stop_limit)" },
+        stop_price: { type: "number", description: "Stop price (for stop_limit orders)" },
+        confirmed: { type: "boolean", description: "Set to true to execute order (default: preview only)" },
+        order_id: { type: "string", description: "Order ID for status/cancel" },
+        limit: { type: "number", description: "Max results (default: 50)" },
+      },
+      required: ["action"],
+    },
+  },
+  // ── DeFi Data Tool ─────────────────────────────────────────────────────
+  {
+    name: "defi_data",
+    description:
+      "Access DeFi data from DeFiLlama — TVL rankings, protocol details, chain TVL, yield/APY pools, stablecoin data, and token prices. No API key required for basic data.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["protocols", "protocol", "chains", "chain_tvl", "yields", "stablecoins", "token_prices", "summary"],
+          description: "Action to perform",
+        },
+        slug: { type: "string", description: "Protocol slug (e.g., 'aave', 'uniswap') for 'protocol' action" },
+        chain: { type: "string", description: "Chain name (e.g., 'Ethereum', 'BSC') for filtering" },
+        stablecoin: { type: "boolean", description: "Filter yields to stablecoin pools only" },
+        tokens: { type: "array", items: { type: "string" }, description: "Token contract addresses for price lookup" },
+        limit: { type: "number", description: "Max results (default varies by action)" },
+      },
+      required: ["action"],
+    },
+  },
+  // ── On-Chain Analytics Tool ────────────────────────────────────────────
+  {
+    name: "onchain_analytics",
+    description:
+      "Ethereum on-chain analytics via Etherscan and Alchemy. Check wallet balances, transaction history, token transfers, token balances, gas prices, and asset transfers. Supports wallet summaries combining all data sources.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["balance", "transactions", "token_transfers", "token_balances", "gas", "asset_transfers", "wallet_summary"],
+          description: "Action to perform",
+        },
+        address: { type: "string", description: "Ethereum address (0x...)" },
+        contract_address: { type: "string", description: "Filter token transfers by contract" },
+        page: { type: "number", description: "Page number (default: 1)" },
+        offset: { type: "number", description: "Results per page (default: 50)" },
+        sort: { type: "string", enum: ["asc", "desc"], description: "Sort order (default: desc)" },
+      },
+      required: ["action"],
+    },
+  },
+  // ── Order Book Tool ────────────────────────────────────────────────────
+  {
+    name: "order_book",
+    description:
+      "Real-time order book data from Binance and Coinbase (public, no auth). View bid/ask depth, aggregated books across exchanges, spread analysis, depth visualization, and detect large order walls.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["book", "aggregated", "depth", "spread", "walls"],
+          description: "Action to perform",
+        },
+        symbol: { type: "string", description: "Trading pair (e.g., 'BTC/USDT', 'ETH-USD')" },
+        exchange: { type: "string", enum: ["binance", "coinbase"], description: "Exchange (for 'book' and 'spread')" },
+        limit: { type: "number", description: "Order book depth (default: 100)" },
+        threshold: { type: "number", description: "Wall detection threshold multiplier (default: 3x average)" },
+      },
+      required: ["action", "symbol"],
+    },
+  },
+  // ── Backtesting Tool ───────────────────────────────────────────────────
+  {
+    name: "backtest",
+    description:
+      "Backtest trading strategies against historical data. Built-in strategies: SMA Crossover, RSI, Momentum, Mean Reversion. Compare multiple strategies, view performance metrics (Sharpe ratio, max drawdown, win rate, profit factor). Use with research_market to get historical price data first.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["run", "compare", "strategies"],
+          description: "Action: 'run' single backtest, 'compare' multiple strategies, 'strategies' list available",
+        },
+        symbol: { type: "string", description: "Asset symbol (e.g., 'bitcoin', 'AAPL')" },
+        asset_type: { type: "string", enum: ["crypto", "stock"], description: "Asset type" },
+        strategy: { type: "string", description: "Strategy name: sma_crossover, rsi, momentum, mean_reversion" },
+        strategies: { type: "array", items: { type: "string" }, description: "Strategy names for comparison" },
+        days: { type: "number", description: "Backtest period in days (default: 90)" },
+        initial_capital: { type: "number", description: "Starting capital (default: 10000)" },
+        fee_rate: { type: "number", description: "Fee rate per trade (default: 0.001 = 0.1%)" },
+        params: { type: "object", description: "Strategy parameters override (e.g., {shortPeriod: 5, longPeriod: 20})" },
+      },
+      required: ["action"],
     },
   },
 ];
@@ -6057,6 +6183,239 @@ export async function executeTool(
           }
           default:
             return { success: false, result: null, error: `Unknown Google service: ${gService}` };
+        }
+      }
+
+      // ── Crypto Exchange ──────────────────────────────────────────────────
+      case "crypto_exchange": {
+        const client = createExchangeClient({
+          coinbaseApiKey: env.COINBASE_API_KEY,
+          coinbasePrivateKey: env.COINBASE_PRIVATE_KEY,
+          binanceApiKey: env.BINANCE_API_KEY,
+          binanceApiSecret: env.BINANCE_API_SECRET,
+          binanceTestnet: env.BINANCE_TESTNET,
+          requireConfirmation: env.EXCHANGE_REQUIRE_CONFIRMATION,
+        });
+        const action = input.action as string;
+        const exchange = (input.exchange as "coinbase" | "binance") ?? "binance";
+        switch (action) {
+          case "balances":
+            return { success: true, result: await client.getBalances(exchange) };
+          case "place_order":
+            return {
+              success: true,
+              result: await client.placeOrder({
+                exchange,
+                symbol: input.symbol as string,
+                side: input.side as "buy" | "sell",
+                orderType: (input.order_type as "market" | "limit" | "stop_limit") ?? "market",
+                quantity: input.quantity as number,
+                price: input.price as number | undefined,
+                stopPrice: input.stop_price as number | undefined,
+                confirmed: input.confirmed as boolean | undefined,
+              }),
+            };
+          case "cancel_order":
+            return { success: true, result: await client.cancelOrder(exchange, input.order_id as string) };
+          case "order_status":
+            return { success: true, result: await client.getOrder(exchange, input.order_id as string) };
+          case "order_history":
+            return { success: true, result: await client.getOrderHistory(exchange, input.symbol as string | undefined, (input.limit as number) ?? 50) };
+          case "fills":
+            return { success: true, result: await client.getFills(exchange, input.order_id as string | undefined) };
+          case "ticker":
+            return { success: true, result: await client.getTicker(exchange, input.symbol as string) };
+          default:
+            return { success: false, result: null, error: `Unknown exchange action: ${action}` };
+        }
+      }
+
+      // ── DeFi Data ─────────────────────────────────────────────────────────
+      case "defi_data": {
+        const client = createDeFiClient({ apiKey: env.DEFILLAMA_API_KEY });
+        const action = input.action as string;
+        switch (action) {
+          case "protocols":
+            return { success: true, result: await client.getProtocols(input.limit as number | undefined) };
+          case "protocol":
+            if (!input.slug) return { success: false, result: null, error: "'slug' is required" };
+            return { success: true, result: await client.getProtocol(input.slug as string) };
+          case "chains":
+            return { success: true, result: await client.getChainTVLs() };
+          case "chain_tvl":
+            if (!input.chain) return { success: false, result: null, error: "'chain' is required" };
+            return { success: true, result: await client.getChainTVL(input.chain as string) };
+          case "yields":
+            return {
+              success: true,
+              result: await client.getTopYields({
+                chain: input.chain as string | undefined,
+                stablecoin: input.stablecoin as boolean | undefined,
+                limit: input.limit as number | undefined,
+              }),
+            };
+          case "stablecoins":
+            return { success: true, result: await client.getStablecoins() };
+          case "token_prices":
+            if (!input.tokens) return { success: false, result: null, error: "'tokens' array is required" };
+            const priceMap = await client.getTokenPrices(input.tokens as string[], (input.chain as string) ?? "ethereum");
+            return { success: true, result: Object.fromEntries(priceMap) };
+          case "summary":
+            return { success: true, result: await client.getDeFiSummary() };
+          default:
+            return { success: false, result: null, error: `Unknown DeFi action: ${action}` };
+        }
+      }
+
+      // ── On-Chain Analytics ────────────────────────────────────────────────
+      case "onchain_analytics": {
+        const client = createOnChainClient({
+          etherscanApiKey: env.ETHERSCAN_API_KEY,
+          alchemyApiKey: env.ALCHEMY_API_KEY,
+          alchemyNetwork: env.ALCHEMY_NETWORK,
+        });
+        const action = input.action as string;
+        const address = input.address as string;
+        switch (action) {
+          case "balance":
+            if (!address) return { success: false, result: null, error: "'address' is required" };
+            return { success: true, result: await client.getBalance(address) };
+          case "transactions":
+            if (!address) return { success: false, result: null, error: "'address' is required" };
+            return {
+              success: true,
+              result: await client.getTransactions(address, {
+                page: input.page as number | undefined,
+                offset: input.offset as number | undefined,
+                sort: input.sort as "asc" | "desc" | undefined,
+              }),
+            };
+          case "token_transfers":
+            if (!address) return { success: false, result: null, error: "'address' is required" };
+            return {
+              success: true,
+              result: await client.getTokenTransfers(address, {
+                contractAddress: input.contract_address as string | undefined,
+                page: input.page as number | undefined,
+                offset: input.offset as number | undefined,
+              }),
+            };
+          case "token_balances":
+            if (!address) return { success: false, result: null, error: "'address' is required" };
+            return { success: true, result: await client.getTokenBalances(address) };
+          case "gas":
+            return { success: true, result: await client.getGasOracle() };
+          case "asset_transfers":
+            if (!address) return { success: false, result: null, error: "'address' is required" };
+            return { success: true, result: await client.getAssetTransfers(address) };
+          case "wallet_summary":
+            if (!address) return { success: false, result: null, error: "'address' is required" };
+            return { success: true, result: await client.getWalletSummary(address) };
+          default:
+            return { success: false, result: null, error: `Unknown on-chain action: ${action}` };
+        }
+      }
+
+      // ── Order Book ────────────────────────────────────────────────────────
+      case "order_book": {
+        const client = createOrderBookClient();
+        const action = input.action as string;
+        const symbol = input.symbol as string;
+        switch (action) {
+          case "book": {
+            const exchange = input.exchange as "binance" | "coinbase" | undefined;
+            if (exchange === "coinbase") {
+              return { success: true, result: await client.getCoinbaseOrderBook(symbol, (input.limit as number) ?? 100) };
+            }
+            return { success: true, result: await client.getBinanceOrderBook(symbol, (input.limit as number) ?? 100) };
+          }
+          case "aggregated":
+            return { success: true, result: await client.getAggregatedOrderBook(symbol) };
+          case "depth":
+            return { success: true, result: await client.getDepthVisualization(symbol) };
+          case "spread":
+            return { success: true, result: await client.getSpread(symbol, input.exchange as "binance" | "coinbase" | undefined) };
+          case "walls":
+            return { success: true, result: await client.detectWalls(symbol, (input.threshold as number) ?? 3) };
+          default:
+            return { success: false, result: null, error: `Unknown order book action: ${action}` };
+        }
+      }
+
+      // ── Backtesting ───────────────────────────────────────────────────────
+      case "backtest": {
+        const engine = createBacktestingEngine({
+          defaultCapital: input.initial_capital as number | undefined,
+          defaultFeeRate: input.fee_rate as number | undefined,
+        });
+        const action = input.action as string;
+        switch (action) {
+          case "strategies":
+            return { success: true, result: engine.getBuiltinStrategies() };
+          case "run": {
+            if (!input.symbol) return { success: false, result: null, error: "'symbol' is required" };
+            if (!input.strategy) return { success: false, result: null, error: "'strategy' is required" };
+            // Fetch historical prices
+            const { createCryptoClient } = await import("../integrations/finance/crypto");
+            const { createStockClient } = await import("../integrations/finance/stocks");
+            const days = (input.days as number) ?? 90;
+            const daysToRange = (d: number): "1mo" | "3mo" | "6mo" | "1y" | "2y" | "5y" | "max" =>
+              d <= 30 ? "1mo" : d <= 90 ? "3mo" : d <= 180 ? "6mo" : d <= 365 ? "1y" : d <= 730 ? "2y" : d <= 1825 ? "5y" : "max";
+            let prices: number[];
+            const assetType = (input.asset_type as "crypto" | "stock") ?? "crypto";
+            if (assetType === "crypto") {
+              const crypto = createCryptoClient();
+              const history = await crypto.getHistoricalData(input.symbol as string, days);
+              prices = history.prices.map(([, p]) => p);
+            } else {
+              const stocks = createStockClient({ alphaVantageApiKey: env.ALPHA_VANTAGE_API_KEY });
+              const history = await stocks.getHistoricalData(input.symbol as string, daysToRange(days));
+              prices = history.map((d: { close: number }) => d.close);
+            }
+            const result = await engine.backtest({
+              symbol: input.symbol as string,
+              assetType,
+              strategy: input.strategy as string,
+              days,
+              initialCapital: input.initial_capital as number | undefined,
+              feeRate: input.fee_rate as number | undefined,
+              strategyParams: input.params as Record<string, number> | undefined,
+              prices,
+            });
+            return { success: true, result };
+          }
+          case "compare": {
+            if (!input.symbol) return { success: false, result: null, error: "'symbol' is required" };
+            const strategies = (input.strategies as string[]) ?? ["sma_crossover", "rsi", "momentum", "mean_reversion"];
+            const days = (input.days as number) ?? 90;
+            const daysToRange = (d: number): "1mo" | "3mo" | "6mo" | "1y" | "2y" | "5y" | "max" =>
+              d <= 30 ? "1mo" : d <= 90 ? "3mo" : d <= 180 ? "6mo" : d <= 365 ? "1y" : d <= 730 ? "2y" : d <= 1825 ? "5y" : "max";
+            const { createCryptoClient } = await import("../integrations/finance/crypto");
+            const { createStockClient } = await import("../integrations/finance/stocks");
+            let prices: number[];
+            const assetType = (input.asset_type as "crypto" | "stock") ?? "crypto";
+            if (assetType === "crypto") {
+              const crypto = createCryptoClient();
+              const history = await crypto.getHistoricalData(input.symbol as string, days);
+              prices = history.prices.map(([, p]) => p);
+            } else {
+              const stocks = createStockClient({ alphaVantageApiKey: env.ALPHA_VANTAGE_API_KEY });
+              const history = await stocks.getHistoricalData(input.symbol as string, daysToRange(days));
+              prices = history.map((d: { close: number }) => d.close);
+            }
+            const comparison = await engine.compareStrategies({
+              symbol: input.symbol as string,
+              assetType,
+              strategies,
+              days,
+              initialCapital: input.initial_capital as number | undefined,
+              feeRate: input.fee_rate as number | undefined,
+              prices,
+            });
+            return { success: true, result: comparison };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown backtest action: ${action}` };
         }
       }
 

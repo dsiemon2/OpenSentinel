@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-02-18
+
+### Added
+- **Exchange Trading Integration**: Coinbase Advanced Trade + Binance API support
+  - JWT auth (Coinbase) and HMAC-SHA256 signing (Binance)
+  - Safety-first order preview before execution (`requireConfirmation` default true)
+  - Balances, order placement, cancellation, history, fills, ticker
+  - `exchange_orders` DB table for order tracking
+- **DeFi Data Module**: DeFiLlama integration for TVL, protocols, yields, stablecoins
+  - Protocol rankings, chain TVL, historical TVL data
+  - Top yield/APY pool discovery with chain and stablecoin filters
+  - Token price lookup by contract address
+  - DeFi market summary aggregation
+- **On-Chain Analytics**: Etherscan + Alchemy dual-source analytics
+  - Wallet balances, transaction history, ERC-20 token transfers
+  - Token balance queries, gas oracle, asset transfers
+  - Contract detection, comprehensive wallet summaries
+  - Graceful degradation when only one API key available
+- **Order Book Data**: Real-time Binance + Coinbase order books (public, no auth)
+  - Bid/ask depth, aggregated cross-exchange books
+  - Spread analysis, depth visualization with imbalance ratios
+  - Large order wall detection with significance scoring
+- **Backtesting Framework**: Strategy testing against historical price data
+  - 4 built-in strategies: SMA Crossover, RSI, Momentum, Mean Reversion
+  - Performance metrics: Sharpe ratio, max drawdown, win rate, profit factor
+  - Strategy comparison with ranking
+  - Equity curve, trade log, buy-and-hold comparison
+  - `backtest_results` DB table for result persistence
+- 5 new tools: `crypto_exchange`, `defi_data`, `onchain_analytics`, `order_book`, `backtest`
+- 10 new env vars for exchange/DeFi/on-chain configuration
+- 176 new tests across 5 test files
+
+### Changed
+- Tool count: 121 → 126
+- Test count: 4,787+ → 4,969+ across 144 files
+- Finance module expanded with 5 new sub-modules
+- `FinanceConfig` interface extended with exchange, DeFi, on-chain, orderbook, backtesting options
+
 ## [2.8.0] - 2026-02-17
 
 ### Added
@@ -238,7 +276,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Desktop app (Electron)
 - Browser extension (Chrome/Firefox)
 
-[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v2.8.0...HEAD
+[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v2.9.0...HEAD
+[2.9.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.5.1...v2.7.0
 [2.5.1]: https://github.com/dsiemon2/OpenSentinel/compare/v2.5.0...v2.5.1

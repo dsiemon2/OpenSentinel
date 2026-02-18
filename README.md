@@ -121,7 +121,7 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - **Home Assistant**: Smart home device control
 - **Spotify**: Playback, playlists, search
 - **Cloud Storage**: Google Drive, Dropbox
-- **Finance**: Crypto, stocks, currency, portfolio tracking
+- **Finance**: Crypto, stocks, currency, portfolio tracking, exchange trading (Coinbase/Binance), DeFi data, on-chain analytics, order books, backtesting
 
 ### Infrastructure
 - Built-in tunnels (Cloudflare, ngrok, localtunnel)
@@ -302,7 +302,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 139 test files, 4,787+ tests
+tests/                          # 144 test files, 4,969+ tests
 ```
 
 ## Ports
