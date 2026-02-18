@@ -554,6 +554,70 @@ app.get("/api/system/status", async (c) => {
   });
 });
 
+// ===== Spotify OAuth Callback =====
+
+app.get("/api/callbacks/spotify", async (c) => {
+  try {
+    const code = c.req.query("code");
+    const error = c.req.query("error");
+
+    if (error) {
+      return c.html(`<h1>Spotify Authorization Failed</h1><p>Error: ${error}</p><p>Go back and try again.</p>`);
+    }
+
+    if (!code) {
+      return c.html(`<h1>Missing Authorization Code</h1><p>No code received from Spotify.</p>`);
+    }
+
+    const { env: appEnv } = await import("../../config/env");
+    if (!appEnv.SPOTIFY_CLIENT_ID || !appEnv.SPOTIFY_CLIENT_SECRET) {
+      return c.html(`<h1>Spotify Not Configured</h1><p>Set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in .env</p>`);
+    }
+
+    const { createSpotifyAuth } = await import("../../integrations/spotify/auth");
+    const auth = createSpotifyAuth({
+      clientId: appEnv.SPOTIFY_CLIENT_ID,
+      clientSecret: appEnv.SPOTIFY_CLIENT_SECRET,
+      redirectUri: appEnv.SPOTIFY_REDIRECT_URI || `http://localhost:${appEnv.PORT}/api/callbacks/spotify`,
+    });
+
+    const tokens = await auth.exchangeCode(code);
+
+    return c.html(`
+      <html><body style="font-family: system-ui; max-width: 600px; margin: 40px auto; padding: 20px;">
+        <h1>Spotify Connected!</h1>
+        <p>Add this to your <code>.env</code> file:</p>
+        <pre style="background: #f0f0f0; padding: 16px; border-radius: 8px; word-break: break-all; white-space: pre-wrap;">SPOTIFY_REFRESH_TOKEN=${tokens.refreshToken}</pre>
+        <p>Then restart OpenSentinel. You can close this page.</p>
+      </body></html>
+    `);
+  } catch (err) {
+    console.error("Spotify callback error:", err);
+    return c.html(`<h1>Spotify Auth Error</h1><p>${err instanceof Error ? err.message : String(err)}</p>`);
+  }
+});
+
+app.get("/api/spotify/authorize", async (c) => {
+  try {
+    const { env: appEnv } = await import("../../config/env");
+    if (!appEnv.SPOTIFY_CLIENT_ID || !appEnv.SPOTIFY_CLIENT_SECRET) {
+      return c.json({ error: "Spotify not configured. Set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET in .env" }, 400);
+    }
+
+    const { createSpotifyAuth, DEFAULT_SCOPES } = await import("../../integrations/spotify/auth");
+    const auth = createSpotifyAuth({
+      clientId: appEnv.SPOTIFY_CLIENT_ID,
+      clientSecret: appEnv.SPOTIFY_CLIENT_SECRET,
+      redirectUri: appEnv.SPOTIFY_REDIRECT_URI || `http://localhost:${appEnv.PORT}/api/callbacks/spotify`,
+    });
+
+    const url = auth.getAuthorizationUrl(DEFAULT_SCOPES, undefined, true);
+    return c.json({ url });
+  } catch (err) {
+    return c.json({ error: err instanceof Error ? err.message : String(err) }, 500);
+  }
+});
+
 // Serve static files from web/dist
 app.use("/*", serveStatic({ root: "./src/web/dist" }));
 
