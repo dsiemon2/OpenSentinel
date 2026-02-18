@@ -416,6 +416,9 @@ app.get("/api/providers", async (c) => {
 import { osintRoutes } from "./routes/osint";
 app.route("/api/osint", osintRoutes);
 
+import { emailRoutes } from "./routes/email";
+app.route("/api/email", emailRoutes);
+
 // ===== SDK API (External App Integration) =====
 import { sdkRoutes } from "./routes/sdk";
 app.route("/api/sdk", sdkRoutes);
@@ -542,7 +545,7 @@ app.get("/api/system/status", async (c) => {
   if (authHeader?.startsWith("Bearer ")) {
     return c.json({
       status: "online",
-      version: "2.7.0",
+      version: "3.0.0",
       uptime: process.uptime(),
       memory: process.memoryUsage(),
     });
@@ -550,7 +553,7 @@ app.get("/api/system/status", async (c) => {
   // Public: only expose status and version (no runtime details)
   return c.json({
     status: "online",
-    version: "2.7.0",
+    version: "3.0.0",
   });
 });
 

@@ -1,6 +1,6 @@
 # OpenSentinel Architecture
 
-This document describes the internal architecture of OpenSentinel v2.7.0, covering data flow, core components, and the overall system design.
+This document describes the internal architecture of OpenSentinel v3.0.0, covering data flow, core components, and the overall system design.
 
 ---
 
@@ -182,7 +182,7 @@ Query → Contextual Rewrite → HyDE → Cache Check → Hybrid Search → Re-r
 | 6. Multi-Step | `multi-step.ts` | `MULTISTEP_RAG_ENABLED` | Evaluates completeness, generates follow-up queries for gaps |
 | 7. Orchestrator | `enhanced-retrieval.ts` | -- | Wires all stages together, graceful degradation |
 
-All features default to `false` -- zero impact until explicitly enabled. The pipeline degrades gracefully: if all flags are off, it falls back to standard hybrid search.
+As of v3.0.0, all 5 RAG enhancements are enabled by default. The pipeline degrades gracefully: if all flags are turned off, it falls back to standard hybrid search.
 
 **Flow:**
 1. User sends a message
@@ -388,7 +388,7 @@ Each input channel follows the same pattern:
 
 ## Tool System
 
-OpenSentinel provides 121 tools defined in `src/tools/index.ts`.
+OpenSentinel provides 126 tools defined in `src/tools/index.ts`.
 
 **How tools work:**
 
@@ -663,7 +663,7 @@ opensentinel/
 +-- plugins/                               # Plugin directory
 +-- docker/                                # Docker configs (init-db, nginx)
 +-- docker-compose.yml                     # Full stack orchestration
-+-- tests/                                 # Test suite (4617+ tests)
++-- tests/                                 # Test suite (5000+ tests)
 +-- docs/                                  # Documentation
 +-- package.json                           # NPM package (opensentinel)
 +-- drizzle.config.ts                      # Drizzle ORM configuration

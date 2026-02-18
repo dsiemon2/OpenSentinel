@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiFetch } from "../lib/api";
 
 interface SystemStatus {
   status: string;
@@ -16,7 +17,7 @@ export default function Settings() {
   const [useTools, setUseTools] = useState(true);
 
   useEffect(() => {
-    fetch("/api/system/status")
+    apiFetch("/api/system/status")
       .then((r) => r.json())
       .then(setStatus)
       .catch(console.error);
@@ -48,17 +49,21 @@ export default function Settings() {
               <span>Version</span>
               <span>{status.version}</span>
             </div>
-            <div className="setting-row">
-              <span>Uptime</span>
-              <span>{formatUptime(status.uptime)}</span>
-            </div>
-            <div className="setting-row">
-              <span>Memory Usage</span>
-              <span>
-                {formatBytes(status.memory.heapUsed)} /{" "}
-                {formatBytes(status.memory.heapTotal)}
-              </span>
-            </div>
+            {status.uptime != null && (
+              <div className="setting-row">
+                <span>Uptime</span>
+                <span>{formatUptime(status.uptime)}</span>
+              </div>
+            )}
+            {status.memory && (
+              <div className="setting-row">
+                <span>Memory Usage</span>
+                <span>
+                  {formatBytes(status.memory.heapUsed)} /{" "}
+                  {formatBytes(status.memory.heapTotal)}
+                </span>
+              </div>
+            )}
           </>
         ) : (
           <p style={{ color: "var(--text-secondary)" }}>Loading...</p>

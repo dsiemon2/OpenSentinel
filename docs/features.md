@@ -1,6 +1,6 @@
 # OpenSentinel Features
 
-**Status: ALL FEATURES IMPLEMENTED** (v2.7.0)
+**Status: ALL FEATURES IMPLEMENTED** (v3.0.0)
 
 ## Input Methods
 
@@ -28,9 +28,12 @@
 - Slash commands
 
 ### Web Dashboard ✅
+- 5 views: Chat, Memories, Graph, Email, Settings
 - Real-time chat interface
 - Markdown rendering
 - Memory explorer
+- OSINT graph explorer (D3.js)
+- Full email client (browse, read, compose, reply, forward, attachments, search)
 - System status
 - File upload/download
 - Task queue monitor
@@ -54,6 +57,7 @@
 - `/api/ask` - Simple queries
 - `/api/chat/tools` - Full tool-enabled chat
 - `/api/memories` - Memory management
+- `/api/email/*` - 8 email endpoints (folders, inbox, message, attachment, send, reply, search, flag)
 - `/health` - Health check
 
 ---
@@ -85,6 +89,7 @@
 - Redis-backed Retrieval Cache with TTL expiry
 - Contextual Query Rewriting from conversation history
 - Composable pipeline: each stage independently toggleable via env vars
+- All 5 enhancements enabled by default as of v3.0.0
 - Graceful degradation: falls back to hybrid search when all flags disabled
 
 ### Personality ✅
@@ -106,7 +111,7 @@
 
 ---
 
-## Tools (121)
+## Tools (126)
 
 ### Shell Execution ✅
 - Sandboxed command execution

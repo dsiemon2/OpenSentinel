@@ -147,7 +147,7 @@ describe("CLI Utils", () => {
         expect(logs.length).toBeGreaterThan(0);
         const output = logs.join("\n");
         expect(output).toContain("OPENSENTINEL");
-        expect(output).toContain("v2.0.0");
+        expect(output).toContain("v3.0.0");
       } finally {
         console.log = originalLog;
       }
@@ -192,7 +192,7 @@ describe("CLI Router", () => {
       stderr: "pipe",
     });
     const output = await new Response(proc.stdout).text();
-    expect(output.trim()).toBe("opensentinel v2.0.0");
+    expect(output.trim()).toBe("opensentinel v3.0.0");
   });
 
   test("--version flag works same as version command", async () => {
@@ -202,7 +202,7 @@ describe("CLI Router", () => {
       stderr: "pipe",
     });
     const output = await new Response(proc.stdout).text();
-    expect(output.trim()).toBe("opensentinel v2.0.0");
+    expect(output.trim()).toBe("opensentinel v3.0.0");
   });
 
   test("-v flag works same as version command", async () => {
@@ -212,7 +212,7 @@ describe("CLI Router", () => {
       stderr: "pipe",
     });
     const output = await new Response(proc.stdout).text();
-    expect(output.trim()).toBe("opensentinel v2.0.0");
+    expect(output.trim()).toBe("opensentinel v3.0.0");
   });
 
   test("status command runs without error", async () => {

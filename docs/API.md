@@ -69,7 +69,7 @@ GET /api/system/status
 ```json
 {
   "status": "online",
-  "version": "2.7.0",
+  "version": "3.0.0",
   "uptime": 3600.123,
   "memory": {
     "rss": 52428800,
@@ -670,6 +670,123 @@ curl -X POST http://localhost:8030/api/pair \
     }
   }'
 ```
+
+---
+
+## Email API
+
+The Email API provides 8 endpoints for full email management from the web dashboard. Added in v3.0.0.
+
+### List Email Folders
+
+```
+GET /api/email/folders
+```
+
+Returns the list of available mailbox folders (INBOX, Sent, Drafts, etc.).
+
+---
+
+### Get Inbox
+
+```
+GET /api/email/inbox
+```
+
+**Query parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `folder` | string | No | Folder name (default: `INBOX`) |
+| `limit` | number | No | Max messages to return (default: 50) |
+
+Returns a list of email message summaries (UID, from, subject, date, flags).
+
+---
+
+### Get Message
+
+```
+GET /api/email/message/:uid
+```
+
+Returns the full email message including HTML body, plain text, and attachment metadata.
+
+---
+
+### Get Attachment
+
+```
+GET /api/email/attachment/:uid/:index
+```
+
+Downloads or views a specific attachment by message UID and attachment index.
+
+---
+
+### Send Email
+
+```
+POST /api/email/send
+```
+
+**Request body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient address |
+| `subject` | string | Yes | Email subject |
+| `body` | string | Yes | Email body (HTML or plain text) |
+| `attachments` | File[] | No | File attachments (multipart form data) |
+
+---
+
+### Reply to Email
+
+```
+POST /api/email/reply
+```
+
+**Request body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `uid` | number | Yes | Original message UID |
+| `body` | string | Yes | Reply body |
+| `replyAll` | boolean | No | Reply to all recipients (default: `false`) |
+
+---
+
+### Search Email
+
+```
+POST /api/email/search
+```
+
+**Request body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `query` | string | Yes | Search query |
+| `folder` | string | No | Folder to search (default: `INBOX`) |
+
+Returns matching email message summaries.
+
+---
+
+### Flag Email
+
+```
+POST /api/email/flag
+```
+
+**Request body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `uid` | number | Yes | Message UID |
+| `flag` | string | Yes | Flag to set (e.g., `\\Seen`, `\\Flagged`, `\\Deleted`) |
+| `set` | boolean | Yes | `true` to add flag, `false` to remove |
 
 ---
 

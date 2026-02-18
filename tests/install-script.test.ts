@@ -61,9 +61,9 @@ describe("Project Structure", () => {
     expect(pkg.name).toBe("opensentinel");
   });
 
-  test("package.json version is 2.0.0", () => {
+  test("package.json version is 3.0.0", () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf-8"));
-    expect(pkg.version).toBe("2.0.0");
+    expect(pkg.version).toBe("3.0.0");
   });
 
   test(".env.example exists", () => {
@@ -118,7 +118,7 @@ describe("Website", () => {
   test("docs getting-started.html shows native install as primary", () => {
     const content = readFileSync(join(websiteDir, "docs", "getting-started.html"), "utf-8");
     expect(content).toContain("curl -fsSL https://opensentinel.ai/install.sh");
-    expect(content).toContain("npm install -g opensentinel");
+    expect(content).toContain("npm install opensentinel");
   });
 
   test("docs marks Docker as optional", () => {

@@ -1,4 +1,16 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect, beforeAll } from "bun:test";
+
+beforeAll(async () => {
+  const { configure } = await import("../src/config/env");
+  configure({
+    CLAUDE_API_KEY: "test-key",
+    HYDE_ENABLED: false,
+    RERANK_ENABLED: false,
+    MULTISTEP_RAG_ENABLED: false,
+    RETRIEVAL_CACHE_ENABLED: false,
+    CONTEXTUAL_QUERY_ENABLED: false,
+  });
+});
 
 // ============================================
 // Enhanced Retrieval Pipeline Orchestrator Tests

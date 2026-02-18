@@ -39,7 +39,7 @@ switch (command) {
   case "version":
   case "--version":
   case "-v":
-    console.log("opensentinel v2.1.1");
+    console.log("opensentinel v3.0.0");
     break;
 
   case "help":
