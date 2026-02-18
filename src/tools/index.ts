@@ -5069,37 +5069,57 @@ export async function executeTool(
           };
         }
 
+        // Auto-select device if none specified and no active device
+        let deviceId = input.device_id as string | undefined;
+        if (!deviceId && ["play", "pause", "next", "previous", "volume", "shuffle", "repeat", "queue"].includes(action)) {
+          try {
+            const devices = await spotify.player.getDevices();
+            const active = devices.find((d) => d.is_active);
+            if (!active && devices.length > 0) {
+              const target = devices[0];
+              if (target.id) {
+                await spotify.player.transferPlayback({ deviceIds: [target.id], play: false });
+                deviceId = target.id;
+                // Brief delay to let Spotify activate the device
+                await new Promise((r) => setTimeout(r, 500));
+              }
+            }
+          } catch {
+            // Ignore device check errors, let the actual command fail with a better message
+          }
+        }
+
         switch (action) {
           case "play": {
             const query = input.query as string;
             const type = (input.type as string) || "track";
             if (!query) {
-              await spotify.player.play();
+              await spotify.player.play({ deviceId });
               return { success: true, result: { message: "Playback resumed" } };
             }
             if (type === "track") {
-              const track = await spotify.playTrackByName(query, input.device_id as string | undefined);
+              const track = await spotify.playTrackByName(query, deviceId);
               return { success: true, result: { message: `Now playing: ${track.name} by ${track.artists.map((a: any) => a.name).join(", ")}`, track: { name: track.name, artists: track.artists.map((a: any) => a.name), album: (track as any).album?.name } } };
             } else if (type === "album") {
-              const album = await spotify.playAlbumByName(query, input.device_id as string | undefined);
+              const album = await spotify.playAlbumByName(query, deviceId);
               return { success: true, result: { message: `Now playing album: ${album.name}`, album: { name: album.name, artists: album.artists.map((a: any) => a.name) } } };
             } else if (type === "artist") {
-              const artist = await spotify.playArtistByName(query, input.device_id as string | undefined);
+              const artist = await spotify.playArtistByName(query, deviceId);
               return { success: true, result: { message: `Now playing: ${artist.name}`, artist: { name: artist.name } } };
             } else if (type === "playlist") {
-              const playlist = await spotify.playPlaylistByName(query, input.device_id as string | undefined);
+              const playlist = await spotify.playPlaylistByName(query, deviceId);
               return { success: true, result: { message: `Now playing playlist: ${playlist.name}`, playlist: { name: playlist.name } } };
             }
             return { success: false, result: null, error: `Unknown play type: ${type}` };
           }
           case "pause":
-            await spotify.player.pause();
+            await spotify.player.pause(deviceId);
             return { success: true, result: { message: "Playback paused" } };
           case "next":
-            await spotify.player.next();
+            await spotify.player.next(deviceId);
             return { success: true, result: { message: "Skipped to next track" } };
           case "previous":
-            await spotify.player.previous();
+            await spotify.player.previous(deviceId);
             return { success: true, result: { message: "Playing previous track" } };
           case "now_playing": {
             const np = await spotify.getNowPlaying();
@@ -5142,7 +5162,7 @@ export async function executeTool(
           }
           case "queue": {
             if (input.query) {
-              const track = await spotify.queueTrackByName(input.query as string, input.device_id as string | undefined);
+              const track = await spotify.queueTrackByName(input.query as string, deviceId);
               return { success: true, result: { message: `Added to queue: ${track.name}`, track: { name: track.name } } };
             }
             const queue = await spotify.player.getQueue();
@@ -5156,13 +5176,13 @@ export async function executeTool(
           }
           case "volume":
             if (input.volume === undefined) return { success: false, result: null, error: "'volume' required (0-100)" };
-            await spotify.player.setVolume(input.volume as number, input.device_id as string | undefined);
+            await spotify.player.setVolume(input.volume as number, deviceId);
             return { success: true, result: { message: `Volume set to ${input.volume}%` } };
           case "shuffle":
-            await spotify.player.setShuffle(input.state !== false, input.device_id as string | undefined);
+            await spotify.player.setShuffle(input.state !== false, deviceId);
             return { success: true, result: { message: `Shuffle ${input.state !== false ? "on" : "off"}` } };
           case "repeat":
-            await spotify.player.setRepeat((input.repeat_mode as any) || "off", input.device_id as string | undefined);
+            await spotify.player.setRepeat((input.repeat_mode as any) || "off", deviceId);
             return { success: true, result: { message: `Repeat set to ${input.repeat_mode || "off"}` } };
           case "devices": {
             const devices = await spotify.player.getDevices();
