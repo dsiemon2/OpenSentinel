@@ -6690,10 +6690,10 @@ export async function executeTool(
 
       case "generate_word_document": {
         const { generateWordDocument } = await import("./file-generation/word-document");
-        const result = await generateWordDocument(input.content as string, input.filename as string, {
-          title: input.title as string,
-          template: input.template as string,
-        });
+        const elements = typeof input.content === "string" ? JSON.parse(input.content) : (input.content || []);
+        const opts: any = { title: input.title as string };
+        if (input.template) opts.template = input.template;
+        const result = await generateWordDocument(elements as any[], input.filename as string, opts);
         return { success: result.success, result: result.filePath || result.error, error: result.error };
       }
 
@@ -6701,16 +6701,15 @@ export async function executeTool(
         const { generatePresentation } = await import("./file-generation/presentations");
         const slides = typeof input.slides === "string" ? JSON.parse(input.slides) : input.slides;
         const result = await generatePresentation(slides, input.filename as string, {
-          theme: input.theme as string,
-        });
+          theme: input.theme as any,
+        } as any);
         return { success: result.success, result: result.filePath || result.error, error: result.error };
       }
 
       case "generate_image": {
         const { generateImage } = await import("./file-generation/image-generation");
-        const result = await generateImage(input.prompt as string, {
-          action: input.action as string,
-          size: input.size as string,
+        const result = await generateImage(input.prompt as string, input.filename as string, {
+          size: input.size as any,
           n: input.n as number,
         });
         return { success: result.success, result: result.url || result.filePath || result.error, error: result.error };

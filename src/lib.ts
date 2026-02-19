@@ -54,5 +54,20 @@ export { WhatsAppBot } from "./inputs/whatsapp";
 export { SignalBot } from "./inputs/signal";
 export { iMessageBot } from "./inputs/imessage";
 
+// Security
+export { generateEncryptionKey, reEncryptValue, getRotationInfo } from "./core/security/key-rotation";
+
+// Utility tools
+export { transformText, countText, detectLanguage, extractKeywords, changeCase } from "./tools/text-transform";
+export { jsonTool, validateJson, formatJson, flattenJson, diffJson, queryJson } from "./tools/json-tool";
+export { cronTool, explainCron, getNextRuns, validateCron } from "./tools/cron-explain";
+export { hashTool, hashString, compareHashes, generateToken } from "./tools/hash-tool";
+export { regexTool, testRegex, replaceWithRegex, extractCaptures } from "./tools/regex-tool";
+export { unitConverter, convert } from "./tools/unit-converter";
+export { qrCodeTool, generateQRSvg } from "./tools/qr-code";
+export { clipboardTool } from "./tools/clipboard-manager";
+export { createDatabaseBackup, restoreDatabase, listBackups } from "./tools/backup-restore";
+export { registerService, recordBeat, checkHeartbeats, getHeartbeatSummary } from "./tools/heartbeat-monitor";
+
 // Database (advanced)
 export { db } from "./db";
