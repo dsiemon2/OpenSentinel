@@ -5,12 +5,13 @@
  * estimates ROI, and generates investment reports.
  */
 
-import { configure, chatWithTools, storeMemory, searchMemories, type Message } from "opensentinel";
+import { configure, ready, chatWithTools, storeMemory, searchMemories, type Message } from "opensentinel";
 
 configure({
   CLAUDE_API_KEY: process.env.CLAUDE_API_KEY || "",
   DATABASE_URL: process.env.DATABASE_URL || "",
 });
+await ready();
 
 interface Property {
   address: string;

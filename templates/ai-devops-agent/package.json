@@ -7,6 +7,6 @@
     "dev": "bun --watch index.ts"
   },
   "dependencies": {
-    "opensentinel": "^2.0.0"
+    "opensentinel": "^3.0.0"
   }
 }

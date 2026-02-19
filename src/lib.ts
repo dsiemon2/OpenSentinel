@@ -6,7 +6,8 @@
  */
 
 // Configuration
-export { configure, env, type Env } from "./config/env";
+export { configure, ready, env, type Env } from "./config/env";
+export { initializeProviders } from "./core/providers";
 
 // Orchestrator class
 export { OpenSentinel, type OpenSentinelConfig } from "./app";

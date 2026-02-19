@@ -5,12 +5,13 @@
  * escalates when needed, and learns from past resolutions.
  */
 
-import { configure, chatWithTools, storeMemory, searchMemories, type Message } from "opensentinel";
+import { configure, ready, chatWithTools, storeMemory, searchMemories, type Message } from "opensentinel";
 
 configure({
   CLAUDE_API_KEY: process.env.CLAUDE_API_KEY || "",
   DATABASE_URL: process.env.DATABASE_URL || "",
 });
+await ready();
 
 interface Ticket {
   id: string;
