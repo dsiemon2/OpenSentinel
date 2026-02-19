@@ -5,11 +5,12 @@
  * Produces API docs, guides, changelogs, and README files.
  */
 
-import { configure, chatWithTools, type Message } from "opensentinel";
+import { configure, ready, chatWithTools, type Message } from "opensentinel";
 
 configure({
   CLAUDE_API_KEY: process.env.CLAUDE_API_KEY || "",
 });
+await ready();
 
 interface DocTarget {
   type: "api-reference" | "getting-started" | "changelog" | "readme" | "architecture";

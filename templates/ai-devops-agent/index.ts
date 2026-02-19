@@ -5,11 +5,12 @@
  * and runs runbooks — all through OpenSentinel's tool system.
  */
 
-import { configure, chatWithTools, type Message } from "opensentinel";
+import { configure, ready, chatWithTools, type Message } from "opensentinel";
 
 configure({
   CLAUDE_API_KEY: process.env.CLAUDE_API_KEY || "",
 });
+await ready();
 
 // Servers to monitor
 const SERVERS = [

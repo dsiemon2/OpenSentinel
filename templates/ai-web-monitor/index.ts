@@ -5,12 +5,13 @@
  * Uses OpenSentinel's tool system to fetch pages, diff content, and notify.
  */
 
-import { configure, chatWithTools, type Message } from "opensentinel";
+import { configure, ready, chatWithTools, type Message } from "opensentinel";
 
 // Configure with your API key
 configure({
   CLAUDE_API_KEY: process.env.CLAUDE_API_KEY || "",
 });
+await ready();
 
 // Pages to monitor
 const WATCH_LIST = [

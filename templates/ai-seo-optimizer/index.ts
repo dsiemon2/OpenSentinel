@@ -5,11 +5,12 @@
  * generates optimized content suggestions, and tracks rankings.
  */
 
-import { configure, chatWithTools, type Message } from "opensentinel";
+import { configure, ready, chatWithTools, type Message } from "opensentinel";
 
 configure({
   CLAUDE_API_KEY: process.env.CLAUDE_API_KEY || "",
 });
+await ready();
 
 interface Page {
   url: string;

@@ -282,6 +282,8 @@ let _env: Env | null = null;
  * Call this before any module accesses `env`.
  * Config values are merged with process.env (config takes precedence).
  */
+let _providerInitPromise: Promise<void> | null = null;
+
 export function configure(config: Partial<Env> & { CLAUDE_API_KEY: string }): Env {
   const merged = { ...process.env, ...config };
   const result = envSchema.safeParse(merged);
@@ -296,7 +298,19 @@ export function configure(config: Partial<Env> & { CLAUDE_API_KEY: string }): En
   }
 
   _env = result.data;
+
+  // Auto-initialize LLM providers after configuration
+  _providerInitPromise = import("../core/providers").then((m) => m.initializeProviders()).catch(() => {});
+
   return _env;
+}
+
+/**
+ * Wait for provider initialization to complete.
+ * Call after configure() if you need providers ready before first API call.
+ */
+export async function ready(): Promise<void> {
+  if (_providerInitPromise) await _providerInitPromise;
 }
 
 /**
