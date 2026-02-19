@@ -54,25 +54,27 @@ export async function main() {
     console.warn("[Scheduler] Could not start worker (Redis may be unavailable):", err);
   }
 
-  // Initialize MCP (Model Context Protocol) servers
+  // Initialize MCP (Model Context Protocol) servers in background (non-blocking)
   let mcpRegistry: MCPRegistry | null = null;
-  if (env.MCP_ENABLED) {
-    try {
-      console.log("[MCP] Initializing MCP servers...");
-      mcpRegistry = await initMCPRegistry(env.MCP_CONFIG_PATH);
-      setMCPRegistry(mcpRegistry);
+  const mcpInitPromise = env.MCP_ENABLED
+    ? (async () => {
+        try {
+          console.log("[MCP] Initializing MCP servers (background)...");
+          mcpRegistry = await initMCPRegistry(env.MCP_CONFIG_PATH);
+          setMCPRegistry(mcpRegistry);
 
-      if (mcpRegistry.connectedCount > 0) {
-        console.log(`[MCP] Connected to ${mcpRegistry.connectedCount} server(s), ${mcpRegistry.totalToolCount} tools available`);
-        console.log(getMCPToolSummary(mcpRegistry));
-      } else {
-        console.log("[MCP] No servers configured (add servers to mcp.json)");
-      }
-    } catch (err) {
-      console.warn("[MCP] Failed to initialize:", err);
-      mcpRegistry = null;
-    }
-  }
+          if (mcpRegistry.connectedCount > 0) {
+            console.log(`[MCP] Connected to ${mcpRegistry.connectedCount} server(s), ${mcpRegistry.totalToolCount} tools available`);
+            console.log(getMCPToolSummary(mcpRegistry));
+          } else {
+            console.log("[MCP] No servers configured (add servers to mcp.json)");
+          }
+        } catch (err) {
+          console.warn("[MCP] Failed to initialize:", err);
+          mcpRegistry = null;
+        }
+      })()
+    : Promise.resolve();
 
   // Start Discord bot if configured
   let discordBot: DiscordBot | null = null;
@@ -287,6 +289,7 @@ export async function main() {
     console.log("\nShutting down...");
     stopWorker();
     wsHandler.closeAllConnections();
+    await mcpInitPromise;
     if (mcpRegistry) await mcpRegistry.shutdown();
     if (bot) await bot.stop();
     if (discordBot) await discordBot.stop();
