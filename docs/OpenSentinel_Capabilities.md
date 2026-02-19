@@ -3,7 +3,7 @@
 ![OpenSentinel](GoGreen-OpenSentinel.png)
 
 **Category:** AI Assistant
-**Version:** 3.1.0
+**Version:** 3.1.1
 **Status:** Production Ready
 **Date:** February 2026
 
@@ -192,7 +192,7 @@ Providers are automatically registered from environment variables. Per-request p
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    OPENSENTINEL v3.1.0                          │
+│                    OPENSENTINEL v3.1.1                          │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │
@@ -303,4 +303,4 @@ Providers are automatically registered from environment variables. Per-request p
 
 **GoGreen Paperless Initiative**
 OpenSentinel - Personal AI Assistant
-Version 3.1.0 | February 2026
+Version 3.1.1 | February 2026

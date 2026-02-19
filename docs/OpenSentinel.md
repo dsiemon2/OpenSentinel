@@ -1,6 +1,6 @@
 # OPENSENTINEL: Complete Implementation
 
-**Status: FULLY IMPLEMENTED** (v3.1.0 - February 2026)
+**Status: FULLY IMPLEMENTED** (v3.1.1 - February 2026)
 
 OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered by Claude, capable of receiving commands via Telegram, Discord, Slack, Voice, and API, executing browser automation, shell commands, file operations, and maintaining persistent memory.
 
@@ -10,7 +10,7 @@ OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                       OPENSENTINEL v3.1.0                        │
+│                       OPENSENTINEL v3.1.1                        │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │

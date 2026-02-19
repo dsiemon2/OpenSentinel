@@ -1,6 +1,6 @@
 # Configuration Reference
 
-This document provides a complete reference for all environment variables used by OpenSentinel v3.0.0. Configuration is managed through environment variables, validated at startup using Zod schemas defined in `src/config/env.ts`.
+This document provides a complete reference for all environment variables used by OpenSentinel v3.1.1. Configuration is managed through environment variables, validated at startup using Zod schemas defined in `src/config/env.ts`.
 
 ## Table of Contents
 
@@ -182,7 +182,7 @@ This document provides a complete reference for all environment variables used b
 
 ## Advanced RAG Pipeline
 
-As of v3.0.0, all 5 RAG enhancement techniques are enabled by default.
+As of v3.1.1, all 5 RAG enhancement techniques are enabled by default.
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|

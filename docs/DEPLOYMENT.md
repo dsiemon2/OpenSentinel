@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This document covers production deployment options for OpenSentinel v3.1.0. The recommended approach is Docker Compose, which handles all dependencies automatically.
+This document covers production deployment options for OpenSentinel v3.1.1. The recommended approach is Docker Compose, which handles all dependencies automatically.
 
 ## Table of Contents
 

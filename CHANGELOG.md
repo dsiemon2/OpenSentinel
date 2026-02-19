@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Tool count: 105 → 121
 - Test count: 4,829+ → 5,629+ across 161 files
-- Version bump: 3.0.0 → 3.1.0
+- Version bump: 3.0.0 → 3.1.1
 
 ## [3.0.0] - 2026-02-18
 
@@ -70,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Version bump: 2.9.0 → 3.0.0
-- Tool count: 126 → 126 (email uses existing tools, web UI is new frontend)
+- Tool count: 121 (email uses existing tools, web UI is new frontend)
 - Dashboard views: 4 → 5 (added Email page)
 - All RAG feature flags default to `true` in `.env.example`
 - `.env.example` updated: Google Services unified OAuth2, exchange/DeFi/on-chain vars uncommented, Spotify redirect URI fixed, RAG flags section added
@@ -108,7 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 176 new tests across 5 test files
 
 ### Changed
-- Tool count: 121 → 126
+- Tool count: 121
 - Test count: 4,787+ → 4,969+ across 144 files
 - Finance module expanded with 5 new sub-modules
 - `FinanceConfig` interface extended with exchange, DeFi, on-chain, orderbook, backtesting options

@@ -15,7 +15,7 @@ import { initializeProviders } from "./core/providers";
 export async function main() {
   console.log(`
 ╔══════════════════════════════════════════╗
-║           OPENSENTINEL v3.0.0            ║
+║           OPENSENTINEL v3.1.1            ║
 ║     Your Personal AI Assistant           ║
 ╚══════════════════════════════════════════╝
 `);

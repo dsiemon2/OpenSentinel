@@ -31,7 +31,7 @@ Contrary to previous reports, OpenSentinel supports a wide array of channels:
     -   `WritingAgent`: Content generation.
     -   `AnalysisAgent`: Data processing.
     -   `OSINTAgent`: Open Source Intelligence gathering (Graph/Entity search).
--   **Tools**: `src/tools/index.ts` registers **120+ tools**, including browser automation, file generation (PDF/Office), and deep integrations (GitHub, Notion, Home Assistant).
+-   **Tools**: `src/tools/index.ts` registers **121 tools**, including browser automation, file generation (PDF/Office), and deep integrations (GitHub, Notion, Home Assistant).
 
 ### 2.3 Enterprise Ready
 -   **Multi-User**: `src/core/enterprise/multi-user.ts` supports organization structures.

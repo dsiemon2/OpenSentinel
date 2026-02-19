@@ -40,7 +40,7 @@ Deployment is handled via manual `rsync`/`scp` to the production server, followe
 
 ## Testing
 
-OpenSentinel uses **Bun's native test runner** (`bun:test`) with 160+ test files and 5,600+ tests.
+OpenSentinel uses **Bun's native test runner** (`bun:test`) with 161 test files and 5,600+ tests.
 
 ```bash
 # Run all tests
@@ -139,7 +139,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 160+ test files, 5,600+ tests
+tests/                          # 161 test files, 5,600+ tests
 ```
 
 ## Discord Setup (IMPORTANT)
