@@ -34,8 +34,16 @@ export class MCPRegistry {
 
     console.log(`[MCP] Initializing ${enabledServers.length} server(s)...`);
 
+    const withTimeout = (promise: Promise<void>, name: string, ms = 15000) =>
+      Promise.race([
+        promise,
+        new Promise<void>((_, reject) =>
+          setTimeout(() => reject(new Error(`${name} timed out after ${ms / 1000}s`)), ms)
+        ),
+      ]);
+
     const results = await Promise.allSettled(
-      enabledServers.map((config) => this.connectServer(config))
+      enabledServers.map((config) => withTimeout(this.connectServer(config), config.name))
     );
 
     // Log any failures
