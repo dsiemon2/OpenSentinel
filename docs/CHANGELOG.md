@@ -31,7 +31,7 @@ All notable changes to OpenSentinel are documented here.
 
 ### Changed
 - Version bump: 2.9.0 → 3.0.0
-- Tool count: 126
+- Tool count: 121
 - Dashboard views: 4 → 5 (added Email page)
 - All RAG feature flags default to `true`
 - Test count: 5,600+ across 160+ files
@@ -53,7 +53,7 @@ All notable changes to OpenSentinel are documented here.
 - **Google Services Integration**: Gmail, Google Calendar, Google Drive via OAuth2
 - **Enhanced Security**: Audit trail, crypto utilities, enhanced rate limiter
 - **File Generation**: HTML reports and iCal calendar file generation
-- Expanded brain system prompt to list all 120+ tool categories for better tool selection
+- Expanded brain system prompt to list all 121 tool categories for better tool selection
 - Natural language Spotify CLI with command parsing
 
 ### Changed

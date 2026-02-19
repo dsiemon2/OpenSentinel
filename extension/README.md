@@ -1,6 +1,6 @@
 # OpenSentinel Browser Extension
 
-**Status: IMPLEMENTED** (v2.7.0)
+**Status: IMPLEMENTED** (v3.1.1)
 
 A Chrome/Firefox browser extension for interacting with your OpenSentinel personal AI assistant.
 

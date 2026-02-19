@@ -1,6 +1,6 @@
 # OpenSentinel Features
 
-**Status: ALL FEATURES IMPLEMENTED** (v3.0.0)
+**Status: ALL FEATURES IMPLEMENTED** (v3.1.1)
 
 ## Input Methods
 
@@ -89,7 +89,7 @@
 - Redis-backed Retrieval Cache with TTL expiry
 - Contextual Query Rewriting from conversation history
 - Composable pipeline: each stage independently toggleable via env vars
-- All 5 enhancements enabled by default as of v3.0.0
+- All 5 enhancements enabled by default as of v3.1.1
 - Graceful degradation: falls back to hybrid search when all flags disabled
 
 ### Personality ✅
@@ -111,7 +111,7 @@
 
 ---
 
-## Tools (126)
+## Tools (121)
 
 ### Shell Execution ✅
 - Sandboxed command execution

@@ -69,7 +69,7 @@ GET /api/system/status
 ```json
 {
   "status": "online",
-  "version": "3.0.0",
+  "version": "3.1.1",
   "uptime": 3600.123,
   "memory": {
     "rss": 52428800,

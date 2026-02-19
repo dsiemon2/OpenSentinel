@@ -122,7 +122,7 @@ On startup, you will see:
 
 ```
 +==========================================+
-|           OPENSENTINEL v3.1.0            |
+|           OPENSENTINEL v3.1.1            |
 |     Your Personal AI Assistant           |
 +==========================================+
 
@@ -388,7 +388,7 @@ Run the test suite:
 bun test
 ```
 
-The suite includes 5,600+ tests across 160+ test files covering all components.
+The suite includes 5,600+ tests across 161 test files covering all components.
 
 ---
 

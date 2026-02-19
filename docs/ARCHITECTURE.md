@@ -1,6 +1,6 @@
 # OpenSentinel Architecture
 
-This document describes the internal architecture of OpenSentinel v3.0.0, covering data flow, core components, and the overall system design.
+This document describes the internal architecture of OpenSentinel v3.1.1, covering data flow, core components, and the overall system design.
 
 ---
 
@@ -182,7 +182,7 @@ Query → Contextual Rewrite → HyDE → Cache Check → Hybrid Search → Re-r
 | 6. Multi-Step | `multi-step.ts` | `MULTISTEP_RAG_ENABLED` | Evaluates completeness, generates follow-up queries for gaps |
 | 7. Orchestrator | `enhanced-retrieval.ts` | -- | Wires all stages together, graceful degradation |
 
-As of v3.0.0, all 5 RAG enhancements are enabled by default. The pipeline degrades gracefully: if all flags are turned off, it falls back to standard hybrid search.
+As of v3.1.1, all 5 RAG enhancements are enabled by default. The pipeline degrades gracefully: if all flags are turned off, it falls back to standard hybrid search.
 
 **Flow:**
 1. User sends a message
