@@ -61,7 +61,7 @@ OpenSentinel is a self-hosted personal AI assistant powered by Claude. It suppor
 
 | Document | Description |
 |----------|-------------|
-| [Testing](TESTING.md) | Running the 5,000+ test suite, writing tests, and coverage |
+| [Testing](TESTING.md) | Running the 5,600+ test suite, writing tests, and coverage |
 | [Contributing](CONTRIBUTING.md) | Code style, PR process, and development workflow |
 | [Changelog](CHANGELOG.md) | Version history and release notes |
 

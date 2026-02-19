@@ -297,7 +297,7 @@ Providers are automatically registered from environment variables. Per-request p
 | Sub-Agents | 4 |
 | Source Files | 349 |
 | Lines of Code | ~52,000 |
-| Unit Tests | 5,000+ (5,629) |
+| Unit Tests | 5,600+ (5,629) |
 
 ---
 

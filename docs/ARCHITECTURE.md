@@ -663,7 +663,7 @@ opensentinel/
 +-- plugins/                               # Plugin directory
 +-- docker/                                # Docker configs (init-db, nginx)
 +-- docker-compose.yml                     # Full stack orchestration
-+-- tests/                                 # Test suite (5000+ tests)
++-- tests/                                 # Test suite (5600+ tests)
 +-- docs/                                  # Documentation
 +-- package.json                           # NPM package (opensentinel)
 +-- drizzle.config.ts                      # Drizzle ORM configuration

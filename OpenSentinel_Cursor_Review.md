@@ -169,7 +169,7 @@ SOC 2 is based on the AICPA Trust Services Criteria: **Security** (common), **Av
 |-------------------|----------------------|--------|------------------------|
 | Processing completeness/accuracy | Tool execution, error handling, audit of tool_use | ✅ | Document how errors and retries are handled. |
 | Data validation | Sandbox, prompt/memory guards, risk engine | ✅ | None. |
-| Quality assurance | 5,000+ tests, CI | ✅ | Mention in SOC 2 documentation. |
+| Quality assurance | 5,600+ tests, CI | ✅ | Mention in SOC 2 documentation. |
 
 ### 4.4 Confidentiality
 
