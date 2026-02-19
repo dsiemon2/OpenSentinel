@@ -65,7 +65,7 @@ All notable changes to OpenSentinel are documented here.
 - Version bumped to 2.7.0
 - Tool count increased from 93 to 121
 - Test count increased from 3,800+ to 4,617+
-- Feature count increased from 280+ to 300+
+- Feature count increased from ~245 to 270+
 
 ## [2.5.0] - 2026-02-15
 

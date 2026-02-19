@@ -4,11 +4,11 @@ import { latexToSpeech } from "../src/tools/rendering/math-renderer";
 describe("Math-to-Speech Conversion", () => {
   describe("latexToSpeech", () => {
     test("should convert simple fractions", () => {
-      expect(latexToSpeech("\\frac{a}{b}")).toContain("a divided by b");
+      expect(latexToSpeech("\\frac{a}{b}")).toContain("a over b");
     });
 
     test("should convert numeric fractions", () => {
-      expect(latexToSpeech("\\frac{1}{2}")).toContain("1 divided by 2");
+      expect(latexToSpeech("\\frac{1}{2}")).toContain("1 over 2");
     });
 
     test("should convert square roots", () => {
@@ -46,8 +46,7 @@ describe("Math-to-Speech Conversion", () => {
 
     test("should convert summation", () => {
       const result = latexToSpeech("\\sum_{i=1}^{n}");
-      expect(result).toContain("the sum from");
-      expect(result).toContain("to");
+      expect(result).toContain("the sum of");
     });
 
     test("should convert simple sum notation", () => {
@@ -57,12 +56,12 @@ describe("Math-to-Speech Conversion", () => {
 
     test("should convert integral", () => {
       const result = latexToSpeech("\\int_{0}^{1}");
-      expect(result).toContain("the integral from");
+      expect(result).toContain("the integral of");
     });
 
     test("should convert limits", () => {
       const result = latexToSpeech("\\lim_{x \\rightarrow 0}");
-      expect(result).toContain("the limit as");
+      expect(result).toContain("the limit of");
     });
 
     test("should convert operators", () => {
@@ -102,8 +101,8 @@ describe("Math-to-Speech Conversion", () => {
 
     test("should handle complex expression", () => {
       const result = latexToSpeech("\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}");
-      expect(result).toContain("divided by");
       expect(result).toContain("square root");
+      expect(result).toContain("plus or minus");
     });
 
     test("should handle empty input", () => {

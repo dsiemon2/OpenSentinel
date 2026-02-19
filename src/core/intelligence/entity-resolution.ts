@@ -258,8 +258,7 @@ export async function resolveEntity(candidate: EntityCandidate): Promise<Resolve
     const newEntity = await db
       .insert(graphEntities)
       .values({
-        userId: "system",
-        type: mapOSINTTypeToGraphType(candidate.type),
+        type: mapOSINTTypeToGraphType(candidate.type) as any,
         name: candidate.name,
         aliases: candidate.aliases || [],
         description: `Discovered from ${candidate.source}`,

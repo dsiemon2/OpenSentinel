@@ -122,7 +122,7 @@ On startup, you will see:
 
 ```
 +==========================================+
-|           OPENSENTINEL v2.7.0            |
+|           OPENSENTINEL v3.1.0            |
 |     Your Personal AI Assistant           |
 +==========================================+
 
@@ -329,7 +329,7 @@ For full API documentation, see [API.md](API.md).
 
 ## Desktop App (Optional)
 
-Build the Electron desktop app for system tray access and a global hotkey (Ctrl+Shift+M):
+Build the Electron desktop app for system tray access and global hotkeys (Ctrl+Shift+M chat, Ctrl+Shift+O OpenSentinel):
 
 ```bash
 cd desktop
@@ -388,7 +388,7 @@ Run the test suite:
 bun test
 ```
 
-The suite includes 4617+ tests covering all components.
+The suite includes 5,000+ tests across 155+ test files covering all components.
 
 ---
 

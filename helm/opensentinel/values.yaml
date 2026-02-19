@@ -1,0 +1,125 @@
+# OpenSentinel Helm Chart — Default Values
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/dsiemon2/opensentinel
+  tag: "3.1.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 8030
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: opensentinel.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+    # - secretName: opensentinel-tls
+    #   hosts:
+    #     - opensentinel.local
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Environment variables — secrets should use existingSecret
+env:
+  NODE_ENV: production
+  PORT: "8030"
+
+# Reference an existing Kubernetes Secret for sensitive values
+# The secret should contain: CLAUDE_API_KEY, DATABASE_URL, REDIS_URL, etc.
+existingSecret: ""
+
+# Inline secret values (use existingSecret in production instead)
+secrets:
+  CLAUDE_API_KEY: ""
+  DATABASE_URL: ""
+  REDIS_URL: ""
+  ENCRYPTION_MASTER_KEY: ""
+  AUDIT_SIGNING_KEY: ""
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Prometheus metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    path: /metrics
+
+# PostgreSQL subchart (set enabled: false to use external DB)
+postgresql:
+  enabled: true
+  auth:
+    username: opensentinel
+    password: opensentinel
+    database: opensentinel
+  primary:
+    persistence:
+      size: 10Gi
+    initdb:
+      scripts:
+        init-pgvector.sql: |
+          CREATE EXTENSION IF NOT EXISTS vector;
+
+# Redis subchart (set enabled: false to use external Redis)
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      size: 2Gi

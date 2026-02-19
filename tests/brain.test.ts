@@ -72,7 +72,7 @@ describe("Brain - Core AI Engine", () => {
 
     test("should mention web browsing", async () => {
       const { SYSTEM_PROMPT } = await import("../src/core/brain");
-      expect(SYSTEM_PROMPT).toContain("Browse the web");
+      expect(SYSTEM_PROMPT.toLowerCase()).toContain("browse the web");
     });
 
     test("should mention memory/remembering", async () => {

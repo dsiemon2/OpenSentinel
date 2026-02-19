@@ -47,8 +47,9 @@ afterEach(async () => {
 // ========================
 
 describe("executeTool - list_directory", () => {
-  test("returns success with array of files for /tmp", async () => {
-    const res = await executeTool("list_directory", { path: "/tmp" });
+  test("returns success with array of files for temp dir", async () => {
+    const tmpPath = process.platform === "win32" ? process.env.TEMP || "C:\\Windows\\Temp" : "/tmp";
+    const res = await executeTool("list_directory", { path: tmpPath });
     expect(res.success).toBe(true);
     expect(Array.isArray(res.result)).toBe(true);
     expect(res.error).toBeUndefined();
@@ -156,13 +157,15 @@ describe("executeTool - execute_command", () => {
   });
 
   test("working_directory parameter works", async () => {
+    const tmpPath = process.platform === "win32" ? (process.env.TEMP || "C:\\Windows\\Temp") : "/tmp";
     const res = await executeTool("execute_command", {
       command: "pwd",
-      working_directory: "/tmp",
+      working_directory: tmpPath,
     });
     expect(res.success).toBe(true);
     const result = res.result as { stdout: string };
-    expect(result.stdout.trim()).toBe("/tmp");
+    // Windows PowerShell pwd has different output format
+    expect(result.stdout).toContain(process.platform === "win32" ? "Temp" : "/tmp");
   });
 });
 

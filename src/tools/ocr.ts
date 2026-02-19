@@ -9,6 +9,30 @@ export interface OCRResult {
   error?: string;
 }
 
+// OCR using Tesseract.js (local, no API key needed)
+export async function ocrWithTesseract(
+  filePath: string,
+  language: string = "eng"
+): Promise<OCRResult> {
+  try {
+    const Tesseract = await import("tesseract.js");
+    const worker = await Tesseract.createWorker(language);
+    const { data } = await worker.recognize(filePath);
+    await worker.terminate();
+
+    return {
+      success: true,
+      text: data.text,
+      confidence: data.confidence / 100,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: `Tesseract OCR failed: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+}
+
 // Use Claude Vision for OCR (most reliable for complex documents)
 export async function ocrWithVision(
   filePath: string,
@@ -33,11 +57,13 @@ export async function ocrWithVision(
   };
 }
 
-// Simple OCR fallback using pattern matching (for testing without external deps)
-// In production, this would use Tesseract.js
+// OCR using Tesseract.js as primary, falling back to Vision API
 export async function ocrSimple(filePath: string): Promise<OCRResult> {
-  // This is a placeholder - real implementation would use Tesseract.js
-  // For now, fall back to Vision API
+  const result = await ocrWithTesseract(filePath);
+  if (result.success && result.confidence && result.confidence > 0.6) {
+    return result;
+  }
+  // Fall back to Vision API on low confidence or failure
   return ocrWithVision(filePath);
 }
 
@@ -155,5 +181,6 @@ export async function extractStructuredData(
 export default {
   performOCR,
   ocrWithVision,
+  ocrWithTesseract,
   extractStructuredData,
 };

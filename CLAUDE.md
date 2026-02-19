@@ -1,7 +1,7 @@
 # CLAUDE.md - AI Assistant Instructions
 
 ## Project Overview
-OpenSentinel is a self-hosted personal AI assistant powered by Claude, with Telegram, Discord, Slack, and web interfaces. It includes 300+ features including smart home control, productivity integrations, and workflow automation.
+OpenSentinel is a self-hosted personal AI assistant powered by Claude, with Telegram, Discord, Slack, and web interfaces. It includes 270+ features including smart home control, productivity integrations, and workflow automation.
 
 ## API Keys & Credentials
 All credentials are stored in `.env` (not committed to git). See `.env.example` for the required variables.
@@ -31,16 +31,16 @@ All credentials are stored in `.env` (not committed to git). See `.env.example` 
 
 The project uses GitHub Actions for continuous integration. Workflows are located in `.github/workflows/`.
 
-**Note**: If no `.github/workflows/` directory exists yet, create one with a CI workflow that includes:
-- Linting and type checking
-- Running the full test suite (`bun test`)
-- Building the project (`bun run build`)
+The CI workflow (`.github/workflows/ci.yml`) runs on push/PR to `main`:
+- Type checking (`tsc --noEmit`, non-blocking)
+- Full test suite (`bun test`) with PostgreSQL 16 + pgvector and Redis 7 services
+- Web frontend build (`cd src/web && bun run build`)
 
 Deployment is handled via manual `rsync`/`scp` to the production server, followed by a `systemctl restart opensentinel`.
 
 ## Testing
 
-OpenSentinel uses **Bun's native test runner** (`bun:test`) with 133 test files and 4,617+ tests.
+OpenSentinel uses **Bun's native test runner** (`bun:test`) with 155+ test files and 5,000+ tests.
 
 ```bash
 # Run all tests
@@ -105,7 +105,7 @@ src/
 │   ├── scheduler.ts            # BullMQ task scheduler
 │   ├── agents/                 # Sub-agent system
 │   ├── enterprise/             # Multi-user, SSO, quotas
-│   ├── intelligence/           # Predictive, relationship, temporal
+│   ├── intelligence/           # Predictive, relationship, temporal, entity resolution
 │   ├── evolution/              # Evolution, achievements, modes
 │   ├── observability/          # Metrics, replay, alerting
 │   ├── personality/            # Personas, mood, domain experts
@@ -129,6 +129,7 @@ src/
 │   ├── spotify/                # Spotify API
 │   ├── cloud-storage/          # Google Drive, Dropbox
 │   ├── finance/                # Crypto, stocks, currency
+│   ├── public-records/         # FEC, SEC, IRS 990, USASpending, OpenCorporates
 │   ├── documents/              # Document ingestion
 │   └── vision/                 # Screen/webcam capture
 ├── tools/                      # Tool implementations
@@ -138,7 +139,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 133 test files, 4,617+ tests
+tests/                          # 155+ test files, 5,000+ tests
 ```
 
 ## Discord Setup (IMPORTANT)
@@ -186,4 +187,4 @@ cd extension && bun install && bun run build
 ```
 
 ---
-*Last Updated: 2026-02-16*
+*Last Updated: 2026-02-19*

@@ -1,0 +1,26 @@
+apiVersion: v2
+name: opensentinel
+description: Self-hosted AI assistant powered by Claude
+type: application
+version: 3.1.0
+appVersion: "3.1.0"
+keywords:
+  - ai
+  - assistant
+  - claude
+  - self-hosted
+home: https://opensentinel.ai
+sources:
+  - https://github.com/dsiemon2/OpenSentinel
+maintainers:
+  - name: OpenSentinel
+    url: https://github.com/dsiemon2/OpenSentinel
+dependencies:
+  - name: postgresql
+    version: "~15"
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+  - name: redis
+    version: "~18"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled

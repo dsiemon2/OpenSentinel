@@ -2,7 +2,7 @@
 
 ## Overview
 
-OpenSentinel v3.0.0 has a comprehensive test suite with **5,000+ tests** across **145+ test files**. Tests cover the core brain, all input channels, integrations, tools, and utility modules.
+OpenSentinel v3.1.0 has a comprehensive test suite with **5,000+ tests** across **155+ test files**. Tests cover the core brain, all input channels, integrations, tools, and utility modules.
 
 ## Test Framework
 

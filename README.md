@@ -123,6 +123,13 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - **Cloud Storage**: Google Drive, Dropbox
 - **Finance**: Crypto, stocks, currency, portfolio tracking, exchange trading (Coinbase/Binance), DeFi data, on-chain analytics, order books, backtesting
 
+### OSINT & Public Records
+- **Graph Explorer**: D3.js force-directed knowledge graph visualization
+- **External API Search**: Auto-queries FEC, OpenCorporates when entities aren't in local DB
+- **Entity Resolution**: Jaro-Winkler fuzzy matching, exact/identifier/fuzzy/new resolution pipeline
+- **Public Records Clients**: FEC, SEC EDGAR, IRS 990, USASpending, OpenCorporates
+- **Rate Limiting**: Per-service sliding-window rate limiter for API compliance
+
 ### Infrastructure
 - Built-in tunnels (Cloudflare, ngrok, localtunnel)
 
@@ -138,7 +145,7 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Built-in workflow templates
 
 ### Desktop & Browser Apps
-- **Electron Desktop App**: System tray, global hotkeys (Ctrl+Shift+O)
+- **Electron Desktop App**: System tray, global hotkeys (Ctrl+Shift+M chat, Ctrl+Shift+O OpenSentinel)
 - **Browser Extension**: Chrome/Firefox popup chat, context menu
 
 ## Quick Start
@@ -288,6 +295,7 @@ src/
 │   ├── spotify/                # Spotify API
 │   ├── cloud-storage/          # Google Drive, Dropbox
 │   ├── finance/                # Crypto, stocks, currency
+│   ├── public-records/         # FEC, SEC, IRS 990, USASpending, OpenCorporates
 │   ├── documents/              # Document ingestion
 │   └── vision/                 # Screen/webcam capture
 ├── tools/
@@ -302,7 +310,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 145+ test files, 5,000+ tests
+tests/                          # 155+ test files, 5,000+ tests
 ```
 
 ## Ports

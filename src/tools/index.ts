@@ -2872,6 +2872,236 @@ export const TOOLS: Tool[] = [
       required: ["action"],
     },
   },
+  // ===== NEW TOOLS (v3.1.0) =====
+  {
+    name: "ocr_tesseract",
+    description: "Extract text from images using Tesseract.js OCR engine (local, no API key needed). Best for scanned documents and clear text.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        file_path: { type: "string", description: "Path to the image file" },
+        language: { type: "string", description: "OCR language (default: eng). Supports: eng, fra, deu, spa, ita, por, jpn, chi_sim, kor, ara" },
+      },
+      required: ["file_path"],
+    },
+  },
+  {
+    name: "generate_pdf_native",
+    description: "Generate a PDF document natively using PDFKit (no browser needed). Supports markdown-like formatting with headings, lists, and paragraphs.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        content: { type: "string", description: "Content to render in the PDF (supports markdown headings, lists)" },
+        filename: { type: "string", description: "Output filename (default: auto-generated)" },
+        title: { type: "string", description: "PDF document title" },
+        author: { type: "string", description: "PDF author name" },
+        format: { type: "string", description: "Page format: A4, Letter, Legal (default: A4)" },
+        orientation: { type: "string", description: "Page orientation: portrait or landscape (default: portrait)" },
+      },
+      required: ["content"],
+    },
+  },
+  {
+    name: "generate_word_document",
+    description: "Generate a Word (.docx) document with formatted content including headings, paragraphs, lists, tables, and images.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        content: { type: "string", description: "Document content in markdown format" },
+        filename: { type: "string", description: "Output filename" },
+        title: { type: "string", description: "Document title" },
+        template: { type: "string", description: "Template style: report, letter, memo, resume" },
+      },
+      required: ["content"],
+    },
+  },
+  {
+    name: "generate_presentation",
+    description: "Generate a PowerPoint (.pptx) presentation with slides, titles, bullet points, and images.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        slides: { type: "string", description: "JSON array of slides with title, content, and optional notes" },
+        filename: { type: "string", description: "Output filename" },
+        theme: { type: "string", description: "Presentation theme: default, dark, minimal, corporate" },
+      },
+      required: ["slides"],
+    },
+  },
+  {
+    name: "generate_image",
+    description: "Generate AI images using DALL-E. Create, edit, or create variations of images.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        prompt: { type: "string", description: "Image description/prompt" },
+        action: { type: "string", description: "Action: generate, edit, variation (default: generate)" },
+        size: { type: "string", description: "Image size: 256x256, 512x512, 1024x1024 (default: 1024x1024)" },
+        n: { type: "number", description: "Number of images to generate (1-4, default: 1)" },
+      },
+      required: ["prompt"],
+    },
+  },
+  {
+    name: "key_rotation",
+    description: "Rotate encryption keys and security credentials. Generate new keys, check rotation status, and re-encrypt stored data.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", description: "Action: generate_key, rotate, status, dry_run" },
+        new_key: { type: "string", description: "Optional: provide a specific new key instead of generating one" },
+      },
+      required: ["action"],
+    },
+  },
+  {
+    name: "backup_restore",
+    description: "Backup and restore the OpenSentinel database. Create compressed backups, list available backups, and restore from backup.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", description: "Action: backup, restore, list, status" },
+        file_path: { type: "string", description: "For restore: path to backup file" },
+        compress: { type: "boolean", description: "Compress backup with gzip (default: true)" },
+        max_backups: { type: "number", description: "Maximum number of backups to keep (prunes oldest)" },
+      },
+      required: ["action"],
+    },
+  },
+  {
+    name: "heartbeat_monitor",
+    description: "Monitor service health with heartbeats. Register services, record heartbeats, check status, and get alerts on missed beats.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", description: "Action: register, beat, check, status, unregister, summary" },
+        service_id: { type: "string", description: "Unique service identifier" },
+        service_name: { type: "string", description: "Human-readable service name (for register)" },
+        interval_ms: { type: "number", description: "Expected heartbeat interval in milliseconds (default: 60000)" },
+      },
+      required: ["action"],
+    },
+  },
+  {
+    name: "text_transform",
+    description: "Text manipulation utilities: word count, language detection, keyword extraction, case conversion, deduplication, and truncation.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        text: { type: "string", description: "Input text to transform" },
+        action: { type: "string", description: "Action: count, detect_language, extract_keywords, change_case, truncate, deduplicate" },
+        target_case: { type: "string", description: "For change_case: upper, lower, title, sentence, camel, snake, kebab" },
+        max_length: { type: "number", description: "For truncate: maximum character length" },
+        count: { type: "number", description: "For extract_keywords: number of keywords to extract (default: 10)" },
+      },
+      required: ["text", "action"],
+    },
+  },
+  {
+    name: "json_tool",
+    description: "JSON manipulation utilities: validate, format/prettify, minify, flatten/unflatten, diff two JSON objects, query with dot notation, list all keys.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", description: "Action: validate, format, minify, flatten, unflatten, diff, query, keys" },
+        input: { type: "string", description: "JSON string to process" },
+        compare: { type: "string", description: "For diff: second JSON string to compare against" },
+        path: { type: "string", description: "For query: dot-notation path (e.g., 'data.users[0].name')" },
+        indent: { type: "number", description: "For format: indentation spaces (default: 2)" },
+      },
+      required: ["action", "input"],
+    },
+  },
+  {
+    name: "cron_explain",
+    description: "Parse and explain cron expressions. Convert cron to natural language, validate expressions, and list next scheduled runs.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", description: "Action: explain, validate, next" },
+        expression: { type: "string", description: "Cron expression (5 fields: minute hour day month weekday)" },
+        count: { type: "number", description: "For next: number of upcoming runs to show (default: 5)" },
+      },
+      required: ["action", "expression"],
+    },
+  },
+  {
+    name: "hash_tool",
+    description: "Compute cryptographic hashes (MD5, SHA-1, SHA-256, SHA-512) for strings or files. Compare hashes, generate random tokens and UUIDs.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", description: "Action: hash, hash_file, hash_all, compare, generate_token, generate_uuid" },
+        input: { type: "string", description: "String to hash, file path for hash_file, or hash to compare" },
+        algorithm: { type: "string", description: "Hash algorithm: md5, sha1, sha256, sha512 (default: sha256)" },
+        compare: { type: "string", description: "For compare: second hash to compare against" },
+        length: { type: "number", description: "For generate_token: token length (default: 32)" },
+        encoding: { type: "string", description: "For generate_token: hex, base64, base64url (default: hex)" },
+      },
+      required: ["action", "input"],
+    },
+  },
+  {
+    name: "regex_tool",
+    description: "Build, test, explain, and apply regular expressions. Match text, extract captures, replace patterns, validate regex syntax.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", description: "Action: test, replace, extract, validate, explain, escape, split" },
+        pattern: { type: "string", description: "Regular expression pattern" },
+        text: { type: "string", description: "Text to match against" },
+        replacement: { type: "string", description: "For replace: replacement string" },
+        flags: { type: "string", description: "Regex flags (default: g). Common: g (global), i (case-insensitive), m (multiline)" },
+      },
+      required: ["action", "pattern", "text"],
+    },
+  },
+  {
+    name: "unit_converter",
+    description: "Convert between units of measurement: length, weight, temperature, volume, data size, time, and speed.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        value: { type: "number", description: "The numeric value to convert" },
+        from: { type: "string", description: "Source unit (e.g., km, lb, F, GB, hr)" },
+        to: { type: "string", description: "Target unit (e.g., mi, kg, C, MB, min)" },
+        action: { type: "string", description: "Action: convert (default) or list (to see available units)" },
+      },
+      required: ["value", "from", "to"],
+    },
+  },
+  {
+    name: "qr_code",
+    description: "Generate QR codes as SVG images. Supports plain text, URLs, WiFi credentials, and vCards (contact info).",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", description: "Action: generate, wifi, vcard" },
+        data: { type: "string", description: "Data to encode (text/URL for generate, SSID for wifi, name for vcard)" },
+        password: { type: "string", description: "For wifi: WiFi password" },
+        encryption: { type: "string", description: "For wifi: WPA, WEP, or nopass (default: WPA)" },
+        phone: { type: "string", description: "For vcard: phone number" },
+        email: { type: "string", description: "For vcard: email address" },
+        size: { type: "number", description: "SVG size in pixels (default: 256)" },
+      },
+      required: ["action", "data"],
+    },
+  },
+  {
+    name: "clipboard_manager",
+    description: "Named clipboard with history. Save, retrieve, search, and manage text snippets. Supports text, code, URLs, and JSON.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: { type: "string", description: "Action: save, get, delete, list, search, history, clear" },
+        name: { type: "string", description: "Clipboard entry name (for save/get/delete) or search query (for search)" },
+        content: { type: "string", description: "For save: content to store" },
+        type: { type: "string", description: "For save: content type (text, code, url, json). Auto-detected if omitted." },
+        limit: { type: "number", description: "For history: number of entries to return (default: 20)" },
+      },
+      required: ["action"],
+    },
+  },
 ];
 
 // MCP registry reference (set by brain.ts after initialization)
@@ -6437,6 +6667,183 @@ export async function executeTool(
           default:
             return { success: false, result: null, error: `Unknown backtest action: ${action}` };
         }
+      }
+
+      // ===== NEW TOOLS (v3.1.0) =====
+
+      case "ocr_tesseract": {
+        const { ocrWithTesseract } = await import("./ocr");
+        const result = await ocrWithTesseract(input.file_path as string, input.language as string);
+        return { success: result.success, result: result.text || result.error, error: result.error };
+      }
+
+      case "generate_pdf_native": {
+        const { generatePDFNative } = await import("./file-generation/pdf");
+        const result = await generatePDFNative(input.content as string, input.filename as string, {
+          title: input.title as string,
+          author: input.author as string,
+          format: input.format as any,
+          orientation: input.orientation as any,
+        });
+        return { success: result.success, result: result.filePath || result.error, error: result.error };
+      }
+
+      case "generate_word_document": {
+        const { generateWordDocument } = await import("./file-generation/word-document");
+        const result = await generateWordDocument(input.content as string, input.filename as string, {
+          title: input.title as string,
+          template: input.template as string,
+        });
+        return { success: result.success, result: result.filePath || result.error, error: result.error };
+      }
+
+      case "generate_presentation": {
+        const { generatePresentation } = await import("./file-generation/presentations");
+        const slides = typeof input.slides === "string" ? JSON.parse(input.slides) : input.slides;
+        const result = await generatePresentation(slides, input.filename as string, {
+          theme: input.theme as string,
+        });
+        return { success: result.success, result: result.filePath || result.error, error: result.error };
+      }
+
+      case "generate_image": {
+        const { generateImage } = await import("./file-generation/image-generation");
+        const result = await generateImage(input.prompt as string, {
+          action: input.action as string,
+          size: input.size as string,
+          n: input.n as number,
+        });
+        return { success: result.success, result: result.url || result.filePath || result.error, error: result.error };
+      }
+
+      case "key_rotation": {
+        const keyRotation = await import("../core/security/key-rotation");
+        switch (input.action as string) {
+          case "generate_key":
+            return { success: true, result: keyRotation.generateEncryptionKey() };
+          case "status":
+            return { success: true, result: keyRotation.getRotationInfo() };
+          case "dry_run":
+            return { success: true, result: await keyRotation.rotateEncryptionKeys({ dryRun: true }) };
+          case "rotate":
+            return { success: true, result: await keyRotation.rotateEncryptionKeys({ newKey: input.new_key as string }) };
+          default:
+            return { success: false, result: null, error: `Unknown key_rotation action: ${input.action}` };
+        }
+      }
+
+      case "backup_restore": {
+        const backup = await import("./backup-restore");
+        switch (input.action as string) {
+          case "backup":
+            return { success: true, result: await backup.createDatabaseBackup({ compress: input.compress as boolean ?? true, maxBackups: input.max_backups as number }) };
+          case "restore":
+            return { success: true, result: await backup.restoreDatabase(input.file_path as string) };
+          case "list":
+            return { success: true, result: await backup.listBackups() };
+          case "status":
+            return { success: true, result: backup.getBackupStatus() };
+          default:
+            return { success: false, result: null, error: `Unknown backup_restore action: ${input.action}` };
+        }
+      }
+
+      case "heartbeat_monitor": {
+        const hb = await import("./heartbeat-monitor");
+        switch (input.action as string) {
+          case "register":
+            return { success: true, result: hb.registerService(input.service_id as string, input.service_name as string, input.interval_ms as number) };
+          case "beat":
+            return { success: true, result: hb.recordBeat(input.service_id as string) };
+          case "check":
+            return { success: true, result: hb.checkHeartbeats() };
+          case "status":
+            return { success: true, result: hb.getServiceStatus(input.service_id as string) };
+          case "unregister":
+            return { success: true, result: hb.unregisterService(input.service_id as string) };
+          case "summary":
+            return { success: true, result: hb.getHeartbeatSummary() };
+          default:
+            return { success: false, result: null, error: `Unknown heartbeat_monitor action: ${input.action}` };
+        }
+      }
+
+      case "text_transform": {
+        const { transformText } = await import("./text-transform");
+        const result = await transformText(input.text as string, input.action as string, {
+          target_case: input.target_case,
+          max_length: input.max_length,
+          count: input.count,
+        });
+        return { success: result.success, result: result.result, error: result.error };
+      }
+
+      case "json_tool": {
+        const { jsonTool } = await import("./json-tool");
+        const result = await jsonTool(input.action as string, input.input as string, {
+          compare: input.compare,
+          path: input.path,
+          indent: input.indent,
+        });
+        return { success: result.success, result: result.result, error: result.error };
+      }
+
+      case "cron_explain": {
+        const { cronTool } = await import("./cron-explain");
+        const result = await cronTool(input.action as string, input.expression as string, { count: input.count });
+        return { success: result.success, result: result.result, error: result.error };
+      }
+
+      case "hash_tool": {
+        const { hashTool } = await import("./hash-tool");
+        const result = await hashTool(input.action as string, input.input as string, {
+          algorithm: input.algorithm,
+          compare: input.compare,
+          length: input.length,
+          encoding: input.encoding,
+        });
+        return { success: result.success, result: result.result, error: result.error };
+      }
+
+      case "regex_tool": {
+        const { regexTool } = await import("./regex-tool");
+        const result = await regexTool(input.action as string, input.pattern as string, input.text as string, {
+          replacement: input.replacement,
+          flags: input.flags,
+        });
+        return { success: result.success, result: result.result, error: result.error };
+      }
+
+      case "unit_converter": {
+        const { unitConverter } = await import("./unit-converter");
+        const result = await unitConverter(
+          (input.action as string) || "convert",
+          input.value as number,
+          input.from as string,
+          input.to as string
+        );
+        return { success: result.success, result: result.result, error: result.error };
+      }
+
+      case "qr_code": {
+        const { qrCodeTool } = await import("./qr-code");
+        const result = await qrCodeTool(input.action as string, input.data as string, {
+          password: input.password,
+          encryption: input.encryption,
+          phone: input.phone,
+          email: input.email,
+          size: input.size,
+        });
+        return { success: result.success, result: result.svg || result.error, error: result.error };
+      }
+
+      case "clipboard_manager": {
+        const { clipboardTool } = await import("./clipboard-manager");
+        const result = await clipboardTool(input.action as string, input.name as string, input.content as string, {
+          type: input.type,
+          limit: input.limit,
+        });
+        return { success: result.success, result: result.entry || result.entries || result.error, error: result.error };
       }
 
       default:

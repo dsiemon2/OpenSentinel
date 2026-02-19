@@ -1,6 +1,6 @@
 # OpenSentinel Desktop
 
-**Status: IMPLEMENTED** (v2.7.0)
+**Status: IMPLEMENTED** (v3.0.0)
 
 Electron-based desktop application for OpenSentinel - your personal AI assistant.
 
