@@ -334,10 +334,13 @@ export function createEmailClient(
   return new EmailClient(configs[provider]);
 }
 
+// Import factory functions for default export
+import { createImapClient as _createImapClient } from "./imap-client";
+import { createSmtpClient as _createSmtpClient } from "./smtp-client";
+
 export default {
   EmailClient,
   createEmailClient,
-  // Re-export factory functions
-  createImapClient: require("./imap-client").createImapClient,
-  createSmtpClient: require("./smtp-client").createSmtpClient,
+  createImapClient: _createImapClient,
+  createSmtpClient: _createSmtpClient,
 };
