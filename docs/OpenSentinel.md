@@ -59,7 +59,7 @@ OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered
 
 ---
 
-## Implemented Features (270+)
+## Implemented Features (300+)
 
 ### 1. Multi-Modal Input Layer
 

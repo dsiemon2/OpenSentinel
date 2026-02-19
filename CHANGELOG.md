@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 16 new tools: ocr_tesseract, generate_pdf_native, generate_word_document, generate_presentation, generate_image, key_rotation, backup_restore, heartbeat_monitor, text_transform, json_tool, cron_explain, hash_tool, regex_tool, unit_converter, qr_code, clipboard_manager
 - Admin audit log viewer UI with filterable table and chain integrity display
 - Admin API routes: GET /api/admin/audit-logs, GET /api/admin/audit-logs/integrity, GET /api/admin/incidents
-- 11 new test files with 500+ new tests covering messaging integrations, intelligence modules, and utility tools
+- 13 new test files with 800+ new tests covering messaging integrations, intelligence modules, and utility tools
 - Key rotation module for ENCRYPTION_MASTER_KEY management
 - Backup/restore module with pg_dump/pg_restore support
 - Heartbeat monitoring for service health tracking
@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Tool count: 105 → 121
-- Test count: 4,829+ → 5,361+ across 155 files
+- Test count: 4,829+ → 5,629+ across 161 files
 - Version bump: 3.0.0 → 3.1.0
 
 ## [3.0.0] - 2026-02-18

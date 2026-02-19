@@ -202,7 +202,7 @@ OpenSentinel defines this category. OpenClaw is a chat assistant that happens to
 
 | Audience | Hook | Value Prop | Proof Point |
 |----------|------|-----------|-------------|
-| Builder Developer | "Build AI products, not plumbing" | NPM package with memory, tools, and security built in | 20 production templates, 5,000+ tests |
+| Builder Developer | "Build AI products, not plumbing" | NPM package with memory, tools, and security built in | 20 production templates, 5,600+ tests |
 | Automation Enthusiast | "Your AI that works while you sleep" | Workflow automation + 15 integrations + persistent memory | Home Assistant, Spotify, GitHub, finance integrations |
 | Technical Decision Maker | "Enterprise AI without enterprise complexity" | Self-hosted, SOC2-ready, deploys in 5 minutes | 2FA, SSO, GDPR, audit logs, Kubernetes |
 
@@ -210,7 +210,7 @@ OpenSentinel defines this category. OpenClaw is a chat assistant that happens to
 
 **Level 1 (Headline):** Deploy autonomous AI agents with persistent memory.
 
-**Level 2 (Subhead):** Self-hosted. 270+ features. Enterprise-grade security. One `npm install`.
+**Level 2 (Subhead):** Self-hosted. 300+ features. Enterprise-grade security. One `npm install`.
 
 **Level 3 (Body):** OpenSentinel is the open-source AI assistant platform that goes beyond chat. Build agents that remember, automate workflows, coordinate sub-agents, and integrate with your existing tools -- all running on your infrastructure.
 
@@ -755,7 +755,7 @@ Every piece of content maps to 1-2 target keywords. No content without keyword i
 
 | Dimension | AutoGPT/AgentGPT | OpenSentinel |
 |-----------|------------------|-------------|
-| **Stability** | Experimental, frequent failures | Production-grade (5,000+ tests) |
+| **Stability** | Experimental, frequent failures | Production-grade (5,600+ tests) |
 | **Memory** | Short-term only | Persistent pgvector RAG |
 | **Integrations** | Minimal | 15+ (email, GitHub, Notion, etc.) |
 | **Enterprise** | None | Full (SSO, audit, GDPR) |
@@ -783,7 +783,7 @@ Every piece of content maps to 1-2 target keywords. No content without keyword i
 |------|------------|--------|-----------|
 | Slow community growth | Medium | High | Double down on templates (passive acquisition); focus on 1-2 channels, not all 10 |
 | Low conversion to paid | Medium | Medium | Ensure free tier has natural expansion limits; track activation funnel closely |
-| Maintenance burden (270+ features) | High | Medium | Prioritize stability over new features; community contributions |
+| Maintenance burden (300+ features) | High | Medium | Prioritize stability over new features; community contributions |
 | API cost perception | Medium | Low | Clear docs on cost expectations; local LLM fallback |
 
 ### 16.3 Brand Risks

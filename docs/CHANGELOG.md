@@ -34,7 +34,7 @@ All notable changes to OpenSentinel are documented here.
 - Tool count: 126
 - Dashboard views: 4 → 5 (added Email page)
 - All RAG feature flags default to `true`
-- Test count: 5,000+ across 145+ files
+- Test count: 5,600+ across 160+ files
 
 ## [2.7.0] - 2026-02-17
 
@@ -65,7 +65,7 @@ All notable changes to OpenSentinel are documented here.
 - Version bumped to 2.7.0
 - Tool count increased from 93 to 121
 - Test count increased from 3,800+ to 4,617+
-- Feature count increased from ~245 to 270+
+- Feature count increased from ~245 to 300+
 
 ## [2.5.0] - 2026-02-15
 
