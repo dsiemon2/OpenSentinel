@@ -3,7 +3,7 @@
 > How to use every feature in OpenSentinel via Telegram, Discord, Slack, or Web Chat.
 > Just talk to it naturally — Claude picks the right tool automatically.
 >
-> **121+ tools | 5,000+ tests across 155+ test files, all passing**
+> **121+ tools | 5,600+ tests across 160+ test files, all passing**
 
 ---
 

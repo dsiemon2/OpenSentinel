@@ -290,14 +290,14 @@ Providers are automatically registered from environment variables. Per-request p
 
 | Metric | Value |
 |--------|-------|
-| Total Features | 270+ |
+| Total Features | 300+ |
 | Tools | 121+ |
 | Integrations | 15+ |
 | Domain Experts | 15 |
 | Sub-Agents | 4 |
 | Source Files | 349 |
 | Lines of Code | ~52,000 |
-| Unit Tests | 5,000+ (5,361) |
+| Unit Tests | 5,000+ (5,629) |
 
 ---
 

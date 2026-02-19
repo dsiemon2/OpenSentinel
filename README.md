@@ -310,7 +310,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 155+ test files, 5,000+ tests
+tests/                          # 160+ test files, 5,600+ tests
 ```
 
 ## Ports

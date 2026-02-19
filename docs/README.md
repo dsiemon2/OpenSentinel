@@ -2,7 +2,7 @@
 
 **Version 3.1.0** | [GitHub](https://github.com/dsiemon2/OpenSentinel) | [Website](https://opensentinel.ai) | [App](https://app.opensentinel.ai) | [MIT License](../LICENSE)
 
-OpenSentinel is a self-hosted personal AI assistant powered by Claude. It supports 9 communication channels (Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Zalo, Web, and REST API), 270+ features, 121 tools, and a full plugin/skill ecosystem. Built with Bun, TypeScript, Hono, and React, it runs entirely on your own infrastructure with PostgreSQL and Redis.
+OpenSentinel is a self-hosted personal AI assistant powered by Claude. It supports 9 communication channels (Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Zalo, Web, and REST API), 300+ features, 121 tools, and a full plugin/skill ecosystem. Built with Bun, TypeScript, Hono, and React, it runs entirely on your own infrastructure with PostgreSQL and Redis.
 
 ---
 
@@ -13,7 +13,7 @@ OpenSentinel is a self-hosted personal AI assistant powered by Claude. It suppor
 | [Getting Started](GETTING_STARTED.md) | Installation, setup, and first run |
 | [Architecture](ARCHITECTURE.md) | System design and component deep dive |
 | [API Reference](API.md) | REST API and WebSocket documentation |
-| [Features Overview](features.md) | Complete list of 270+ features |
+| [Features Overview](features.md) | Complete list of 300+ features |
 
 ---
 

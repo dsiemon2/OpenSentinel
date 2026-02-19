@@ -388,7 +388,7 @@ Run the test suite:
 bun test
 ```
 
-The suite includes 5,000+ tests across 155+ test files covering all components.
+The suite includes 5,600+ tests across 160+ test files covering all components.
 
 ---
 

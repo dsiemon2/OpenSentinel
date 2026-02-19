@@ -1,7 +1,7 @@
 # CLAUDE.md - AI Assistant Instructions
 
 ## Project Overview
-OpenSentinel is a self-hosted personal AI assistant powered by Claude, with Telegram, Discord, Slack, and web interfaces. It includes 270+ features including smart home control, productivity integrations, and workflow automation.
+OpenSentinel is a self-hosted personal AI assistant powered by Claude, with Telegram, Discord, Slack, and web interfaces. It includes 300+ features including smart home control, productivity integrations, and workflow automation.
 
 ## API Keys & Credentials
 All credentials are stored in `.env` (not committed to git). See `.env.example` for the required variables.
@@ -40,7 +40,7 @@ Deployment is handled via manual `rsync`/`scp` to the production server, followe
 
 ## Testing
 
-OpenSentinel uses **Bun's native test runner** (`bun:test`) with 155+ test files and 5,000+ tests.
+OpenSentinel uses **Bun's native test runner** (`bun:test`) with 160+ test files and 5,600+ tests.
 
 ```bash
 # Run all tests
@@ -139,7 +139,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 155+ test files, 5,000+ tests
+tests/                          # 160+ test files, 5,600+ tests
 ```
 
 ## Discord Setup (IMPORTANT)
