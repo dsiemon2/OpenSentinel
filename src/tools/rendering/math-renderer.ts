@@ -144,19 +144,25 @@ export function latexToSpeech(latex: string): string {
   // Square roots
   s = s.replace(/\\sqrt\[([^\]]+)\]\{([^}]+)\}/g, "the $1th root of $2");
   s = s.replace(/\\sqrt\{([^}]+)\}/g, "the square root of $1");
-  // Superscripts
+  // Superscripts — specific cases first, then general
+  s = s.replace(/\^{2}/g, " squared");
+  s = s.replace(/\^2/g, " squared");
+  s = s.replace(/\^{3}/g, " cubed");
+  s = s.replace(/\^3/g, " cubed");
   s = s.replace(/\^{([^}]+)}/g, " to the power of $1");
   s = s.replace(/\^(\d)/g, " to the power of $1");
-  s = s.replace(/\^2/g, " squared");
-  s = s.replace(/\^3/g, " cubed");
   // Subscripts
   s = s.replace(/_{([^}]+)}/g, " sub $1");
   s = s.replace(/_(\w)/g, " sub $1");
-  // Summation/product/integral
+  // Summation/product/integral with bounds
   s = s.replace(/\\sum/g, "the sum of");
   s = s.replace(/\\prod/g, "the product of");
   s = s.replace(/\\int/g, "the integral of");
   s = s.replace(/\\lim/g, "the limit of");
+  // Trig functions
+  s = s.replace(/\\sin/g, "sine");
+  s = s.replace(/\\cos/g, "cosine");
+  s = s.replace(/\\tan/g, "tangent");
   // Greek letters
   const greekMap: Record<string, string> = {
     "\\alpha": "alpha", "\\beta": "beta", "\\gamma": "gamma", "\\delta": "delta",
@@ -172,11 +178,16 @@ export function latexToSpeech(latex: string): string {
   s = s.replace(/\\cdot/g, " times ");
   s = s.replace(/\\div/g, " divided by ");
   s = s.replace(/\\pm/g, " plus or minus ");
-  s = s.replace(/\\leq/g, " is less than or equal to ");
-  s = s.replace(/\\geq/g, " is greater than or equal to ");
-  s = s.replace(/\\neq/g, " is not equal to ");
-  s = s.replace(/\\approx/g, " is approximately ");
+  s = s.replace(/\\leq/g, " less than or equal to ");
+  s = s.replace(/\\geq/g, " greater than or equal to ");
+  s = s.replace(/\\neq/g, " not equal to ");
+  s = s.replace(/\\approx/g, " approximately equal to ");
   s = s.replace(/\\infty/g, "infinity");
+  // Set theory
+  s = s.replace(/\\in/g, " in ");
+  s = s.replace(/\\emptyset/g, "the empty set");
+  s = s.replace(/\\forall/g, "for all");
+  s = s.replace(/\\exists/g, "there exists");
   s = s.replace(/=/g, " equals ");
   s = s.replace(/\+/g, " plus ");
   s = s.replace(/-/g, " minus ");

@@ -7,8 +7,9 @@ import { isAuthRequired, apiFetch, clearStoredToken } from "./lib/api";
 
 const GraphExplorer = lazy(() => import("./components/GraphExplorer"));
 const Email = lazy(() => import("./components/Email"));
+const AuditLogViewer = lazy(() => import("./components/AuditLogViewer"));
 
-type View = "chat" | "memories" | "graph" | "email" | "settings";
+type View = "chat" | "memories" | "graph" | "email" | "audit" | "settings";
 
 interface SystemStatus {
   status: string;
@@ -115,6 +116,12 @@ function App() {
             Email
           </div>
           <div
+            className={`nav-item ${view === "audit" ? "active" : ""}`}
+            onClick={() => setView("audit")}
+          >
+            Audit Log
+          </div>
+          <div
             className={`nav-item ${view === "settings" ? "active" : ""}`}
             onClick={() => setView("settings")}
           >
@@ -143,6 +150,11 @@ function App() {
         {view === "email" && (
           <Suspense fallback={<div style={{ padding: 24 }}>Loading Email...</div>}>
             <Email />
+          </Suspense>
+        )}
+        {view === "audit" && (
+          <Suspense fallback={<div style={{ padding: 24 }}>Loading Audit Logs...</div>}>
+            <AuditLogViewer />
           </Suspense>
         )}
         {view === "settings" && <Settings />}

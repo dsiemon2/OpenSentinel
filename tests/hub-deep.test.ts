@@ -475,8 +475,8 @@ describe("SentinelHub — Deep Behavioral Tests", () => {
   // 27. Browse limit larger than total returns all items
   // =========================================================
   test("browse with limit larger than total returns all items", () => {
-    const allResult = sentinelHub.browseHub({ category: "skills" });
-    const bigLimitResult = sentinelHub.browseHub({ category: "skills", limit: 1000 });
+    const allResult = sentinelHub.browseHub({ category: "skills", limit: 1000 });
+    const bigLimitResult = sentinelHub.browseHub({ category: "skills", limit: 9999 });
 
     expect(bigLimitResult.items.length).toBe(allResult.items.length);
     expect(bigLimitResult.total).toBe(allResult.total);

@@ -12,6 +12,11 @@ describe("install.sh", () => {
   });
 
   test("is executable", () => {
+    if (process.platform === "win32") {
+      // Windows doesn't have Unix permission bits; just verify file exists
+      expect(existsSync(scriptPath)).toBe(true);
+      return;
+    }
     const stats = statSync(scriptPath);
     // Check owner execute bit (0o100)
     expect(stats.mode & 0o100).toBeTruthy();

@@ -423,6 +423,10 @@ app.route("/api/email", emailRoutes);
 import { sdkRoutes } from "./routes/sdk";
 app.route("/api/sdk", sdkRoutes);
 
+// ===== Admin API (Audit Logs, Incidents) =====
+import adminRouter from "./routes/admin";
+app.route("/api/admin", adminRouter);
+
 // ===== Incident Response API =====
 
 app.get("/api/incidents", requirePermission("admin:settings" as any), async (c) => {

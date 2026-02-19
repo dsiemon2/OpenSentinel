@@ -2,7 +2,7 @@ import { describe, test, expect, afterEach } from "bun:test";
 import { mkdtemp, writeFile as fsWriteFile, readFile as fsReadFile, rm, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import { tmpdir } from "os";
-import { join } from "path";
+import { join, isAbsolute } from "path";
 import {
   listDirectory,
   readFileContent,
@@ -91,7 +91,7 @@ describe("Files - listDirectory", () => {
     await fsWriteFile(join(dir, "test.txt"), "x");
 
     const result = await listDirectory(dir);
-    expect(result[0].path.startsWith("/")).toBe(true);
+    expect(isAbsolute(result[0].path)).toBe(true);
     expect(result[0].path).toBe(join(dir, "test.txt"));
   });
 
@@ -248,7 +248,7 @@ describe("Files - searchFiles", () => {
 
     const results = await searchFiles("*.txt", dir);
     expect(results.length).toBe(1);
-    expect(results[0].startsWith("/")).toBe(true);
+    expect(isAbsolute(results[0])).toBe(true);
   });
 
   test("excludes node_modules by default", async () => {

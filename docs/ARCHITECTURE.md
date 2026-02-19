@@ -388,7 +388,7 @@ Each input channel follows the same pattern:
 
 ## Tool System
 
-OpenSentinel provides 126 tools defined in `src/tools/index.ts`.
+OpenSentinel provides 121 tools defined in `src/tools/index.ts`.
 
 **How tools work:**
 

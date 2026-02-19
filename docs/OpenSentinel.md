@@ -1,6 +1,6 @@
 # OPENSENTINEL: Complete Implementation
 
-**Status: FULLY IMPLEMENTED** (v2.7.0 - February 2026)
+**Status: FULLY IMPLEMENTED** (v3.1.0 - February 2026)
 
 OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered by Claude, capable of receiving commands via Telegram, Discord, Slack, Voice, and API, executing browser automation, shell commands, file operations, and maintaining persistent memory.
 
@@ -10,7 +10,7 @@ OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                       OPENSENTINEL v2.7.0                        │
+│                       OPENSENTINEL v3.1.0                        │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │
@@ -59,7 +59,7 @@ OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered
 
 ---
 
-## Implemented Features (300+)
+## Implemented Features (270+)
 
 ### 1. Multi-Modal Input Layer
 
@@ -147,7 +147,7 @@ OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered
 
 ### 3. Tool Execution Engine ✅
 
-- Shell/Terminal (sandboxed, 121 tools)
+- Shell/Terminal (sandboxed, 121+ tools)
 - Browser Automation (Playwright)
 - File System Operations
 - Web Search & Research
@@ -235,7 +235,7 @@ OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered
 
 ### 11. Desktop & Browser ✅
 
-- **Electron Desktop App**: System tray, global hotkeys (Ctrl+Shift+M)
+- **Electron Desktop App**: System tray, global hotkeys (Ctrl+Shift+M chat, Ctrl+Shift+O OpenSentinel)
 - **Browser Extension**: Chrome/Firefox popup chat, context menu
 
 ---

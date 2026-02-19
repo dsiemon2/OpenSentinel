@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This document covers production deployment options for OpenSentinel v2.7.0. The recommended approach is Docker Compose, which handles all dependencies automatically.
+This document covers production deployment options for OpenSentinel v3.1.0. The recommended approach is Docker Compose, which handles all dependencies automatically.
 
 ## Table of Contents
 
@@ -45,6 +45,8 @@ CLAUDE_API_KEY=sk-ant-api03-...
 TELEGRAM_BOT_TOKEN=your-token-here
 TELEGRAM_CHAT_ID=your-chat-id
 DB_PASSWORD=a-secure-password
+ENCRYPTION_MASTER_KEY=your-64-char-hex-key
+AUDIT_SIGNING_KEY=your-64-char-hex-key
 ```
 
 3. Start all services:
@@ -277,6 +279,8 @@ stringData:
   DB_PASSWORD: "your-secure-password"
   TELEGRAM_BOT_TOKEN: "your-token"
   TELEGRAM_CHAT_ID: "your-chat-id"
+  ENCRYPTION_MASTER_KEY: "your-64-char-hex-key"
+  AUDIT_SIGNING_KEY: "your-64-char-hex-key"
 ```
 
 ### Deployment

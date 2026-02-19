@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **OSINT External API Search**: Graph Explorer auto-queries public records APIs when local results are insufficient
+  - FEC candidate and committee search with name normalization ("LAST, FIRST" → "First Last")
+  - OpenCorporates company search for corporate entity discovery
+  - Automatic entity resolution and ingestion into local knowledge graph
+  - Results cached locally — subsequent searches return instantly without re-fetching
+  - Frontend "Searching external sources..." indicator during external lookups
+  - Graceful fallback when external APIs are unreachable
+
+### Fixed
+- Entity resolution UUID type error when creating system-level entities
+- Brain test case sensitivity for "browse the web" assertion
+
+## [3.1.0] - 2026-02-19
+
+### Added
+- 16 new tools: ocr_tesseract, generate_pdf_native, generate_word_document, generate_presentation, generate_image, key_rotation, backup_restore, heartbeat_monitor, text_transform, json_tool, cron_explain, hash_tool, regex_tool, unit_converter, qr_code, clipboard_manager
+- Admin audit log viewer UI with filterable table and chain integrity display
+- Admin API routes: GET /api/admin/audit-logs, GET /api/admin/audit-logs/integrity, GET /api/admin/incidents
+- 11 new test files with 500+ new tests covering messaging integrations, intelligence modules, and utility tools
+- Key rotation module for ENCRYPTION_MASTER_KEY management
+- Backup/restore module with pg_dump/pg_restore support
+- Heartbeat monitoring for service health tracking
+
+### Fixed
+- Wired tesseract.js for real OCR (was using fallback)
+- Wired pdfkit for real PDF generation (was using fallback)
+- All documentation counts now match actual implementation
+
+### Changed
+- Tool count: 105 → 121
+- Test count: 4,829+ → 5,361+ across 155 files
+- Version bump: 3.0.0 → 3.1.0
+
 ## [3.0.0] - 2026-02-18
 
 ### Added
@@ -134,7 +168,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed "Molt" system to "Evolution" across all code, docs, and Discord
 - Tool count: 93 → 121
 - Test count: 3,800+ → 4,617+ across 133 files
-- Feature count: 280+ → 300+
+- Feature count: ~245 → 270+
 
 ## [2.5.1] - 2026-02-16
 
@@ -310,7 +344,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Desktop app (Electron)
 - Browser extension (Chrome/Firefox)
 
-[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/dsiemon2/OpenSentinel/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.9.0...v3.0.0
 [2.9.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.7.0...v2.8.0

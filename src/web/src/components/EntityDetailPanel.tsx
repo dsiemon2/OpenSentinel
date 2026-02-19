@@ -62,7 +62,30 @@ export default function EntityDetailPanel({
       const response = await fetch(`/api/osint/entity/${entityId}`);
       if (response.ok) {
         const data = await response.json();
-        setRelationships(data.relationships || []);
+        const rels = data.relationships || {};
+        // Normalize outgoing relationships (have targetName)
+        const outgoing = (rels.outgoing || []).map((r: any) => ({
+          id: r.id,
+          sourceId: r.sourceEntityId,
+          sourceName: entity?.name || "",
+          targetId: r.targetEntityId,
+          targetName: r.targetName || "Unknown",
+          type: r.type,
+          strength: (r.strength ?? 50) / 100,
+          description: r.context,
+        }));
+        // Normalize incoming relationships (have sourceName)
+        const incoming = (rels.incoming || []).map((r: any) => ({
+          id: r.id,
+          sourceId: r.sourceEntityId,
+          sourceName: r.sourceName || "Unknown",
+          targetId: r.targetEntityId,
+          targetName: entity?.name || "",
+          type: r.type,
+          strength: (r.strength ?? 50) / 100,
+          description: r.context,
+        }));
+        setRelationships([...outgoing, ...incoming]);
       }
     } catch (error) {
       console.error("Error fetching entity relationships:", error);
@@ -133,7 +156,7 @@ export default function EntityDetailPanel({
             {entity.type}
           </span>
           <span style={styles.importanceBadge}>
-            Importance: {entity.importance}/10
+            Importance: {entity.importance}/100
           </span>
         </div>
       </div>

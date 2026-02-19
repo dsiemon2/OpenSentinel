@@ -76,6 +76,8 @@ const TYPE_COLORS: Record<string, string> = {
   filing: "#8b5cf6",
   location: "#06b6d4",
   topic: "#ec4899",
+  event: "#f97316",
+  project: "#a855f7",
 };
 
 const DEFAULT_COLOR = "#6b7280";
@@ -93,6 +95,7 @@ export default function GraphExplorer() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEntity, setSelectedEntity] = useState<GraphNode | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchingExternal, setSearchingExternal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -125,19 +128,46 @@ export default function GraphExplorer() {
       return;
     }
     setLoading(true);
+    setSearchingExternal(false);
     setError(null);
     try {
+      // The backend will automatically query external APIs (FEC, OpenCorporates)
+      // if local results < 3. This may take a few seconds, so we show the
+      // external search indicator after a short delay.
+      const externalTimer = setTimeout(() => setSearchingExternal(true), 800);
+
       const response = await apiFetch(
         `/api/osint/search?q=${encodeURIComponent(searchQuery.trim())}`
       );
+      clearTimeout(externalTimer);
+
       if (!response.ok) throw new Error("Search request failed");
-      const data: GraphData = await response.json();
-      setGraphData(data);
+      const data = await response.json();
+
+      // Search returns { results, edges, total, externalSearched }
+      const nodes: GraphNode[] = (data.results || []).map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        type: r.type,
+        importance: r.importance ?? 50,
+        description: r.description,
+        attributes: r.attributes,
+        aliases: r.aliases,
+      }));
+      const edges: GraphEdge[] = (data.edges || []).map((e: any) => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        type: e.type,
+        strength: e.strength ?? 50,
+      }));
+      setGraphData({ nodes, edges, stats: { totalEntities: nodes.length, totalRelationships: edges.length, totalSources: data.externalSearched ? 1 : 0 } });
     } catch (err) {
       console.error("Error searching entities:", err);
       setError("Search failed. Please try again.");
     } finally {
       setLoading(false);
+      setSearchingExternal(false);
     }
   }, [searchQuery, fetchGraph]);
 
@@ -175,6 +205,13 @@ export default function GraphExplorer() {
   useEffect(() => {
     fetchGraph();
   }, [fetchGraph]);
+
+  // When switching to financial view, auto-select the highest-importance entity if none selected
+  useEffect(() => {
+    if (view === "financial" && !selectedEntity && graphData && graphData.nodes.length > 0) {
+      setSelectedEntity(graphData.nodes[0]); // Already sorted by importance desc
+    }
+  }, [view, selectedEntity, graphData]);
 
   // When selecting an entity and in financial view, fetch flow data
   useEffect(() => {
@@ -223,7 +260,7 @@ export default function GraphExplorer() {
           .id((d) => d.id)
           .distance(120)
           .strength((d) =>
-            typeof d.strength === "number" ? d.strength * 0.5 : 0.3
+            typeof d.strength === "number" ? (d.strength / 100) * 0.5 : 0.3
           )
       )
       .force("charge", d3.forceManyBody().strength(-300))
@@ -248,7 +285,22 @@ export default function GraphExplorer() {
       .append("line")
       .attr("stroke", "#374151")
       .attr("stroke-opacity", 0.6)
-      .attr("stroke-width", (d) => Math.max(1, (d.strength || 0.3) * 4));
+      .attr("stroke-width", (d) => Math.max(1, ((d.strength || 30) / 100) * 4));
+
+    // Draw edge labels
+    const linkLabel = g
+      .append("g")
+      .attr("class", "link-labels")
+      .selectAll("text")
+      .data(edges)
+      .enter()
+      .append("text")
+      .text((d) => d.type.replace(/_/g, " "))
+      .attr("fill", "#6b7280")
+      .attr("font-size", 9)
+      .attr("text-anchor", "middle")
+      .attr("pointer-events", "none")
+      .attr("opacity", 0.7);
 
     // Draw nodes
     const node = g
@@ -310,6 +362,10 @@ export default function GraphExplorer() {
         .attr("y2", (d) => ((d.target as GraphNode).y ?? 0));
 
       node.attr("transform", (d) => `translate(${d.x ?? 0},${d.y ?? 0})`);
+
+      linkLabel
+        .attr("x", (d) => (((d.source as GraphNode).x ?? 0) + ((d.target as GraphNode).x ?? 0)) / 2)
+        .attr("y", (d) => (((d.source as GraphNode).y ?? 0) + ((d.target as GraphNode).y ?? 0)) / 2 - 4);
     });
   }, [graphData]);
 
@@ -329,135 +385,214 @@ export default function GraphExplorer() {
 
   // ------ Sankey / Financial Flow Rendering ------
 
+  function formatCurrency(value: number): string {
+    if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(1)}B`;
+    if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+    if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
+    return `$${value.toLocaleString()}`;
+  }
+
   const renderSankey = useCallback(() => {
-    if (!financialData || !svgRef.current || !containerRef.current)
-      return;
+    if (!financialData || !svgRef.current || !containerRef.current) return;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
     const container = containerRef.current;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    const padding = 40;
+    const width = container.clientWidth || 800;
+    const height = container.clientHeight || 500;
 
-    svg.attr("width", width).attr("height", height);
+    svg.attr("width", width).attr("height", height)
+      .attr("viewBox", `0 0 ${width} ${height}`);
+
+    // Dark background
+    svg.append("rect")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("fill", "#0f172a");
 
     const { nodes, links } = financialData;
-    if (nodes.length === 0) return;
+    if (nodes.length === 0 || links.length === 0) return;
 
-    // Build a simple left-to-right layout.
-    // Assign columns: sources on left, targets on right.
+    const margin = { top: 60, right: 200, bottom: 40, left: 200 };
+    const innerW = width - margin.left - margin.right;
+    const innerH = height - margin.top - margin.bottom;
+
+    const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Title
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", 30)
+      .attr("text-anchor", "middle")
+      .attr("fill", "#f9fafb")
+      .attr("font-size", 16)
+      .attr("font-weight", "600")
+      .text(`Financial Flows — ${selectedEntity?.name || "Entity"}`);
+
+    // Categorize nodes into columns: sources (left), center, targets (right)
     const sourceIds = new Set(links.map((l) => l.source));
     const targetIds = new Set(links.map((l) => l.target));
 
-    // Nodes that are only sources go left, only targets go right, both go middle
-    const leftNodes: FinancialNode[] = [];
-    const middleNodes: FinancialNode[] = [];
-    const rightNodes: FinancialNode[] = [];
+    const leftCol: FinancialNode[] = [];
+    const centerCol: FinancialNode[] = [];
+    const rightCol: FinancialNode[] = [];
 
     for (const n of nodes) {
-      const isSource = sourceIds.has(n.id);
-      const isTarget = targetIds.has(n.id);
-      if (isSource && isTarget) middleNodes.push(n);
-      else if (isSource) leftNodes.push(n);
-      else rightNodes.push(n);
+      const isSrc = sourceIds.has(n.id);
+      const isTgt = targetIds.has(n.id);
+      if (isSrc && isTgt) centerCol.push(n);
+      else if (isSrc) leftCol.push(n);
+      else rightCol.push(n);
     }
 
-    const columns = [leftNodes, middleNodes, rightNodes].filter(
-      (c) => c.length > 0
-    );
-    const colCount = columns.length || 1;
-    const colWidth = 24;
-    const colSpacing = (width - padding * 2 - colWidth * colCount) / Math.max(colCount - 1, 1);
+    // If only 2 columns, spread them; if 3, use thirds
+    const columns = [leftCol, centerCol, rightCol].filter((c) => c.length > 0);
+    const colCount = columns.length;
+    const barWidth = 20;
 
-    // Position nodes
+    // Layout columns
     const nodeMap = new Map<string, FinancialNode>();
+    const maxValue = Math.max(...nodes.map((n) => n.value || 1));
+
     columns.forEach((col, ci) => {
-      const x = padding + ci * (colWidth + colSpacing);
-      const totalValue = col.reduce((sum, n) => sum + (n.value || 1), 0);
-      const availableHeight = height - padding * 2;
-      let y = padding;
+      const x = colCount === 1
+        ? innerW / 2 - barWidth / 2
+        : ci * (innerW / Math.max(colCount - 1, 1)) - (ci === colCount - 1 ? barWidth : 0);
+
+      // Distribute nodes vertically with even spacing
+      const gap = 16;
+      const totalBarH = col.reduce(
+        (s, n) => s + Math.max(30, ((n.value || 1) / maxValue) * (innerH * 0.5)),
+        0
+      );
+      const totalGaps = (col.length - 1) * gap;
+      const startY = Math.max(0, (innerH - totalBarH - totalGaps) / 2);
+      let y = startY;
 
       col.forEach((n) => {
-        const h = Math.max(
-          20,
-          ((n.value || 1) / totalValue) * availableHeight * 0.8
-        );
+        const h = Math.max(30, ((n.value || 1) / maxValue) * (innerH * 0.5));
         n.x = x;
         n.y = y;
-        n.width = colWidth;
+        n.width = barWidth;
         n.height = h;
         nodeMap.set(n.id, n);
-        y += h + 8;
+        y += h + gap;
       });
     });
 
-    const g = svg.append("g");
+    // Draw flow links
+    const maxLinkValue = Math.max(...links.map((l) => l.value), 1);
 
-    // Draw links as curved paths
     for (const link of links) {
       const sn = nodeMap.get(link.source);
       const tn = nodeMap.get(link.target);
       if (!sn || !tn) continue;
 
-      const x0 = (sn.x ?? 0) + (sn.width ?? colWidth);
-      const y0 = (sn.y ?? 0) + (sn.height ?? 20) / 2;
+      const x0 = (sn.x ?? 0) + barWidth;
+      const y0 = (sn.y ?? 0) + (sn.height ?? 30) / 2;
       const x1 = tn.x ?? 0;
-      const y1 = (tn.y ?? 0) + (tn.height ?? 20) / 2;
+      const y1 = (tn.y ?? 0) + (tn.height ?? 30) / 2;
       const mx = (x0 + x1) / 2;
 
-      const thickness = Math.max(
-        2,
-        Math.min(
-          30,
-          (link.value /
-            Math.max(
-              ...links.map((l) => l.value),
-              1
-            )) *
-            30
-        )
-      );
+      const thickness = Math.max(3, (link.value / maxLinkValue) * 40);
 
+      // Gradient-colored flow
+      const gradId = `grad-${link.source}-${link.target}`.replace(/[^a-zA-Z0-9-]/g, "");
+      const defs = svg.select("defs").empty() ? svg.append("defs") : svg.select("defs");
+      const grad = defs.append("linearGradient").attr("id", gradId);
+      grad.append("stop").attr("offset", "0%").attr("stop-color", "#10b981").attr("stop-opacity", 0.6);
+      grad.append("stop").attr("offset", "100%").attr("stop-color", "#3b82f6").attr("stop-opacity", 0.4);
+
+      // Flow path
       g.append("path")
-        .attr(
-          "d",
-          `M${x0},${y0} C${mx},${y0} ${mx},${y1} ${x1},${y1}`
-        )
+        .attr("d", `M${x0},${y0} C${mx},${y0} ${mx},${y1} ${x1},${y1}`)
         .attr("fill", "none")
-        .attr("stroke", "#10b981")
-        .attr("stroke-opacity", 0.35)
-        .attr("stroke-width", thickness);
+        .attr("stroke", `url(#${gradId})`)
+        .attr("stroke-width", thickness)
+        .attr("stroke-linecap", "round");
+
+      // Amount label on the flow
+      g.append("text")
+        .text(`${formatCurrency(link.value)}`)
+        .attr("x", mx)
+        .attr("y", (y0 + y1) / 2 - thickness / 2 - 6)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#10b981")
+        .attr("font-size", 12)
+        .attr("font-weight", "600");
+
+      // Description label below amount
+      if (link.description) {
+        g.append("text")
+          .text(link.description)
+          .attr("x", mx)
+          .attr("y", (y0 + y1) / 2 + thickness / 2 + 14)
+          .attr("text-anchor", "middle")
+          .attr("fill", "#6b7280")
+          .attr("font-size", 10)
+          .attr("font-style", "italic");
+      }
     }
 
-    // Draw nodes as rectangles
+    // Draw node bars and labels
     for (const n of nodes) {
-      const positioned = nodeMap.get(n.id);
-      if (!positioned) continue;
+      const pos = nodeMap.get(n.id);
+      if (!pos) continue;
 
       const color = TYPE_COLORS[n.type] || DEFAULT_COLOR;
 
+      // Bar
       g.append("rect")
-        .attr("x", positioned.x ?? 0)
-        .attr("y", positioned.y ?? 0)
-        .attr("width", positioned.width ?? colWidth)
-        .attr("height", positioned.height ?? 20)
+        .attr("x", pos.x ?? 0)
+        .attr("y", pos.y ?? 0)
+        .attr("width", barWidth)
+        .attr("height", pos.height ?? 30)
         .attr("fill", color)
-        .attr("rx", 4);
+        .attr("rx", 4)
+        .attr("stroke", "#1e293b")
+        .attr("stroke-width", 1);
 
+      // Determine label position: left of bar for leftmost column, right for others
+      const isLeftCol = leftCol.includes(n);
+      const labelX = isLeftCol ? (pos.x ?? 0) - 10 : (pos.x ?? 0) + barWidth + 10;
+      const anchor = isLeftCol ? "end" : "start";
+
+      // Name label
       g.append("text")
-        .text(truncateLabel(n.name, 22))
-        .attr("x", (positioned.x ?? 0) + (positioned.width ?? colWidth) + 6)
-        .attr(
-          "y",
-          (positioned.y ?? 0) + (positioned.height ?? 20) / 2
-        )
-        .attr("fill", "#d1d5db")
-        .attr("font-size", 11)
+        .text(n.name)
+        .attr("x", labelX)
+        .attr("y", (pos.y ?? 0) + (pos.height ?? 30) / 2 - 7)
+        .attr("text-anchor", anchor)
+        .attr("fill", "#f1f5f9")
+        .attr("font-size", 13)
+        .attr("font-weight", "500")
+        .attr("dominant-baseline", "central");
+
+      // Value label below name
+      if (n.value > 0) {
+        g.append("text")
+          .text(formatCurrency(n.value))
+          .attr("x", labelX)
+          .attr("y", (pos.y ?? 0) + (pos.height ?? 30) / 2 + 9)
+          .attr("text-anchor", anchor)
+          .attr("fill", "#94a3b8")
+          .attr("font-size", 11)
+          .attr("dominant-baseline", "central");
+      }
+
+      // Type badge
+      g.append("text")
+        .text(n.type)
+        .attr("x", labelX)
+        .attr("y", (pos.y ?? 0) + (pos.height ?? 30) / 2 + 23)
+        .attr("text-anchor", anchor)
+        .attr("fill", color)
+        .attr("font-size", 9)
+        .attr("text-transform", "uppercase")
         .attr("dominant-baseline", "central");
     }
-  }, [financialData]);
+  }, [financialData, selectedEntity]);
 
   useEffect(() => {
     if (view === "financial" && financialData) {
@@ -469,7 +604,7 @@ export default function GraphExplorer() {
   // ------ Helpers ------
 
   function nodeRadius(d: GraphNode): number {
-    return 5 + ((d.importance ?? 5) / 10) * 20; // 5-25 px
+    return 8 + ((d.importance ?? 50) / 100) * 22; // 8-30 px
   }
 
   function truncateLabel(text: string, max: number): string {
@@ -533,8 +668,17 @@ export default function GraphExplorer() {
             <div style={styles.centered}>
               <div style={styles.spinner} />
               <p style={{ color: "#9ca3af", marginTop: 12 }}>
-                Loading graph data...
+                {searchingExternal
+                  ? "Searching external sources (FEC, OpenCorporates)..."
+                  : searchQuery.trim()
+                    ? "Searching..."
+                    : "Loading graph data..."}
               </p>
+              {searchingExternal && (
+                <p style={{ color: "#6b7280", fontSize: 12, marginTop: 4 }}>
+                  Querying public records APIs for new data
+                </p>
+              )}
             </div>
           ) : error ? (
             <div style={styles.centered}>

@@ -1,0 +1,16 @@
+{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "opensentinel.fullname" . }}
+  labels:
+    {{- include "opensentinel.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "opensentinel.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http
+      path: {{ .Values.metrics.serviceMonitor.path }}
+      interval: {{ .Values.metrics.serviceMonitor.interval }}
+{{- end }}

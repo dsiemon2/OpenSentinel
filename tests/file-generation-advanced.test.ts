@@ -421,16 +421,20 @@ This is a **bold** paragraph.
   describe("generateWord convenience function", () => {
     test("should handle markdown content", async () => {
       const { generateWord } = await import("../src/tools/file-generation/word-document");
-      const result = await generateWord("# Hello World\n\nParagraph text.", "test.docx");
+      const { join } = await import("path");
+      const { tmpdir } = await import("os");
+      const result = await generateWord("# Hello World\n\nParagraph text.", join(tmpdir(), "test-word-md.docx"));
 
       expect(result.success).toBe(true);
     });
 
     test("should handle elements content", async () => {
       const { generateWord } = await import("../src/tools/file-generation/word-document");
+      const { join } = await import("path");
+      const { tmpdir } = await import("os");
       const result = await generateWord(
         [{ type: "paragraph", content: "Test" }],
-        "test.docx",
+        join(tmpdir(), "test-word-elem.docx"),
         { contentType: "elements" }
       );
 
