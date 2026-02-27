@@ -24,7 +24,7 @@
 
 ## Overview
 
-OpenSentinel is a comprehensive self-hosted personal AI assistant—a JARVIS-style hub powered by Claude. It provides intelligent assistance through multiple communication channels including Telegram, Discord, Slack, voice commands, web dashboard, and REST API. The system features 121+ tools for shell execution, file operations, browser automation, web search, document generation, and more.
+OpenSentinel is a comprehensive self-hosted personal AI assistant—a JARVIS-style hub powered by Claude. It provides intelligent assistance through multiple communication channels including Telegram, Discord, Slack, voice commands, web dashboard, and REST API. The system features 123+ tools for shell execution, file operations, browser automation, web search, document generation, and more.
 
 OpenSentinel learns from interactions through a sophisticated RAG-based memory system, supports 15 domain expert personalities, and includes enterprise features like multi-user support, SSO integration, and comprehensive security controls.
 
@@ -36,7 +36,7 @@ OpenSentinel learns from interactions through a sophisticated RAG-based memory s
 |---------|-------------|
 | Multi-Channel Input | Telegram, Discord, Slack, Web, API, Voice |
 | Voice Interface | Wake word detection ("Hey OpenSentinel"), continuous conversation |
-| Tool Execution | 121+ tools including shell, browser, files, search |
+| Tool Execution | 123+ tools including shell, browser, files, search |
 | Memory System | Advanced RAG with pgvector, HyDE, cross-encoder re-ranking, multi-step retrieval, Redis cache, contextual query rewriting, auto-extraction, importance scoring |
 | Sub-Agent System | Research, Coding, Writing, Analysis agents |
 | File Generation | PDF, Word, Excel, PowerPoint, charts, AI images |
@@ -208,7 +208,7 @@ Providers are automatically registered from environment variables. Per-request p
 │  Providers: Anthropic, OpenRouter, Groq, Mistral, Ollama       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Tools: Shell, Files, Browser, Search, OCR, Screenshots,       │
-│         Video, Image Analysis, File Generation (121+)          │
+│         Video, Image Analysis, File Generation (123+)          │
 ├─────────────────────────────────────────────────────────────────┤
 │  Infrastructure: Built-in Tunnels (Cloudflare, ngrok,          │
 │                  localtunnel), Prometheus Metrics               │
@@ -226,7 +226,7 @@ Providers are automatically registered from environment variables. Per-request p
 
 ---
 
-## Tools (121+)
+## Tools (123+)
 
 | Category | Tools |
 |----------|-------|
@@ -291,13 +291,13 @@ Providers are automatically registered from environment variables. Per-request p
 | Metric | Value |
 |--------|-------|
 | Total Features | 300+ |
-| Tools | 121+ |
+| Tools | 123+ |
 | Integrations | 15+ |
 | Domain Experts | 15 |
-| Sub-Agents | 4 |
+| Sub-Agents | 5 |
 | Source Files | 349 |
 | Lines of Code | ~52,000 |
-| Unit Tests | 5,600+ (5,629) |
+| Unit Tests | 5,800+ |
 
 ---
 

@@ -111,7 +111,7 @@
 
 ---
 
-## Tools (121)
+## Tools (123)
 
 ### Shell Execution ✅
 - Sandboxed command execution

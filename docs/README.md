@@ -1,8 +1,8 @@
 # OpenSentinel Documentation
 
-**Version 3.1.1** | [GitHub](https://github.com/dsiemon2/OpenSentinel) | [Website](https://opensentinel.ai) | [App](https://app.opensentinel.ai) | [MIT License](../LICENSE)
+**Version 3.2.0** | [GitHub](https://github.com/dsiemon2/OpenSentinel) | [Website](https://opensentinel.ai) | [App](https://app.opensentinel.ai) | [MIT License](../LICENSE)
 
-OpenSentinel is a self-hosted personal AI assistant powered by Claude. It supports 9 communication channels (Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Zalo, Web, and REST API), 300+ features, 121 tools, and a full plugin/skill ecosystem. Built with Bun, TypeScript, Hono, and React, it runs entirely on your own infrastructure with PostgreSQL and Redis.
+OpenSentinel is a self-hosted personal AI assistant powered by Claude. It supports 9 communication channels (Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Zalo, Web, and REST API), 300+ features, 123 tools, and a full plugin/skill ecosystem. Built with Bun, TypeScript, Hono, and React, it runs entirely on your own infrastructure with PostgreSQL and Redis.
 
 ---
 
@@ -44,7 +44,7 @@ OpenSentinel is a self-hosted personal AI assistant powered by Claude. It suppor
 
 | Document | Description |
 |----------|-------------|
-| [Tools Reference](TOOLS.md) | All 121 tools: shell, files, web, vision, generation, agents, and more |
+| [Tools Reference](TOOLS.md) | All 123 tools: shell, files, web, vision, generation, agents, and more |
 | [Skills System](SKILLS.md) | User-teachable skills, skill registry, and the Sentinel Hub marketplace |
 | [Hooks & SOUL](HOOKS.md) | Lifecycle hooks, before/after events, and SOUL personality injection |
 | [Plugins](PLUGINS.md) | Plugin system: loader, sandbox, API, and writing custom plugins |
@@ -61,7 +61,7 @@ OpenSentinel is a self-hosted personal AI assistant powered by Claude. It suppor
 
 | Document | Description |
 |----------|-------------|
-| [Testing](TESTING.md) | Running the 5,600+ test suite, writing tests, and coverage |
+| [Testing](TESTING.md) | Running the 5,800+ test suite, writing tests, and coverage |
 | [Contributing](CONTRIBUTING.md) | Code style, PR process, and development workflow |
 | [Changelog](CHANGELOG.md) | Version history and release notes |
 

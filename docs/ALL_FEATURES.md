@@ -1,7 +1,7 @@
 # OpenSentinel — Complete Feature Reference
 
-> **Version 3.1.1** | February 2026
-> Self-hosted AI assistant powered by Claude with 300+ features, 121 tools, 15 MCP servers, 25 built-in skills, and 5,800+ tests.
+> **Version 3.2.0** | February 2026
+> Self-hosted AI assistant powered by Claude with 300+ features, 123 tools, 15 MCP servers, 25 built-in skills, and 5,800+ tests.
 > Intelligent model routing, self-correcting reasoning, and context compaction built in.
 > Advanced RAG pipeline with all 5 enhancements enabled by default.
 > Talk to it via Telegram, Discord, Slack, Web, Voice, or API — it does the rest.
@@ -47,7 +47,7 @@ OpenSentinel is a self-hosted personal AI assistant — a JARVIS-style hub that 
 
 **Key numbers:**
 - 300+ features
-- 121 total tools (33 built-in + 22 custom + 66 MCP)
+- 123 total tools (35 built-in + 22 custom + 66 MCP)
 - 30+ app integrations via SDK
 - 15 MCP servers (Filesystem, GitHub, Memory, Puppeteer, Brave Search, Slack, PostgreSQL, Fetch, Time, Google Maps, SQLite, Redis, Sentry, and more)
 - 25 built-in skills (research, productivity, development, communication, utility)
@@ -1495,6 +1495,6 @@ OpenSentinel serves as the central AI hub for an entire application ecosystem. A
 
 ---
 
-*OpenSentinel v3.1.1 — Self-hosted AI assistant with 300+ features, 121 tools, 15 MCP servers, 25 built-in skills, and 5,800+ tests.*
+*OpenSentinel v3.2.0 — Self-hosted AI assistant with 300+ features, 123 tools, 15 MCP servers, 25 built-in skills, and 5,800+ tests.*
 *Intelligent model routing, ReAct reasoning with self-correction, context compaction, and advanced RAG pipeline.*
 *Built with Bun, TypeScript, Claude (Haiku/Sonnet/Opus), PostgreSQL, and Redis.*
