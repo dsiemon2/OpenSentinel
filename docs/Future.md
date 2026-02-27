@@ -284,7 +284,7 @@ Leaning into the transformation/growth theme:
 ### Vision ✅
 - [x] Screen capture - `src/integrations/vision/screen-capture.ts`
 - [x] Webcam capture - `src/integrations/vision/webcam-capture.ts`
-- [x] Image analysis (Claude Vision) - `src/integrations/vision/image-analyzer.ts`
+- [x] Image analysis (multi-provider vision) - `src/integrations/vision/image-analyzer.ts`
 - [x] Enhanced OCR - `src/integrations/vision/ocr-enhanced.ts`
 - [x] Continuous monitoring - `src/integrations/vision/continuous-monitor.ts`
 

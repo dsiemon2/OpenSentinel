@@ -99,7 +99,7 @@ RAG-based memory using PostgreSQL with pgvector.
 | web_search | web-search.ts | Search the internet |
 | browse_url | browser.ts | Navigate and extract |
 | take_screenshot | browser.ts | Screenshot page |
-| analyze_image | image-analysis.ts | Claude Vision |
+| analyze_image | image-analysis.ts | Multi-provider vision |
 | ocr_document | ocr.ts | Extract text |
 | generate_pdf | file-generation/ | Create PDF |
 | generate_docx | file-generation/ | Create Word doc |

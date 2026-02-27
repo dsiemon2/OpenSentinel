@@ -35,7 +35,7 @@ TELEGRAM_CHAT_ID=your-chat-id
 ### Features
 
 - **Voice notes:** Send a voice message and it will be automatically transcribed using speech-to-text, then processed as a text message
-- **Image analysis:** Send an image and Claude Vision will analyze it. Include a caption to ask specific questions about the image
+- **Image analysis:** Send an image and the configured LLM's vision model will analyze it. Include a caption to ask specific questions about the image
 - **Document handling:** Send PDF, Word, or text files for analysis and summarization
 - **Inline keyboards:** Interactive buttons for polls, confirmations, and multi-step workflows
 - **Markdown responses:** Full markdown formatting in replies
@@ -176,7 +176,7 @@ WHATSAPP_ENABLED=true
 ### Features
 
 - **Text messages:** Send and receive text messages
-- **Image analysis:** Send images for Claude Vision analysis
+- **Image analysis:** Send images for vision analysis (multi-provider)
 - **Session persistence:** The WhatsApp session is stored locally and reconnects automatically
 
 ### Security

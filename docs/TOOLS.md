@@ -49,7 +49,7 @@ Tool definitions follow the Anthropic tool_use schema, specifying a `name`, `des
 
 | Tool | Parameters | Description |
 |------|-----------|-------------|
-| `analyze_image` | `{ image_path: string, question?: string }` | Analyze an image using Claude Vision. Optionally provide a specific question about the image to get a targeted response. |
+| `analyze_image` | `{ image_path: string, question?: string }` | Analyze an image using the configured LLM provider's vision capabilities. Optionally provide a specific question about the image to get a targeted response. |
 | `ocr_document` | `{ file_path: string }` | Extract text from images or scanned documents using OCR. Supports common image formats and PDFs. |
 | `capture_screen` | `{}` | Capture the current screen. Takes no parameters. Returns the screenshot as an image for analysis. |
 | `capture_webcam` | `{}` | Capture a frame from the connected webcam. Takes no parameters. Returns the image for analysis. |
