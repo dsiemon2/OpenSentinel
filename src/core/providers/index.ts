@@ -5,6 +5,7 @@
 import { env } from "../../config/env";
 import { AnthropicProvider } from "./anthropic-provider";
 import { OpenAICompatibleProvider } from "./openai-compatible-provider";
+import { GeminiProvider } from "./gemini";
 import { providerRegistry } from "./registry";
 
 /**
@@ -90,6 +91,17 @@ export async function initializeProviders(): Promise<void> {
     console.log("[LLM] Registered provider: Mistral");
   }
 
+  // Register Google Gemini if configured
+  if ((env as any).GEMINI_API_KEY) {
+    providerRegistry.register(
+      new GeminiProvider(
+        (env as any).GEMINI_API_KEY,
+        (env as any).GEMINI_DEFAULT_MODEL || "gemini-2.0-flash"
+      )
+    );
+    console.log("[LLM] Registered provider: Google Gemini");
+  }
+
   // Register generic OpenAI-compatible endpoint if configured
   if ((env as any).OPENAI_COMPATIBLE_BASE_URL) {
     providerRegistry.register(
@@ -148,6 +160,7 @@ export { providerRegistry } from "./registry";
 export { AnthropicProvider } from "./anthropic-provider";
 export { OpenAICompatibleProvider } from "./openai-compatible-provider";
 export { OllamaProvider } from "./ollama";
+export { GeminiProvider } from "./gemini";
 export type { LLMProvider } from "./provider";
 export type {
   LLMMessage,

@@ -8,7 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Google Gemini LLM Provider**: New `GeminiProvider` class using OpenAI-compatible endpoint at `generativelanguage.googleapis.com/v1beta/openai/`
+  - Supports vision, tool use, streaming, and 1M token context window
+  - Zero new dependencies — subclasses existing `OpenAICompatibleProvider`
+  - Configured via `GEMINI_API_KEY` and `GEMINI_DEFAULT_MODEL` env vars
+  - Set `LLM_PROVIDER=gemini` to use as default
+- **HuggingFace Embedding Documentation**: Documented existing HuggingFace Inference API embedding provider
+  - Supports sentence-transformers (all-MiniLM-L6-v2, all-mpnet-base-v2) and BAAI/BGE models
+  - Batch processing with retry logic and rate limit handling
+- **Embedding Test Suite**: 43 tests covering TF-IDF, HuggingFace, OpenAI embedding providers, registry, and dimension adapter
+- **Gemini Test Suite**: 15 tests covering GeminiProvider construction, capabilities, and availability
+- **Provider Wiring Test Suite**: 44 integration tests verifying end-to-end provider registration, startup wiring, and cross-file consistency
 - **OSINT External API Search**: Graph Explorer auto-queries public records APIs when local results are insufficient
+
+### Fixed
+- **Agent worker now uses provider registry** instead of hardcoded Anthropic SDK — agents respect `LLM_PROVIDER` env var
+- **Memory system now uses embedding registry** instead of hardcoded OpenAI — `EMBEDDING_PROVIDER` env var now works
+- **Embedding initialization called at startup** — HuggingFace and TF-IDF providers are no longer dead code
   - FEC candidate and committee search with name normalization ("LAST, FIRST" → "First Last")
   - OpenCorporates company search for corporate entity discovery
   - Automatic entity resolution and ingestion into local knowledge graph
@@ -273,7 +289,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.0] - 2026-02-04
 
 ### Added
-- Complete feature set: 250+ features implemented
+- Complete feature set: 300+ features implemented
 - NPM package support (import as library or use as CLI)
 - WhatsApp integration via Baileys
 - Signal integration via signal-cli

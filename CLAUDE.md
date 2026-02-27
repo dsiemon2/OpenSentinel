@@ -24,7 +24,7 @@ All credentials are stored in `.env` (not committed to git). See `.env.example` 
 - **Language**: TypeScript
 - **Framework**: Hono (API), grammY (Telegram), discord.js, @slack/bolt
 - **Database**: PostgreSQL 16 + pgvector (port 5445)
-- **Cache/Queue**: Redis 7 (port 6379)
+- **Cache/Queue**: Redis 7 (port 6385 on host, 6379 inside container)
 - **Frontend**: React + Vite
 
 ## CI/CD
@@ -40,7 +40,7 @@ Deployment is handled via manual `rsync`/`scp` to the production server, followe
 
 ## Testing
 
-OpenSentinel uses **Bun's native test runner** (`bun:test`) with 161 test files and 5,600+ tests.
+OpenSentinel uses **Bun's native test runner** (`bun:test`) with 170 test files and 5,800+ tests.
 
 ```bash
 # Run all tests
@@ -139,7 +139,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 161 test files, 5,600+ tests
+tests/                          # 170 test files, 5,800+ tests
 ```
 
 ## Discord Setup (IMPORTANT)
@@ -154,7 +154,7 @@ tests/                          # 161 test files, 5,600+ tests
 ## Ports
 - 8030: OpenSentinel API + Web Dashboard
 - 5445: PostgreSQL
-- 6379: Redis
+- 6385: Redis (host-mapped from container 6379)
 
 ## Common Tasks
 

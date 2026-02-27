@@ -11,6 +11,7 @@ import wsHandler from "./inputs/websocket";
 import { initMCPRegistry, type MCPRegistry, getMCPToolSummary } from "./core/mcp";
 import { setMCPRegistry } from "./tools";
 import { initializeProviders } from "./core/providers";
+import { initializeEmbeddings } from "./core/embeddings";
 
 export async function main() {
   console.log(`
@@ -20,8 +21,15 @@ export async function main() {
 ╚══════════════════════════════════════════╝
 `);
 
-  // Initialize LLM providers (Anthropic, OpenRouter, Groq, Mistral, Ollama, etc.)
+  // Initialize LLM providers (Anthropic, OpenRouter, Groq, Gemini, Mistral, Ollama, etc.)
   await initializeProviders();
+
+  // Initialize embedding providers (OpenAI, HuggingFace, TF-IDF)
+  try {
+    await initializeEmbeddings();
+  } catch (err: any) {
+    console.warn("[Embeddings] Failed to initialize:", err.message);
+  }
 
   // Start Telegram bot (only if token is configured)
   let bot: ReturnType<typeof createBot> | null = null;
@@ -112,8 +120,8 @@ export async function main() {
       token: env.SLACK_BOT_TOKEN,
       signingSecret: env.SLACK_SIGNING_SECRET,
       appToken: env.SLACK_APP_TOKEN,
-      socketMode: env.SLACK_SOCKET_MODE === "true",
-      port: parseInt(env.SLACK_PORT || "3000"),
+      socketMode: !!env.SLACK_SOCKET_MODE,
+      port: env.SLACK_PORT || 3000,
       allowedUserIds: env.SLACK_ALLOWED_USER_IDS?.split(",") || [],
       allowedChannelIds: env.SLACK_ALLOWED_CHANNEL_IDS?.split(",") || [],
     });
@@ -184,7 +192,7 @@ export async function main() {
   console.log(`[API] Starting server on port ${env.PORT}...`);
   const server = Bun.serve({
     port: env.PORT,
-    fetch: (req, server) => {
+    fetch: (req: Request, server: any) => {
       // Handle WebSocket upgrade requests
       if (req.headers.get("upgrade") === "websocket") {
         const result = wsHandler.handleUpgrade(req, server);
@@ -229,6 +237,30 @@ export async function main() {
     } catch {
       // Autonomy system non-critical
     }
+  }
+
+  // Register financial safeguards (risk engine hook + limits)
+  try {
+    const { riskEngine } = await import("./core/intelligence/risk-engine");
+    const { hookManager } = await import("./core/hooks");
+
+    // Update risk engine with env-based financial limits
+    riskEngine.updateConfig({
+      maxTradeSize: (env as any).EXCHANGE_MAX_TRADE_SIZE ?? 100,
+      maxDailyTradeSpend: (env as any).EXCHANGE_MAX_DAILY_SPEND ?? 500,
+      maxTradesPerHour: (env as any).EXCHANGE_MAX_TRADES_PER_HOUR ?? 5,
+    });
+
+    // Register as a hook to intercept tool execution
+    riskEngine.registerAsHook(hookManager);
+
+    const maxTrade = (env as any).EXCHANGE_MAX_TRADE_SIZE ?? 100;
+    const maxDaily = (env as any).EXCHANGE_MAX_DAILY_SPEND ?? 500;
+    const maxRate = (env as any).EXCHANGE_MAX_TRADES_PER_HOUR ?? 5;
+    const agentTrading = (env as any).EXCHANGE_AGENT_TRADING_ENABLED ?? false;
+    console.log(`[Security] Financial safeguards active: max_trade=$${maxTrade}, max_daily=$${maxDaily}, max_rate=${maxRate}/hr, agent_trading=${agentTrading}`);
+  } catch {
+    // Financial safeguards non-critical if no trading configured
   }
 
   // Initialize device pairing

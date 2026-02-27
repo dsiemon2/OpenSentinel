@@ -25,7 +25,9 @@ This document provides a complete reference for all environment variables used b
 | `OPENAI_API_KEY` | OpenAI API key. Used for Whisper speech-to-text, DALL-E image generation, and text embeddings. | `""` | No |
 | `ELEVENLABS_API_KEY` | ElevenLabs API key for high-quality text-to-speech synthesis. | `""` | No |
 | `ELEVENLABS_VOICE_ID` | ElevenLabs voice ID specifying which voice to use for TTS output. | `""` | No |
-| `HUGGINGFACE_ACCESS_TOKEN` | HuggingFace access token for downloading and running local models. | None | No |
+| `HUGGINGFACE_ACCESS_TOKEN` | HuggingFace access token for text embeddings via Inference API (sentence-transformers, BAAI/BGE models). | None | No |
+| `GEMINI_API_KEY` | Google Gemini API key for LLM inference. Supports vision, tool use, and 1M token context. | None | No |
+| `GEMINI_DEFAULT_MODEL` | Default Gemini model. Set `LLM_PROVIDER=gemini` to use as primary. | `gemini-2.0-flash` | No |
 
 ## Database and Cache
 

@@ -25,7 +25,8 @@ This guide walks you through installing, configuring, and running OpenSentinel o
 |-----|----------------|---------|
 | `OPENAI_API_KEY` | [platform.openai.com](https://platform.openai.com/api-keys) | Whisper STT, DALL-E images, embeddings |
 | `ELEVENLABS_API_KEY` | [elevenlabs.io](https://elevenlabs.io/) | Text-to-speech (JARVIS voice) |
-| `HUGGINGFACE_ACCESS_TOKEN` | [huggingface.co](https://huggingface.co/settings/tokens) | Model access |
+| `HUGGINGFACE_ACCESS_TOKEN` | [huggingface.co](https://huggingface.co/settings/tokens) | Text embeddings via Inference API |
+| `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com/apikey) | Google Gemini LLM (1M context) |
 | `TELEGRAM_BOT_TOKEN` | [@BotFather](https://t.me/BotFather) on Telegram | Telegram channel |
 | `DISCORD_BOT_TOKEN` | [Discord Developer Portal](https://discord.com/developers/applications) | Discord channel |
 | `SLACK_BOT_TOKEN` | [Slack API](https://api.slack.com/apps) | Slack channel |
@@ -388,7 +389,7 @@ Run the test suite:
 bun test
 ```
 
-The suite includes 5,600+ tests across 161 test files covering all components.
+The suite includes 5,800+ tests across 170 test files covering all components.
 
 ---
 

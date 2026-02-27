@@ -2,6 +2,18 @@
 
 All notable changes to OpenSentinel are documented here.
 
+## [3.2.0] - 2026-02-27
+
+### Added
+- **Google Gemini LLM Provider**: New `GeminiProvider` using OpenAI-compatible endpoint (vision, tool use, 1M context)
+- **HuggingFace Embedding Documentation**: Documented existing HuggingFace Inference API embedding provider
+- **Embedding Test Suite**: 43 tests for all 3 embedding providers, registry, and dimension adapter
+- **Gemini Test Suite**: 15 tests for GeminiProvider
+
+### Changed
+- Test count: 5,800+ across 170 files
+- LLM providers: 7 → 8 (added Google Gemini)
+
 ## [3.0.0] - 2026-02-18
 
 ### Added
@@ -34,7 +46,7 @@ All notable changes to OpenSentinel are documented here.
 - Tool count: 121
 - Dashboard views: 4 → 5 (added Email page)
 - All RAG feature flags default to `true`
-- Test count: 5,600+ across 160+ files
+- Test count: 5,800+ across 169 files
 
 ## [2.7.0] - 2026-02-17
 
@@ -177,7 +189,7 @@ All notable changes to OpenSentinel are documented here.
 ## [2.0.0] - 2026-02-04
 
 ### Added
-- Complete feature set: 250+ features implemented
+- Complete feature set: 300+ features implemented
 - NPM package support (import as library or use as CLI)
 - WhatsApp integration via Baileys
 - Signal integration via signal-cli

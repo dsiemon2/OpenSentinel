@@ -90,6 +90,8 @@ const envSchema = z.object({
 
   // Finance (optional)
   ALPHA_VANTAGE_API_KEY: z.string().optional(),
+  FRED_API_KEY: z.string().optional(),        // Federal Reserve Economic Data
+  FINNHUB_API_KEY: z.string().optional(),     // Finnhub financial market data
 
   // Exchange Trading (optional)
   COINBASE_API_KEY: z.string().optional(),
@@ -98,6 +100,10 @@ const envSchema = z.object({
   BINANCE_API_SECRET: z.string().optional(),
   BINANCE_TESTNET: z.coerce.boolean().optional().default(false),
   EXCHANGE_REQUIRE_CONFIRMATION: z.coerce.boolean().optional().default(true),
+  EXCHANGE_MAX_TRADE_SIZE: z.coerce.number().optional().default(100),
+  EXCHANGE_MAX_DAILY_SPEND: z.coerce.number().optional().default(500),
+  EXCHANGE_MAX_TRADES_PER_HOUR: z.coerce.number().optional().default(5),
+  EXCHANGE_AGENT_TRADING_ENABLED: z.coerce.boolean().optional().default(false),
 
   // DeFi (optional)
   DEFILLAMA_API_KEY: z.string().optional(), // Pro tier
@@ -154,6 +160,10 @@ const envSchema = z.object({
   OPENAI_COMPATIBLE_API_KEY: z.string().optional(),
   OPENAI_COMPATIBLE_BASE_URL: z.string().optional(),
   OPENAI_COMPATIBLE_MODEL: z.string().optional(),
+
+  // Google Gemini (optional)
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_DEFAULT_MODEL: z.string().optional().default("gemini-2.0-flash"),
 
   // Ollama (local models)
   OLLAMA_ENABLED: z.coerce.boolean().optional().default(false),
