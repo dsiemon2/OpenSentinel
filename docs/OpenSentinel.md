@@ -147,7 +147,7 @@ OpenSentinel is a self-hosted personal AI assistant—a JARVIS-style hub powered
 
 ### 3. Tool Execution Engine ✅
 
-- Shell/Terminal (sandboxed, 121+ tools)
+- Shell/Terminal (sandboxed, 123+ tools)
 - Browser Automation (Playwright)
 - File System Operations
 - Web Search & Research

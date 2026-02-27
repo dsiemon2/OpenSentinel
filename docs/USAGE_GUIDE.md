@@ -3,7 +3,7 @@
 > How to use every feature in OpenSentinel via Telegram, Discord, Slack, or Web Chat.
 > Just talk to it naturally — Claude picks the right tool automatically.
 >
-> **121 tools | 5,800+ tests across 170 test files, all passing**
+> **123 tools | 5,800+ tests across 170 test files, all passing**
 
 ---
 
@@ -1216,7 +1216,7 @@ Sections:
 
 ```
 Generate a README for OpenSentinel:
-Description: Self-hosted AI assistant with 121 tools
+Description: Self-hosted AI assistant with 123 tools
 Features: Multi-platform chat, financial markets, server monitoring, email management
 Install: bun install && bun run start
 License: MIT

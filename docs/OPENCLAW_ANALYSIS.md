@@ -112,11 +112,11 @@ OpenSentinel is a **completely custom, self-contained AI assistant** built from 
 │  • Discord           │  • RAG Memory       │  • Voice TTS    │
 │  • Slack             │  • Tool Router      │  • Files (PDF,  │
 │  • Web Dashboard     │  • BullMQ Scheduler │    Word, Excel, │
-│  • REST API          │  • Sub-Agents (4)   │    PPT, Images) │
+│  • REST API          │  • Sub-Agents (5)   │    PPT, Images) │
 │  • Voice (Wake Word) │  • Plugin System    │                 │
 │  • Device Triggers   │  • Workflows        │                 │
 ├─────────────────────────────────────────────────────────────┤
-│  Tools (121): Shell, Files, Browser, Search, OCR,           │
+│  Tools (123): Shell, Files, Browser, Search, OCR,           │
 │               Screenshots, Video, Image Gen, Charts          │
 ├─────────────────────────────────────────────────────────────┤
 │  Intelligence: Predictive, Relationship Graph, Temporal,     │
@@ -134,7 +134,7 @@ OpenSentinel is a **completely custom, self-contained AI assistant** built from 
 | Metric | Value |
 |--------|-------|
 | Total Features | 300+ |
-| Tools | 121 |
+| Tools | 123 |
 | Integrations | 15+ |
 | Domain Experts | 15 |
 | Sub-Agents | 5 |

@@ -1,6 +1,6 @@
 # OpenSentinel Tools Reference
 
-Complete reference for all 121 tools available in OpenSentinel v3.1.1.
+Complete reference for all 123 tools available in OpenSentinel v3.2.0.
 
 ## Overview
 

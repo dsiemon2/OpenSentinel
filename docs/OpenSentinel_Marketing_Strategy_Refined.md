@@ -202,7 +202,7 @@ OpenSentinel defines this category. OpenClaw is a chat assistant that happens to
 
 | Audience | Hook | Value Prop | Proof Point |
 |----------|------|-----------|-------------|
-| Builder Developer | "Build AI products, not plumbing" | NPM package with memory, tools, and security built in | 20 production templates, 5,600+ tests |
+| Builder Developer | "Build AI products, not plumbing" | NPM package with memory, tools, and security built in | 20 production templates, 5,800+ tests |
 | Automation Enthusiast | "Your AI that works while you sleep" | Workflow automation + 15 integrations + persistent memory | Home Assistant, Spotify, GitHub, finance integrations |
 | Technical Decision Maker | "Enterprise AI without enterprise complexity" | Self-hosted, SOC2-ready, deploys in 5 minutes | 2FA, SSO, GDPR, audit logs, Kubernetes |
 
@@ -542,8 +542,8 @@ Every piece of content maps to 1-2 target keywords. No content without keyword i
 | **AI Brain (Claude)** | Bring your own key | Bring your own key | Bring your own key | Bring your own key |
 | **Input channels** | 1 (Telegram OR Discord OR Slack OR Web) | All 8+ channels | All channels | All channels |
 | **Memory** | pgvector RAG (basic) | Full RAG + memory vault | Team memory + shared knowledge base | Federated memory |
-| **Tools** | 10 core tools | All 121+ tools | All tools | All tools + custom |
-| **Sub-agents** | 1 (Research) | All 4 agents | All agents + custom | Unlimited |
+| **Tools** | 10 core tools | All 123+ tools | All tools | All tools + custom |
+| **Sub-agents** | 1 (Research) | All 5 agents | All agents + custom | Unlimited |
 | **Workflows** | 3 active workflows | Unlimited | Unlimited | Unlimited |
 | **File generation** | Text only | PDF, Word, Excel, PPT, charts | All formats | All formats |
 | **Integrations** | 3 | All 15+ | All + custom | All + custom |
@@ -742,7 +742,7 @@ Every piece of content maps to 1-2 target keywords. No content without keyword i
 |-----------|-------------------|-------------|
 | **What it is** | Agent framework (library) | Agent platform (runtime + framework) |
 | **Memory** | You build it | Built-in (pgvector RAG) |
-| **Tools** | You build/integrate them | 121+ built-in |
+| **Tools** | You build/integrate them | 123+ built-in |
 | **Deployment** | You handle it | Docker/K8s ready |
 | **Messaging** | You build it | Telegram, Discord, Slack, etc. built-in |
 | **Learning curve** | Steep (abstractions on abstractions) | Moderate (opinionated but clear) |
@@ -755,7 +755,7 @@ Every piece of content maps to 1-2 target keywords. No content without keyword i
 
 | Dimension | AutoGPT/AgentGPT | OpenSentinel |
 |-----------|------------------|-------------|
-| **Stability** | Experimental, frequent failures | Production-grade (5,600+ tests) |
+| **Stability** | Experimental, frequent failures | Production-grade (5,800+ tests) |
 | **Memory** | Short-term only | Persistent pgvector RAG |
 | **Integrations** | Minimal | 15+ (email, GitHub, Notion, etc.) |
 | **Enterprise** | None | Full (SSO, audit, GDPR) |
@@ -825,7 +825,7 @@ OpenSentinel occupies the "enterprise-ready + full automation" quadrant. No comp
 
 | Audience | One-Liner |
 |----------|-----------|
-| **Developer** | "npm install opensentinel -- AI agents with persistent memory, workflow automation, and 121+ built-in tools." |
+| **Developer** | "npm install opensentinel -- AI agents with persistent memory, workflow automation, and 123+ built-in tools." |
 | **DevOps** | "Self-hosted AI that monitors, alerts, and auto-remediates -- with full audit trail." |
 | **Founder** | "Build your AI product on OpenSentinel. Memory, tools, security, and multi-user -- already done." |
 | **Enterprise** | "The AI assistant platform with 2FA, SSO, GDPR compliance, and Kubernetes deployment." |

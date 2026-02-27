@@ -87,7 +87,7 @@ RAG-based memory using PostgreSQL with pgvector.
 
 ### 3. Tool System (`src/tools/`)
 
-121+ tools defined using Claude's tool_use format:
+123+ tools defined using Claude's tool_use format:
 
 | Tool | File | Purpose |
 |------|------|---------|

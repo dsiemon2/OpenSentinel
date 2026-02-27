@@ -81,6 +81,12 @@
         <a href="integrations.html#cloud-storage" class="sidebar-link"><span class="ico">&#x1F4C1;</span> Cloud Storage</a>
         <a href="integrations.html#finance" class="sidebar-link"><span class="ico">&#x1F4B0;</span> Finance</a>
         <a href="integrations.html#vision-documents" class="sidebar-link"><span class="ico">&#x1F441;</span> Vision &amp; Documents</a>
+        <a href="integrations.html#osint" class="sidebar-link"><span class="ico">&#x1F50D;</span> OSINT</a>
+        <a href="integrations.html#calendar" class="sidebar-link"><span class="ico">&#x1F4C5;</span> Calendar</a>
+        <a href="integrations.html#finnhub-fred" class="sidebar-link"><span class="ico">&#x1F4CA;</span> FinnHub &amp; FRED</a>
+        <a href="integrations.html#business-adapters" class="sidebar-link"><span class="ico">&#x1F4BC;</span> Business Adapters</a>
+        <a href="integrations.html#ml-algorithms" class="sidebar-link"><span class="ico">&#x1F9EA;</span> ML Algorithms</a>
+        <a href="integrations.html#providers" class="sidebar-link"><span class="ico">&#x1F504;</span> LLM &amp; Embeddings</a>
       </div>
 
       <div class="sidebar-group">
@@ -112,12 +118,12 @@
 
       <div class="content">
         <h1>Integrations</h1>
-        <p class="lead">Connect OpenSentinel to email, GitHub, Notion, smart home, music, cloud storage, finance, and more.</p>
+        <p class="lead">Connect OpenSentinel to email, GitHub, Notion, smart home, music, cloud storage, finance, OSINT, calendar, and 14 business adapters.</p>
 
 
         <!-- ========== Overview ========== -->
         <h2 id="overview">Overview</h2>
-        <p>OpenSentinel ships with <strong>15+ built-in integrations</strong> that connect your AI assistant to the services you already use. Each integration is enabled by adding the relevant API key or configuration to your <code>.env</code> file. If a key is missing, the integration is silently skipped &mdash; no errors, no crashes.</p>
+        <p>OpenSentinel ships with <strong>30+ built-in integrations</strong> that connect your AI assistant to the services you already use. Each integration is enabled by adding the relevant API key or configuration to your <code>.env</code> file. If a key is missing, the integration is silently skipped &mdash; no errors, no crashes.</p>
 
         <div class="callout callout-tip">
           <span class="callout-ico">&#x1F4A1;</span>
@@ -136,8 +142,17 @@
             <tr><td><strong>Google Drive</strong></td><td>Cloud Storage</td><td>Upload, download, search</td></tr>
             <tr><td><strong>Dropbox</strong></td><td>Cloud Storage</td><td>Upload, download, sync</td></tr>
             <tr><td><strong>Finance</strong></td><td>Data</td><td>Crypto, stocks, currency, alerts</td></tr>
+            <tr><td><strong>FinnHub</strong></td><td>Data</td><td>Real-time stock quotes, company profiles, market news</td></tr>
+            <tr><td><strong>FRED</strong></td><td>Data</td><td>Federal Reserve economic data (GDP, CPI, rates)</td></tr>
             <tr><td><strong>Vision</strong></td><td>AI</td><td>Screen capture, webcam, OCR</td></tr>
             <tr><td><strong>Documents</strong></td><td>Knowledge</td><td>PDF, DOCX, vector search</td></tr>
+            <tr><td><strong>OSINT / Public Records</strong></td><td>Intelligence</td><td>FEC, SEC EDGAR, IRS 990, USASpending, OpenCorporates</td></tr>
+            <tr><td><strong>Calendar</strong></td><td>Productivity</td><td>Google Calendar, Outlook, iCal sync</td></tr>
+            <tr><td><strong>Salesforce</strong></td><td>CRM</td><td>Accounts, contacts, opportunities, campaigns</td></tr>
+            <tr><td><strong>HubSpot</strong></td><td>CRM</td><td>Marketing automation, contacts, deals</td></tr>
+            <tr><td><strong>Stripe</strong></td><td>Payments</td><td>Payment processing, subscriptions, invoices</td></tr>
+            <tr><td><strong>Zapier</strong></td><td>Automation</td><td>Webhook-based integration with 5,000+ apps</td></tr>
+            <tr><td><strong>Jira</strong></td><td>Project Mgmt</td><td>Issues, sprints, boards, project tracking</td></tr>
           </tbody>
         </table>
 
@@ -445,8 +460,156 @@ console.<span class="cf">log</span>(result.text);</code></pre>
 
         <div class="callout callout-tip">
           <span class="callout-ico">&#x1F4A1;</span>
-          <div><strong>Embedding model.</strong> Document ingestion requires an <code>OPENAI_API_KEY</code> for generating embeddings (text-embedding-3-small). A PostgreSQL database with pgvector is also required for vector storage and search.</div>
+          <div><strong>Embedding providers.</strong> Document ingestion supports 3 embedding providers: <strong>OpenAI</strong> (text-embedding-3-small), <strong>HuggingFace</strong> (sentence-transformers), and <strong>TF-IDF</strong> (zero-API fallback). Set <code>EMBEDDING_PROVIDER</code> in your <code>.env</code> file. A PostgreSQL database with pgvector is required for vector storage and search.</div>
         </div>
+
+
+        <!-- ========== OSINT & Public Records ========== -->
+        <h2 id="osint">OSINT &amp; Public Records</h2>
+        <p>Investigate entities, trace financial flows, and map organizational relationships using open-source intelligence and public records.</p>
+
+        <h3>Capabilities</h3>
+        <ul>
+          <li><strong>FEC Campaign Data</strong> &mdash; candidate search, committee filings, donor research</li>
+          <li><strong>SEC EDGAR</strong> &mdash; corporate filings (10-K, 10-Q, 8-K), insider trading, company data</li>
+          <li><strong>IRS Form 990</strong> &mdash; non-profit tax filings, organizational data, revenue analysis</li>
+          <li><strong>USASpending</strong> &mdash; federal contracts, grants, government spending data</li>
+          <li><strong>OpenCorporates</strong> &mdash; corporate entity search across jurisdictions worldwide</li>
+          <li><strong>Graph Explorer</strong> &mdash; D3.js force-directed graph visualization of entity relationships</li>
+          <li><strong>Entity Resolution</strong> &mdash; automatic deduplication and cross-referencing of entities</li>
+        </ul>
+
+
+        <!-- ========== Calendar ========== -->
+        <h2 id="calendar">Calendar Integration</h2>
+        <p>Sync with Google Calendar, Outlook Calendar, and iCal feeds. View upcoming events, create meetings, and receive reminders.</p>
+
+        <h3>Capabilities</h3>
+        <ul>
+          <li><strong>Google Calendar</strong> &mdash; list events, create events, RSVP management</li>
+          <li><strong>Outlook Calendar</strong> &mdash; Microsoft Graph API integration, meeting scheduling</li>
+          <li><strong>iCal</strong> &mdash; subscribe to and parse standard iCal/ICS feeds</li>
+          <li><strong>Calendar triggers</strong> &mdash; fire workflows before or after calendar events</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">GOOGLE_CALENDAR_CREDENTIALS</span>=<span class="cs">path/to/credentials.json</span>
+<span class="cv">OUTLOOK_CLIENT_ID</span>=<span class="cs">your-client-id</span>
+<span class="cv">OUTLOOK_CLIENT_SECRET</span>=<span class="cs">your-client-secret</span></code></pre>
+        </div>
+
+
+        <!-- ========== FinnHub & FRED ========== -->
+        <h2 id="finnhub-fred">FinnHub &amp; FRED (Advanced Finance)</h2>
+        <p>Access real-time market data from FinnHub and macroeconomic indicators from the Federal Reserve Economic Data (FRED) API.</p>
+
+        <h3>FinnHub</h3>
+        <ul>
+          <li><strong>Real-time stock quotes</strong> &mdash; latest price, change, volume for US equities</li>
+          <li><strong>Company profiles</strong> &mdash; market cap, industry, IPO date, description</li>
+          <li><strong>Market news</strong> &mdash; latest headlines and sentiment for any ticker</li>
+          <li><strong>Financial statements</strong> &mdash; quarterly/annual income, balance sheet, cash flow</li>
+        </ul>
+
+        <h3>FRED</h3>
+        <ul>
+          <li><strong>Economic series data</strong> &mdash; GDP, CPI, unemployment, interest rates, and 800,000+ data series</li>
+          <li><strong>Historical trends</strong> &mdash; multi-year economic data for trend analysis</li>
+          <li><strong>Category search</strong> &mdash; browse and search the FRED catalog by topic</li>
+        </ul>
+
+        <h3>Configuration</h3>
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">.env</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cv">FINNHUB_API_KEY</span>=<span class="cs">your-finnhub-api-key</span>
+<span class="cv">FRED_API_KEY</span>=<span class="cs">your-fred-api-key</span></code></pre>
+        </div>
+
+
+        <!-- ========== Business Adapters ========== -->
+        <h2 id="business-adapters">Business Adapters (14 Platforms)</h2>
+        <p>Pre-built adapters for popular business platforms. Each adapter normalizes API access and provides a consistent interface for OpenSentinel to interact with.</p>
+
+        <table>
+          <thead><tr><th>Adapter</th><th>Category</th><th>Key Features</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Salesforce</strong></td><td>CRM</td><td>Accounts, contacts, opportunities, campaigns</td></tr>
+            <tr><td><strong>HubSpot</strong></td><td>CRM</td><td>Marketing automation, contacts, deals, workflows</td></tr>
+            <tr><td><strong>Stripe</strong></td><td>Payments</td><td>Payment processing, subscriptions, invoices</td></tr>
+            <tr><td><strong>Jira</strong></td><td>Project Mgmt</td><td>Issues, sprints, boards, project tracking</td></tr>
+            <tr><td><strong>Shopify</strong></td><td>E-commerce</td><td>Products, orders, inventory, analytics</td></tr>
+            <tr><td><strong>QuickBooks</strong></td><td>Accounting</td><td>Invoices, expenses, reports, payroll</td></tr>
+            <tr><td><strong>Xero</strong></td><td>Accounting</td><td>Invoices, bank reconciliation, financial reports</td></tr>
+            <tr><td><strong>Mailchimp</strong></td><td>Marketing</td><td>Campaigns, lists, analytics, automation</td></tr>
+            <tr><td><strong>SendGrid</strong></td><td>Email</td><td>Transactional email, templates, analytics</td></tr>
+            <tr><td><strong>Zapier</strong></td><td>Automation</td><td>Webhook triggers, 5,000+ app connections</td></tr>
+            <tr><td><strong>AWS S3</strong></td><td>Cloud</td><td>File storage, bucket management, signed URLs</td></tr>
+            <tr><td><strong>Google Workspace</strong></td><td>Productivity</td><td>Gmail, Drive, Calendar, Docs API access</td></tr>
+            <tr><td><strong>Microsoft 365</strong></td><td>Productivity</td><td>Outlook, Teams, OneDrive, SharePoint</td></tr>
+            <tr><td><strong>Twilio</strong></td><td>Communication</td><td>SMS, voice, video, WhatsApp Business API</td></tr>
+          </tbody>
+        </table>
+
+
+        <!-- ========== ML Algorithms ========== -->
+        <h2 id="ml-algorithms">Built-in ML Algorithms</h2>
+        <p>Five pure TypeScript ML algorithms run locally with zero external dependencies. Used internally for pattern detection, anomaly scoring, and predictive suggestions.</p>
+
+        <table>
+          <thead><tr><th>Algorithm</th><th>Use Case</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Isolation Forest</strong></td><td>Anomaly detection</td><td>Detect unusual patterns in time-series or behavioral data</td></tr>
+            <tr><td><strong>Naive Bayes</strong></td><td>Text classification</td><td>Categorize messages, tickets, and documents</td></tr>
+            <tr><td><strong>K-Means++</strong></td><td>Clustering</td><td>Group similar data points for segmentation and analysis</td></tr>
+            <tr><td><strong>Markov Chain</strong></td><td>Sequence prediction</td><td>Predict next actions based on behavioral sequences</td></tr>
+            <tr><td><strong>Linear Regression</strong></td><td>Forecasting</td><td>Trend detection and numerical prediction</td></tr>
+          </tbody>
+        </table>
+
+
+        <!-- ========== LLM & Embedding Providers ========== -->
+        <h2 id="providers">LLM &amp; Embedding Providers</h2>
+        <p>Switch between 8 LLM providers and 3 embedding providers. All modules use the provider registry &mdash; setting <code>LLM_PROVIDER</code> routes every AI call through your chosen provider.</p>
+
+        <h3>LLM Providers (8)</h3>
+        <table>
+          <thead><tr><th>Provider</th><th>Models</th><th>Key Features</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Anthropic</strong></td><td>Claude Opus, Sonnet, Haiku</td><td>Extended thinking, vision, 200K context</td></tr>
+            <tr><td><strong>Google Gemini</strong></td><td>Gemini 2.0 Flash, Pro</td><td>1M context, vision, tool use</td></tr>
+            <tr><td><strong>OpenAI</strong></td><td>GPT-4o, GPT-4 Turbo</td><td>Vision, function calling, 128K context</td></tr>
+            <tr><td><strong>OpenRouter</strong></td><td>200+ models</td><td>Multi-model routing, any provider</td></tr>
+            <tr><td><strong>Groq</strong></td><td>Llama 3, Mixtral</td><td>Ultra-fast inference</td></tr>
+            <tr><td><strong>Mistral</strong></td><td>Mistral Large, Medium, Small</td><td>Code generation, multilingual</td></tr>
+            <tr><td><strong>Ollama</strong></td><td>Any local model</td><td>Full privacy, no API calls</td></tr>
+            <tr><td><strong>Custom</strong></td><td>Any OpenAI-compatible</td><td>Self-hosted or 3rd-party endpoints</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Embedding Providers (3)</h3>
+        <table>
+          <thead><tr><th>Provider</th><th>Models</th><th>Dimensions</th></tr></thead>
+          <tbody>
+            <tr><td><strong>OpenAI</strong></td><td>text-embedding-3-small, 3-large, ada-002</td><td>1536 / 3072</td></tr>
+            <tr><td><strong>HuggingFace</strong></td><td>all-MiniLM-L6-v2, all-mpnet-base-v2, BAAI/BGE</td><td>384 / 768</td></tr>
+            <tr><td><strong>TF-IDF</strong></td><td>Built-in (no API needed)</td><td>256</td></tr>
+          </tbody>
+        </table>
+
+        <h3>RAG Pipeline (6 Techniques)</h3>
+        <table>
+          <thead><tr><th>Technique</th><th>Description</th><th>Config</th></tr></thead>
+          <tbody>
+            <tr><td><strong>HyDE</strong></td><td>Hypothetical Document Embeddings &mdash; generates ideal answer before search</td><td><code>HYDE_ENABLED=true</code></td></tr>
+            <tr><td><strong>Hybrid Search</strong></td><td>Dense (vector) + sparse (keyword) retrieval combined</td><td>Always active</td></tr>
+            <tr><td><strong>Re-ranking</strong></td><td>LLM scores each result 0-10 for true relevance</td><td><code>RERANK_ENABLED=true</code></td></tr>
+            <tr><td><strong>Contextual Query</strong></td><td>Rewrites queries using conversation context</td><td><code>CONTEXTUAL_QUERY_ENABLED=true</code></td></tr>
+            <tr><td><strong>Multi-Step RAG</strong></td><td>Iterative retrieval with gap detection</td><td><code>MULTISTEP_RAG_ENABLED=true</code></td></tr>
+            <tr><td><strong>Retrieval Cache</strong></td><td>Redis-backed caching (1h TTL, ~60% faster)</td><td><code>RETRIEVAL_CACHE_ENABLED=true</code></td></tr>
+          </tbody>
+        </table>
 
 
         <!-- ========== Page Nav ========== -->

@@ -231,9 +231,9 @@
 - Browser extension (Chrome/Firefox)
 
 **Advanced Features:**
-- 121 tools (shell, files, browser, search, OCR, video, etc.)
+- 123 tools (shell, files, browser, search, OCR, video, etc.)
 - 15 domain expert personalities
-- 4 specialized sub-agents (research, coding, writing, analysis)
+- 5 specialized sub-agents (research, coding, writing, analysis, OSINT)
 - Agent collaboration system
 - Plugin system with hot reload
 - Enterprise multi-user support
