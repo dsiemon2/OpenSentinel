@@ -1,7 +1,7 @@
 /**
  * Image Analyzer Module
  *
- * Analyzes images using Claude Vision API for:
+ * Analyzes images using the configured LLM provider's vision capabilities for:
  * - Object detection and description
  * - Scene understanding
  * - Text extraction (OCR)
@@ -9,17 +9,9 @@
  * - Activity recognition
  */
 
-import Anthropic from "@anthropic-ai/sdk";
-import type { ImageBlockParam } from "@anthropic-ai/sdk/resources/messages";
-import { env } from "../../config/env";
+import { providerRegistry } from "../../core/providers";
+import type { LLMContentBlock } from "../../core/providers/types";
 import { promises as fs } from "fs";
-
-/**
- * Claude client instance
- */
-const client = new Anthropic({
-  apiKey: env.CLAUDE_API_KEY,
-});
 
 /**
  * Supported image MIME types
@@ -430,6 +422,29 @@ ${formatInstruction}`;
 }
 
 /**
+ * Build an image content block for the LLM API
+ */
+function buildImageBlock(prepared: { type: "base64" | "url"; data: string; mediaType: ImageMediaType }): LLMContentBlock {
+  if (prepared.type === "url") {
+    return {
+      type: "image",
+      source: {
+        type: "url",
+        url: prepared.data,
+      },
+    };
+  }
+  return {
+    type: "image",
+    source: {
+      type: "base64",
+      mediaType: prepared.mediaType,
+      data: prepared.data,
+    },
+  };
+}
+
+/**
  * Analyze a single image
  */
 export async function analyzeImage(
@@ -442,25 +457,10 @@ export async function analyzeImage(
     const maxTokens = options.maxTokens || 2048;
     const model = options.model || "claude-sonnet-4-20250514";
 
-    const imageBlock: ImageBlockParam =
-      prepared.type === "url"
-        ? {
-            type: "image",
-            source: {
-              type: "url",
-              url: prepared.data,
-            },
-          }
-        : {
-            type: "image",
-            source: {
-              type: "base64",
-              media_type: prepared.mediaType,
-              data: prepared.data,
-            },
-          };
+    const imageBlock = buildImageBlock(prepared);
 
-    const response = await client.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model,
       max_tokens: maxTokens,
       messages: [
@@ -472,7 +472,7 @@ export async function analyzeImage(
     });
 
     const textBlock = response.content.find((block) => block.type === "text");
-    const analysisText = textBlock?.type === "text" ? textBlock.text : "";
+    const analysisText = textBlock?.text || "";
 
     let data: Record<string, unknown> | undefined;
     if (options.format === "json") {
@@ -522,42 +522,25 @@ export async function compareImages(
     const maxTokens = options.maxTokens || 2048;
     const model = options.model || "claude-sonnet-4-20250514";
 
-    const content: Array<ImageBlockParam | { type: "text"; text: string }> = [];
+    const content: LLMContentBlock[] = [];
 
     for (let i = 0; i < preparedImages.length; i++) {
       const prepared = preparedImages[i];
-      const imageBlock: ImageBlockParam =
-        prepared.type === "url"
-          ? {
-              type: "image",
-              source: {
-                type: "url",
-                url: prepared.data,
-              },
-            }
-          : {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: prepared.mediaType,
-                data: prepared.data,
-              },
-            };
-
-      content.push(imageBlock);
+      content.push(buildImageBlock(prepared));
       content.push({ type: "text", text: `Image ${i + 1}` });
     }
 
     content.push({ type: "text", text: prompt });
 
-    const response = await client.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model,
       max_tokens: maxTokens,
       messages: [{ role: "user", content }],
     });
 
     const textBlock = response.content.find((block) => block.type === "text");
-    const analysisText = textBlock?.type === "text" ? textBlock.text : "";
+    const analysisText = textBlock?.text || "";
 
     let data: Record<string, unknown> | undefined;
     if (options.format === "json") {

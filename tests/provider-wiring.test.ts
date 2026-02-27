@@ -269,11 +269,206 @@ describe(".env.example completeness", () => {
 });
 
 // ============================================
-// 8. Provider construction smoke tests
+// 8. Vision & Tool Modules use Provider Registry
 // ============================================
-// NOTE: Dynamic import() tests that construct providers are in
-// tests/gemini.test.ts and tests/embeddings.test.ts respectively.
-// Source-level wiring verification above covers the integration paths.
+
+describe("Image Analysis Provider Wiring", () => {
+  const source = readFileSync("src/tools/image-analysis.ts", "utf-8");
+
+  test("does not import @anthropic-ai/sdk", () => {
+    expect(source).not.toContain('from "@anthropic-ai/sdk"');
+  });
+
+  test("does not instantiate Anthropic client directly", () => {
+    expect(source).not.toContain("new Anthropic(");
+  });
+
+  test("imports providerRegistry from core/providers", () => {
+    expect(source).toContain("providerRegistry");
+    expect(source).toContain('from "../core/providers"');
+  });
+
+  test("uses providerRegistry.getDefault() for API calls", () => {
+    expect(source).toContain("providerRegistry.getDefault()");
+    expect(source).toContain("provider.createMessage(");
+  });
+
+  test("uses LLM-compatible image content block format", () => {
+    expect(source).toContain("mediaType:");
+    expect(source).not.toContain("media_type:");
+  });
+});
+
+describe("Video Summarization Provider Wiring", () => {
+  const source = readFileSync("src/tools/video-summarization.ts", "utf-8");
+
+  test("does not import @anthropic-ai/sdk", () => {
+    expect(source).not.toContain('from "@anthropic-ai/sdk"');
+  });
+
+  test("does not instantiate Anthropic client directly", () => {
+    expect(source).not.toContain("new Anthropic(");
+  });
+
+  test("imports providerRegistry from core/providers", () => {
+    expect(source).toContain("providerRegistry");
+    expect(source).toContain('from "../core/providers"');
+  });
+
+  test("uses providerRegistry.getDefault() for LLM calls", () => {
+    expect(source).toContain("providerRegistry.getDefault()");
+    expect(source).toContain("provider.createMessage(");
+  });
+
+  test("keeps OpenAI for Whisper transcription (separate from LLM)", () => {
+    expect(source).toContain('from "openai"');
+    expect(source).toContain("openai.audio.transcriptions.create");
+  });
+});
+
+describe("Code Review Provider Wiring", () => {
+  const source = readFileSync("src/integrations/github/code-review.ts", "utf-8");
+
+  test("does not import @anthropic-ai/sdk", () => {
+    expect(source).not.toContain('from "@anthropic-ai/sdk"');
+  });
+
+  test("does not instantiate Anthropic client directly", () => {
+    expect(source).not.toContain("new Anthropic(");
+  });
+
+  test("imports providerRegistry from core/providers", () => {
+    expect(source).toContain("providerRegistry");
+    expect(source).toContain('from "../../core/providers"');
+  });
+
+  test("uses providerRegistry.getDefault() for all AI calls", () => {
+    expect(source).toContain("providerRegistry.getDefault()");
+    expect(source).toContain("provider.createMessage(");
+  });
+});
+
+describe("Image Analyzer Provider Wiring", () => {
+  const source = readFileSync("src/integrations/vision/image-analyzer.ts", "utf-8");
+
+  test("does not import @anthropic-ai/sdk", () => {
+    expect(source).not.toContain('from "@anthropic-ai/sdk"');
+  });
+
+  test("does not import ImageBlockParam from Anthropic types", () => {
+    expect(source).not.toContain("ImageBlockParam");
+  });
+
+  test("does not instantiate Anthropic client directly", () => {
+    expect(source).not.toContain("new Anthropic(");
+  });
+
+  test("imports providerRegistry from core/providers", () => {
+    expect(source).toContain("providerRegistry");
+    expect(source).toContain('from "../../core/providers"');
+  });
+
+  test("imports LLMContentBlock for image blocks", () => {
+    expect(source).toContain("LLMContentBlock");
+  });
+
+  test("uses providerRegistry.getDefault() for API calls", () => {
+    expect(source).toContain("providerRegistry.getDefault()");
+    expect(source).toContain("provider.createMessage(");
+  });
+});
+
+describe("Enhanced OCR Provider Wiring", () => {
+  const source = readFileSync("src/integrations/vision/ocr-enhanced.ts", "utf-8");
+
+  test("does not import @anthropic-ai/sdk", () => {
+    expect(source).not.toContain('from "@anthropic-ai/sdk"');
+  });
+
+  test("does not import ImageBlockParam from Anthropic types", () => {
+    expect(source).not.toContain("ImageBlockParam");
+  });
+
+  test("does not instantiate Anthropic client directly", () => {
+    expect(source).not.toContain("new Anthropic(");
+  });
+
+  test("imports providerRegistry from core/providers", () => {
+    expect(source).toContain("providerRegistry");
+    expect(source).toContain('from "../../core/providers"');
+  });
+
+  test("imports LLMContentBlock for image blocks", () => {
+    expect(source).toContain("LLMContentBlock");
+  });
+
+  test("uses providerRegistry.getDefault() for API calls", () => {
+    expect(source).toContain("providerRegistry.getDefault()");
+    expect(source).toContain("provider.createMessage(");
+  });
+});
+
+describe("Tree-of-Thought Provider Wiring", () => {
+  const source = readFileSync("src/core/agents/reasoning/tree-of-thought.ts", "utf-8");
+
+  test("does not import @anthropic-ai/sdk", () => {
+    expect(source).not.toContain('from "@anthropic-ai/sdk"');
+  });
+
+  test("does not instantiate Anthropic client directly", () => {
+    expect(source).not.toContain("new Anthropic(");
+  });
+
+  test("imports providerRegistry from providers module", () => {
+    expect(source).toContain("providerRegistry");
+    expect(source).toContain('from "../../providers"');
+  });
+
+  test("imports LLMProvider type for function signatures", () => {
+    expect(source).toContain("LLMProvider");
+    expect(source).toContain('from "../../providers/provider"');
+  });
+
+  test("gets provider from registry in treeOfThought function", () => {
+    expect(source).toContain("providerRegistry.getDefault()");
+  });
+
+  test("passes provider to internal llmCall function", () => {
+    expect(source).toContain("provider: LLMProvider");
+    expect(source).toContain("provider.createMessage(");
+  });
+
+  test("does not reference Anthropic.TextBlock type", () => {
+    expect(source).not.toContain("Anthropic.TextBlock");
+  });
+});
+
+// ============================================
+// 9. No remaining hardcoded Anthropic SDK imports
+// ============================================
+
+describe("No remaining hardcoded Anthropic SDK usage in non-provider files", () => {
+  const filesToCheck = [
+    { path: "src/tools/image-analysis.ts", name: "image-analysis" },
+    { path: "src/tools/video-summarization.ts", name: "video-summarization" },
+    { path: "src/integrations/github/code-review.ts", name: "code-review" },
+    { path: "src/integrations/vision/image-analyzer.ts", name: "image-analyzer" },
+    { path: "src/integrations/vision/ocr-enhanced.ts", name: "ocr-enhanced" },
+    { path: "src/core/agents/reasoning/tree-of-thought.ts", name: "tree-of-thought" },
+    { path: "src/core/agents/agent-worker.ts", name: "agent-worker" },
+  ];
+
+  for (const file of filesToCheck) {
+    test(`${file.name} does not import from @anthropic-ai/sdk`, () => {
+      const source = readFileSync(file.path, "utf-8");
+      expect(source).not.toContain('from "@anthropic-ai/sdk"');
+    });
+  }
+});
+
+// ============================================
+// 10. Cross-file wiring consistency
+// ============================================
 
 describe("Cross-file wiring consistency", () => {
   const geminiSource = readFileSync("src/core/providers/gemini.ts", "utf-8");
