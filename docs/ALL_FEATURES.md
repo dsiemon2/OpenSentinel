@@ -71,7 +71,7 @@ OpenSentinel is a self-hosted personal AI assistant — a JARVIS-style hub that 
 ### Telegram Bot
 - Text messages with markdown support
 - Voice notes (auto-transcribed via Whisper)
-- Image analysis (Claude Vision)
+- Image analysis (multi-provider vision)
 - Document processing (PDF, text, DOCX)
 - Commands: `/start`, `/help`, `/clear`, `/remind`, `/mode`, `/expert`
 - Inline keyboard responses
@@ -398,7 +398,7 @@ These are core tools that ship with OpenSentinel and handle fundamental operatio
 
 | Tool | What It Does |
 |------|-------------|
-| `analyze_image` | Analyze images with Claude Vision |
+| `analyze_image` | Analyze images with vision-capable LLM (multi-provider) |
 | `ocr_document` | Extract text from images/documents |
 | `extract_document_data` | Structured data extraction from documents |
 | `screenshot_analyze` | Take and analyze a screenshot in one step |

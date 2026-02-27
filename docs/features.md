@@ -7,7 +7,7 @@
 ### Telegram Bot ✅
 - Text messages
 - Voice notes (auto-transcribed)
-- Images (Claude Vision)
+- Images (multi-provider vision)
 - Documents (PDF, text files)
 - Commands (/start, /help, /clear, /remind, /mode, /expert)
 - Inline keyboard responses
@@ -131,7 +131,7 @@
 - Form filling
 
 ### Vision & OCR ✅
-- Image analysis (Claude Vision)
+- Image analysis (multi-provider vision)
 - Document OCR
 - Screenshot interpretation
 - Video summarization

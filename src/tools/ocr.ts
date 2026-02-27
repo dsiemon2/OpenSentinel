@@ -33,7 +33,7 @@ export async function ocrWithTesseract(
   }
 }
 
-// Use Claude Vision for OCR (most reliable for complex documents)
+// Use LLM Vision for OCR (most reliable for complex documents)
 export async function ocrWithVision(
   filePath: string,
   language?: string
@@ -72,7 +72,7 @@ export async function ocrPdf(
   filePath: string,
   pages?: string // e.g., "1-5" or "1,3,5"
 ): Promise<OCRResult> {
-  // For PDFs, we'll use Claude Vision on the file directly
+  // For PDFs, we'll use LLM Vision on the file directly
   const prompt = `Extract all text from this PDF document. Return the text content, preserving the structure and formatting as much as possible. If there are multiple pages, separate them clearly.`;
 
   const result = await analyzeImageFile(filePath, prompt);

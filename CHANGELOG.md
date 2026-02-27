@@ -18,8 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Batch processing with retry logic and rate limit handling
 - **Embedding Test Suite**: 43 tests covering TF-IDF, HuggingFace, OpenAI embedding providers, registry, and dimension adapter
 - **Gemini Test Suite**: 15 tests covering GeminiProvider construction, capabilities, and availability
-- **Provider Wiring Test Suite**: 44 integration tests verifying end-to-end provider registration, startup wiring, and cross-file consistency
+- **Provider Wiring Test Suite**: 84 integration tests verifying end-to-end provider registration, startup wiring, and cross-file consistency
 - **OSINT External API Search**: Graph Explorer auto-queries public records APIs when local results are insufficient
+
+### Changed
+- **Full provider-agnostic LLM routing**: All 7 LLM-consuming modules now use provider registry instead of hardcoded Anthropic SDK
+  - `src/tools/image-analysis.ts` — vision analysis uses active provider
+  - `src/tools/video-summarization.ts` — frame analysis uses active provider (Whisper STT still via OpenAI)
+  - `src/integrations/github/code-review.ts` — PR review uses active provider
+  - `src/integrations/vision/image-analyzer.ts` — image comparison uses active provider
+  - `src/integrations/vision/ocr-enhanced.ts` — OCR extraction uses active provider
+  - `src/core/agents/reasoning/tree-of-thought.ts` — ToT reasoning uses active provider
+  - `src/core/agents/agent-worker.ts` — agent spawning uses active provider
+- Setting `LLM_PROVIDER=gemini` (or any provider) now routes ALL AI calls through that provider
+- All documentation updated: "Claude Vision" → "multi-provider vision" across docs, website, and source comments
 
 ### Fixed
 - **Agent worker now uses provider registry** instead of hardcoded Anthropic SDK — agents respect `LLM_PROVIDER` env var

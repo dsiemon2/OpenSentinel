@@ -11,6 +11,9 @@ All notable changes to OpenSentinel are documented here.
 - **Gemini Test Suite**: 15 tests for GeminiProvider
 
 ### Changed
+- **Full provider-agnostic LLM routing**: All 7 LLM-consuming modules now use provider registry — setting `LLM_PROVIDER` routes ALL AI calls through that provider
+- All "Claude Vision" references updated to "multi-provider vision" across docs and website
+- Provider wiring tests: 44 → 84 (covers all migrated modules)
 - Test count: 5,800+ across 170 files
 - LLM providers: 7 → 8 (added Google Gemini)
 

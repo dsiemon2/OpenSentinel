@@ -4,7 +4,7 @@
  * Provides webcam and screen analysis capabilities for OpenSentinel:
  * - Screen capture (full screen, window, region)
  * - Webcam capture and streaming
- * - Image analysis with Claude Vision
+ * - Image analysis with vision-capable LLM (multi-provider)
  * - Enhanced OCR with layout detection
  * - Continuous monitoring with change detection
  * - Motion detection
@@ -124,7 +124,7 @@ export async function checkVisionCapabilities(): Promise<{
     webcam: webcamCapability,
     analysis: {
       available: true,
-      message: "Claude Vision API available for image analysis",
+      message: "Vision API available for image analysis",
     },
   };
 }
