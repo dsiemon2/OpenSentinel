@@ -2,20 +2,12 @@
  * Enhanced OCR Module
  *
  * Advanced text extraction with layout detection, table recognition,
- * and document structure analysis using Claude Vision.
+ * and document structure analysis using the configured LLM provider's vision capabilities.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
-import type { ImageBlockParam } from "@anthropic-ai/sdk/resources/messages";
-import { env } from "../../config/env";
+import { providerRegistry } from "../../core/providers";
+import type { LLMContentBlock } from "../../core/providers/types";
 import { promises as fs } from "fs";
-
-/**
- * Claude client instance
- */
-const client = new Anthropic({
-  apiKey: env.CLAUDE_API_KEY,
-});
 
 /**
  * Supported image MIME types
@@ -273,6 +265,20 @@ async function prepareImage(input: OCRInput): Promise<{
 }
 
 /**
+ * Build an image content block for the LLM API
+ */
+function buildImageBlock(prepared: { data: string; mediaType: ImageMediaType }): LLMContentBlock {
+  return {
+    type: "image",
+    source: {
+      type: "base64",
+      mediaType: prepared.mediaType,
+      data: prepared.data,
+    },
+  };
+}
+
+/**
  * Build OCR prompt
  */
 function buildOCRPrompt(options: EnhancedOCROptions): string {
@@ -432,16 +438,10 @@ export async function enhancedOCR(
     const model = options.model || "claude-sonnet-4-20250514";
     const maxTokens = options.maxTokens || 4096;
 
-    const imageBlock: ImageBlockParam = {
-      type: "image",
-      source: {
-        type: "base64",
-        media_type: prepared.mediaType,
-        data: prepared.data,
-      },
-    };
+    const imageBlock = buildImageBlock(prepared);
 
-    const response = await client.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model,
       max_tokens: maxTokens,
       messages: [
@@ -453,7 +453,7 @@ export async function enhancedOCR(
     });
 
     const textBlock = response.content.find((block) => block.type === "text");
-    const responseText = textBlock?.type === "text" ? textBlock.text : "";
+    const responseText = textBlock?.text || "";
 
     const parsed = parseResponse(responseText);
 
@@ -507,16 +507,10 @@ export async function extractText(
       prompt += ` The text is in ${options.languageHint}.`;
     }
 
-    const imageBlock: ImageBlockParam = {
-      type: "image",
-      source: {
-        type: "base64",
-        media_type: prepared.mediaType,
-        data: prepared.data,
-      },
-    };
+    const imageBlock = buildImageBlock(prepared);
 
-    const response = await client.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model,
       max_tokens: 2048,
       messages: [
@@ -528,7 +522,7 @@ export async function extractText(
     });
 
     const textBlock = response.content.find((block) => block.type === "text");
-    const text = textBlock?.type === "text" ? textBlock.text : "";
+    const text = textBlock?.text || "";
 
     return {
       success: true,
@@ -608,16 +602,10 @@ Return as JSON:
 
 Return ONLY the JSON, no additional text.`;
 
-    const imageBlock: ImageBlockParam = {
-      type: "image",
-      source: {
-        type: "base64",
-        media_type: prepared.mediaType,
-        data: prepared.data,
-      },
-    };
+    const imageBlock = buildImageBlock(prepared);
 
-    const response = await client.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model,
       max_tokens: 2048,
       messages: [
@@ -629,7 +617,7 @@ Return ONLY the JSON, no additional text.`;
     });
 
     const textBlock = response.content.find((block) => block.type === "text");
-    const responseText = textBlock?.type === "text" ? textBlock.text : "";
+    const responseText = textBlock?.text || "";
 
     const parsed = parseResponse(responseText);
 
@@ -709,16 +697,10 @@ Return as JSON:
 
 Extract numerical values without currency symbols. Return ONLY the JSON.`;
 
-    const imageBlock: ImageBlockParam = {
-      type: "image",
-      source: {
-        type: "base64",
-        media_type: prepared.mediaType,
-        data: prepared.data,
-      },
-    };
+    const imageBlock = buildImageBlock(prepared);
 
-    const response = await client.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model,
       max_tokens: 2048,
       messages: [
@@ -730,7 +712,7 @@ Extract numerical values without currency symbols. Return ONLY the JSON.`;
     });
 
     const textBlock = response.content.find((block) => block.type === "text");
-    const responseText = textBlock?.type === "text" ? textBlock.text : "";
+    const responseText = textBlock?.text || "";
 
     const parsed = parseResponse(responseText);
 
@@ -810,16 +792,10 @@ Return as JSON:
 
 Return ONLY the JSON, no additional text. Use null for fields not present.`;
 
-    const imageBlock: ImageBlockParam = {
-      type: "image",
-      source: {
-        type: "base64",
-        media_type: prepared.mediaType,
-        data: prepared.data,
-      },
-    };
+    const imageBlock = buildImageBlock(prepared);
 
-    const response = await client.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model,
       max_tokens: 1024,
       messages: [
@@ -831,7 +807,7 @@ Return ONLY the JSON, no additional text. Use null for fields not present.`;
     });
 
     const textBlock = response.content.find((block) => block.type === "text");
-    const responseText = textBlock?.type === "text" ? textBlock.text : "";
+    const responseText = textBlock?.text || "";
 
     const parsed = parseResponse(responseText);
 

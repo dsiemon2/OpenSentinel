@@ -1,6 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { env } from "../config/env";
+import { providerRegistry } from "../core/providers";
 import { isPathAllowed, getSafeExtension } from "../utils/paths";
 import { readFile, writeFile, unlink, mkdir, stat, readdir } from "fs/promises";
 import { existsSync } from "fs";
@@ -8,10 +8,6 @@ import { join, dirname, basename } from "path";
 import { spawn } from "child_process";
 import { tmpdir } from "os";
 import { randomUUID } from "crypto";
-
-const anthropic = new Anthropic({
-  apiKey: env.CLAUDE_API_KEY,
-});
 
 const openai = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
@@ -263,7 +259,7 @@ async function transcribeAudio(
   }
 }
 
-// Analyze a single frame using Claude Vision
+// Analyze a single frame using the configured LLM provider
 async function analyzeFrame(
   framePath: string,
   timestamp: number,
@@ -273,7 +269,8 @@ async function analyzeFrame(
     const imageData = await readFile(framePath);
     const base64 = imageData.toString("base64");
 
-    const response = await anthropic.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model: "claude-sonnet-4-20250514",
       max_tokens: 500,
       messages: [
@@ -284,7 +281,7 @@ async function analyzeFrame(
               type: "image",
               source: {
                 type: "base64",
-                media_type: "image/jpeg",
+                mediaType: "image/jpeg",
                 data: base64,
               },
             },
@@ -298,7 +295,7 @@ async function analyzeFrame(
     });
 
     const textContent = response.content.find((c) => c.type === "text");
-    return textContent?.type === "text" ? textContent.text : "Unable to analyze frame";
+    return textContent?.text || "Unable to analyze frame";
   } catch (error) {
     return `Frame analysis failed: ${error instanceof Error ? error.message : "Unknown error"}`;
   }
@@ -351,7 +348,7 @@ function formatTimestamp(seconds: number): string {
   return `${minutes}:${String(secs).padStart(2, "0")}`;
 }
 
-// Generate comprehensive summary using Claude
+// Generate comprehensive summary using the configured LLM provider
 async function generateSummary(
   keyMoments: KeyMoment[],
   transcript: string | null,
@@ -390,7 +387,8 @@ ${options.analysisDepth === "detailed" ? "Provide extra detail in the overview."
 ${options.analysisDepth === "quick" ? "Keep the overview brief, 1-2 sentences." : ""}`;
 
   try {
-    const response = await anthropic.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model: "claude-sonnet-4-20250514",
       max_tokens: 2000,
       messages: [
@@ -402,7 +400,7 @@ ${options.analysisDepth === "quick" ? "Keep the overview brief, 1-2 sentences." 
     });
 
     const textContent = response.content.find((c) => c.type === "text");
-    const responseText = textContent?.type === "text" ? textContent.text : "";
+    const responseText = textContent?.text || "";
 
     // Extract JSON from response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);

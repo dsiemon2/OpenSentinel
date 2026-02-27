@@ -1,11 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
-import { env } from "../config/env";
+import { providerRegistry } from "../core/providers";
 import { readFile } from "fs/promises";
 import { isPathAllowed } from "../utils/paths";
-
-const anthropic = new Anthropic({
-  apiKey: env.CLAUDE_API_KEY,
-});
 
 export interface ImageAnalysisResult {
   success: boolean;
@@ -33,7 +28,8 @@ export async function analyzeImageUrl(
   prompt: string
 ): Promise<ImageAnalysisResult> {
   try {
-    const response = await anthropic.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1024,
       messages: [
@@ -59,7 +55,7 @@ export async function analyzeImageUrl(
     const textContent = response.content.find((c) => c.type === "text");
     return {
       success: true,
-      analysis: textContent?.type === "text" ? textContent.text : undefined,
+      analysis: textContent?.text,
     };
   } catch (error) {
     return {
@@ -94,7 +90,8 @@ export async function analyzeImageFile(
     const imageData = await readFile(filePath);
     const base64 = imageData.toString("base64");
 
-    const response = await anthropic.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1024,
       messages: [
@@ -105,7 +102,7 @@ export async function analyzeImageFile(
               type: "image",
               source: {
                 type: "base64",
-                media_type: mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+                mediaType: mimeType,
                 data: base64,
               },
             },
@@ -121,7 +118,7 @@ export async function analyzeImageFile(
     const textContent = response.content.find((c) => c.type === "text");
     return {
       success: true,
-      analysis: textContent?.type === "text" ? textContent.text : undefined,
+      analysis: textContent?.text,
     };
   } catch (error) {
     return {
@@ -140,7 +137,8 @@ export async function analyzeImageBuffer(
   try {
     const base64 = imageBuffer.toString("base64");
 
-    const response = await anthropic.messages.create({
+    const provider = providerRegistry.getDefault();
+    const response = await provider.createMessage({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1024,
       messages: [
@@ -151,7 +149,7 @@ export async function analyzeImageBuffer(
               type: "image",
               source: {
                 type: "base64",
-                media_type: mimeType,
+                mediaType: mimeType,
                 data: base64,
               },
             },
@@ -167,7 +165,7 @@ export async function analyzeImageBuffer(
     const textContent = response.content.find((c) => c.type === "text");
     return {
       success: true,
-      analysis: textContent?.type === "text" ? textContent.text : undefined,
+      analysis: textContent?.text,
     };
   } catch (error) {
     return {

@@ -1,18 +1,13 @@
 /**
  * AI-Powered Code Review
  *
- * Uses Claude to provide intelligent code review on pull requests.
+ * Uses the configured LLM provider to provide intelligent code review on pull requests.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
-import { env } from "../../config/env";
+import { providerRegistry } from "../../core/providers";
 import { getOctokit, parseRepoString, type GitHubClientConfig } from "./client";
 import { getPullRequest, listFiles, listCommits, createReview, type PullRequestFile, type CreateReviewOptions } from "./pull-requests";
 import { getContents } from "./repos";
-
-const claude = new Anthropic({
-  apiKey: env.CLAUDE_API_KEY,
-});
 
 export interface CodeReviewOptions {
   /**
@@ -145,8 +140,9 @@ export async function reviewPullRequest(
   // Build the review prompt
   const prompt = buildReviewPrompt(pr, diffContexts, commits, options);
 
-  // Get AI review
-  const response = await claude.messages.create({
+  // Get AI review using the configured provider
+  const provider = providerRegistry.getDefault();
+  const response = await provider.createMessage({
     model: "claude-sonnet-4-20250514",
     max_tokens: 8192,
     system: getSystemPrompt(options),
@@ -155,7 +151,7 @@ export async function reviewPullRequest(
 
   // Parse the review response
   const reviewContent =
-    response.content[0].type === "text" ? response.content[0].text : "";
+    response.content[0]?.type === "text" ? response.content[0].text || "" : "";
 
   const reviewResult = parseReviewResponse(
     reviewContent,
@@ -206,7 +202,8 @@ export async function reviewFile(
 
   const prompt = buildSingleFileReviewPrompt(file, options);
 
-  const response = await claude.messages.create({
+  const provider = providerRegistry.getDefault();
+  const response = await provider.createMessage({
     model: "claude-sonnet-4-20250514",
     max_tokens: 4096,
     system: getSystemPrompt(options),
@@ -214,7 +211,7 @@ export async function reviewFile(
   });
 
   const reviewContent =
-    response.content[0].type === "text" ? response.content[0].text : "";
+    response.content[0]?.type === "text" ? response.content[0].text || "" : "";
 
   return parseSingleFileReview(reviewContent, filename);
 }
@@ -263,14 +260,15 @@ Provide your analysis in the following JSON format:
   "testingRecommendations": ["What should be tested"]
 }`;
 
-  const response = await claude.messages.create({
+  const provider = providerRegistry.getDefault();
+  const response = await provider.createMessage({
     model: "claude-sonnet-4-20250514",
     max_tokens: 2048,
     messages: [{ role: "user", content: prompt }],
   });
 
   const content =
-    response.content[0].type === "text" ? response.content[0].text : "";
+    response.content[0]?.type === "text" ? response.content[0].text || "" : "";
 
   try {
     // Extract JSON from the response
@@ -356,7 +354,8 @@ Respond in JSON format:
   "summary": "Overall security assessment"
 }`;
 
-  const response = await claude.messages.create({
+  const provider = providerRegistry.getDefault();
+  const response = await provider.createMessage({
     model: "claude-sonnet-4-20250514",
     max_tokens: 4096,
     system: "You are a security expert reviewing code for vulnerabilities. Be thorough but avoid false positives.",
@@ -364,7 +363,7 @@ Respond in JSON format:
   });
 
   const content =
-    response.content[0].type === "text" ? response.content[0].text : "";
+    response.content[0]?.type === "text" ? response.content[0].text || "" : "";
 
   try {
     const jsonMatch = content.match(/\{[\s\S]*\}/);

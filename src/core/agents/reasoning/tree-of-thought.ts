@@ -10,8 +10,8 @@
  * with Large Language Models" (2023)
  */
 
-import Anthropic from "@anthropic-ai/sdk";
-import { env } from "../../../config/env";
+import { providerRegistry } from "../../providers";
+import type { LLMProvider } from "../../providers/provider";
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -76,21 +76,21 @@ function nextId(): string {
 }
 
 async function llmCall(
-  client: Anthropic,
+  provider: LLMProvider,
   model: string,
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number = 1024
 ): Promise<{ text: string; tokens: number }> {
-  const response = await client.messages.create({
+  const response = await provider.createMessage({
     model,
     max_tokens: maxTokens,
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
   });
   const text = response.content
-    .filter((b): b is Anthropic.TextBlock => b.type === "text")
-    .map((b) => b.text)
+    .filter((b) => b.type === "text")
+    .map((b) => b.text || "")
     .join("");
   const tokens = (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0);
   return { text, tokens };
@@ -100,7 +100,7 @@ async function llmCall(
  * Generate candidate thoughts (branches) from the current state.
  */
 async function generateThoughts(
-  client: Anthropic,
+  provider: LLMProvider,
   model: string,
   problem: string,
   pathSoFar: string[],
@@ -111,7 +111,7 @@ async function generateThoughts(
     : "";
 
   const { text, tokens } = await llmCall(
-    client,
+    provider,
     model,
     `You are a systematic problem solver. Generate exactly ${count} distinct next-step thoughts for solving the problem. Each thought should explore a DIFFERENT approach or angle. Return each thought on its own line, prefixed with "THOUGHT:" — nothing else.`,
     `Problem: ${problem}${context}\n\nGenerate ${count} candidate next thoughts:`,
@@ -136,7 +136,7 @@ async function generateThoughts(
  * Evaluate a thought's quality and whether it leads toward a solution.
  */
 async function evaluateThought(
-  client: Anthropic,
+  provider: LLMProvider,
   model: string,
   problem: string,
   pathSoFar: string[],
@@ -147,7 +147,7 @@ async function evaluateThought(
     : "";
 
   const { text, tokens } = await llmCall(
-    client,
+    provider,
     model,
     `You evaluate reasoning steps. Given a problem and a candidate thought, score it 0-10 and determine if it reaches a complete solution.
 
@@ -194,7 +194,7 @@ export async function treeOfThought(
   const cfg = { ...DEFAULTS, ...config };
   nodeCounter = 0;
 
-  const client = new Anthropic({ apiKey: env.CLAUDE_API_KEY });
+  const provider = providerRegistry.getDefault();
   const nodeMap = new Map<string, ThoughtNode>();
   let totalTokens = 0;
   let llmCalls = 0;
@@ -233,7 +233,7 @@ export async function treeOfThought(
 
     // Generate candidate thoughts
     const { thoughts, tokens: genTokens } = await generateThoughts(
-      client,
+      provider,
       cfg.model,
       problem,
       pathSoFar,
@@ -247,7 +247,7 @@ export async function treeOfThought(
       if (nodeMap.size >= cfg.maxNodes) break;
 
       const { score, evaluation, isSolution, tokens: evalTokens } = await evaluateThought(
-        client,
+        provider,
         cfg.model,
         problem,
         pathSoFar,
