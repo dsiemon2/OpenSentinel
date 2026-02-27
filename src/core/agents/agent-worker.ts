@@ -1,6 +1,5 @@
 import { Worker, Job } from "bullmq";
 import Redis from "ioredis";
-import Anthropic from "@anthropic-ai/sdk";
 import { env } from "../../config/env";
 import {
   AgentType,
@@ -17,17 +16,15 @@ import {
   getAgent,
 } from "./agent-manager";
 import { TOOLS, executeTool } from "../../tools";
+import { riskEngine } from "../intelligence/risk-engine";
 import { metric } from "../observability/metrics";
 import { captureException } from "../observability/error-tracker";
+import { providerRegistry } from "../providers";
+import type { LLMMessage, LLMContentBlock, LLMTool } from "../providers/types";
 
 // Redis connection
 const connection = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: null,
-});
-
-// Anthropic client
-const anthropic = new Anthropic({
-  apiKey: env.CLAUDE_API_KEY,
 });
 
 interface AgentJobData {
@@ -57,25 +54,33 @@ async function processAgentTask(job: Job<AgentJobData>): Promise<AgentResult> {
   // Build system prompt
   const systemPrompt = buildSystemPrompt(type, context);
 
+  // Get the configured LLM provider (respects LLM_PROVIDER env var)
+  const provider = providerRegistry.getDefault();
+
   // Get allowed tools for this agent type
   const allowedToolNames = AGENT_TOOL_PERMISSIONS[type];
-  const agentTools = TOOLS.filter((t) => allowedToolNames.includes(t.name));
+  const agentTools = TOOLS
+    .filter((t) => allowedToolNames.includes(t.name))
+    .map((t) => ({
+      name: t.name,
+      description: t.description || "",
+      input_schema: (t.input_schema || { type: "object" as const, properties: {} }) as LLMTool["input_schema"],
+    }));
 
   // Build initial messages
-  const messages: Anthropic.MessageParam[] = [
-    {
-      role: "user",
-      content: `Your objective: ${objective}
+  const userContent = `Your objective: ${objective}
 
 ${context ? `Additional context:\n${JSON.stringify(context, null, 2)}` : ""}
 
-Please proceed with the task, reporting your progress as you go.`,
-    },
+Please proceed with the task, reporting your progress as you go.`;
+
+  const messages: LLMMessage[] = [
+    { role: "user", content: userContent },
   ];
 
   await addAgentMessage(agentId, {
     role: "user",
-    content: messages[0].content as string,
+    content: userContent,
   });
 
   let stepNumber = 2;
@@ -96,9 +101,9 @@ Please proceed with the task, reporting your progress as you go.`,
         break;
       }
 
-      // Call Claude
-      const response = await anthropic.messages.create({
-        model: "claude-sonnet-4-20250514",
+      // Call the configured LLM provider (Claude, Gemini, OpenAI, etc.)
+      const response = await provider.createMessage({
+        model: "",  // Use provider's default model
         max_tokens: 4096,
         system: systemPrompt,
         tools: agentTools,
@@ -126,7 +131,7 @@ Please proceed with the task, reporting your progress as you go.`,
       // Extract text for logging
       const textContent = assistantContent
         .filter((c) => c.type === "text")
-        .map((c) => (c as { type: "text"; text: string }).text)
+        .map((c) => c.text || "")
         .join("\n");
 
       if (textContent) {
@@ -162,14 +167,53 @@ Please proceed with the task, reporting your progress as you go.`,
 
       // Process tool calls
       if (response.stop_reason === "tool_use") {
-        const toolResults: Anthropic.MessageParam["content"] = [];
+        const toolResultBlocks: LLMContentBlock[] = [];
 
         for (const block of assistantContent) {
           if (block.type === "tool_use") {
-            const toolName = block.name;
+            const toolName = block.name!;
             const toolInput = block.input as Record<string, unknown>;
 
             console.log(`[Agent ${agentId}] Using tool: ${toolName}`);
+
+            // Risk engine gate: evaluate before executing any tool from an agent
+            const riskDecision = await riskEngine.evaluate({
+              action: "agent_tool_execute",
+              userId,
+              toolName,
+              input: toolInput,
+              metadata: { agentId, agentType: type },
+            });
+
+            if (!riskDecision.allowed) {
+              const failedChecks = riskDecision.checks
+                .filter((c) => !c.passed)
+                .map((c) => c.message)
+                .join("; ");
+              const result = {
+                success: false,
+                result: null,
+                error: `[RiskEngine] Agent tool blocked: ${failedChecks}`,
+              };
+
+              await addAgentMessage(agentId, {
+                role: "tool_result",
+                content: JSON.stringify({ tool: toolName, result }),
+                metadata: { toolInput },
+              });
+
+              toolResultBlocks.push({
+                type: "tool_result",
+                tool_use_id: block.id!,
+                content: JSON.stringify(result),
+              });
+              continue;
+            }
+
+            // Inject caller context for financial tools
+            if (toolName === "crypto_exchange") {
+              toolInput._callerContext = "agent";
+            }
 
             // Execute tool
             const result = await executeTool(toolName, toolInput);
@@ -180,9 +224,9 @@ Please proceed with the task, reporting your progress as you go.`,
               metadata: { toolInput },
             });
 
-            toolResults.push({
+            toolResultBlocks.push({
               type: "tool_result",
-              tool_use_id: block.id,
+              tool_use_id: block.id!,
               content: JSON.stringify(result),
             });
           }
@@ -190,7 +234,7 @@ Please proceed with the task, reporting your progress as you go.`,
 
         // Add assistant response and tool results to messages
         messages.push({ role: "assistant", content: assistantContent });
-        messages.push({ role: "user", content: toolResults });
+        messages.push({ role: "user", content: toolResultBlocks });
       }
 
       stepNumber++;

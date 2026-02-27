@@ -137,10 +137,10 @@ OpenSentinel is a **completely custom, self-contained AI assistant** built from 
 | Tools | 121 |
 | Integrations | 15+ |
 | Domain Experts | 15 |
-| Sub-Agents | 4 |
+| Sub-Agents | 5 |
 | Source Files | 349 |
 | Lines of Code | ~52,000 |
-| Unit Tests | 5,600+ |
+| Unit Tests | 5,800+ |
 
 ---
 
@@ -168,7 +168,7 @@ OpenSentinel is a **completely custom, self-contained AI assistant** built from 
 | File Operations | ✅ | ✅ | Both full access |
 | Web Search | ✅ | ✅ | Both multi-engine |
 | **Advanced Features** | | | |
-| Sub-Agent System | ❌ | ✅ 4 agents | Our advantage |
+| Sub-Agent System | ❌ | ✅ 5 agents (incl. OSINT) | Our advantage |
 | Domain Experts (15) | ❌ | ✅ | Our advantage |
 | Workflow Automation | ❌ | ✅ IFTTT-like | Our advantage |
 | Document Generation | Skills | ✅ Built-in | Our advantage (PDF, Word, Excel, PPT) |
@@ -312,7 +312,7 @@ Integrate OpenClaw's MCP (Model Context Protocol) servers as tool providers.
 | Sub-agent collaboration | More maintenance burden |
 | Workflow automation | |
 | Full observability | |
-| 5,600+ unit tests | |
+| 5,800+ unit tests | |
 
 ---
 
@@ -326,6 +326,7 @@ Integrate OpenClaw's MCP (Model Context Protocol) servers as tool providers.
 | Claude Haiku | $10-50/month | Acceptable |
 | GPT-4o | $80-200/month | Good |
 | GPT-4o-mini | $20-80/month | Variable (may fail) |
+| Google Gemini 2.0 Flash | $5-30/month | Good (1M context) |
 | Local LLMs (Ollama) | $0 (compute only) | Depends on hardware |
 
 *Source: User reports indicate $10-25/day with active Opus 4.5 usage*
@@ -392,9 +393,9 @@ From various security analyses:
 ### Why NOT Migrate to OpenClaw
 1. We lose PostgreSQL + pgvector RAG (our memory system is more sophisticated)
 2. We lose enterprise features (multi-user, SSO, quotas, Kubernetes)
-3. We lose 5,600+ unit tests and known stability
+3. We lose 5,800+ unit tests and known stability
 4. We lose workflow automation
-5. We lose 15 domain experts and 4 sub-agents
+5. We lose 15 domain experts and 5 sub-agents
 6. Migration effort (3-6 months) outweighs benefits
 7. OpenClaw has documented security concerns we've already solved
 

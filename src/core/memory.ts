@@ -3,8 +3,9 @@ import { eq, desc, sql, and } from "drizzle-orm";
 import OpenAI from "openai";
 import { env } from "../config/env";
 import { encryptField, decryptField, isEncryptionAvailable } from "./security/field-encryption";
+import { generateEmbedding as embeddingGenerateEmbedding } from "./embeddings";
 
-// Lazy OpenAI client — created on first use
+// Lazy OpenAI client — used only for extractMemories (LLM call, not embeddings)
 let _openai: OpenAI | null = null;
 function getOpenAI(): OpenAI {
   if (!_openai) {
@@ -23,13 +24,9 @@ const openai = new Proxy({} as OpenAI, {
   },
 });
 
-// Generate embedding for text using OpenAI
+// Generate embedding using the configured provider (OpenAI, HuggingFace, or TF-IDF)
 export async function generateEmbedding(text: string): Promise<number[]> {
-  const response = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: text,
-  });
-  return response.data[0].embedding;
+  return embeddingGenerateEmbedding(text);
 }
 
 // Store a new memory with embedding and tsvector

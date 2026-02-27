@@ -44,7 +44,9 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 
 ### Multi-Provider LLM
 - Anthropic Claude (default)
+- Google Gemini (1M context, vision, tool use)
 - OpenRouter, Groq, Mistral, OpenAI
+- HuggingFace Inference API (text embeddings)
 - Ollama (local/offline models)
 - Any OpenAI-compatible endpoint
 - Automatic provider registration from env vars
@@ -310,7 +312,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 161 test files, 5,600+ tests
+tests/                          # 170 test files, 5,800+ tests
 ```
 
 ## Ports
@@ -319,7 +321,7 @@ tests/                          # 161 test files, 5,600+ tests
 |---------|------|
 | OpenSentinel API + Dashboard | 8030 |
 | PostgreSQL | 5445 |
-| Redis | 6379 |
+| Redis | 6385 |
 
 ## Contributing
 

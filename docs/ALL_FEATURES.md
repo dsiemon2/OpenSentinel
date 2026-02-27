@@ -1,7 +1,7 @@
 # OpenSentinel — Complete Feature Reference
 
 > **Version 3.1.1** | February 2026
-> Self-hosted AI assistant powered by Claude with 300+ features, 121 tools, 15 MCP servers, 25 built-in skills, and 5,600+ tests.
+> Self-hosted AI assistant powered by Claude with 300+ features, 121 tools, 15 MCP servers, 25 built-in skills, and 5,800+ tests.
 > Intelligent model routing, self-correcting reasoning, and context compaction built in.
 > Advanced RAG pipeline with all 5 enhancements enabled by default.
 > Talk to it via Telegram, Discord, Slack, Web, Voice, or API — it does the rest.
@@ -53,12 +53,14 @@ OpenSentinel is a self-hosted personal AI assistant — a JARVIS-style hub that 
 - 25 built-in skills (research, productivity, development, communication, utility)
 - 15+ integrations (email, GitHub, Notion, Spotify, smart home, finance, etc.)
 - 15 domain expert personalities
-- 4 specialized sub-agents
+- 5 specialized sub-agents
 - Intelligent model routing (Haiku / Sonnet / Opus)
+- 8 LLM providers (Anthropic, Gemini, OpenAI, OpenRouter, Groq, Mistral, Ollama, custom)
+- 3 embedding providers (OpenAI, HuggingFace, TF-IDF)
 - ReAct reasoning with self-correction
 - Context compaction for unlimited-length conversations
 - Advanced RAG pipeline with all 5 enhancements enabled by default
-- 5,600+ unit tests across 161 test files
+- 5,800+ unit tests across 170 test files
 
 **Tech stack:** Bun, TypeScript, Hono, PostgreSQL 16 + pgvector, Redis 7, React + Vite
 
@@ -936,6 +938,7 @@ OpenSentinel can spawn autonomous background workers for complex, multi-step tas
 | **Coding** | Code generation, debugging, analysis | "Write a REST API for user management" |
 | **Writing** | Long-form content creation | "Write a 2000-word blog post about AI trends" |
 | **Analysis** | Data processing, insights | "Analyze our Q4 sales data and find trends" |
+| **OSINT** | Open-source intelligence, entity resolution | "Investigate company connections and public records" |
 
 ### Agent Features
 - Token budget per agent (prevents runaway costs)
@@ -951,6 +954,44 @@ OpenSentinel can spawn autonomous background workers for complex, multi-step tas
 "Check agent progress"
 "Cancel the research agent"
 ```
+
+---
+
+## 12b. ML Algorithms (Pure TypeScript)
+
+5 built-in ML algorithms with zero external dependencies:
+
+| Algorithm | Class | Used In |
+|-----------|-------|---------|
+| **NaiveBayesClassifier** | `src/core/ml/naive-bayes.ts` | Intent parser — fuzzy intent classification for commands that miss regex patterns |
+| **IsolationForest** | `src/core/ml/isolation-forest.ts` | Anomaly detection — identifies outlier patterns in usage data |
+| **KMeans** | `src/core/ml/kmeans.ts` | Clustering — groups similar data points for analysis |
+| **MarkovChain** | `src/core/ml/markov-chain.ts` | Prediction — next-state prediction from sequence data |
+| **LinearRegression** | `src/core/ml/linear-regression.ts` | Cost tracker forecasting, FRED/Finnhub trend detection, time-series analysis |
+
+---
+
+## 12c. Finance Data Clients
+
+| Client | Location | Capabilities |
+|--------|----------|-------------|
+| **FRED** | `src/integrations/finance/fred.ts` | Federal Reserve economic data: GDP, CPI, unemployment, interest rates, money supply; trend detection via LinearRegression |
+| **Finnhub** | `src/integrations/finance/finnhub.ts` | Market data: stock quotes, company profiles, news sentiment, earnings calendars, price trend analysis |
+| **Exchange** | `src/integrations/finance/exchange.ts` | Crypto trading (Coinbase + Binance): preview orders, place orders, balances, market data |
+
+---
+
+## 12d. Financial Safeguards
+
+Defense-in-depth protection for autonomous financial operations:
+
+| Layer | Location | Protection |
+|-------|----------|-----------|
+| **Autonomy Manager** | `src/core/security/autonomy.ts` | `crypto_exchange` in SUPERVISED_REQUIRE_APPROVAL — flags for approval in supervised mode |
+| **Risk Engine** | `src/core/intelligence/risk-engine.ts` | Trade size limit, daily spend cap, hourly rate limit; hook-based interception |
+| **Agent/Workflow Gate** | `agent-worker.ts`, `actions.ts` | Risk engine check + callerContext injection before any tool execution |
+| **Anti-Auto-Confirm** | `src/integrations/finance/exchange.ts` | Blocks agents/workflows from confirming their own orders |
+| **Exchange Limits** | `src/integrations/finance/exchange.ts` | Hard monetary caps as last line of defense |
 
 ---
 
@@ -1314,7 +1355,7 @@ bun run db:migrate   # Apply migrations
 ## 27. Test Coverage
 
 ### Overview
-- **5,600+ tests** across **161 test files**
+- **5,800+ tests** across **170 test files**
 - **572 Advanced RAG tests** across 8 dedicated test files
 - **366 custom tool tests** across 18 dedicated test files
 - **181 core system tests** across 4 dedicated test files
@@ -1454,6 +1495,6 @@ OpenSentinel serves as the central AI hub for an entire application ecosystem. A
 
 ---
 
-*OpenSentinel v3.1.1 — Self-hosted AI assistant with 300+ features, 121 tools, 15 MCP servers, 25 built-in skills, and 5,600+ tests.*
+*OpenSentinel v3.1.1 — Self-hosted AI assistant with 300+ features, 121 tools, 15 MCP servers, 25 built-in skills, and 5,800+ tests.*
 *Intelligent model routing, ReAct reasoning with self-correction, context compaction, and advanced RAG pipeline.*
 *Built with Bun, TypeScript, Claude (Haiku/Sonnet/Opus), PostgreSQL, and Redis.*
