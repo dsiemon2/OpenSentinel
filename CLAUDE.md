@@ -186,8 +186,27 @@ cd extension && bun install && bun run build
 # Load extension/dist in Chrome at chrome://extensions
 ```
 
+## SEO
+
+OpenSentinel includes full SEO configuration for search engine visibility:
+
+- **Meta Tags**: Description, robots (index/follow), canonical URL in `src/web/index.html`
+- **Open Graph**: Full OG tags (type, site_name, title, description, url, image) for Facebook/LinkedIn sharing
+- **Twitter Card**: Summary card with title, description, and image
+- **Favicons**: SVG, PNG 32x32, PNG 16x16, and Apple Touch Icon (180x180) in `src/web/public/`
+- **JSON-LD**: Organization schema markup with structured data
+- **robots.txt**: Located at `src/web/public/robots.txt` - allows crawling, blocks `/api/` and `/admin`
+- **sitemap.xml**: Located at `src/web/public/sitemap.xml` - lists public URLs
+- **Nginx**: SEO routes for `/robots.txt` and `/sitemap.xml` in `docker/nginx.conf`
+- **Canonical domain**: `https://opensentinel.ai`
+
+### Updating SEO
+- Edit meta tags in `src/web/index.html`
+- Update sitemap URLs in `src/web/public/sitemap.xml` when adding new public pages
+- Favicon source files are generated via Python PIL (dark theme: `rgb(30, 41, 59)`, accent: `rgb(99, 102, 241)`)
+
 ---
-*Last Updated: 2026-02-19*
+*Last Updated: 2026-03-02*
 
 
 ## Workflow Orchestration
