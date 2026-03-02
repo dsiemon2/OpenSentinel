@@ -158,18 +158,16 @@ function convertOutlookEvent(outlookEvent: any): CalendarEvent {
     summary: outlookEvent.subject || "Untitled Event",
     description: outlookEvent.body?.content || "",
     location: outlookEvent.location?.displayName || "",
-    start: new Date(outlookEvent.start.dateTime + "Z"),
-    end: new Date(outlookEvent.end.dateTime + "Z"),
-    allDay: outlookEvent.isAllDay || false,
-    recurrenceRule: outlookEvent.recurrence
+    startDate: new Date(outlookEvent.start.dateTime + "Z"),
+    endDate: new Date(outlookEvent.end.dateTime + "Z"),
+    isAllDay: outlookEvent.isAllDay || false,
+    recurrence: outlookEvent.recurrence
       ? JSON.stringify(outlookEvent.recurrence)
       : undefined,
     organizer: outlookEvent.organizer?.emailAddress?.address,
     attendees: (outlookEvent.attendees || []).map(
       (a: any) => a.emailAddress?.address
     ),
-    status: outlookEvent.responseStatus?.response,
-    htmlLink: outlookEvent.webLink,
   };
 }
 

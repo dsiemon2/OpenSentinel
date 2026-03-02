@@ -47,6 +47,7 @@
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@notionhq/client": "^5.11.0",
     "bullmq": "^5.34.0",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.39.0",

@@ -74,7 +74,7 @@ export async function typeText(selector: string, text: string): Promise<void> {
 
 export async function extractText(selector: string): Promise<string> {
   const p = await getPage();
-  return p.textContent(selector) || "";
+  return (await p.textContent(selector)) ?? "";
 }
 
 export async function searchGoogle(query: string): Promise<BrowseResult> {

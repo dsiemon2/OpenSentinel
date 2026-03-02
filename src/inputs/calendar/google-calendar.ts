@@ -151,14 +151,12 @@ function convertGoogleEvent(googleEvent: any): CalendarEvent {
     summary: googleEvent.summary || "Untitled Event",
     description: googleEvent.description || "",
     location: googleEvent.location || "",
-    start: new Date(googleEvent.start.dateTime || googleEvent.start.date),
-    end: new Date(googleEvent.end.dateTime || googleEvent.end.date),
-    allDay: isAllDay,
-    recurrenceRule: googleEvent.recurrence?.[0] || undefined,
+    startDate: new Date(googleEvent.start.dateTime || googleEvent.start.date),
+    endDate: new Date(googleEvent.end.dateTime || googleEvent.end.date),
+    isAllDay: isAllDay,
+    recurrence: googleEvent.recurrence?.[0] || undefined,
     organizer: googleEvent.organizer?.email,
     attendees: (googleEvent.attendees || []).map((a: any) => a.email),
-    status: googleEvent.status,
-    htmlLink: googleEvent.htmlLink,
   };
 }
 

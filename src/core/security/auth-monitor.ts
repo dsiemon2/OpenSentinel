@@ -1,6 +1,8 @@
 // Authentication monitoring and anomaly detection
+// Uses Isolation Forest (Algorithm #28) for ML-based anomaly detection
 
 import { logAudit, getRecentUserActivity } from "./audit-logger";
+import { IsolationForest } from "../ml/isolation-forest";
 
 export interface LoginAttempt {
   userId: string;
@@ -46,6 +48,11 @@ export class AuthMonitor {
   // Rapid session switching threshold
   private rapidSwitchThreshold = 5;
   private rapidSwitchWindowMs = 5 * 60 * 1000; // 5 minutes
+
+  // ML anomaly detection
+  private isolationForest = new IsolationForest({ numTrees: 50, sampleSize: 64, threshold: 0.65 });
+  private trainingData: number[][] = [];
+  private trainingSampleCount = 0;
 
   onAlert(callback: AlertCallback): void {
     alertCallbacks.push(callback);
@@ -108,6 +115,18 @@ export class AuthMonitor {
       const hour = attempt.timestamp.getHours();
       if (!userLoginHours.has(userId)) userLoginHours.set(userId, []);
       userLoginHours.get(userId)!.push(hour);
+    }
+
+    // Feed Isolation Forest training data
+    const featureVector = this.buildLoginFeatureVector(attempt);
+    this.trainingData.push(featureVector);
+    this.trainingSampleCount++;
+    if (this.trainingData.length > 1000) {
+      this.trainingData = this.trainingData.slice(-1000);
+    }
+    // Retrain every 50 login attempts once we have enough data
+    if (this.trainingSampleCount % 50 === 0 && this.trainingData.length >= 30) {
+      this.isolationForest.fit(this.trainingData);
     }
 
     return anomalies;
@@ -227,7 +246,15 @@ export class AuthMonitor {
       });
     }
 
-    // 6. Impossible travel detection
+    // 6. ML-based anomaly detection (Isolation Forest)
+    if (currentAttempt) {
+      const mlAnomaly = this.detectMLAnomaly(currentAttempt);
+      if (mlAnomaly) {
+        anomalies.push(mlAnomaly);
+      }
+    }
+
+    // 7. Impossible travel detection
     if (currentAttempt?.ipAddress && currentAttempt.success) {
       const lastSuccessful = history
         .filter(
@@ -286,6 +313,68 @@ export class AuthMonitor {
     knownDevices.delete(userId);
     knownIPs.delete(userId);
     userLoginHours.delete(userId);
+  }
+
+  /**
+   * Build feature vector for Isolation Forest from a login attempt.
+   * Features: [hour, dayOfWeek, successBit, knownDeviceBit, knownIpBit, minutesSinceLast, failCountRecent]
+   */
+  private buildLoginFeatureVector(attempt: LoginAttempt): number[] {
+    const hour = attempt.timestamp.getHours();
+    const dayOfWeek = attempt.timestamp.getDay();
+    const successBit = attempt.success ? 1 : 0;
+
+    const knownDevice = attempt.deviceInfo
+      ? (knownDevices.get(attempt.userId)?.has(attempt.deviceInfo) ? 1 : 0)
+      : 0.5; // unknown
+    const knownIp = attempt.ipAddress
+      ? (knownIPs.get(attempt.userId)?.has(attempt.ipAddress) ? 1 : 0)
+      : 0.5;
+
+    // Time since last login for this user
+    const history = loginHistory.get(attempt.userId) ?? [];
+    let minutesSinceLast = 1440; // default 24h
+    if (history.length >= 2) {
+      const prev = history[history.length - 2];
+      minutesSinceLast = Math.min(
+        1440,
+        (attempt.timestamp.getTime() - prev.timestamp.getTime()) / 60000
+      );
+    }
+
+    // Failed attempts in the last 10 minutes
+    const recentFailed = history.filter(
+      (a) => !a.success && attempt.timestamp.getTime() - a.timestamp.getTime() < 600000
+    ).length;
+
+    return [hour, dayOfWeek, successBit, knownDevice, knownIp, minutesSinceLast, recentFailed];
+  }
+
+  /**
+   * ML-based anomaly detection using Isolation Forest.
+   * Returns an anomaly if the model flags the login attempt.
+   */
+  detectMLAnomaly(attempt: LoginAttempt): AuthAnomaly | null {
+    if (!this.isolationForest.isReady()) return null;
+
+    const featureVector = this.buildLoginFeatureVector(attempt);
+    const prediction = this.isolationForest.predict(featureVector);
+
+    if (prediction.isAnomaly) {
+      return {
+        type: "unusual_time", // closest matching type
+        level: prediction.score > 0.75 ? "warning" : "info",
+        message: `ML anomaly detected: login pattern is unusual (score: ${prediction.score.toFixed(3)})`,
+        details: {
+          anomalyScore: prediction.score,
+          confidence: prediction.confidence,
+          features: { hour: featureVector[0], dayOfWeek: featureVector[1], minutesSinceLast: featureVector[5] },
+        },
+        timestamp: attempt.timestamp,
+      };
+    }
+
+    return null;
   }
 }
 

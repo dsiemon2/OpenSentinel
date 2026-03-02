@@ -188,6 +188,16 @@ export async function main() {
     }
   }
 
+  // Start agent processor if enabled (BullMQ worker for sub-agents)
+  if (env.AGENT_PROCESSOR_ENABLED) {
+    try {
+      const { startAgentProcessor } = await import("./core/agents/agent-processor");
+      startAgentProcessor();
+    } catch (err: any) {
+      console.warn("[AgentProcessor] Failed to start:", err.message);
+    }
+  }
+
   // Start API server with WebSocket support
   console.log(`[API] Starting server on port ${env.PORT}...`);
   const server = Bun.serve({

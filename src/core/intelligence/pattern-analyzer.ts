@@ -6,9 +6,13 @@
  * - Tracks user interaction patterns
  * - Identifies recurring behaviors and preferences
  * - Time-based pattern detection (daily/weekly cycles)
- * - Anomaly detection for unusual activity
+ * - Anomaly detection via Isolation Forest (Algorithm #28)
+ * - Sequence prediction via Markov Chain (Algorithm #29)
  * - Continuous learning from corrections
  */
+
+import { IsolationForest } from "../ml/isolation-forest";
+import { MarkovChain } from "../ml/markov-chain";
 
 export interface PatternEvent {
   type: string;
@@ -54,6 +58,12 @@ export class PatternAnalyzer {
   private maxEvents = 10000;
   private patternIdCounter = 0;
 
+  // ML models
+  private isolationForest = new IsolationForest({ numTrees: 50, sampleSize: 128, threshold: 0.62 });
+  private markovChain = new MarkovChain({ order: 2, minObservations: 3 });
+  private anomalyTrainingData: number[][] = [];
+  private actionSequences: Map<string, string[]> = new Map(); // per-user action history
+
   /**
    * Record a user interaction event
    */
@@ -74,10 +84,60 @@ export class PatternAnalyzer {
       });
     }
 
+    // Feed Markov chain with action sequence
+    if (!this.actionSequences.has(event.userId)) {
+      this.actionSequences.set(event.userId, []);
+    }
+    const userActions = this.actionSequences.get(event.userId)!;
+    userActions.push(`${event.type}:${event.action}`);
+    if (userActions.length > 500) userActions.splice(0, userActions.length - 500);
+
+    // Train Markov chain periodically
+    if (userActions.length % 20 === 0 && userActions.length >= 10) {
+      this.markovChain.train(userActions);
+    }
+
+    // Build anomaly feature vector: [hour, dayOfWeek, actionTypeHash, minutesSinceLastEvent]
+    const featureVector = this.buildFeatureVector(event);
+    this.anomalyTrainingData.push(featureVector);
+    if (this.anomalyTrainingData.length > 2000) {
+      this.anomalyTrainingData = this.anomalyTrainingData.slice(-2000);
+    }
+
+    // Retrain Isolation Forest every 100 events (if enough data)
+    if (this.anomalyTrainingData.length % 100 === 0 && this.anomalyTrainingData.length >= 50) {
+      this.isolationForest.fit(this.anomalyTrainingData);
+    }
+
     // Detect patterns on every 50 events
     if (this.events.length % 50 === 0) {
       this.analyzePatterns(event.userId);
     }
+  }
+
+  private buildFeatureVector(event: PatternEvent): number[] {
+    const hour = event.timestamp.getHours();
+    const dayOfWeek = event.timestamp.getDay();
+    // Simple string hash for action type (deterministic)
+    let actionHash = 0;
+    const actionStr = `${event.type}:${event.action}`;
+    for (let i = 0; i < actionStr.length; i++) {
+      actionHash = ((actionHash << 5) - actionHash + actionStr.charCodeAt(i)) | 0;
+    }
+    actionHash = Math.abs(actionHash) % 100;
+
+    // Time since last event
+    const userEvents = this.events.filter((e) => e.userId === event.userId);
+    let minutesSinceLast = 60; // default
+    if (userEvents.length >= 2) {
+      const prev = userEvents[userEvents.length - 2];
+      minutesSinceLast = Math.min(
+        1440,
+        (event.timestamp.getTime() - prev.timestamp.getTime()) / 60000
+      );
+    }
+
+    return [hour, dayOfWeek, actionHash, minutesSinceLast];
   }
 
   /**
@@ -232,7 +292,7 @@ export class PatternAnalyzer {
   }
 
   /**
-   * Predict next likely action for a user
+   * Predict next likely action for a user using Markov Chain + pattern heuristics
    */
   predict(userId: string, currentContext: Record<string, unknown> = {}): Prediction[] {
     const userPatterns = Array.from(this.patterns.values())
@@ -241,17 +301,42 @@ export class PatternAnalyzer {
 
     const predictions: Prediction[] = [];
     const currentHour = new Date().getHours();
+    const seenActions = new Set<string>();
 
+    // Primary: Markov Chain prediction (if trained and user has action history)
+    const userActions = this.actionSequences.get(userId);
+    if (userActions && userActions.length >= 3 && this.markovChain.isReady()) {
+      const markovResult = this.markovChain.predict(userActions);
+      if (markovResult) {
+        for (const pred of markovResult.topPredictions.slice(0, 3)) {
+          if (!seenActions.has(pred.state)) {
+            seenActions.add(pred.state);
+            predictions.push({
+              action: pred.state,
+              confidence: pred.probability,
+              reasoning: `Markov Chain prediction (${markovResult.observations} observations, p=${pred.probability.toFixed(2)})`,
+              basedOnPatterns: ["markov_chain"],
+            });
+          }
+        }
+      }
+    }
+
+    // Secondary: pattern-based predictions
     for (const pattern of userPatterns) {
       if (pattern.type === "temporal") {
         const peakHour = pattern.data.peakHour as number;
         if (Math.abs(currentHour - peakHour) <= 1) {
-          predictions.push({
-            action: pattern.data.actionType as string,
-            confidence: pattern.confidence * 0.8,
-            reasoning: pattern.description,
-            basedOnPatterns: [pattern.id],
-          });
+          const action = pattern.data.actionType as string;
+          if (!seenActions.has(action)) {
+            seenActions.add(action);
+            predictions.push({
+              action,
+              confidence: pattern.confidence * 0.8,
+              reasoning: pattern.description,
+              basedOnPatterns: [pattern.id],
+            });
+          }
         }
       }
 
@@ -261,12 +346,15 @@ export class PatternAnalyzer {
         const lastAction = currentContext.lastAction as string;
         if (lastAction && first === lastAction) {
           const nextAction = seq.split(" → ")[1];
-          predictions.push({
-            action: nextAction,
-            confidence: pattern.confidence,
-            reasoning: `Based on common sequence: ${seq}`,
-            basedOnPatterns: [pattern.id],
-          });
+          if (!seenActions.has(nextAction)) {
+            seenActions.add(nextAction);
+            predictions.push({
+              action: nextAction,
+              confidence: pattern.confidence,
+              reasoning: `Based on common sequence: ${seq}`,
+              basedOnPatterns: [pattern.id],
+            });
+          }
         }
       }
     }
@@ -277,7 +365,7 @@ export class PatternAnalyzer {
   }
 
   /**
-   * Detect anomalous behavior
+   * Detect anomalous behavior using Isolation Forest + heuristic fallback
    */
   detectAnomaly(event: PatternEvent): AnomalyResult {
     const userEvents = this.events.filter(
@@ -287,6 +375,23 @@ export class PatternAnalyzer {
     if (userEvents.length < 20) {
       return { isAnomaly: false, score: 0, event };
     }
+
+    // Primary: Isolation Forest (if trained)
+    if (this.isolationForest.isReady()) {
+      const featureVector = this.buildFeatureVector(event);
+      const prediction = this.isolationForest.predict(featureVector);
+
+      if (prediction.isAnomaly) {
+        return {
+          isAnomaly: true,
+          score: prediction.score,
+          reason: `Isolation Forest anomaly detected (score: ${prediction.score.toFixed(3)}, confidence: ${(prediction.confidence * 100).toFixed(0)}%) for "${event.type}" at ${event.timestamp.getHours()}:00`,
+          event,
+        };
+      }
+    }
+
+    // Fallback: heuristic checks (for early stages before forest is trained)
 
     // Time anomaly: action at unusual hour
     const hourCounts: number[] = new Array(24).fill(0);

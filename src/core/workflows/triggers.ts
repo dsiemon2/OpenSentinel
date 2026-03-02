@@ -3,7 +3,7 @@
  */
 
 import { EventEmitter } from "events";
-import cron from "node-cron";
+import cron, { type ScheduledTask } from "node-cron";
 
 // ============================================
 // TRIGGER TYPES
@@ -127,7 +127,7 @@ export interface TriggerContext {
 
 export class TriggerManager extends EventEmitter {
   private triggers = new Map<string, Trigger>();
-  private cronJobs = new Map<string, cron.ScheduledTask>();
+  private cronJobs = new Map<string, ScheduledTask>();
   private intervals = new Map<string, NodeJS.Timer>();
   private conditionPollers = new Map<string, NodeJS.Timer>();
   private webhookHandlers = new Map<string, WebhookTrigger>();

@@ -17,8 +17,15 @@ import {
 import { eq, and, gte, desc, sql, count } from "drizzle-orm";
 import OpenAI from "openai";
 import { env } from "../../config/env";
+import { KMeans } from "../ml/k-means";
 
 const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+
+// k-Means++ behavior clustering: groups users by activity patterns
+const behaviorClusterer = new KMeans({ k: 4, maxIterations: 50 });
+let clusterModel: { centroids: number[][]; labels: number[] } | null = null;
+let lastClusterUpdate = 0;
+const CLUSTER_UPDATE_INTERVAL = 3600000; // Re-cluster every hour
 
 // Types for predictive suggestions
 export interface Suggestion {
@@ -66,7 +73,14 @@ export interface PatternAnalysis {
     commonStarters: string[];
     followUpRate: number;
   };
+  /** k-Means++ cluster assignment (behavior group) */
+  behaviorCluster?: number;
+  /** Distance to cluster centroid (lower = more typical) */
+  clusterDistance?: number;
 }
+
+// Per-user behavior feature vectors for k-Means++ clustering
+const behaviorFeatureStore: Map<string, number[]> = new Map();
 
 // Generate suggestions for a user based on current context
 export async function generateSuggestions(
@@ -194,6 +208,60 @@ async function analyzeUserPatterns(userId: string): Promise<PatternAnalysis> {
         conversationStats.length
       : 0;
 
+  // Build behavior feature vector for clustering:
+  // [avgConvLength, topToolFreq, peakHourActivity, topicDiversity, toolDiversity]
+  const topToolFreq = toolStats.length > 0 ? toolStats[0].total : 0;
+  const peakHourActivity = hourlyActivity.length > 0
+    ? Math.max(...hourlyActivity.map((h) => h.count))
+    : 0;
+  const topicDiversity = topicPatterns.length;
+  const toolDiversity = toolStats.length;
+
+  const featureVector = [
+    Math.round(avgLength),
+    topToolFreq,
+    peakHourActivity,
+    topicDiversity,
+    toolDiversity,
+  ];
+
+  // Cluster assignment (if model is trained)
+  let behaviorCluster: number | undefined;
+  let clusterDistance: number | undefined;
+
+  if (clusterModel) {
+    const result = behaviorClusterer.predictOne(featureVector);
+    behaviorCluster = result.cluster;
+    clusterDistance = result.distance;
+  }
+
+  // Periodically retrain the cluster model with accumulated data
+  if (Date.now() - lastClusterUpdate > CLUSTER_UPDATE_INTERVAL) {
+    // Store this user's feature vector for clustering
+    if (!behaviorFeatureStore.has(userId)) {
+      behaviorFeatureStore.set(userId, featureVector);
+    } else {
+      behaviorFeatureStore.set(userId, featureVector);
+    }
+
+    // Retrain if we have enough users
+    if (behaviorFeatureStore.size >= 4) {
+      const allFeatures = Array.from(behaviorFeatureStore.values());
+      const k = Math.min(4, allFeatures.length);
+      const km = new KMeans({ k, maxIterations: 50 });
+      const result = km.fit(allFeatures);
+      clusterModel = { centroids: result.centroids, labels: result.labels };
+      lastClusterUpdate = Date.now();
+
+      // Re-predict for this user
+      const rePrediction = km.predictOne(featureVector);
+      behaviorCluster = rePrediction.cluster;
+      clusterDistance = rePrediction.distance;
+    }
+  } else if (!behaviorFeatureStore.has(userId)) {
+    behaviorFeatureStore.set(userId, featureVector);
+  }
+
   return {
     frequentTopics: topicPatterns.map((p) => ({
       topic: p.patternKey,
@@ -214,6 +282,8 @@ async function analyzeUserPatterns(userId: string): Promise<PatternAnalysis> {
       commonStarters: [], // Would need NLP analysis
       followUpRate: 0.3, // Placeholder - would need analysis
     },
+    behaviorCluster,
+    clusterDistance,
   };
 }
 
@@ -353,6 +423,29 @@ async function generatePatternSuggestions(
       },
       createdAt: new Date(),
     });
+  }
+
+  // Cluster-based suggestion: if user is atypical (far from centroid), suggest optimization
+  if (patterns.behaviorCluster !== undefined && patterns.clusterDistance !== undefined) {
+    if (patterns.clusterDistance > 50) {
+      suggestions.push({
+        id: `pattern-cluster-${Date.now()}`,
+        type: "workflow_optimization",
+        title: "Your usage pattern is unique",
+        description: "Your workflow differs from typical patterns. Want personalized optimization tips?",
+        confidence: 55,
+        relevance: 60,
+        action: {
+          type: "message",
+          payload: { prompt: "Analyze my usage patterns and suggest workflow improvements" },
+          label: "Optimize Workflow",
+        },
+        context: {
+          triggerPattern: `behavior_cluster_${patterns.behaviorCluster}`,
+        },
+        createdAt: new Date(),
+      });
+    }
   }
 
   // Workflow optimization suggestion based on tool patterns

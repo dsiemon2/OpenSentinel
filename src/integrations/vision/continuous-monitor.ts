@@ -608,10 +608,11 @@ export function createScreenMonitor(
     interval?: number;
   }
 ): ContinuousMonitor {
+  const { interval: _interval, ...rest } = options;
   return new ContinuousMonitor({
     source: "screen",
     interval: options.interval || 5000,
-    ...options,
+    ...rest,
   });
 }
 
@@ -623,10 +624,11 @@ export function createWebcamMonitor(
     interval?: number;
   }
 ): ContinuousMonitor {
+  const { interval: _interval, ...rest } = options;
   return new ContinuousMonitor({
     source: "webcam",
     interval: options.interval || 2000,
-    ...options,
+    ...rest,
   });
 }
 

@@ -176,7 +176,7 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat" data-animate>
-          <span class="stat-value">5,800+</span>
+          <span class="stat-value">6,100+</span>
           <span class="stat-label">Unit Tests</span>
         </div>
       </div>
@@ -218,15 +218,21 @@
             <h3>OpenSentinel</h3>
           </div>
           <ul>
+            <li>Agentic RAG: tool pre-classification, memory middleware, pipeline orchestrator</li>
             <li>Advanced RAG: HyDE, re-ranking, multi-step retrieval, caching</li>
+            <li>Brain Dashboard: real-time pipeline visualization, activity feed, score gauges</li>
             <li>Workflow engine with triggers &amp; schedules</li>
             <li>5 specialist sub-agents in parallel</li>
             <li>Gateway token auth, field encryption, tamper-proof audit</li>
             <li>2FA, incident response, GDPR, encrypted vault</li>
             <li>Multi-user with SSO and quotas</li>
             <li>Sandboxed plugins + MCP servers</li>
-            <li>Metrics, replay, alerting, dry-run</li>
+            <li>Metrics, replay, alerting, dry-run, brain telemetry</li>
             <li>Multi-LLM: Gemini, OpenRouter, Groq, Mistral, Ollama</li>
+            <li>File download UI with secure token-based access</li>
+            <li>Image vision &amp; document parsing from Web Chat uploads</li>
+            <li>ML algorithms: clustering, anomaly detection, forecasting</li>
+            <li>Finnhub &amp; FRED financial data integrations</li>
             <li>Prometheus metrics for DevOps monitoring</li>
             <li>Built-in tunnels for instant public access</li>
           </ul>
@@ -253,8 +259,8 @@
           <div class="feature-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           </div>
-          <h3>Persistent Memory</h3>
-          <p>Advanced RAG with pgvector, HyDE, cross-encoder re-ranking, multi-step retrieval, and Redis caching. Hybrid search fuses vector, keyword, and graph results. Your AI genuinely learns over time.</p>
+          <h3>Agentic RAG Memory</h3>
+          <p>Full agentic RAG pipeline: tool pre-classification, memory middleware (auto-search + auto-extract), pipeline orchestrator, HyDE, re-ranking, multi-step retrieval, and Redis caching. Hybrid search fuses vector, keyword, and graph results. Your AI genuinely learns over time.</p>
           <div class="feature-tag">Core Differentiator</div>
         </div>
 
@@ -294,8 +300,8 @@
           <div class="feature-icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <h3>File Generation</h3>
-          <p>Generate PDFs, Word docs, Excel spreadsheets, PowerPoint presentations, charts, diagrams, and AI images on demand.</p>
+          <h3>File Generation & Parsing</h3>
+          <p>Generate PDFs, Word docs, Excel spreadsheets, PowerPoint presentations, charts, diagrams, and AI images on demand. Secure download links with token-based access. Upload documents for automatic parsing (PDF, DOCX, CSV, and more). Image vision analysis from Web Chat uploads.</p>
         </div>
 
         <div class="feature-card" data-animate>
@@ -311,7 +317,7 @@
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <h3>Full Observability</h3>
-          <p>Metrics dashboard, conversation replay, tool dry-run mode, prompt inspector, cost alerting, error tracking, and anomaly detection.</p>
+          <p>Brain Dashboard with real-time pipeline visualization, activity feed, and score gauges. ML-powered anomaly detection and cost forecasting. Plus metrics, conversation replay, tool dry-run, prompt inspector, cost alerting, and brain telemetry.</p>
         </div>
 
         <div class="feature-card" data-animate>
@@ -336,6 +342,14 @@
           </div>
           <h3>Autonomy Controls</h3>
           <p>Three autonomy levels &mdash; readonly, supervised, autonomous &mdash; control what the AI can do. Per-user settings, API control, and full audit trail.</p>
+        </div>
+
+        <div class="feature-card" data-animate>
+          <div class="feature-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M2 20h20M5 20V10l4-6 4 4 4-4 3 6v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>ML Algorithms</h3>
+          <p>5 built-in ML algorithms with zero external dependencies: Naive Bayes for intent classification, Isolation Forest for anomaly detection, K-Means clustering, Markov Chain prediction, and Linear Regression for cost forecasting and trend detection.</p>
         </div>
 
         <div class="feature-card" data-animate>
@@ -659,8 +673,9 @@
             <h4>OpenSentinel Core</h4>
             <div class="arch-items">
               <span class="arch-highlight">LLM Providers</span>
-              <span class="arch-highlight">Advanced RAG</span>
-              <span>Tool Router</span>
+              <span class="arch-highlight">Agentic RAG</span>
+              <span>Brain Telemetry</span>
+              <span>Tool Classifier</span>
               <span>Sub-Agents (5)</span>
               <span>Workflow Engine</span>
               <span>Plugin System</span>

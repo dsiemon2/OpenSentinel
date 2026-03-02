@@ -2,7 +2,7 @@
 
 ## Overview
 
-OpenSentinel v3.1.1 has a comprehensive test suite with **5,800+ tests** across **170 test files**. Tests cover the core brain, all input channels, integrations, tools, and utility modules.
+OpenSentinel v3.4.0 has a comprehensive test suite with **6,300+ tests** across **190+ test files**. Tests cover the core brain, agentic RAG pipeline, all input channels, integrations, tools, brain telemetry, ML algorithms, finance data providers, and utility modules.
 
 ## Test Framework
 
@@ -75,7 +75,7 @@ describe("ModuleName", () => {
 
 ## Test Categories and Files
 
-### Core (14 files)
+### Core (20 files)
 
 | File | Tests | Module |
 |------|-------|--------|
@@ -93,6 +93,12 @@ describe("ModuleName", () => {
 | `tests/skills.test.ts` | Skill teaching and execution |
 | `tests/hub.test.ts` | Sentinel Hub marketplace |
 | `tests/auth-monitor.test.ts` | Authentication monitoring and session management |
+| `tests/agent-processor.test.ts` | BullMQ worker for sub-agent queue execution |
+| `tests/agentic-orchestrator.test.ts` | Agentic RAG pipeline coordinator |
+| `tests/brain-agentic-parity.test.ts` | Brain and agentic pipeline parity checks |
+| `tests/brain-hooks.test.ts` | Brain lifecycle hook system |
+| `tests/tool-classifier.test.ts` | LLM-based tool pre-classification |
+| `tests/memory-middleware.test.ts` | Auto-search and auto-extract memory middleware |
 
 ### Inputs (5 files)
 
@@ -104,7 +110,7 @@ describe("ModuleName", () => {
 | `tests/zalo.test.ts` | Zalo OA message handling, webhook verification |
 | `tests/wake-word.test.ts` | Wake word detection and voice activation |
 
-### Integrations (11 files)
+### Integrations (14 files)
 
 | File | Tests | Module |
 |------|-------|--------|
@@ -112,6 +118,9 @@ describe("ModuleName", () => {
 | `tests/github.test.ts` | GitHub API operations, code review, issue management |
 | `tests/email.test.ts` | IMAP/SMTP email sending and receiving |
 | `tests/finance.test.ts` | Crypto prices, stock data, currency conversion |
+| `tests/finnhub.test.ts` | Finnhub real-time stock quotes, news sentiment, earnings |
+| `tests/finnhub-analysis.test.ts` | Finnhub analyst recommendations and price trend analysis |
+| `tests/fred.test.ts` | FRED economic data: GDP, CPI, unemployment, interest rates |
 | `tests/documents.test.ts` | PDF parsing, DOCX parsing, text extraction, chunking |
 | `tests/vision.test.ts` | Image analysis, screen capture, webcam capture |
 | `tests/spotify.test.ts` | Spotify playback control, search, playlists |
@@ -119,6 +128,14 @@ describe("ModuleName", () => {
 | `tests/home-assistant.test.ts` | Home Assistant device control, state queries |
 | `tests/cloud-storage.test.ts` | Google Drive and Dropbox file operations |
 | `tests/gmail-pubsub.test.ts` | Gmail push notification handling |
+
+### ML & Brain Telemetry (3 files)
+
+| File | Tests | Module |
+|------|-------|--------|
+| `tests/ml-algorithms.test.ts` | K-means, Isolation Forest, Linear Regression, Naive Bayes, Markov Chain |
+| `tests/ml-integrations.test.ts` | ML algorithm integration with cost tracker, intent parser, finance modules |
+| `tests/brain-telemetry.test.ts` | Brain telemetry event emitter, status state machine, metric accumulators |
 
 ### Tools (7 files)
 

@@ -273,6 +273,26 @@ const envSchema = z.object({
   RETRIEVAL_CACHE_ENABLED: z.coerce.boolean().optional().default(false),
   CONTEXTUAL_QUERY_ENABLED: z.coerce.boolean().optional().default(false),
 
+  // Agentic RAG Pipeline
+  TOOL_CLASSIFIER_ENABLED: z.coerce.boolean().optional().default(false),
+  TOOL_CLASSIFIER_TIMEOUT_MS: z.coerce.number().optional().default(5000),
+  TOOL_CLASSIFIER_MAX_CATEGORIES: z.coerce.number().optional().default(3),
+
+  // AI Memory (auto-extract/search)
+  AUTO_MEMORY_EXTRACT_ENABLED: z.coerce.boolean().optional().default(false),
+  AUTO_MEMORY_EXTRACT_DEDUP_THRESHOLD: z.coerce.number().optional().default(0.9),
+  AUTO_MEMORY_SEARCH_THRESHOLD: z.coerce.number().optional().default(0.3),
+
+  // Agentic Pipeline Orchestrator
+  AGENTIC_PIPELINE_ENABLED: z.coerce.boolean().optional().default(false),
+  AGENTIC_PRE_EXECUTION_ENABLED: z.coerce.boolean().optional().default(false),
+  AGENTIC_PRE_EXECUTION_TIMEOUT_MS: z.coerce.number().optional().default(8000),
+
+  // Agent Processor
+  AGENT_PROCESSOR_ENABLED: z.coerce.boolean().optional().default(false),
+  AGENT_PROCESSOR_CONCURRENCY: z.coerce.number().optional().default(1),
+  AGENT_MAX_TURNS: z.coerce.number().optional().default(20),
+
   // SOC 2 Encryption & Audit
   ENCRYPTION_MASTER_KEY: z.string().optional(), // 32-byte base64 key for field encryption
   AUDIT_SIGNING_KEY: z.string().optional(), // HMAC key for tamper-proof audit logs

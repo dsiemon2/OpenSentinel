@@ -24,6 +24,8 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Search the internet
 - Set reminders and scheduled tasks
 - Remember things about you (advanced RAG: HyDE, re-ranking, multi-step, graph RAG, caching)
+- Agentic RAG pipeline: tool pre-classification, memory middleware, pipeline orchestrator, Brain telemetry
+- ML algorithms (Naive Bayes, Isolation Forest, K-Means, Markov Chain, Linear Regression) for intent parsing, anomaly detection, and forecasting
 - Respond with voice (JARVIS voice via ElevenLabs)
 
 ### Advanced Voice
@@ -60,6 +62,7 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 
 ### Multi-Modal Input
 - Image understanding and analysis
+- Image/vision analysis from Web Chat uploads (base64 to Claude vision)
 - Document OCR
 - Screenshot interpretation
 - Video summarization
@@ -79,6 +82,8 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Excel spreadsheets
 - Charts and diagrams
 - AI image generation (DALL-E)
+- Secure file download UI with token-based access (1-hour expiry)
+- Document parsing from uploads (`parse_document` — PDF, DOCX, TXT, MD, HTML, CSV, JSON, XML, YAML)
 
 ### Personality System
 - 15 domain expert modes (coding, legal, medical, finance, etc.)
@@ -108,6 +113,8 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Kubernetes deployment
 
 ### Observability
+- Brain Dashboard with real-time pipeline visualization, activity feed, and score gauges
+- Brain Telemetry event emitter with status state machine and metric accumulators
 - Metrics dashboard
 - Replay mode (re-run conversations)
 - Tool dry-run (preview without executing)
@@ -116,14 +123,14 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Prometheus metrics export (GET /metrics)
 
 ### Integrations
-- **Email**: IMAP/SMTP with AI inbox summarization + web email client (read, compose, attachments)
+- **Email**: IMAP/SMTP with AI inbox summarization + web email client (read, compose, attachments) + automatic local/remote IMAP fallback
 - **SMS/Phone**: Twilio for calls and texts
 - **GitHub**: Repos, issues, PRs, AI code review
 - **Notion**: Pages, databases, search, sync
 - **Home Assistant**: Smart home device control
 - **Spotify**: Playback, playlists, search
 - **Cloud Storage**: Google Drive, Dropbox
-- **Finance**: Crypto, stocks, currency, portfolio tracking, exchange trading (Coinbase/Binance), DeFi data, on-chain analytics, order books, backtesting
+- **Finance**: Crypto, stocks, currency, portfolio tracking, exchange trading (Coinbase/Binance), DeFi data, on-chain analytics, order books, backtesting, Finnhub (real-time quotes, news sentiment, analyst recs, earnings), FRED (GDP, CPI, unemployment, interest rates)
 
 ### OSINT & Public Records
 - **Graph Explorer**: D3.js force-directed knowledge graph visualization
@@ -272,6 +279,7 @@ src/
 │   ├── enterprise/             # Multi-user, SSO, quotas
 │   ├── intelligence/           # Predictive, relationship, temporal
 │   ├── evolution/              # Evolution, achievements, modes
+│   ├── ml/                     # ML algorithms (Naive Bayes, Isolation Forest, K-Means, Markov Chain, Linear Regression)
 │   ├── observability/          # Metrics, replay, alerting
 │   ├── personality/            # Personas, mood, domain experts
 │   ├── plugins/                # Plugin system
@@ -312,7 +320,7 @@ src/
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 170 test files, 5,800+ tests
+tests/                          # 190+ test files, 6,300+ tests
 ```
 
 ## Ports

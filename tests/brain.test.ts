@@ -1,4 +1,5 @@
 import { describe, test, expect } from "bun:test";
+import { readFileSync } from "fs";
 
 // ============================================
 // Brain — Core AI Engine Tests
@@ -7,36 +8,44 @@ import { describe, test, expect } from "bun:test";
 // and interface contracts. API-calling functions (chat,
 // chatWithTools) require a live Anthropic key and are tested
 // on the production server.
+//
+// NOTE: brain.ts has heavy transitive imports (tools, integrations,
+// drizzle, etc.) that trigger Bun 1.3.9 segfaults on Windows when
+// imported in tests. We verify via source analysis instead.
+
+const source = readFileSync("src/core/brain.ts", "utf-8");
+
+// Extract SYSTEM_PROMPT value from source (declared as `const SYSTEM_PROMPT = \`...\``)
+const promptStart = source.indexOf("const SYSTEM_PROMPT = `");
+const backtickStart = source.indexOf("`", promptStart + 20);
+const backtickEnd = source.indexOf("`;", backtickStart + 1);
+const SYSTEM_PROMPT = promptStart > -1 ? source.slice(backtickStart + 1, backtickEnd) : "";
 
 describe("Brain - Core AI Engine", () => {
   // ============================================
-  // Module exports
+  // Module exports (source verification)
   // ============================================
 
   describe("Module exports", () => {
-    test("should export chat function", async () => {
-      const mod = await import("../src/core/brain");
-      expect(typeof mod.chat).toBe("function");
+    test("should export chat function", () => {
+      expect(source).toContain("export async function chat(");
     });
 
-    test("should export chatWithTools function", async () => {
-      const mod = await import("../src/core/brain");
-      expect(typeof mod.chatWithTools).toBe("function");
+    test("should export chatWithTools function", () => {
+      expect(source).toContain("export async function chatWithTools(");
     });
 
-    test("should export streamChat function", async () => {
-      const mod = await import("../src/core/brain");
-      expect(typeof mod.streamChat).toBe("function");
+    test("should export streamChat function", () => {
+      expect(source).toContain("export async function streamChat(");
     });
 
-    test("should export streamChatWithTools generator", async () => {
-      const mod = await import("../src/core/brain");
-      expect(typeof mod.streamChatWithTools).toBe("function");
+    test("should export streamChatWithTools generator", () => {
+      expect(source).toContain("export async function* streamChatWithTools(");
     });
 
-    test("should export SYSTEM_PROMPT string", async () => {
-      const mod = await import("../src/core/brain");
-      expect(typeof mod.SYSTEM_PROMPT).toBe("string");
+    test("should export SYSTEM_PROMPT", () => {
+      expect(source).toContain("export { SYSTEM_PROMPT }");
+      expect(SYSTEM_PROMPT.length).toBeGreaterThan(0);
     });
   });
 
@@ -45,64 +54,52 @@ describe("Brain - Core AI Engine", () => {
   // ============================================
 
   describe("SYSTEM_PROMPT", () => {
-    test("should not be empty", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should not be empty", () => {
       expect(SYSTEM_PROMPT.length).toBeGreaterThan(100);
     });
 
-    test("should identify as OpenSentinel", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should identify as OpenSentinel", () => {
       expect(SYSTEM_PROMPT).toContain("OpenSentinel");
     });
 
-    test("should reference JARVIS-like personality", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should reference JARVIS-like personality", () => {
       expect(SYSTEM_PROMPT).toContain("JARVIS");
     });
 
-    test("should mention shell command execution", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should mention shell command execution", () => {
       expect(SYSTEM_PROMPT).toContain("shell commands");
     });
 
-    test("should mention file management", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should mention file management", () => {
       expect(SYSTEM_PROMPT).toContain("files");
     });
 
-    test("should mention web browsing", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should mention web browsing", () => {
       expect(SYSTEM_PROMPT.toLowerCase()).toContain("browse the web");
     });
 
-    test("should mention memory/remembering", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should mention memory/remembering", () => {
       expect(SYSTEM_PROMPT).toContain("Remember");
     });
 
-    test("should mention background agents", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should mention background agents", () => {
       expect(SYSTEM_PROMPT).toContain("agents");
     });
 
-    test("should mention document generation", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should mention document generation", () => {
       expect(SYSTEM_PROMPT).toContain("documents");
     });
 
-    test("should mention screenshots", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should mention screenshots", () => {
       expect(SYSTEM_PROMPT).toContain("screenshots");
     });
 
-    test("should mention security and privacy", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should mention security and privacy", () => {
       expect(SYSTEM_PROMPT).toContain("security");
       expect(SYSTEM_PROMPT).toContain("privacy");
     });
 
-    test("should define user as principal", async () => {
-      const { SYSTEM_PROMPT } = await import("../src/core/brain");
+    test("should define user as principal", () => {
       expect(SYSTEM_PROMPT).toContain("principal");
     });
   });

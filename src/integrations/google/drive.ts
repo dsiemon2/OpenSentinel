@@ -134,7 +134,7 @@ export class GoogleDriveService {
     const uploadResponse = await fetch(uploadUrl, {
       method: "PUT",
       headers: { "Content-Length": String(fileContent.length) },
-      body: fileContent,
+      body: new Uint8Array(fileContent) as any,
     });
 
     if (!uploadResponse.ok) throw new Error(`Drive upload error: ${uploadResponse.status}`);

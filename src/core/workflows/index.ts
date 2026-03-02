@@ -140,6 +140,7 @@ import {
   createSetVariableAction,
   createLogAction,
   createDelayAction,
+  type SendMessageAction,
 } from "./actions";
 import { eq, gt, contains, branch, and } from "./conditions";
 
@@ -176,7 +177,7 @@ export const workflowTemplates: WorkflowTemplate[] = [
         )
         .action(
           createSendMessageAction("send-summary", "Send Summary", {
-            channel: config.channel as string ?? "telegram",
+            channel: (config.channel as string ?? "telegram") as SendMessageAction["message"]["channel"],
             target: config.chatId as string,
             content: config.message as string ?? "Good morning! Here's your daily summary.",
             format: "markdown",
@@ -210,7 +211,7 @@ export const workflowTemplates: WorkflowTemplate[] = [
         )
         .action(
           createSendMessageAction("notify", "Send Notification", {
-            channel: config.channel as string ?? "telegram",
+            channel: (config.channel as string ?? "telegram") as SendMessageAction["message"]["channel"],
             target: config.chatId as string,
             content: config.messageTemplate as string ?? "Webhook received: {{webhookData}}",
             format: "text",
@@ -282,7 +283,7 @@ export const workflowTemplates: WorkflowTemplate[] = [
                 id: "alert-step",
                 type: "action" as const,
                 action: createSendMessageAction("alert", "Send Alert", {
-                  channel: config.alertChannel as string ?? "telegram",
+                  channel: (config.alertChannel as string ?? "telegram") as SendMessageAction["message"]["channel"],
                   target: config.chatId as string,
                   content: `API Health Check Failed!\n\nURL: ${config.apiUrl}\nTime: {{timestamp}}`,
                   format: "text",
@@ -348,7 +349,7 @@ export const workflowTemplates: WorkflowTemplate[] = [
         )
         .action(
           createSendMessageAction("remind", "Send Reminder", {
-            channel: config.channel as string ?? "telegram",
+            channel: (config.channel as string ?? "telegram") as SendMessageAction["message"]["channel"],
             target: config.chatId as string,
             content: config.reminderMessage as string,
             format: "text",
@@ -403,7 +404,7 @@ export const workflowTemplates: WorkflowTemplate[] = [
       if (config.notifyOnComplete) {
         builder.action(
           createSendMessageAction("notify-complete", "Notify Completion", {
-            channel: config.channel as string ?? "telegram",
+            channel: (config.channel as string ?? "telegram") as SendMessageAction["message"]["channel"],
             target: config.chatId as string,
             content: `Tool ${config.toolName} completed.\n\nResult: {{toolResult}}`,
             format: "text",

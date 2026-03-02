@@ -139,8 +139,8 @@ export async function executeTerminalCommand(options: TerminalOptions): Promise<
     const result = await executeCommand(command, cwd);
     return {
       success: result.success,
-      stdout: result.output || "",
-      stderr: result.error || "",
+      stdout: result.stdout || "",
+      stderr: result.stderr || "",
       exitCode: result.exitCode ?? (result.success ? 0 : 1),
       platform: process.platform,
       executedOn: "server",

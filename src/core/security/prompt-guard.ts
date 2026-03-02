@@ -98,8 +98,7 @@ export class PromptGuard {
 
           // Audit log the blocked attempt
           try {
-            await audit.securityEvent(context.userId, {
-              type: "prompt_injection_blocked",
+            await audit.error(context.userId, "prompt_injection_blocked", `Injection score: ${score.toFixed(2)}`, {
               score,
               patterns: matches.map((m) => m.name),
               messagePreview: message.substring(0, 100),

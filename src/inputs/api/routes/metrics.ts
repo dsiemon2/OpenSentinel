@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import {
   recordMetric,
-  getMetricAggregation,
+  getMetricAggregates,
   getMetricTimeSeries,
   flushMetrics,
+  type MetricName,
 } from "../../../core/observability/metrics";
 import {
   getRecentErrors,
@@ -51,7 +52,7 @@ metricsRouter.get("/aggregation", async (c) => {
   const start = startDate ? new Date(startDate) : new Date(Date.now() - 24 * 60 * 60 * 1000);
   const end = endDate ? new Date(endDate) : new Date();
 
-  const aggregation = await getMetricAggregation(metricType, start, end, groupBy);
+  const aggregation = await getMetricAggregates(metricType as MetricName, start, end);
 
   return c.json({
     type: metricType,
@@ -74,7 +75,7 @@ metricsRouter.get("/timeseries", async (c) => {
   const start = startDate ? new Date(startDate) : new Date(Date.now() - 24 * 60 * 60 * 1000);
   const end = endDate ? new Date(endDate) : new Date();
 
-  const timeSeries = await getMetricTimeSeries(metricType, start, end, interval || "hour");
+  const timeSeries = await getMetricTimeSeries(metricType as MetricName, start, end);
 
   return c.json({
     type: metricType,
@@ -94,10 +95,9 @@ metricsRouter.post("/record", async (c) => {
   }
 
   await recordMetric({
-    type,
+    name: type as MetricName,
     value,
-    metadata,
-    userId,
+    tags: metadata,
   });
 
   return c.json({ success: true });
@@ -112,7 +112,9 @@ metricsRouter.post("/flush", async (c) => {
 // Get error stats
 metricsRouter.get("/errors/stats", async (c) => {
   const days = parseInt(c.req.query("days") || "7");
-  const stats = await getErrorStats(days);
+  const now = new Date();
+  const since = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  const stats = await getErrorStats(since, now);
 
   return c.json({
     period: `Last ${days} days`,
@@ -128,8 +130,7 @@ metricsRouter.get("/errors/recent", async (c) => {
 
   const errors = await getRecentErrors(
     limit,
-    category,
-    resolved === undefined ? undefined : resolved === "true"
+    category as any
   );
 
   return c.json({
@@ -143,13 +144,13 @@ metricsRouter.get("/health", async (c) => {
   const now = new Date();
 
   // Get recent metrics to check system health
-  const recentLatency = await getMetricAggregation(
-    "api_latency",
+  const recentLatency = await getMetricAggregates(
+    "response_latency" as MetricName,
     new Date(now.getTime() - 5 * 60 * 1000),
     now
   );
 
-  const recentErrors = await getRecentErrors(10, undefined, false);
+  const recentErrors = await getRecentErrors(10);
 
   const status = {
     healthy: true,
@@ -182,12 +183,12 @@ metricsRouter.get("/overview", async (c) => {
     tokensWeek,
     errorsWeek,
   ] = await Promise.all([
-    getMetricAggregation("api_latency", dayAgo, now),
-    getMetricAggregation("tokens_used", dayAgo, now),
-    getErrorStats(1),
-    getMetricAggregation("api_latency", weekAgo, now),
-    getMetricAggregation("tokens_used", weekAgo, now),
-    getErrorStats(7),
+    getMetricAggregates("response_latency" as MetricName, dayAgo, now),
+    getMetricAggregates("token_usage_input" as MetricName, dayAgo, now),
+    getErrorStats(dayAgo, now),
+    getMetricAggregates("response_latency" as MetricName, weekAgo, now),
+    getMetricAggregates("token_usage_input" as MetricName, weekAgo, now),
+    getErrorStats(weekAgo, now),
   ]);
 
   return c.json({

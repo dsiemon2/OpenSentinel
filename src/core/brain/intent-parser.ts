@@ -3,7 +3,13 @@
  *
  * Routes trivial commands (time, date, greeting, status, help)
  * locally, saving API costs on simple interactions.
+ *
+ * Uses Naive Bayes (Algorithm #7) as a secondary classifier that
+ * learns from successful matches over time, catching fuzzy variations
+ * that regex patterns miss.
  */
+
+import { NaiveBayesClassifier } from "../ml/naive-bayes";
 
 export interface ParsedIntent {
   intent: string;
@@ -125,14 +131,80 @@ const INTENT_RULES: IntentRule[] = [
 
 export class IntentParser {
   private enabled: boolean;
+  private classifier: NaiveBayesClassifier;
+  private classifierTrained = false;
+  private trainingCount = 0;
+  // Minimum confidence from Naive Bayes to accept (higher than regex since it's fuzzy)
+  private mlConfidenceThreshold = 0.7;
 
   constructor(enabled = true) {
     this.enabled = enabled;
+    this.classifier = new NaiveBayesClassifier({ alpha: 1.0 });
+    this.seedClassifier();
   }
 
   /**
-   * Parse a message for local intent handling
-   * Returns null if no intent matched (should go to Claude API)
+   * Seed the Naive Bayes classifier with examples from the regex patterns.
+   * This gives it initial training data so it can generalize to unseen phrasings.
+   */
+  private seedClassifier(): void {
+    const trainingExamples: Array<{ text: string; label: string }> = [
+      // time
+      { text: "what time is it", label: "time" },
+      { text: "current time", label: "time" },
+      { text: "whats the time", label: "time" },
+      { text: "tell me the time", label: "time" },
+      { text: "what time do you have", label: "time" },
+      { text: "time please", label: "time" },
+      // date
+      { text: "what date is it", label: "date" },
+      { text: "todays date", label: "date" },
+      { text: "what day is today", label: "date" },
+      { text: "current date", label: "date" },
+      { text: "what is today", label: "date" },
+      // greeting
+      { text: "hello", label: "greeting" },
+      { text: "hi there", label: "greeting" },
+      { text: "hey", label: "greeting" },
+      { text: "good morning", label: "greeting" },
+      { text: "good afternoon", label: "greeting" },
+      { text: "whats up", label: "greeting" },
+      { text: "howdy", label: "greeting" },
+      // status
+      { text: "system status", label: "status" },
+      { text: "how are you", label: "status" },
+      { text: "are you working", label: "status" },
+      { text: "are you alive", label: "status" },
+      { text: "status check", label: "status" },
+      // help
+      { text: "help", label: "help" },
+      { text: "what can you do", label: "help" },
+      { text: "commands", label: "help" },
+      { text: "capabilities", label: "help" },
+      { text: "show me what you can do", label: "help" },
+      // thanks
+      { text: "thanks", label: "thanks" },
+      { text: "thank you", label: "thanks" },
+      { text: "thx", label: "thanks" },
+      { text: "appreciated", label: "thanks" },
+      { text: "cheers", label: "thanks" },
+      // none — messages that should NOT match
+      { text: "search for python tutorials", label: "none" },
+      { text: "write a function to sort an array", label: "none" },
+      { text: "remind me to call mom at 5pm", label: "none" },
+      { text: "summarize this document", label: "none" },
+      { text: "send an email to john", label: "none" },
+      { text: "what is the weather like", label: "none" },
+    ];
+
+    this.classifier.fit(trainingExamples);
+    this.classifierTrained = true;
+  }
+
+  /**
+   * Parse a message for local intent handling.
+   * Uses regex (primary, confidence=1.0) then Naive Bayes (secondary, learned confidence).
+   * Returns null if no intent matched (should go to Claude API).
    */
   parseIntent(message: string): ParsedIntent | null {
     if (!this.enabled) return null;
@@ -143,9 +215,14 @@ export class IntentParser {
     // Skip if message is too long to be a simple command
     if (trimmed.length > 100) return null;
 
+    // Primary: exact regex matching
     for (const rule of INTENT_RULES) {
       for (const pattern of rule.patterns) {
         if (pattern.test(trimmed)) {
+          // Reinforce the classifier with this confirmed match
+          this.classifier.partialFit([{ text: trimmed, label: rule.intent }]);
+          this.trainingCount++;
+
           return {
             intent: rule.intent,
             handled: true,
@@ -156,7 +233,37 @@ export class IntentParser {
       }
     }
 
+    // Secondary: Naive Bayes classification for fuzzy matching
+    if (this.classifierTrained) {
+      const prediction = this.classifier.predict(trimmed);
+      if (
+        prediction &&
+        prediction.label !== "none" &&
+        prediction.confidence >= this.mlConfidenceThreshold
+      ) {
+        // Find the matching rule to generate response
+        const matchedRule = INTENT_RULES.find((r) => r.intent === prediction.label);
+        if (matchedRule) {
+          return {
+            intent: prediction.label,
+            handled: true,
+            response: matchedRule.getResponse(),
+            confidence: prediction.confidence,
+          };
+        }
+      }
+    }
+
     return null;
+  }
+
+  /**
+   * Provide a correction to improve the classifier.
+   * Call this when the user indicates a message was misclassified.
+   */
+  recordCorrection(message: string, correctIntent: string): void {
+    this.classifier.partialFit([{ text: message, label: correctIntent }]);
+    this.trainingCount++;
   }
 
   /**

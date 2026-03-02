@@ -207,7 +207,11 @@ export class ImapClient {
     const lock = await client.getMailboxLock(folder);
 
     try {
-      const total = client.mailbox?.exists || 0;
+      const mailbox = client.mailbox;
+      if (!mailbox) {
+        return messages;
+      }
+      const total = mailbox.exists || 0;
       if (total === 0) {
         return messages;
       }
@@ -315,7 +319,13 @@ export class ImapClient {
       }
 
       // Perform search
-      const uids = await client.search(searchQuery, { uid: true });
+      const searchResult = await client.search(searchQuery, { uid: true });
+
+      if (!searchResult) {
+        return messages;
+      }
+
+      const uids = searchResult;
 
       if (uids.length === 0) {
         return messages;
@@ -456,13 +466,19 @@ export class ImapClient {
 
     try {
       // Search for messages referencing this message ID
-      const uids = await client.search({
+      const searchResult = await client.search({
         or: [
           { header: { "Message-ID": messageId } },
           { header: { "In-Reply-To": messageId } },
           { header: { References: messageId } },
         ],
       }, { uid: true });
+
+      if (!searchResult) {
+        return messages;
+      }
+
+      const uids = searchResult;
 
       if (uids.length === 0) {
         return messages;
@@ -502,6 +518,9 @@ export class ImapClient {
     includeBody: boolean
   ): Promise<EmailMessage> {
     const envelope = msg.envelope;
+    if (!envelope) {
+      throw new Error(`Message ${msg.uid} has no envelope`);
+    }
 
     // Parse full message if source is available
     let parsedMail: ParsedMail | null = null;
@@ -602,17 +621,20 @@ export class ImapClient {
       while (watching) {
         try {
           lock = await client.getMailboxLock(folder);
-          const lastKnownUid = client.mailbox?.uidNext
-            ? client.mailbox.uidNext - 1
+          const mailbox = client.mailbox;
+          const lastKnownUid = (mailbox && mailbox.uidNext)
+            ? mailbox.uidNext - 1
             : 0;
 
           // Wait for updates using IDLE
           await client.idle();
 
           // Check for new messages
-          if (client.mailbox?.uidNext && client.mailbox.uidNext > lastKnownUid + 1) {
+          const currentMailbox = client.mailbox;
+          const currentUidNext = currentMailbox ? currentMailbox.uidNext : undefined;
+          if (currentUidNext && currentUidNext > lastKnownUid + 1) {
             const newUids: number[] = [];
-            for (let uid = lastKnownUid + 1; uid < client.mailbox.uidNext; uid++) {
+            for (let uid = lastKnownUid + 1; uid < currentUidNext; uid++) {
               newUids.push(uid);
             }
 

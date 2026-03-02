@@ -1,8 +1,9 @@
 # OpenSentinel — Complete Feature Reference
 
-> **Version 3.2.0** | February 2026
-> Self-hosted AI assistant powered by Claude with 300+ features, 123 tools, 15 MCP servers, 25 built-in skills, and 5,800+ tests.
+> **Version 3.4.0** | March 2026
+> Self-hosted AI assistant powered by Claude with 300+ features, 123 tools, 15 MCP servers, 25 built-in skills, and 6,100+ tests.
 > Intelligent model routing, self-correcting reasoning, and context compaction built in.
+> Full Agentic RAG pipeline: tool pre-classification, memory middleware, pipeline orchestrator, and Brain telemetry dashboard.
 > Advanced RAG pipeline with all 5 enhancements enabled by default.
 > Talk to it via Telegram, Discord, Slack, Web, Voice, or API — it does the rest.
 
@@ -59,8 +60,10 @@ OpenSentinel is a self-hosted personal AI assistant — a JARVIS-style hub that 
 - 3 embedding providers (OpenAI, HuggingFace, TF-IDF)
 - ReAct reasoning with self-correction
 - Context compaction for unlimited-length conversations
+- Full Agentic RAG pipeline (tool pre-classification, memory middleware, orchestrator, telemetry)
 - Advanced RAG pipeline with all 5 enhancements enabled by default
-- 5,800+ unit tests across 170 test files
+- Brain Dashboard with real-time pipeline visualization, activity feed, and scoring
+- 6,300+ unit tests across 190+ test files
 
 **Tech stack:** Bun, TypeScript, Hono, PostgreSQL 16 + pgvector, Redis 7, React + Vite
 
@@ -237,6 +240,31 @@ Configurable reasoning depth for different tasks:
 | Normal | Sonnet 4 | Balanced reasoning | Most tasks |
 | Deep | Sonnet 4 + Extended Thinking (10K budget) | Thorough analysis | Complex problems, code review |
 | Extended | Sonnet 4 + Extended Thinking (32K budget) | Maximum reasoning depth | Hard problems, research, proofs |
+
+### Agentic RAG Pipeline (`src/core/brain/`)
+
+When `AGENTIC_PIPELINE_ENABLED=true`, the brain upgrades from basic memory lookup to a full agentic pipeline:
+
+```
+User Query → Memory Middleware (auto-search) → Tool Classification → Pre-Execution → LLM Call → Tool Loop → Memory Extract
+```
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| **Tool Classifier** | `tool-classifier.ts` | Uses Haiku to pre-classify queries into 18 tool categories before the main LLM call |
+| **Memory Middleware** | `memory/memory-middleware.ts` | Auto-searches memories before every AI call; auto-extracts facts after responses |
+| **Agentic Orchestrator** | `agentic-orchestrator.ts` | Runs memory search + classification in parallel, then pre-executes classified tools |
+| **Agent Processor** | `agents/agent-processor.ts` | BullMQ worker for executing sub-agents from a job queue |
+| **Brain Telemetry** | `observability/brain-telemetry.ts` | EventEmitter singleton tracking pipeline stages, latency, tool success, memory hits |
+
+**Configuration (.env):**
+```
+AGENTIC_PIPELINE_ENABLED=true
+TOOL_CLASSIFIER_ENABLED=true
+AUTO_MEMORY_EXTRACT_ENABLED=true
+AUTO_MEMORY_SEARCH_THRESHOLD=0.3
+AGENT_PROCESSOR_ENABLED=true
+```
 
 ### Intelligence Modules
 
@@ -862,7 +890,7 @@ EMAIL_LOCAL_SMTP_PORT=25
 
 ### Email Integration (`src/integrations/email/`)
 Lower-level email infrastructure:
-- IMAP client with connection pooling
+- IMAP client with connection pooling and automatic fallback (`connectImapWithFallback()` tries local Dovecot first, falls back to remote IMAP)
 - SMTP client with template support
 - Inbox summarizer (AI-powered digest)
 - Email parser and formatter
@@ -909,6 +937,8 @@ Lower-level email infrastructure:
 | **CoinGecko** | Crypto prices, market cap, trending, historical data (free, no key) |
 | **Yahoo Finance** | Stock quotes, historical data, market indices (free, no key) |
 | **Alpha Vantage** | Stock search and extended data (optional key) |
+| **Finnhub** | Real-time stock quotes, company news/sentiment, analyst recommendations, earnings calendars, economic events, price trends |
+| **FRED** | Federal Reserve Economic Data: GDP, unemployment, inflation (CPI), interest rates, money supply |
 | **Currency Exchange** | Real-time forex conversion |
 
 ### Documents
@@ -917,6 +947,7 @@ Lower-level email infrastructure:
 |-------------|----------|
 | **PDF Parser** | Extract text, tables, metadata from PDFs |
 | **DOCX Parser** | Extract text from Word documents |
+| **Document Parser** | Universal `parse_document` tool — supports PDF, DOCX, TXT, MD, HTML, CSV, JSON, XML, YAML |
 | **Text Extraction** | Chunking, knowledge base indexing |
 
 ### Vision
@@ -1158,9 +1189,29 @@ Cross-platform emoji reactions for message feedback. React to any message with e
 | Format | Tool | Example |
 |--------|------|---------|
 | PDF | `generate_pdf` | "Generate a PDF report of Q1 sales" |
-| Word (.docx) | `generate_pdf` | "Create a Word document with the meeting notes" |
+| Word (.docx) | `generate_word_document` | "Create a Word document with the meeting notes" |
 | Excel (.xlsx) | `generate_spreadsheet` | "Create a spreadsheet with this data" |
-| PowerPoint (.pptx) | `generate_pdf` | "Create a presentation about our product" |
+| PowerPoint (.pptx) | `generate_presentation` | "Create a presentation about our product" |
+
+### File Download UI (v3.4.0)
+
+All file-generation tools (`generate_pdf`, `generate_spreadsheet`, `generate_chart`, `generate_diagram`, `generate_pdf_native`, `generate_word_document`, `generate_presentation`, `generate_image`) now return a `downloadUrl` in their results. The Web Chat renders these as styled download buttons.
+
+**How it works:**
+- `src/inputs/api/download-registry.ts` manages a token-based secure download system (Map with 1-hour expiry, 32-byte hex tokens)
+- `GET /api/files/download/:token` serves generated files with `Content-Disposition: attachment`
+- Tokens are single-use and expire after 1 hour for security
+
+### Image/Vision Analysis from Web Chat Uploads (v3.4.0)
+
+Users can upload images directly in the Web Chat. Images are converted to base64 and sent through WebSocket for Claude's vision analysis. The `Message` type includes optional `attachments?: MessageAttachment[]`, and `convertToLLMMessage()` converts image attachments to `LLMContentBlock[]` with `type: "image"`. Images display as thumbnails in chat messages.
+
+### Document Parsing from Uploads (v3.4.0)
+
+- New tool: `parse_document` — supports PDF, DOCX, TXT, MD, HTML, CSV, JSON, XML, YAML
+- New endpoint: `POST /api/files/upload` — multipart file upload (50MB limit), writes to temp dir
+- Web Chat uploads non-image files; Claude automatically calls `parse_document` to extract content
+- Uses existing `parseDocument()` from `src/integrations/documents/`
 
 ### Visualizations
 
@@ -1230,6 +1281,10 @@ Cross-platform emoji reactions for message feedback. React to any message with e
 
 | Feature | Description |
 |---------|-------------|
+| **Brain Telemetry** | Real-time pipeline event emitter with ring buffer, status state machine, and metric accumulators |
+| **Brain Dashboard** | Web UI for watching the AI think — pipeline visualization, activity feed, agent panel, score gauges |
+| **Brain API** | 7 REST endpoints: `/api/brain/status`, `/activity`, `/scores`, `/agents`, `/cost/forecast`, `/timeline`, `/memory-graph` |
+| **Cost Tracker** | Per-tier cost tracking with daily/monthly estimates and trend analysis |
 | **Metrics** | Latency, token usage, tool duration tracking |
 | **Alerting** | Configurable alerts (error rate, latency, quota exceeded) |
 | **Context Viewer** | Debug view of the full context sent to Claude |
@@ -1282,16 +1337,42 @@ cd extension && bun install && bun run build
 
 ## 24. Web Dashboard
 
-React + Vite web application at `https://app.opensentinel.ai` with 5 views: **Chat, Memories, Graph, Email, Settings**.
+React + Vite web application at `https://app.opensentinel.ai` with 7 views: **Chat, Memories, Graph, Brain, Email, Audit Log, Settings**.
 
 | Feature | Description |
 |---------|-------------|
 | Chat Interface | Real-time chat with markdown, code highlighting, file attachments |
-| Memory Explorer | Browse, search, and manage all stored memories |
-| Graph Explorer | OSINT graph visualization with D3.js force-directed layout |
+| Memory Explorer | Browse, search, and manage all stored memories; "View in Graph" cross-linking |
+| Graph Explorer | OSINT graph visualization with D3.js, memory overlay (diamond nodes), temporal slider |
+| **Brain Dashboard** | Real-time pipeline visualization, terminal-style activity feed, agent panel, score gauges |
 | Email Client | Full email client — browse inbox, read/compose/reply/forward, attachments, search, mark read/unread |
+| Audit Log Viewer | Searchable audit trail of all system actions |
 | Settings | Configure personality, integrations, security |
-| File Management | Upload and download files |
+
+### Brain Dashboard (`src/web/src/components/Brain.tsx`)
+
+The Brain Dashboard provides real-time visibility into the AI's thinking process:
+
+| Panel | Description |
+|-------|-------------|
+| **Status Bar** | Pulsing indicator showing current state (Idle/Thinking/Executing/Streaming), pipeline stage, active tool chips |
+| **Pipeline Visualization** | Vertical flow of 6 stages with live status dots (pending → active → done → error) and latency |
+| **Activity Feed** | Terminal-style scrolling log color-coded by category (system, memory, classification, tool, agent, error) |
+| **Agent Panel** | Cards for active/recent agents with type badges, progress bars, expandable step timelines |
+| **Score Panel** | 4 SVG arc gauges: memory hit rate, tool accuracy, pipeline speed, cost tracker |
+
+**Data flow:**
+- WebSocket subscription for real-time brain events
+- Polling: status (3s), scores (10s), agents (15s)
+- Initial load: last 200 activity entries
+
+### Graph Enhancements
+
+| Feature | Description |
+|---------|-------------|
+| **Memory View** | Toggle to overlay memory nodes as diamond shapes on the entity graph |
+| **Temporal Slider** | Filter graph nodes by date range with time slider below SVG |
+| **Memory Cross-linking** | Click "View in Graph" on any memory to auto-navigate and search |
 
 **Build:**
 ```bash
@@ -1355,11 +1436,14 @@ bun run db:migrate   # Apply migrations
 ## 27. Test Coverage
 
 ### Overview
-- **5,800+ tests** across **170 test files**
+- **6,300+ tests** across **190+ test files**
 - **572 Advanced RAG tests** across 8 dedicated test files
+- **378 Agentic RAG tests** across 6 dedicated test files
 - **366 custom tool tests** across 18 dedicated test files
 - **181 core system tests** across 4 dedicated test files
 - **117 Phase 1 architecture tests** across 3 dedicated test files
+- **115 finance integration tests** across 3 dedicated test files (Finnhub, FRED)
+- **110 ML algorithm tests** across 2 dedicated test files
 - All tests pass
 
 ### Core System Tests
@@ -1380,6 +1464,19 @@ bun run db:migrate   # Apply migrations
 | Reflection System | `reflection.test.ts` | 42 |
 | Context Compaction | `compaction.test.ts` | 38 |
 | **Phase 1 Total** | **3 files** | **117** |
+
+### Agentic RAG Pipeline Tests
+
+| Module | Test File | Tests |
+|--------|-----------|-------|
+| Tool Classifier | `tool-classifier.test.ts` | 121 |
+| Memory Middleware | `memory-middleware.test.ts` | 114 |
+| Agentic Orchestrator | `agentic-orchestrator.test.ts` | 44 |
+| Agent Processor | `agent-processor.test.ts` | 46 |
+| Brain Telemetry | `brain-telemetry.test.ts` | 49 |
+| Brain Hooks | `brain-hooks.test.ts` | 59 |
+| Brain Agentic Parity | `brain-agentic-parity.test.ts` | (included above) |
+| **Agentic RAG Total** | **6 files** | **378** |
 
 ### Custom Tool Tests
 
@@ -1403,6 +1500,23 @@ bun run db:migrate   # Apply migrations
 | Onboarding Agent | `onboarding-agent.test.ts` | 16 |
 | Recruiter | `recruiter.test.ts` | 17 |
 | **Tool Tests Total** | **18 files** | **366** |
+
+### Finance Integration Tests
+
+| Module | Test File | Tests |
+|--------|-----------|-------|
+| Finnhub (Market Data) | `finnhub.test.ts` | 45 |
+| Finnhub Analysis | `finnhub-analysis.test.ts` | 32 |
+| FRED (Economic Data) | `fred.test.ts` | 38 |
+| **Finance Tests Total** | **3 files** | **115** |
+
+### ML Algorithm Tests
+
+| Module | Test File | Tests |
+|--------|-----------|-------|
+| ML Algorithms | `ml-algorithms.test.ts` | 62 |
+| ML Integrations | `ml-integrations.test.ts` | 48 |
+| **ML Tests Total** | **2 files** | **110** |
 
 ### Run Tests
 ```bash
@@ -1495,6 +1609,6 @@ OpenSentinel serves as the central AI hub for an entire application ecosystem. A
 
 ---
 
-*OpenSentinel v3.2.0 — Self-hosted AI assistant with 300+ features, 123 tools, 15 MCP servers, 25 built-in skills, and 5,800+ tests.*
+*OpenSentinel v3.4.0 — Self-hosted AI assistant with 300+ features, 123 tools, 15 MCP servers, 25 built-in skills, and 6,300+ tests.*
 *Intelligent model routing, ReAct reasoning with self-correction, context compaction, and advanced RAG pipeline.*
 *Built with Bun, TypeScript, Claude (Haiku/Sonnet/Opus), PostgreSQL, and Redis.*

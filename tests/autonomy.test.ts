@@ -163,7 +163,22 @@ describe("AutonomyManager", () => {
     expect(stats.usersWithCustomLevel).toBe(2);
   });
 
-  // 20. Per-user level overrides default
+  // 20. crypto_exchange requires approval in supervised mode
+  test("crypto_exchange requires approval in supervised mode", () => {
+    expect(SUPERVISED_REQUIRE_APPROVAL.has("crypto_exchange")).toBe(true);
+  });
+
+  // 21. checkToolAccess: supervised flags crypto_exchange
+  test("checkToolAccess: supervised flags crypto_exchange with reason", () => {
+    manager.setLevel("user-1", "supervised");
+    const result = manager.checkToolAccess("user-1", "crypto_exchange");
+    expect(result.allowed).toBe(true);
+    expect(result.reason).toBeDefined();
+    expect(result.reason).toContain("crypto_exchange");
+    expect(result.reason).toContain("approval");
+  });
+
+  // 22. Per-user level overrides default
   test("per-user level overrides the default", () => {
     manager.setDefaultLevel("autonomous");
     manager.setLevel("restricted-user", "readonly");

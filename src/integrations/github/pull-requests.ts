@@ -670,7 +670,7 @@ export async function listCommits(
     page: options?.page || 1,
   });
 
-  return data.map((commit) => ({
+  return data.map((commit: any) => ({
     sha: commit.sha,
     message: commit.commit.message,
     author: commit.commit.author
@@ -757,8 +757,8 @@ export async function updateBranch(
   });
 
   return {
-    message: data.message,
-    url: data.url,
+    message: data.message || "",
+    url: data.url || "",
   };
 }
 

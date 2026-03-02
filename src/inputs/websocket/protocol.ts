@@ -9,7 +9,7 @@ import type { Message } from "../../core/brain";
 // CLIENT → SERVER MESSAGES
 // ============================================
 
-export type WSClientMessageType = "chat" | "chat_with_tools" | "ping" | "cancel";
+export type WSClientMessageType = "chat" | "chat_with_tools" | "ping" | "cancel" | "subscribe_brain" | "unsubscribe_brain";
 
 export interface WSClientMessage {
   type: WSClientMessageType;
@@ -34,7 +34,9 @@ export type WSServerMessageType =
   | "complete"
   | "error"
   | "pong"
-  | "connected";
+  | "connected"
+  | "brain_event"
+  | "brain_status";
 
 export interface WSServerMessage {
   type: WSServerMessageType;
@@ -131,6 +133,6 @@ export function isValidClientMessage(msg: unknown): msg is WSClientMessage {
   return (
     typeof m.type === "string" &&
     typeof m.id === "string" &&
-    ["chat", "chat_with_tools", "ping", "cancel"].includes(m.type)
+    ["chat", "chat_with_tools", "ping", "cancel", "subscribe_brain", "unsubscribe_brain"].includes(m.type)
   );
 }

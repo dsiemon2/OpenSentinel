@@ -390,9 +390,9 @@ export async function queryKnowledgeBase(
     LIMIT ${limit}
   `;
 
-  const results = await db.execute(queryBuilder);
+  const results = await db.execute(queryBuilder) as any;
 
-  return results.rows.map((row: any) => ({
+  return (results.rows || results).map((row: any) => ({
     chunkId: row.chunk_id,
     documentId: row.document_id,
     documentName: row.document_name,

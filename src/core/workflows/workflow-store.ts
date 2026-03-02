@@ -229,7 +229,7 @@ export class WorkflowStore {
   async deleteWorkflow(workflowId: string): Promise<boolean> {
     const result = await db
       .delete(workflows)
-      .where(eq(workflows.id, workflowId));
+      .where(eq(workflows.id, workflowId)) as unknown as { rowCount: number };
 
     return (result.rowCount ?? 0) > 0;
   }
@@ -393,7 +393,7 @@ export class WorkflowStore {
 
     const result = await db
       .delete(workflowExecutions)
-      .where(sql`${workflowExecutions.startedAt} < ${cutoffDate}`);
+      .where(sql`${workflowExecutions.startedAt} < ${cutoffDate}`) as unknown as { rowCount: number };
 
     return result.rowCount ?? 0;
   }

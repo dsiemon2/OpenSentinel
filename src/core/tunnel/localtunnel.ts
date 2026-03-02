@@ -32,6 +32,7 @@ export class LocalTunnel implements TunnelProvider {
 
     try {
       // Dynamic import for lazy loading - localtunnel may not be installed
+      // @ts-expect-error localtunnel has no type declarations
       const mod = await import("localtunnel");
       localtunnel = (mod.default || mod) as LocalTunnelFactory;
     } catch {

@@ -115,6 +115,35 @@ and encourage creative thinking.
   },
 };
 
+// Helper: convert a DB row to the Persona interface
+function rowToPersona(row: any): Persona {
+  return {
+    id: row.id,
+    userId: row.userId ?? "",
+    name: row.name,
+    description: row.description ?? "",
+    systemPromptModifier: row.basePrompt ?? "",
+    voiceSettings: row.settings?.voiceSettings as Persona["voiceSettings"],
+    traits: (row.settings?.traits as PersonaTrait[]) ?? [],
+    isActive: row.settings?.isActive ?? false,
+    isDefault: row.isDefault ?? false,
+    createdAt: row.createdAt,
+  };
+}
+
+// Helper: build the settings jsonb value for insert/update
+function buildSettings(opts: {
+  voiceSettings?: Persona["voiceSettings"];
+  traits?: PersonaTrait[];
+  isActive?: boolean;
+}): Record<string, unknown> {
+  return {
+    voiceSettings: opts.voiceSettings,
+    traits: opts.traits ?? [],
+    isActive: opts.isActive ?? false,
+  } as any;
+}
+
 // Create a new persona
 export async function createPersona(
   userId: string,
@@ -126,11 +155,13 @@ export async function createPersona(
       userId,
       name: config.name,
       description: config.description,
-      systemPromptModifier: config.systemPromptModifier,
-      voiceSettings: config.voiceSettings,
-      traits: config.traits || [],
-      isActive: false,
+      basePrompt: config.systemPromptModifier,
       isDefault: false,
+      settings: buildSettings({
+        voiceSettings: config.voiceSettings,
+        traits: config.traits ?? [],
+        isActive: false,
+      }) as any,
     })
     .returning();
 
@@ -147,18 +178,7 @@ export async function getPersona(personaId: string): Promise<Persona | null> {
 
   if (!persona) return null;
 
-  return {
-    id: persona.id,
-    userId: persona.userId,
-    name: persona.name,
-    description: persona.description || "",
-    systemPromptModifier: persona.systemPromptModifier,
-    voiceSettings: persona.voiceSettings as Persona["voiceSettings"],
-    traits: (persona.traits as PersonaTrait[]) || [],
-    isActive: persona.isActive,
-    isDefault: persona.isDefault,
-    createdAt: persona.createdAt,
-  };
+  return rowToPersona(persona);
 }
 
 // Get user's personas
@@ -168,42 +188,15 @@ export async function getUserPersonas(userId: string): Promise<Persona[]> {
     .from(personas)
     .where(eq(personas.userId, userId));
 
-  return results.map((p) => ({
-    id: p.id,
-    userId: p.userId,
-    name: p.name,
-    description: p.description || "",
-    systemPromptModifier: p.systemPromptModifier,
-    voiceSettings: p.voiceSettings as Persona["voiceSettings"],
-    traits: (p.traits as PersonaTrait[]) || [],
-    isActive: p.isActive,
-    isDefault: p.isDefault,
-    createdAt: p.createdAt,
-  }));
+  return results.map((p) => rowToPersona(p));
 }
 
 // Get active persona for user
 export async function getActivePersona(userId: string): Promise<Persona | null> {
-  const [persona] = await db
-    .select()
-    .from(personas)
-    .where(and(eq(personas.userId, userId), eq(personas.isActive, true)))
-    .limit(1);
-
-  if (!persona) return null;
-
-  return {
-    id: persona.id,
-    userId: persona.userId,
-    name: persona.name,
-    description: persona.description || "",
-    systemPromptModifier: persona.systemPromptModifier,
-    voiceSettings: persona.voiceSettings as Persona["voiceSettings"],
-    traits: (persona.traits as PersonaTrait[]) || [],
-    isActive: persona.isActive,
-    isDefault: persona.isDefault,
-    createdAt: persona.createdAt,
-  };
+  // isActive is stored inside settings jsonb, so we fetch all user personas and filter
+  const allPersonas = await getUserPersonas(userId);
+  const active = allPersonas.find((p) => p.isActive);
+  return active ?? null;
 }
 
 // Activate a persona
@@ -211,25 +204,50 @@ export async function activatePersona(
   userId: string,
   personaId: string
 ): Promise<void> {
-  // Deactivate all personas for user
-  await db
-    .update(personas)
-    .set({ isActive: false })
+  // Deactivate all personas for user — update settings jsonb for each
+  const userPersonas = await db
+    .select()
+    .from(personas)
     .where(eq(personas.userId, userId));
 
+  for (const p of userPersonas) {
+    const currentSettings = (p.settings as any) ?? {};
+    await db
+      .update(personas)
+      .set({ settings: { ...currentSettings, isActive: false } as any })
+      .where(eq(personas.id, p.id));
+  }
+
   // Activate the specified persona
-  await db
-    .update(personas)
-    .set({ isActive: true })
-    .where(and(eq(personas.id, personaId), eq(personas.userId, userId)));
+  const [target] = await db
+    .select()
+    .from(personas)
+    .where(and(eq(personas.id, personaId), eq(personas.userId, userId)))
+    .limit(1);
+
+  if (target) {
+    const currentSettings = (target.settings as any) ?? {};
+    await db
+      .update(personas)
+      .set({ settings: { ...currentSettings, isActive: true } as any })
+      .where(eq(personas.id, personaId));
+  }
 }
 
 // Deactivate all personas
 export async function deactivatePersonas(userId: string): Promise<void> {
-  await db
-    .update(personas)
-    .set({ isActive: false })
+  const userPersonas = await db
+    .select()
+    .from(personas)
     .where(eq(personas.userId, userId));
+
+  for (const p of userPersonas) {
+    const currentSettings = (p.settings as any) ?? {};
+    await db
+      .update(personas)
+      .set({ settings: { ...currentSettings, isActive: false } as any })
+      .where(eq(personas.id, p.id));
+  }
 }
 
 // Set default persona
@@ -260,12 +278,28 @@ export async function updatePersona(
   if (updates.name !== undefined) setValues.name = updates.name;
   if (updates.description !== undefined) setValues.description = updates.description;
   if (updates.systemPromptModifier !== undefined) {
-    setValues.systemPromptModifier = updates.systemPromptModifier;
+    setValues.basePrompt = updates.systemPromptModifier;
   }
-  if (updates.voiceSettings !== undefined) {
-    setValues.voiceSettings = updates.voiceSettings;
+
+  // For voiceSettings and traits, merge into the existing settings jsonb
+  if (updates.voiceSettings !== undefined || updates.traits !== undefined) {
+    const [existing] = await db
+      .select()
+      .from(personas)
+      .where(eq(personas.id, personaId))
+      .limit(1);
+
+    if (existing) {
+      const currentSettings = (existing.settings as any) ?? {};
+      if (updates.voiceSettings !== undefined) {
+        currentSettings.voiceSettings = updates.voiceSettings;
+      }
+      if (updates.traits !== undefined) {
+        currentSettings.traits = updates.traits;
+      }
+      setValues.settings = currentSettings;
+    }
   }
-  if (updates.traits !== undefined) setValues.traits = updates.traits;
 
   if (Object.keys(setValues).length > 0) {
     await db.update(personas).set(setValues).where(eq(personas.id, personaId));

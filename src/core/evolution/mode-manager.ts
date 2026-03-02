@@ -137,7 +137,7 @@ export async function activateMode(
   // Activate new mode
   await db.insert(evolutionModes).values({
     userId,
-    mode,
+    mode: mode as any,
     metadata,
   });
 

@@ -282,7 +282,7 @@ export async function queryDatabase(
   const response = await ((notion as any).dataSources?.query?.(params) ??
     (notion as any).databases.query(params));
 
-  const results: DatabaseEntry[] = response.results.map((page) => {
+  const results: DatabaseEntry[] = response.results.map((page: any) => {
     const p = page as PageObjectResponse;
     return {
       id: p.id,
@@ -345,8 +345,8 @@ export async function getDatabase(databaseId: string): Promise<DatabaseInfo> {
 
   return {
     id: response.id,
-    title: response.title.map((t) => t.plain_text).join(""),
-    description: response.description.map((t) => t.plain_text).join(""),
+    title: response.title.map((t: any) => t.plain_text).join(""),
+    description: response.description.map((t: any) => t.plain_text).join(""),
     url: response.url,
     createdTime: response.created_time,
     lastEditedTime: response.last_edited_time,
@@ -483,7 +483,7 @@ export async function createDatabase(options: {
 
   return {
     id: response.id,
-    title: response.title.map((t) => t.plain_text).join(""),
+    title: response.title.map((t: any) => t.plain_text).join(""),
     description: "",
     url: response.url,
     createdTime: response.created_time,

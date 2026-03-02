@@ -154,7 +154,7 @@ export async function checkServerHealth(
     status = "critical";
     issues.push(`Memory usage critical: ${memory.usedPercent}%`);
   } else if (memory.usedPercent > 80) {
-    if (status !== "critical") status = "warning";
+    if ((status as string) !== "critical") status = "warning";
     issues.push(`Memory usage high: ${memory.usedPercent}%`);
   }
   if (disk.usedPercent > 90) {

@@ -183,10 +183,9 @@ export class DeFiClient {
    */
   async getProtocol(slug: string): Promise<DeFiProtocolDetail> {
     const data = await this.request<{
-      id: string; name: string; slug: string; chain: string; chains: string[]; tvl: number;
+      id: string; name: string; slug: string; chain: string; chains: string[]; tvl: number | Array<{ date: number; totalLiquidityUSD: number }>;
       change_1h: number | null; change_1d: number | null; change_7d: number | null;
       mcap: number | null; category: string; url: string; logo: string; description: string;
-      tvl: Array<{ date: number; totalLiquidityUSD: number }>;
       chainTvls: Record<string, { tvl: Array<{ date: number; totalLiquidityUSD: number }> }>;
       currentChainTvls: Record<string, number>;
       raises: Array<{ amount: number; round: string; date: string }>;

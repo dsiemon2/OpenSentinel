@@ -60,4 +60,4 @@ Claude can create skills using the `teach_skill` tool with name, description, in
 - buildSystemPrompt(skill, userInput) - Generate the system prompt
 
 ## Built-in Skills (via Sentinel Hub)
-10 pre-installed skills: Summarize Webpage, Daily Briefing, Code Review, Meeting Notes, ELI5, Quick Email Draft, Git Changelog, Research Topic, Screenshot Analysis, Regex Helper
+25 pre-installed skills including: Summarize Webpage, Daily Briefing, Code Review, Meeting Notes, ELI5, Quick Email Draft, Git Changelog, Research Topic, Screenshot Analysis, Regex Helper, and 15 more

@@ -5,7 +5,7 @@ import {
   sharedMemories,
   usageQuotas,
 } from "../../db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, inArray } from "drizzle-orm";
 
 // Permission levels
 export type PermissionLevel = "owner" | "admin" | "member" | "viewer";
@@ -110,7 +110,6 @@ export async function createOrganization(
     .insert(organizations)
     .values({
       name,
-      ownerId,
       settings: settings || {},
     })
     .returning();
@@ -122,17 +121,30 @@ export async function createOrganization(
     role: "owner",
   });
 
-  // Initialize usage quota
-  await db.insert(usageQuotas).values({
-    organizationId: org.id,
-    userId: ownerId,
-    monthlyTokenLimit: 1000000,
-    monthlyAgentLimit: 100,
-    storageLimit: 10737418240, // 10GB
-    tokensUsed: 0,
-    agentsUsed: 0,
-    storageUsed: 0,
-  });
+  // Initialize usage quotas (one row per quota type)
+  await db.insert(usageQuotas).values([
+    {
+      organizationId: org.id,
+      userId: ownerId,
+      quotaType: "tokens_monthly",
+      limitValue: 1000000,
+      currentValue: 0,
+    },
+    {
+      organizationId: org.id,
+      userId: ownerId,
+      quotaType: "agents_monthly",
+      limitValue: 100,
+      currentValue: 0,
+    },
+    {
+      organizationId: org.id,
+      userId: ownerId,
+      quotaType: "storage",
+      limitValue: 10737418240, // 10GB
+      currentValue: 0,
+    },
+  ]);
 
   return org.id;
 }
@@ -147,10 +159,22 @@ export async function getOrganization(orgId: string): Promise<Organization | nul
 
   if (!org) return null;
 
+  // Look up the owner from organization members
+  const [ownerMember] = await db
+    .select()
+    .from(organizationMembers)
+    .where(
+      and(
+        eq(organizationMembers.organizationId, orgId),
+        eq(organizationMembers.role, "owner")
+      )
+    )
+    .limit(1);
+
   return {
     id: org.id,
     name: org.name,
-    ownerId: org.ownerId,
+    ownerId: ownerMember?.userId || "",
     settings: (org.settings as Record<string, unknown>) || {},
     createdAt: org.createdAt,
   };
@@ -301,13 +325,12 @@ export async function shareMemory(
   memoryId: string,
   orgId: string,
   sharedBy: string,
-  accessLevel: "read" | "write" = "read"
+  _accessLevel: "read" | "write" = "read"
 ): Promise<void> {
   await db.insert(sharedMemories).values({
     memoryId,
     organizationId: orgId,
     sharedBy,
-    accessLevel,
   });
 }
 
@@ -379,7 +402,7 @@ export async function getUserQuota(
   userId: string,
   orgId?: string
 ): Promise<UsageQuota | null> {
-  const [quota] = await db
+  const quotaRows = await db
     .select()
     .from(usageQuotas)
     .where(
@@ -389,19 +412,28 @@ export async function getUserQuota(
             eq(usageQuotas.userId, userId)
           )
         : eq(usageQuotas.userId, userId)
-    )
-    .limit(1);
+    );
 
-  if (!quota) return null;
+  if (quotaRows.length === 0) return null;
+
+  // Build the UsageQuota from individual quota type rows
+  const quotaMap: Record<string, { limit: number; current: number; resetAt: Date | null }> = {};
+  for (const row of quotaRows) {
+    quotaMap[row.quotaType] = {
+      limit: row.limitValue,
+      current: row.currentValue || 0,
+      resetAt: row.resetAt,
+    };
+  }
 
   return {
-    monthlyTokenLimit: quota.monthlyTokenLimit || 1000000,
-    monthlyAgentLimit: quota.monthlyAgentLimit || 100,
-    storageLimit: quota.storageLimit || 10737418240,
-    tokensUsed: quota.tokensUsed || 0,
-    agentsUsed: quota.agentsUsed || 0,
-    storageUsed: quota.storageUsed || 0,
-    periodStart: quota.periodStart,
+    monthlyTokenLimit: quotaMap["tokens_monthly"]?.limit ?? 1000000,
+    monthlyAgentLimit: quotaMap["agents_monthly"]?.limit ?? 100,
+    storageLimit: quotaMap["storage"]?.limit ?? 10737418240,
+    tokensUsed: quotaMap["tokens_monthly"]?.current ?? 0,
+    agentsUsed: quotaMap["agents_monthly"]?.current ?? 0,
+    storageUsed: quotaMap["storage"]?.current ?? 0,
+    periodStart: quotaMap["tokens_monthly"]?.resetAt || quotaRows[0].updatedAt || new Date(),
   };
 }
 
@@ -444,35 +476,45 @@ export async function incrementUsage(
   amount: number,
   orgId?: string
 ): Promise<void> {
-  const field =
+  const quotaType =
     type === "tokens"
-      ? "tokensUsed"
+      ? "tokens_monthly"
       : type === "agents"
-        ? "agentsUsed"
-        : "storageUsed";
+        ? "agents_monthly"
+        : "storage";
 
   await db
     .update(usageQuotas)
     .set({
-      [field]: sql`${usageQuotas[field]} + ${amount}`,
+      currentValue: sql`${usageQuotas.currentValue} + ${amount}`,
+      updatedAt: new Date(),
     })
     .where(
       orgId
         ? and(
             eq(usageQuotas.organizationId, orgId),
-            eq(usageQuotas.userId, userId)
+            eq(usageQuotas.userId, userId),
+            eq(usageQuotas.quotaType, quotaType)
           )
-        : eq(usageQuotas.userId, userId)
+        : and(
+            eq(usageQuotas.userId, userId),
+            eq(usageQuotas.quotaType, quotaType)
+          )
     );
 }
 
 // Reset monthly usage (called by scheduler)
 export async function resetMonthlyUsage(): Promise<void> {
-  await db.update(usageQuotas).set({
-    tokensUsed: 0,
-    agentsUsed: 0,
-    periodStart: new Date(),
-  });
+  await db
+    .update(usageQuotas)
+    .set({
+      currentValue: 0,
+      resetAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(
+      inArray(usageQuotas.quotaType, ["tokens_monthly", "agents_monthly"])
+    );
 }
 
 export default {

@@ -331,7 +331,7 @@ async function contentRequest<T>(
   const response = await fetch(`${CONTENT_API_BASE}${endpoint}`, {
     method: "POST",
     headers,
-    body: content ? new Blob([content]) : undefined,
+    body: content ? new Blob([new Uint8Array(content)]) : undefined,
   });
 
   if (!response.ok) {

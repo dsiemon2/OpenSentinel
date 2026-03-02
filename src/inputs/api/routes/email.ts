@@ -20,24 +20,58 @@ const email = new Hono();
 // Helpers
 // ---------------------------------------------------------------------------
 
-function createImapClient(emailAddress: string): ImapClient {
+// Connect to IMAP with fallback: local Dovecot → remote IMAP server.
+// Matches the tool-level connectImapWithFallback() in src/tools/index.ts.
+async function connectImapClientWithFallback(emailAddress: string): Promise<ImapClient> {
   if (env.EMAIL_MASTER_USER && env.EMAIL_MASTER_PASSWORD) {
-    return new ImapClient({
+    const authUser = `${emailAddress}*${env.EMAIL_MASTER_USER}`;
+
+    // Try local Dovecot first
+    const localClient = new ImapClient({
       host: env.EMAIL_LOCAL_IMAP_HOST || "127.0.0.1",
       port: env.EMAIL_LOCAL_IMAP_PORT || 993,
       secure: true,
-      user: `${emailAddress}*${env.EMAIL_MASTER_USER}`,
+      user: authUser,
       password: env.EMAIL_MASTER_PASSWORD,
       tls: { rejectUnauthorized: false },
     });
+
+    try {
+      await localClient.connect();
+      return localClient;
+    } catch (localErr: any) {
+      // Fall back to remote IMAP server
+      const remoteHost = env.EMAIL_IMAP_HOST;
+      const remotePort = env.EMAIL_IMAP_PORT || 993;
+
+      if (!remoteHost) throw localErr;
+
+      console.log(
+        `[Email API] Local IMAP unavailable (${localErr.code || localErr.message}), falling back to ${remoteHost}:${remotePort}`
+      );
+
+      const remoteClient = new ImapClient({
+        host: remoteHost,
+        port: remotePort,
+        secure: true,
+        user: authUser,
+        password: env.EMAIL_MASTER_PASSWORD,
+        tls: { rejectUnauthorized: false },
+      });
+
+      await remoteClient.connect();
+      return remoteClient;
+    }
   } else if (env.EMAIL_USER && env.EMAIL_PASSWORD) {
-    return new ImapClient({
+    const client = new ImapClient({
       host: env.EMAIL_IMAP_HOST || "imap.gmail.com",
       port: env.EMAIL_IMAP_PORT || 993,
       secure: env.EMAIL_IMAP_SECURE !== false,
       user: env.EMAIL_USER,
       password: env.EMAIL_PASSWORD,
     });
+    await client.connect();
+    return client;
   }
   throw new Error("Email not configured");
 }
@@ -126,8 +160,7 @@ email.get("/folders", async (c) => {
 
   let imap: ImapClient | null = null;
   try {
-    imap = createImapClient(emailAddress);
-    await imap.connect();
+    imap = await connectImapClientWithFallback(emailAddress);
     const folders = await imap.listFolders();
     return c.json(folders);
   } catch (error) {
@@ -160,8 +193,7 @@ email.get("/inbox", async (c) => {
 
   let imap: ImapClient | null = null;
   try {
-    imap = createImapClient(emailAddress);
-    await imap.connect();
+    imap = await connectImapClientWithFallback(emailAddress);
 
     let emails: EmailMessage[];
     if (unreadOnly) {
@@ -209,8 +241,7 @@ email.get("/message/:uid", async (c) => {
 
   let imap: ImapClient | null = null;
   try {
-    imap = createImapClient(emailAddress);
-    await imap.connect();
+    imap = await connectImapClientWithFallback(emailAddress);
 
     const emailMsg = await imap.fetchEmail(uid, folder);
     if (!emailMsg) {
@@ -249,8 +280,7 @@ email.get("/attachment/:uid/:index", async (c) => {
 
   let imap: ImapClient | null = null;
   try {
-    imap = createImapClient(emailAddress);
-    await imap.connect();
+    imap = await connectImapClientWithFallback(emailAddress);
 
     const emailMsg = await imap.fetchEmail(uid, folder);
     if (!emailMsg) {
@@ -266,7 +296,7 @@ email.get("/attachment/:uid/:index", async (c) => {
       return c.json({ error: "Attachment content not available" }, 404);
     }
 
-    return new Response(attachment.content, {
+    return new Response(new Uint8Array(attachment.content) as any, {
       headers: {
         "Content-Type": attachment.contentType || "application/octet-stream",
         "Content-Disposition": `attachment; filename="${attachment.filename}"`,
@@ -362,8 +392,7 @@ email.post("/reply", async (c) => {
 
   let imap: ImapClient | null = null;
   try {
-    imap = createImapClient(body.email_address);
-    await imap.connect();
+    imap = await connectImapClientWithFallback(body.email_address);
 
     const originalEmail = await imap.fetchEmail(body.email_uid, folder);
     if (!originalEmail) {
@@ -432,8 +461,7 @@ email.post("/search", async (c) => {
 
   let imap: ImapClient | null = null;
   try {
-    imap = createImapClient(body.email_address);
-    await imap.connect();
+    imap = await connectImapClientWithFallback(body.email_address);
 
     const searchOptions = {
       folder: body.folder || "INBOX",
@@ -488,8 +516,7 @@ email.post("/flag", async (c) => {
 
   let imap: ImapClient | null = null;
   try {
-    imap = createImapClient(body.email_address);
-    await imap.connect();
+    imap = await connectImapClientWithFallback(body.email_address);
 
     switch (body.action) {
       case "read":

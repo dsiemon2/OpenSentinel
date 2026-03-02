@@ -36,6 +36,12 @@ export interface ExchangeConfig {
   binanceTestnet?: boolean;
   requireConfirmation?: boolean; // default true
   timeout?: number;
+  /** Maximum single order size in USD (default: 100) */
+  maxOrderSizeUsd?: number;
+  /** Maximum daily spend in USD (default: 500) */
+  maxDailySpendUsd?: number;
+  /** Whether agents/workflows are allowed to trade (default: false) */
+  agentTradingEnabled?: boolean;
 }
 
 export interface ExchangeBalance {
@@ -55,6 +61,8 @@ export interface OrderRequest {
   price?: number; // required for limit orders
   stopPrice?: number; // required for stop_limit orders
   confirmed?: boolean; // must be true to actually execute
+  /** Indicates who initiated the order — used for anti-auto-confirm */
+  callerContext?: "human" | "agent" | "workflow";
 }
 
 export interface ExchangeOrder {
@@ -137,6 +145,11 @@ export class ExchangeClient {
   private timeout: number;
   private lastRequestTime = 0;
   private rateLimitDelay = 200; // 200ms between requests
+  private maxOrderSizeUsd: number;
+  private maxDailySpendUsd: number;
+  private agentTradingEnabled: boolean;
+  private dailySpend = 0;
+  private dailySpendWindowStart = Date.now();
 
   constructor(config: ExchangeConfig = {}) {
     this.coinbaseApiKey = config.coinbaseApiKey;
@@ -148,6 +161,9 @@ export class ExchangeClient {
       : "https://api.binance.com/api";
     this.requireConfirmation = config.requireConfirmation ?? true;
     this.timeout = config.timeout ?? 10000;
+    this.maxOrderSizeUsd = config.maxOrderSizeUsd ?? 100;
+    this.maxDailySpendUsd = config.maxDailySpendUsd ?? 500;
+    this.agentTradingEnabled = config.agentTradingEnabled ?? false;
   }
 
   // ----- Auth Helpers -----
@@ -344,7 +360,30 @@ export class ExchangeClient {
     }
   }
 
+  private resetDailySpendIfNeeded(): void {
+    const now = Date.now();
+    const dayMs = 86400 * 1000;
+    if (now - this.dailySpendWindowStart > dayMs) {
+      this.dailySpend = 0;
+      this.dailySpendWindowStart = now;
+    }
+  }
+
   async placeOrder(request: OrderRequest): Promise<ExchangeOrder | OrderPreview> {
+    const isAutonomous = request.callerContext === "agent" || request.callerContext === "workflow";
+
+    // Anti-auto-confirm: agents/workflows cannot confirm their own orders
+    if (isAutonomous && request.confirmed) {
+      if (!this.agentTradingEnabled) {
+        throw new ExchangeClientError(
+          "BLOCKED: Agents and workflows cannot auto-confirm trade orders. " +
+          "Set EXCHANGE_AGENT_TRADING_ENABLED=true to allow autonomous trading.",
+          undefined,
+          request.exchange
+        );
+      }
+    }
+
     // Safety: require confirmation
     if (this.requireConfirmation && !request.confirmed) {
       // Return preview instead of executing
@@ -352,6 +391,18 @@ export class ExchangeClient {
       const estimatedPrice = request.price ?? ticker.price;
       const estimatedTotal = request.quantity * estimatedPrice;
       const estimatedFee = estimatedTotal * 0.001; // ~0.1% estimate
+
+      // Check monetary limits even on preview (informational)
+      const warnings: string[] = [];
+      if (estimatedTotal > this.maxOrderSizeUsd) {
+        warnings.push(`⛔ Exceeds max order size ($${this.maxOrderSizeUsd})`);
+      }
+      this.resetDailySpendIfNeeded();
+      if (this.dailySpend + estimatedTotal > this.maxDailySpendUsd) {
+        warnings.push(`⛔ Would exceed daily spend limit ($${this.maxDailySpendUsd}, spent: $${this.dailySpend.toFixed(2)})`);
+      }
+
+      const warningStr = warnings.length > 0 ? `\n${warnings.join("\n")}` : "";
 
       return {
         preview: true,
@@ -363,15 +414,43 @@ export class ExchangeClient {
         estimatedPrice,
         estimatedTotal,
         estimatedFee,
-        message: `⚠️ ORDER PREVIEW (not executed). To execute, call again with confirmed: true. ${request.side.toUpperCase()} ${request.quantity} ${request.symbol} @ ~$${estimatedPrice.toFixed(2)} = ~$${estimatedTotal.toFixed(2)} + ~$${estimatedFee.toFixed(2)} fee`,
+        message: `⚠️ ORDER PREVIEW (not executed). To execute, call again with confirmed: true. ${request.side.toUpperCase()} ${request.quantity} ${request.symbol} @ ~$${estimatedPrice.toFixed(2)} = ~$${estimatedTotal.toFixed(2)} + ~$${estimatedFee.toFixed(2)} fee${warningStr}`,
       };
     }
 
-    if (request.exchange === "coinbase") {
-      return this.placeCoinbaseOrder(request);
-    } else {
-      return this.placeBinanceOrder(request);
+    // Hard monetary limits — last line of defense
+    const ticker = await this.getTicker(request.exchange, request.symbol);
+    const estimatedPrice = request.price ?? ticker.price;
+    const estimatedTotal = request.quantity * estimatedPrice;
+
+    if (estimatedTotal > this.maxOrderSizeUsd) {
+      throw new ExchangeClientError(
+        `BLOCKED: Order total ~$${estimatedTotal.toFixed(2)} exceeds maximum single order size of $${this.maxOrderSizeUsd}. Adjust EXCHANGE_MAX_TRADE_SIZE to increase.`,
+        undefined,
+        request.exchange
+      );
     }
+
+    this.resetDailySpendIfNeeded();
+    if (this.dailySpend + estimatedTotal > this.maxDailySpendUsd) {
+      throw new ExchangeClientError(
+        `BLOCKED: Order would push daily spend to ~$${(this.dailySpend + estimatedTotal).toFixed(2)}, exceeding daily limit of $${this.maxDailySpendUsd}. Already spent: $${this.dailySpend.toFixed(2)}. Adjust EXCHANGE_MAX_DAILY_SPEND to increase.`,
+        undefined,
+        request.exchange
+      );
+    }
+
+    let result: ExchangeOrder;
+    if (request.exchange === "coinbase") {
+      result = await this.placeCoinbaseOrder(request);
+    } else {
+      result = await this.placeBinanceOrder(request);
+    }
+
+    // Track spend after successful execution
+    this.dailySpend += estimatedTotal;
+
+    return result;
   }
 
   private async placeCoinbaseOrder(request: OrderRequest): Promise<ExchangeOrder> {

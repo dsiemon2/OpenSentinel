@@ -1008,6 +1008,7 @@ export async function generatePresentation(
 
     // Try to use pptxgenjs library if available
     try {
+      // @ts-expect-error pptxgenjs may not have type declarations
       const PptxGenJS = await import("pptxgenjs");
       return await generateWithPptxGenJs(slides, filePath, options, PptxGenJS.default);
     } catch {
@@ -1028,7 +1029,7 @@ async function generateWithPptxGenJs(
   slides: Slide[],
   filePath: string,
   options: PresentationOptions,
-  PptxGenJS: typeof import("pptxgenjs").default
+  PptxGenJS: any
 ): Promise<PresentationResult> {
   const pptx = new PptxGenJS();
 
@@ -1108,7 +1109,7 @@ async function generateWithPptxGenJs(
 
 // Add content element to pptx slide
 function addContentElementToPptx(
-  slide: ReturnType<import("pptxgenjs").default["addSlide"]>,
+  slide: any,
   element: SlideContent,
   theme: PresentationTheme
 ): void {
@@ -1265,6 +1266,7 @@ async function generateRawPptx(
 
   try {
     // Try to use archiver for ZIP creation
+    // @ts-expect-error archiver has no type declarations
     const archiver = await import("archiver");
     const fs = await import("fs");
 

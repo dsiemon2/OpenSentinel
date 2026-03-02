@@ -4,8 +4,7 @@ import { env } from "../../config/env";
 // Redis connection for rate limiting
 const redis = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: 3,
-  retryDelayOnFailover: 100,
-});
+} as any);
 
 export interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds

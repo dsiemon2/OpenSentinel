@@ -1,5 +1,5 @@
 import { InputFile } from "grammy";
-import type { SentinelContext } from "./bot";
+import type { OpenSentinelContext as SentinelContext } from "./bot";
 import { chatWithTools, type Message } from "../../core/brain";
 import { transcribeAudio } from "../../outputs/stt";
 import { textToSpeech } from "../../outputs/tts";

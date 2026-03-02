@@ -19,6 +19,7 @@ import {
 } from "./agent-types";
 import { audit } from "../security/audit-logger";
 import { metric } from "../observability/metrics";
+import { brainTelemetry } from "../observability/brain-telemetry";
 
 // Redis connection for agent queue
 const connection = new Redis(env.REDIS_URL, {
@@ -55,7 +56,7 @@ export async function spawnAgent(options: SpawnAgentOptions): Promise<string> {
     .insert(subAgents)
     .values({
       userId,
-      type,
+      type: type as any,
       name: name || `${type.charAt(0).toUpperCase() + type.slice(1)} Agent`,
       status: "pending",
       objective,
@@ -90,6 +91,12 @@ export async function spawnAgent(options: SpawnAgentOptions): Promise<string> {
 
   // Record metric
   metric.agentOperation("spawn", type);
+
+  // Brain telemetry
+  brainTelemetry.emitEvent({
+    type: "agent_spawn", timestamp: Date.now(), requestId: `agent-${agent.id}`,
+    userId, data: { agentId: agent.id, type, objective },
+  });
 
   return agent.id;
 }
@@ -193,6 +200,14 @@ export async function updateAgentStatus(
   }
 
   await db.update(subAgents).set(updates).where(eq(subAgents.id, agentId));
+
+  // Brain telemetry for agent lifecycle
+  if (status === "completed" || status === "failed") {
+    brainTelemetry.emitEvent({
+      type: "agent_complete", timestamp: Date.now(), requestId: `agent-${agentId}`,
+      data: { agentId, status, success: status === "completed", tokensUsed: result?.tokensUsed ?? 0 },
+    });
+  }
 }
 
 // Add message to agent
@@ -222,6 +237,11 @@ export async function addAgentProgress(
     description,
     status,
     output: output as Record<string, unknown>,
+  });
+
+  brainTelemetry.emitEvent({
+    type: "agent_progress", timestamp: Date.now(), requestId: `agent-${agentId}`,
+    data: { agentId, step, description, status },
   });
 }
 

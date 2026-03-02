@@ -80,6 +80,7 @@ export async function generatePDFNative(
   try {
     await mkdir(dirname(filePath), { recursive: true });
 
+    // @ts-expect-error pdfkit has no type declarations
     const PDFDocument = (await import("pdfkit")).default;
     const doc = new PDFDocument({
       size: finalOptions.format || "A4",

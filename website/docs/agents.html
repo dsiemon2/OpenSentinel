@@ -148,8 +148,8 @@
         <p>This architecture delivers faster results on multi-step tasks (research + analysis + writing, for example) because independent subtasks run concurrently, up to 5 at a time, while a dependency graph ensures ordering when one subtask depends on another.</p>
 
 
-        <!-- ========== The Four Agents ========== -->
-        <h2 id="agents">The Four Agents</h2>
+        <!-- ========== The Five Agents ========== -->
+        <h2 id="agents">The Five Agents</h2>
         <p>Each agent type has a dedicated system prompt, a restricted set of tool permissions, and a defined process for completing its objective.</p>
 
         <h3 id="research-agent">Research Agent</h3>
@@ -200,6 +200,58 @@
           </tbody>
         </table>
 
+        <h3 id="osint-agent">OSINT Agent</h3>
+        <p>The OSINT Agent investigates entities, traces financial flows, maps organizational relationships, and builds comprehensive intelligence profiles using public records and open data sources.</p>
+        <table>
+          <thead><tr><th>Attribute</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Capabilities</strong></td><td>Entity investigation, financial flow tracing, relationship mapping, public records search</td></tr>
+            <tr><td><strong>Allowed Tools</strong></td><td><code>web_search</code>, <code>browse_url</code>, <code>read_file</code>, <code>osint_search</code>, <code>osint_graph</code>, <code>osint_enrich</code>, <code>osint_analyze</code></td></tr>
+            <tr><td><strong>Process</strong></td><td>Identify targets &rarr; Gather public records &rarr; Map relationships &rarr; Analyze patterns &rarr; Compile profile</td></tr>
+            <tr><td><strong>Best For</strong></td><td>Entity research, financial investigations, corporate relationship mapping, public records analysis</td></tr>
+          </tbody>
+        </table>
+
+
+        <!-- ========== Agentic RAG Pipeline ========== -->
+        <h2 id="agentic-rag">Agentic RAG Pipeline</h2>
+        <p>Before messages even reach the LLM, OpenSentinel runs a full agentic pipeline that pre-classifies tools, auto-searches memory, and pre-executes preparatory steps. This is the intelligence layer between your message and Claude's response.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Pipeline Flow</span></div>
+          <pre><code><span class="cc">User Message</span>
+    <span class="ck">|</span>
+    v
+<span class="cc">Agentic Orchestrator</span> (parallel)
+    <span class="ck">|</span>&mdash;&mdash; <span class="cs">Memory Search</span>     &mdash;&mdash; auto-search relevant memories
+    <span class="ck">|</span>&mdash;&mdash; <span class="cs">Tool Classifier</span>  &mdash;&mdash; Haiku pre-classifies into 18 categories
+    <span class="ck">|</span>
+    v
+<span class="cc">Pre-Execution</span>  &mdash;&mdash;&gt;  run classified tools before main LLM
+    <span class="ck">|</span>
+    v
+<span class="cc">Brain (LLM)</span>  &mdash;&mdash;&gt;  enriched context + filtered tools
+    <span class="ck">|</span>
+    v
+<span class="cc">Memory Middleware</span>  &mdash;&mdash;&gt;  fire-and-forget fact extraction</code></pre>
+        </div>
+
+        <table>
+          <thead><tr><th>Component</th><th>File</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Tool Classifier</strong></td><td><code>src/core/brain/tool-classifier.ts</code></td><td>Uses Haiku to pre-classify queries into 18 tool categories</td></tr>
+            <tr><td><strong>Memory Middleware</strong></td><td><code>src/core/memory/memory-middleware.ts</code></td><td>Auto-searches memories before AI calls; auto-extracts facts after</td></tr>
+            <tr><td><strong>Agentic Orchestrator</strong></td><td><code>src/core/brain/agentic-orchestrator.ts</code></td><td>Runs memory + classification in parallel, then pre-execution</td></tr>
+            <tr><td><strong>Agent Processor</strong></td><td><code>src/core/agents/agent-processor.ts</code></td><td>BullMQ worker consuming <code>sentinel-agents</code> queue</td></tr>
+            <tr><td><strong>Brain Telemetry</strong></td><td><code>src/core/observability/brain-telemetry.ts</code></td><td>Real-time event emitter for pipeline observability</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x1F4CA;</span>
+          <div><strong>Brain Dashboard.</strong> The entire pipeline is visualized in real-time on the Brain Dashboard page at <code>/brain</code>. Watch pipeline stages light up, see memory searches complete, and track tool execution with latency metrics.</div>
+        </div>
+
 
         <!-- ========== How It Works ========== -->
         <h2 id="how-it-works">How It Works</h2>
@@ -248,6 +300,7 @@
     <span class="ck">|</span>&mdash;&mdash; <span class="cs">Coding Agent</span>    &mdash;&mdash;  write_file, execute_command
     <span class="ck">|</span>&mdash;&mdash; <span class="cs">Writing Agent</span>   &mdash;&mdash;  read_file, write_file
     <span class="ck">|</span>&mdash;&mdash; <span class="cs">Analysis Agent</span>  &mdash;&mdash;  read_file, search_files
+    <span class="ck">|</span>&mdash;&mdash; <span class="cs">OSINT Agent</span>     &mdash;&mdash;  osint_search, osint_graph
     <span class="ck">|</span>
     v
 <span class="cc">SharedContext</span> (Redis key-value store)

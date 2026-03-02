@@ -7,28 +7,44 @@ import {
   type AuditResource,
 } from "../../../core/security/audit-logger";
 import { checkRateLimit } from "../../../core/security/rate-limiter";
+import { getGatewayToken, timingSafeEqual } from "../../../core/security/gateway-utils";
 
 const adminRouter = new Hono();
 
-// Middleware for admin API key authentication
-async function requireAdminKey(c: any, next: () => Promise<void>) {
+// Middleware for admin authentication — accepts API key, gateway Bearer token, or open mode
+async function requireAdminAuth(c: any, next: () => Promise<void>) {
+  // If no gateway token configured, open mode — allow all admin access
+  const gatewayToken = getGatewayToken();
+  if (!gatewayToken) {
+    return next();
+  }
+
+  // Check x-api-key header first
   const apiKey = c.req.header("x-api-key");
-  if (!apiKey) {
-    return c.json({ error: "API key required" }, 401);
+  if (apiKey) {
+    const rateLimitResult = await checkRateLimit(apiKey, "api/admin");
+    if (!rateLimitResult.allowed) {
+      return c.json(
+        { error: "Rate limit exceeded", retryAfter: rateLimitResult.retryAfterMs },
+        429
+      );
+    }
+    return next();
   }
 
-  const rateLimitResult = await checkRateLimit(apiKey, "api/admin");
-  if (!rateLimitResult.allowed) {
-    return c.json(
-      { error: "Rate limit exceeded", retryAfter: rateLimitResult.retryAfterMs },
-      429
-    );
+  // Fall back to gateway Bearer token (used by web dashboard)
+  const authHeader = c.req.header("Authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    if (timingSafeEqual(token, gatewayToken)) {
+      return next();
+    }
   }
 
-  await next();
+  return c.json({ error: "API key required" }, 401);
 }
 
-adminRouter.use("*", requireAdminKey);
+adminRouter.use("*", requireAdminAuth);
 
 // GET /api/admin/audit-logs — Query audit logs with filters
 adminRouter.get("/audit-logs", async (c) => {

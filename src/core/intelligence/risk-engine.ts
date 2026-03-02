@@ -65,6 +65,12 @@ export interface RiskConfig {
   killSwitch: boolean;
   /** Custom risk checks */
   customChecks: RiskCheck[];
+  /** Maximum single trade size in USD */
+  maxTradeSize: number;
+  /** Maximum daily trade spend in USD */
+  maxDailyTradeSpend: number;
+  /** Maximum trades per hour */
+  maxTradesPerHour: number;
 }
 
 const DEFAULT_CONFIG: RiskConfig = {
@@ -79,6 +85,9 @@ const DEFAULT_CONFIG: RiskConfig = {
   safeMode: false,
   killSwitch: false,
   customChecks: [],
+  maxTradeSize: 100,
+  maxDailyTradeSpend: 500,
+  maxTradesPerHour: 5,
 };
 
 // Tracking state
@@ -91,6 +100,12 @@ const rateTracker = new Map<
   string,
   { timestamps: number[] }
 >();
+
+// Financial trade spend tracker (daily window)
+const tradeSpendTracker = {
+  daily: new Map<string, { total: number; windowStart: number }>(),
+  hourlyCount: new Map<string, { count: number; windowStart: number }>(),
+};
 
 const auditLog: RiskDecision[] = [];
 
@@ -298,6 +313,72 @@ export class RiskEngine {
       },
       failMessage: "Sensitive data pattern detected in input.",
     });
+
+    // ── Financial Trade Safeguards ─────────────────────────────────────────
+
+    // Trade size limit
+    this.checks.push({
+      name: "trade_size_limit",
+      description: "Blocks orders exceeding maximum single trade size",
+      severity: "critical",
+      check: (ctx) => {
+        if (ctx.toolName !== "crypto_exchange") return true;
+        const input = ctx.input || {};
+        if (input.action !== "place_order") return true;
+        const estimatedTotal = (input._estimatedTotal as number) || 0;
+        if (estimatedTotal <= 0) return true;
+        return estimatedTotal <= this.config.maxTradeSize;
+      },
+      failMessage: `Trade exceeds maximum single order size of $${this.config.maxTradeSize}.`,
+    });
+
+    // Daily trade spend limit
+    this.checks.push({
+      name: "daily_trade_spend_limit",
+      description: "Blocks when daily trade spending cap exceeded",
+      severity: "critical",
+      check: (ctx) => {
+        if (ctx.toolName !== "crypto_exchange") return true;
+        const input = ctx.input || {};
+        if (input.action !== "place_order") return true;
+        const estimatedTotal = (input._estimatedTotal as number) || 0;
+        if (estimatedTotal <= 0) return true;
+
+        const key = ctx.userId || "global";
+        const now = Date.now();
+        const dayMs = 86400 * 1000;
+        const entry = tradeSpendTracker.daily.get(key);
+
+        if (!entry || now - entry.windowStart > dayMs) {
+          return true;
+        }
+        return entry.total + estimatedTotal <= this.config.maxDailyTradeSpend;
+      },
+      failMessage: `Daily trade spend limit of $${this.config.maxDailyTradeSpend} exceeded.`,
+    });
+
+    // Trade rate limit (per hour)
+    this.checks.push({
+      name: "trade_rate_limit",
+      description: "Blocks when hourly trade count exceeded",
+      severity: "high",
+      check: (ctx) => {
+        if (ctx.toolName !== "crypto_exchange") return true;
+        const input = ctx.input || {};
+        if (input.action !== "place_order") return true;
+
+        const key = ctx.userId || "global";
+        const now = Date.now();
+        const hourMs = 3600 * 1000;
+        const entry = tradeSpendTracker.hourlyCount.get(key);
+
+        if (!entry || now - entry.windowStart > hourMs) {
+          return true;
+        }
+        return entry.count < this.config.maxTradesPerHour;
+      },
+      failMessage: `Trade rate limit exceeded (${this.config.maxTradesPerHour}/hr).`,
+    });
   }
 
   private checkRate(key: string, windowMs: number, maxCount: number): boolean {
@@ -476,6 +557,79 @@ export class RiskEngine {
    */
   updateConfig(updates: Partial<RiskConfig>): void {
     Object.assign(this.config, updates);
+  }
+
+  /**
+   * Record trade spend after a successful trade execution.
+   * Call this after a trade completes to track daily/hourly limits.
+   */
+  recordTradeSpend(userId: string, amountUsd: number): void {
+    const now = Date.now();
+    const dayMs = 86400 * 1000;
+    const hourMs = 3600 * 1000;
+
+    // Daily spend
+    let daily = tradeSpendTracker.daily.get(userId);
+    if (!daily || now - daily.windowStart > dayMs) {
+      daily = { total: 0, windowStart: now };
+      tradeSpendTracker.daily.set(userId, daily);
+    }
+    daily.total += amountUsd;
+
+    // Hourly count
+    let hourly = tradeSpendTracker.hourlyCount.get(userId);
+    if (!hourly || now - hourly.windowStart > hourMs) {
+      hourly = { count: 0, windowStart: now };
+      tradeSpendTracker.hourlyCount.set(userId, hourly);
+    }
+    hourly.count += 1;
+  }
+
+  /**
+   * Register risk engine as a hook on tool:execute to intercept
+   * financial tool calls at the hook level.
+   */
+  registerAsHook(hookMgr: {
+    register: (hook: {
+      event: "tool:execute";
+      phase: "before";
+      name: string;
+      priority?: number;
+      handler: (context: any) => Promise<any>;
+    }) => string;
+  }): string {
+    return hookMgr.register({
+      event: "tool:execute",
+      phase: "before",
+      name: "risk-engine-financial",
+      priority: 3, // Run before tool sandbox (priority 5)
+      handler: async (context: any) => {
+        const toolName = context.data.toolName as string || "";
+        const input = (context.data.input as Record<string, unknown>) || {};
+
+        // Only intercept financial tools
+        if (toolName !== "crypto_exchange") return context;
+
+        const decision = await this.evaluate({
+          action: "tool_execute",
+          userId: context.userId,
+          toolName,
+          input,
+        });
+
+        if (!decision.allowed) {
+          context.cancelled = true;
+          const failedChecks = decision.checks
+            .filter((c: any) => !c.passed)
+            .map((c: any) => c.message)
+            .join("; ");
+          context.cancelReason = `[RiskEngine] BLOCKED: ${failedChecks}`;
+          console.log(`[RiskEngine] Blocked ${toolName}: ${failedChecks}`);
+        }
+
+        return context;
+      },
+    });
   }
 }
 

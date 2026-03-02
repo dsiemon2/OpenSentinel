@@ -10,7 +10,7 @@ interface Memory {
   similarity?: number;
 }
 
-export default function MemoryExplorer() {
+export default function MemoryExplorer({ onViewInGraph }: { onViewInGraph?: (query: string) => void } = {}) {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -125,6 +125,17 @@ export default function MemoryExplorer() {
                 {formatDate(memory.createdAt)}
                 {memory.similarity !== undefined && (
                   <> | Relevance: {(memory.similarity * 100).toFixed(0)}%</>
+                )}
+                {onViewInGraph && (
+                  <>
+                    {" | "}
+                    <span
+                      style={{ color: "var(--accent)", cursor: "pointer" }}
+                      onClick={() => onViewInGraph(memory.content.slice(0, 60))}
+                    >
+                      View in Graph
+                    </span>
+                  </>
                 )}
               </div>
             </div>

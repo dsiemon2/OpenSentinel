@@ -19,6 +19,10 @@ import { intentParser } from "./brain/intent-parser";
 import { costTracker } from "./observability/cost-tracker";
 import { providerRegistry } from "./providers";
 import { getAppProfile, prioritizeTools, buildAppTypeContext } from "./app-profiles";
+import { runAgenticPipeline, type AgenticPipelineResult } from "./brain/agentic-orchestrator";
+import { extractAndStoreMemories } from "./memory/memory-middleware";
+import { brainTelemetry } from "./observability/brain-telemetry";
+import type { ToolClassifierResult } from "./brain/tool-classifier";
 import type { LLMProvider } from "./providers/provider";
 import type { LLMContentBlock, LLMTool, LLMMessage, LLMRequest, LLMResponse } from "./providers/types";
 
@@ -70,11 +74,22 @@ IMPORTANT: When the user asks you to do something, USE YOUR TOOLS. Do not say "I
 
 Always be concise but thorough. When executing tasks, explain what you're doing briefly. If you encounter errors, suggest solutions.
 
+When a file-generation tool returns a \`downloadUrl\`, include a markdown link like \`[Download filename](downloadUrl)\` so the user can download the file.
+
+When the user uploads a document (PDF, DOCX, etc.), use the parse_document tool to extract its contents before responding.
+
 The user is your principal. Assist them with whatever they need while being mindful of security and privacy.`;
+
+export interface MessageAttachment {
+  name: string;
+  type: string;       // MIME type
+  data: string;       // base64 data (no data: prefix)
+}
 
 export interface Message {
   role: "user" | "assistant";
   content: string;
+  attachments?: MessageAttachment[];
 }
 
 export interface BrainResponse {
@@ -82,6 +97,44 @@ export interface BrainResponse {
   inputTokens: number;
   outputTokens: number;
   toolsUsed?: string[];
+}
+
+/**
+ * Convert a Message (with optional image attachments) to an LLMMessage.
+ * If images are present, builds a multi-part content block array so the
+ * provider can forward them to the vision-capable model.
+ */
+function convertToLLMMessage(m: Message): LLMMessage {
+  if (!m.attachments || m.attachments.length === 0) {
+    return { role: m.role as "user" | "assistant", content: m.content };
+  }
+
+  const blocks: LLMContentBlock[] = [];
+
+  for (const att of m.attachments) {
+    if (att.type.startsWith("image/")) {
+      blocks.push({
+        type: "image",
+        source: {
+          type: "base64",
+          data: att.data,
+          mediaType: att.type,
+        },
+      });
+    }
+  }
+
+  // Always include the text content
+  if (m.content) {
+    blocks.push({ type: "text", text: m.content });
+  }
+
+  // If no image blocks were added, fall back to simple string content
+  if (blocks.length === 1 && blocks[0].type === "text") {
+    return { role: m.role as "user" | "assistant", content: m.content };
+  }
+
+  return { role: m.role as "user" | "assistant", content: blocks };
 }
 
 // Get all available tools (native + MCP)
@@ -175,12 +228,30 @@ export async function chatWithTools(
   let memoryContext = "";
   let modeContext = "";
   let personalityContext = "";
+  let agenticFilteredTools: LLMTool[] | null = null;
+  let classificationResult: ToolClassifierResult | null = null;
 
   if (lastUserMessage && userId) {
     try {
-      memoryContext = await buildMemoryContext(lastUserMessage.content, userId, messages);
+      if (env.AGENTIC_PIPELINE_ENABLED) {
+        // Full agentic pipeline: memory + classification + pre-execution
+        const pipelineResult = await runAgenticPipeline({
+          userMessage: lastUserMessage.content,
+          userId,
+          messages,
+          allTools: getAllTools(),
+          options: { appType: options?.appType },
+        });
+        memoryContext = pipelineResult.enrichedContext;
+        agenticFilteredTools = pipelineResult.filteredTools;
+        classificationResult = pipelineResult.classification;
+        console.log(`[AgenticPipeline] ${pipelineResult.pipelineLatencyMs}ms | categories: ${classificationResult?.classifications.map(c => c.category).join(", ") || "all"} | memories: ${pipelineResult.memoryResults?.memories.length || 0}`);
+      } else {
+        // Original behavior: basic memory context
+        memoryContext = await buildMemoryContext(lastUserMessage.content, userId, messages);
+      }
     } catch {
-      // Memory system not available, continue without it
+      // Pipeline/memory system not available, continue without it
     }
 
     // Build mode context
@@ -259,10 +330,7 @@ export async function chatWithTools(
   }
 
   // Convert messages to provider-agnostic format (use compacted messages)
-  const llmMessages: LLMMessage[] = compactionResult.messages.map((m) => ({
-    role: m.role as "user" | "assistant",
-    content: m.content,
-  }));
+  const llmMessages: LLMMessage[] = compactionResult.messages.map(convertToLLMMessage);
 
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
@@ -285,8 +353,9 @@ export async function chatWithTools(
 
   console.log(`[Router] Model: ${finalModel} (tier: ${routed.tier}, thinking: ${thinkingParams.thinking ? "enabled" : "off"}${options?.appType ? `, app: ${options.appType}` : ""})`);
 
-  // Prioritize tools for app type (reorder, not filter)
-  const tools = options?.appType ? prioritizeTools(getAllTools(), options.appType) : getAllTools();
+  // Prioritize tools for app type (reorder, not filter); use agentic-filtered set if available
+  const baseTools = agenticFilteredTools ?? getAllTools();
+  const tools = options?.appType ? prioritizeTools(baseTools, options.appType) : baseTools;
 
   // Track tool outcomes for reflection
   const toolOutcomes: ToolOutcome[] = [];
@@ -315,17 +384,26 @@ export async function chatWithTools(
 
     for (const toolUse of toolUseBlocks) {
       if (toolUse.type === "tool_use") {
-        onToolUse?.(toolUse.name!, toolUse.input);
+        // Strip _callerContext from AI-generated input to prevent spoofing
+        const toolInput = { ...(toolUse.input as Record<string, unknown>) };
+        delete toolInput._callerContext;
+
+        onToolUse?.(toolUse.name!, toolInput);
         toolsUsed.push(toolUse.name!);
 
         // Run before-tool hook
         const toolHook = await hookManager.runBefore("tool:execute", {
           toolName: toolUse.name,
-          toolInput: toolUse.input,
+          input: toolInput,
         }, userId);
 
         console.log(`[Tool] Executing: ${toolUse.name}`);
         const toolStartTime = Date.now();
+
+        brainTelemetry.emitEvent({
+          type: "tool_start", timestamp: toolStartTime, requestId: `tool-${toolStartTime}`,
+          userId: userId || undefined, data: { toolName: toolUse.name },
+        });
 
         let result;
         if (toolHook.proceed) {
@@ -333,12 +411,12 @@ export async function chatWithTools(
           if (executeToolOverride) {
             result = await executeToolOverride(
               toolUse.name!,
-              toolUse.input as Record<string, unknown>
+              toolInput
             );
           } else {
             result = await executeTool(
               toolUse.name!,
-              toolUse.input as Record<string, unknown>
+              toolInput
             );
           }
         } else {
@@ -346,6 +424,12 @@ export async function chatWithTools(
         }
 
         const toolDuration = Date.now() - toolStartTime;
+
+        brainTelemetry.emitEvent({
+          type: "tool_complete", timestamp: Date.now(), requestId: `tool-${toolStartTime}`,
+          userId: userId || undefined,
+          data: { toolName: toolUse.name, success: result.success, latencyMs: toolDuration },
+        });
 
         // Run after-tool hook
         await hookManager.runAfter("tool:execute", {
@@ -458,6 +542,27 @@ export async function chatWithTools(
     compacted: compactionResult.wasCompacted,
   }, userId);
 
+  // Emit response complete telemetry
+  brainTelemetry.emitEvent({
+    type: "response_complete", timestamp: Date.now(), requestId: `resp-${startTime}`,
+    userId: userId || undefined,
+    data: {
+      inputTokens: totalInputTokens, outputTokens: totalOutputTokens,
+      toolCount: toolsUsed.length, toolsUsed, latencyMs: Date.now() - startTime,
+    },
+  });
+
+  // Fire-and-forget memory extraction (AI Memory paradigm — never blocks response)
+  if (env.AUTO_MEMORY_EXTRACT_ENABLED && userId && content && lastUserMessage) {
+    extractAndStoreMemories(
+      lastUserMessage.content,
+      content,
+      userId
+    ).catch((err) => {
+      console.error("[MemoryExtract] Background extraction failed:", err);
+    });
+  }
+
   return {
     content,
     inputTokens: totalInputTokens,
@@ -538,12 +643,25 @@ export async function* streamChatWithTools(
   // Build memory context
   const lastUserMessage = messages.filter((m) => m.role === "user").pop();
   let memoryContext = "";
+  let streamFilteredTools: LLMTool[] | null = null;
 
   if (lastUserMessage && userId) {
     try {
-      memoryContext = await buildMemoryContext(lastUserMessage.content, userId, messages);
+      if (env.AGENTIC_PIPELINE_ENABLED) {
+        const pipelineResult = await runAgenticPipeline({
+          userMessage: lastUserMessage.content,
+          userId,
+          messages,
+          allTools: getAllTools(),
+        });
+        memoryContext = pipelineResult.enrichedContext;
+        streamFilteredTools = pipelineResult.filteredTools;
+        console.log(`[AgenticPipeline:Stream] ${pipelineResult.pipelineLatencyMs}ms | categories: ${pipelineResult.classification?.classifications.map(c => c.category).join(", ") || "all"}`);
+      } else {
+        memoryContext = await buildMemoryContext(lastUserMessage.content, userId, messages);
+      }
     } catch {
-      // Memory system not available
+      // Pipeline/memory system not available
     }
   }
 
@@ -557,10 +675,7 @@ export async function* streamChatWithTools(
   });
 
   // Convert messages to provider-agnostic format (use compacted messages)
-  const llmMessages: LLMMessage[] = compactionResult.messages.map((m) => ({
-    role: m.role as "user" | "assistant",
-    content: m.content,
-  }));
+  const llmMessages: LLMMessage[] = compactionResult.messages.map(convertToLLMMessage);
 
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
@@ -573,13 +688,14 @@ export async function* streamChatWithTools(
   });
   const finalModel = routed.model;
 
-  // Initial request with streaming
+  // Initial request with streaming (use agentic-filtered tools if available)
+  const streamTools = streamFilteredTools ?? getAllTools();
   const provider = getProvider();
   const streamResult = provider.streamMessage({
     model: finalModel,
     max_tokens: routed.maxTokens,
     system: systemWithContext,
-    tools: getAllTools(),
+    tools: streamTools,
     messages: llmMessages,
   });
 
@@ -605,18 +721,56 @@ export async function* streamChatWithTools(
 
     for (const toolUse of toolUseBlocks) {
       if (toolUse.type === "tool_use") {
+        // Strip _callerContext from AI-generated input to prevent spoofing
+        const toolInput = { ...(toolUse.input as Record<string, unknown>) };
+        delete toolInput._callerContext;
+
         toolsUsed.push(toolUse.name!);
+
+        // Run before-tool hook (was missing from streaming path)
+        const toolHook = await hookManager.runBefore("tool:execute", {
+          toolName: toolUse.name,
+          input: toolInput,
+        }, userId);
 
         // Yield tool start event
         yield {
           type: "tool_start",
-          data: { toolName: toolUse.name!, toolInput: toolUse.input },
+          data: { toolName: toolUse.name!, toolInput },
         };
 
         console.log(`[Tool] Executing: ${toolUse.name}`);
-        const result = executeToolOverride
-          ? await executeToolOverride(toolUse.name!, toolUse.input as Record<string, unknown>)
-          : await executeTool(toolUse.name!, toolUse.input as Record<string, unknown>);
+        const toolStartTime = Date.now();
+
+        brainTelemetry.emitEvent({
+          type: "tool_start", timestamp: toolStartTime, requestId: `stool-${toolStartTime}`,
+          userId: userId || undefined, data: { toolName: toolUse.name },
+        });
+
+        let result;
+        if (toolHook.proceed) {
+          result = executeToolOverride
+            ? await executeToolOverride(toolUse.name!, toolInput)
+            : await executeTool(toolUse.name!, toolInput);
+        } else {
+          result = { success: false, result: null, error: toolHook.reason ?? "Blocked by hook" };
+        }
+
+        const toolDuration = Date.now() - toolStartTime;
+
+        brainTelemetry.emitEvent({
+          type: "tool_complete", timestamp: Date.now(), requestId: `stool-${toolStartTime}`,
+          userId: userId || undefined,
+          data: { toolName: toolUse.name, success: result.success, latencyMs: toolDuration },
+        });
+
+        // Run after-tool hook (audit/observability parity with chatWithTools)
+        await hookManager.runAfter("tool:execute", {
+          toolName: toolUse.name,
+          toolInput: toolUse.input,
+          toolResult: result,
+          duration: toolDuration,
+        }, userId);
 
         // Yield tool result event
         yield {
@@ -643,12 +797,12 @@ export async function* streamChatWithTools(
       content: toolResults,
     });
 
-    // Stream the continuation
+    // Stream the continuation (use same filtered tools)
     const continueStreamResult = provider.streamMessage({
       model: finalModel,
       max_tokens: routed.maxTokens,
       system: systemWithContext,
-      tools: getAllTools(),
+      tools: streamTools,
       messages: llmMessages,
     });
 
@@ -682,6 +836,27 @@ export async function* streamChatWithTools(
   const latency = Date.now() - startTime;
   metric.latency(latency, { type: "chat_stream" });
   metric.tokens(totalInputTokens, totalOutputTokens, { userId: userId || "unknown" });
+
+  // Emit response complete telemetry for streaming path
+  brainTelemetry.emitEvent({
+    type: "response_complete", timestamp: Date.now(), requestId: `stream-${startTime}`,
+    userId: userId || undefined,
+    data: {
+      inputTokens: totalInputTokens, outputTokens: totalOutputTokens,
+      toolCount: toolsUsed.length, toolsUsed, latencyMs: Date.now() - startTime,
+    },
+  });
+
+  // Fire-and-forget memory extraction (AI Memory paradigm — never blocks response)
+  if (env.AUTO_MEMORY_EXTRACT_ENABLED && userId && fullContent && lastUserMessage) {
+    extractAndStoreMemories(
+      lastUserMessage.content,
+      fullContent,
+      userId
+    ).catch((err) => {
+      console.error("[MemoryExtract:Stream] Background extraction failed:", err);
+    });
+  }
 
   return {
     content: fullContent,

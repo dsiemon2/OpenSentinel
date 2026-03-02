@@ -192,7 +192,7 @@ export async function parseDocument(
       const result = await parsePDF(input);
       return {
         text: result.text,
-        metadata: result.metadata as Record<string, unknown>,
+        metadata: result.metadata as unknown as Record<string, unknown>,
       };
     }
 
@@ -201,7 +201,7 @@ export async function parseDocument(
       const result = await parseDOCX(input);
       return {
         text: result.text,
-        metadata: result.metadata as Record<string, unknown>,
+        metadata: result.metadata as unknown as Record<string, unknown>,
       };
     }
 
@@ -211,7 +211,7 @@ export async function parseDocument(
       });
       return {
         text: result.text,
-        metadata: result.metadata as Record<string, unknown>,
+        metadata: result.metadata as unknown as Record<string, unknown>,
       };
     }
   }

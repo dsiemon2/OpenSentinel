@@ -790,6 +790,210 @@ POST /api/email/flag
 
 ---
 
+## Files API
+
+The Files API provides endpoints for file uploads and secure file downloads. Added in v3.4.0.
+
+### Download File
+
+Download a generated file using a one-time secure token. Tokens are created by file-generation tools (`generate_pdf`, `generate_spreadsheet`, `generate_chart`, `generate_diagram`, `generate_pdf_native`, `generate_word_document`, `generate_presentation`, `generate_image`) and are valid for 1 hour.
+
+```
+GET /api/files/download/:token
+```
+
+**Path parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `token` | string | Yes | 32-byte hex download token |
+
+**Response:**
+
+Binary file with appropriate `Content-Type` and `Content-Disposition: attachment; filename="<originalName>"` headers.
+
+**Content types served:**
+
+| Extension | Content-Type |
+|-----------|-------------|
+| `.pdf` | `application/pdf` |
+| `.docx` | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` |
+| `.xlsx` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
+| `.pptx` | `application/vnd.openxmlformats-officedocument.presentationml.presentation` |
+| `.png` | `image/png` |
+| `.svg` | `image/svg+xml` |
+
+**Status codes:**
+- `200` -- file download
+- `404` -- token not found or expired
+
+**Example:**
+
+```bash
+curl -OJ http://localhost:8030/api/files/download/a1b2c3d4e5f6...
+```
+
+---
+
+### Upload File
+
+Upload a file for parsing or processing. Used by the Web Chat to upload documents and images.
+
+```
+POST /api/files/upload
+```
+
+**Request:** `multipart/form-data`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `file` | File | Yes | The file to upload (max 50MB) |
+
+**Response:**
+
+```json
+{
+  "filePath": "/tmp/opensentinel-uploads/abc123-report.pdf",
+  "originalName": "report.pdf"
+}
+```
+
+**Status codes:**
+- `200` -- upload successful
+- `400` -- no file provided or file too large
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:8030/api/files/upload \
+  -F "file=@report.pdf"
+```
+
+---
+
+## Brain API
+
+The Brain API provides real-time observability into the AI pipeline. Added in v3.3.0.
+
+### Brain Status
+
+```
+GET /api/brain/status
+```
+
+Returns the current pipeline state, active tools, active agents, and pipeline stage.
+
+**Response:**
+
+```json
+{
+  "state": "thinking",
+  "currentRequestId": "req_abc123",
+  "activeTools": ["web_search"],
+  "activeAgents": [{"id": "agent-1", "type": "research", "status": "running"}],
+  "pipelineStage": "LLM Call",
+  "uptime": 86400,
+  "lastActivity": 1709312400000
+}
+```
+
+---
+
+### Brain Activity
+
+```
+GET /api/brain/activity?limit=100
+```
+
+Returns recent activity entries from the ring buffer. Each entry includes a category, summary, timestamp, and optional latency.
+
+**Query parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `limit` | number | No | Max entries to return (default: 100, max: 500) |
+
+---
+
+### Brain Scores
+
+```
+GET /api/brain/scores
+```
+
+Returns aggregated pipeline metrics and cost summary.
+
+**Response:**
+
+```json
+{
+  "pipelineMetrics": {
+    "totalRequests": 150,
+    "memoryHitRate": 72,
+    "toolSuccessRate": 95,
+    "avgPipelineLatencyMs": 1200,
+    "avgMemorySearchLatencyMs": 45,
+    "avgToolExecutionLatencyMs": 800
+  },
+  "costSummary": {
+    "totalCost": 2.50,
+    "costByTier": {"fast": 0.30, "balanced": 1.80, "powerful": 0.40},
+    "estimatedMonthlyCost": 12.00,
+    "trend": {"direction": "flat", "strength": 0}
+  }
+}
+```
+
+---
+
+### Brain Agents
+
+```
+GET /api/brain/agents
+```
+
+Returns active and recent agents with progress details.
+
+---
+
+### Brain Memory Graph
+
+```
+GET /api/brain/memory-graph?query=search_term
+```
+
+Returns a mixed graph of memory nodes (diamond shapes) and entity nodes (circles) for visualization in the Graph Explorer memory view.
+
+---
+
+### Brain Cost Forecast
+
+```
+GET /api/brain/cost/forecast?days=7
+```
+
+Returns cost projections based on recent usage patterns.
+
+---
+
+### WebSocket Brain Events
+
+Subscribe to real-time brain events via WebSocket:
+
+```json
+// Subscribe
+{"type": "subscribe_brain"}
+
+// Receive events
+{"type": "brain_event", "data": {"type": "pipeline_start", "timestamp": 1709312400000, ...}}
+{"type": "brain_status", "data": {"state": "thinking", "pipelineStage": "Memory Search", ...}}
+
+// Unsubscribe
+{"type": "unsubscribe_brain"}
+```
+
+---
+
 ## WebSocket API
 
 Connect to the WebSocket endpoint for real-time streaming chat.

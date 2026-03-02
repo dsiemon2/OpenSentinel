@@ -7,13 +7,20 @@ OpenSentinel supports MCP servers, allowing integration with 1200+ external tool
 | Server | Package | Status | API Key Required |
 |--------|---------|--------|------------------|
 | Filesystem | `@modelcontextprotocol/server-filesystem` | Enabled | No |
-| GitHub | `@modelcontextprotocol/server-github` | Enabled | Optional |
+| GitHub | `@modelcontextprotocol/server-github` | Enabled | Yes (configured) |
 | Memory | `@modelcontextprotocol/server-memory` | Enabled | No |
 | Puppeteer | `@modelcontextprotocol/server-puppeteer` | Enabled | No |
 | Everything | `@modelcontextprotocol/server-everything` | Enabled | No |
 | Sequential Thinking | `@modelcontextprotocol/server-sequential-thinking` | Enabled | No |
-| Brave Search | `@brave/brave-search-mcp-server` | Disabled | Yes |
-| Slack | `@anthropic-ai/mcp-server-slack` | Disabled | Yes |
+| Brave Search | `@modelcontextprotocol/server-brave-search` | Enabled | Yes (configured) |
+| Slack | `@modelcontextprotocol/server-slack` | Enabled | Yes (configured) |
+| PostgreSQL | `@modelcontextprotocol/server-postgres` | Enabled | No (uses DATABASE_URL) |
+| Google Maps | `@modelcontextprotocol/server-google-maps` | Enabled | Yes (configured) |
+| Redis | `@anthropic-ai/mcp-server-redis` | Enabled | No (uses REDIS_URL) |
+| Fetch (HTTP) | `@anthropic-ai/mcp-server-fetch` | Disabled | No |
+| Time & Timezone | `@modelcontextprotocol/server-time` | Disabled | No |
+| SQLite | `@modelcontextprotocol/server-sqlite` | Disabled | No |
+| Sentry | `@modelcontextprotocol/server-sentry` | Disabled | Yes |
 
 ## Configuration
 

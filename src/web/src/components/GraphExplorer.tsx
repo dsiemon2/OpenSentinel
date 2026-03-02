@@ -64,7 +64,7 @@ interface FinancialFlowData {
   links: FinancialLink[];
 }
 
-type ViewMode = "network" | "financial";
+type ViewMode = "network" | "financial" | "memory";
 
 // ---------- Constants ----------
 
@@ -78,6 +78,7 @@ const TYPE_COLORS: Record<string, string> = {
   topic: "#ec4899",
   event: "#f97316",
   project: "#a855f7",
+  memory: "#c084fc",
 };
 
 const DEFAULT_COLOR = "#6b7280";
@@ -86,7 +87,184 @@ const DEFAULT_COLOR = "#6b7280";
 
 // ---------- Component ----------
 
-export default function GraphExplorer() {
+// Temporal slider sub-component — filter graph by creation date
+function TemporalSlider({
+  nodes,
+  onRangeChange,
+}: {
+  nodes: GraphNode[];
+  onRangeChange: (since: string | null, until: string | null) => void;
+}) {
+  const [value, setValue] = useState(100); // 0-100 percentage
+
+  // Calculate time range from nodes
+  const timestamps = nodes
+    .map((n: any) => n.createdAt ? new Date(n.createdAt).getTime() : 0)
+    .filter(t => t > 0);
+
+  if (timestamps.length < 2) return null;
+
+  const minTs = Math.min(...timestamps);
+  const maxTs = Math.max(...timestamps);
+  const range = maxTs - minTs;
+
+  if (range < 86400000) return null; // Less than 1 day spread, skip
+
+  const currentTs = minTs + (range * value / 100);
+  const minDate = new Date(minTs).toLocaleDateString();
+  const currentDate = new Date(currentTs).toLocaleDateString();
+  const maxDate = new Date(maxTs).toLocaleDateString();
+
+  return (
+    <div className="temporal-slider">
+      <span>{minDate}</span>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        value={value}
+        onChange={(e) => {
+          const v = parseInt(e.target.value);
+          setValue(v);
+          if (v >= 100) {
+            onRangeChange(null, null); // Reset: show all
+          } else {
+            const until = new Date(minTs + (range * v / 100)).toISOString();
+            onRangeChange(new Date(minTs).toISOString(), until);
+          }
+        }}
+      />
+      <span>{value >= 100 ? maxDate : currentDate}</span>
+    </div>
+  );
+}
+
+// Memory Graph sub-component — renders memories as diamond nodes
+function MemoryGraphView({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [memData, setMemData] = useState<{ nodes: GraphNode[]; edges: GraphEdge[] } | null>(null);
+  const [memLoading, setMemLoading] = useState(true);
+
+  useEffect(() => {
+    setMemLoading(true);
+    apiFetch("/api/brain/memory-graph?limit=50")
+      .then(r => r.json())
+      .then(data => {
+        setMemData({
+          nodes: (data.nodes || []).map((n: any) => ({ ...n, importance: n.importance || 50 })),
+          edges: (data.edges || []).map((e: any) => ({ ...e, id: `${e.source}-${e.target}`, strength: e.strength || 50 })),
+        });
+      })
+      .catch(() => setMemData({ nodes: [], edges: [] }))
+      .finally(() => setMemLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!memData || !svgRef.current || !containerRef.current) return;
+    if (memData.nodes.length === 0) return;
+
+    const width = containerRef.current.clientWidth;
+    const height = containerRef.current.clientHeight;
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+    svg.attr("width", width).attr("height", height);
+
+    const g = svg.append("g");
+
+    // Zoom
+    const zoom = d3.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.1, 8])
+      .on("zoom", (event) => g.attr("transform", event.transform));
+    svg.call(zoom);
+
+    // Force simulation
+    const simulation = d3.forceSimulation(memData.nodes as any)
+      .force("link", d3.forceLink(memData.edges).id((d: any) => d.id).strength(0.3))
+      .force("charge", d3.forceManyBody().strength(-200))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collide", d3.forceCollide(30));
+
+    // Edges (dashed for memory connections)
+    const link = g.append("g")
+      .selectAll("line")
+      .data(memData.edges)
+      .join("line")
+      .attr("stroke", "#374151")
+      .attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", "4,4");
+
+    // Nodes — diamonds for memory, circles for entities
+    const node = g.append("g")
+      .selectAll("g")
+      .data(memData.nodes)
+      .join("g")
+      .call(d3.drag<any, any>()
+        .on("start", (event, d: any) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+        .on("drag", (event, d: any) => { d.fx = event.x; d.fy = event.y; })
+        .on("end", (event, d: any) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+      );
+
+    // Diamond shape for memory nodes
+    node.filter((d: any) => d.type === "memory")
+      .append("rect")
+      .attr("width", 16)
+      .attr("height", 16)
+      .attr("x", -8)
+      .attr("y", -8)
+      .attr("transform", "rotate(45)")
+      .attr("fill", TYPE_COLORS.memory || "#c084fc")
+      .attr("stroke", "#1f2937")
+      .attr("stroke-width", 2)
+      .attr("rx", 2);
+
+    // Circle for entity nodes
+    node.filter((d: any) => d.type !== "memory")
+      .append("circle")
+      .attr("r", 10)
+      .attr("fill", (d: any) => TYPE_COLORS[d.type] || DEFAULT_COLOR)
+      .attr("stroke", "#1f2937")
+      .attr("stroke-width", 2);
+
+    // Labels
+    node.append("text")
+      .text((d: any) => d.name?.slice(0, 25) || "")
+      .attr("x", 14)
+      .attr("y", 4)
+      .attr("fill", "#d1d5db")
+      .attr("font-size", 11);
+
+    simulation.on("tick", () => {
+      link
+        .attr("x1", (d: any) => d.source.x)
+        .attr("y1", (d: any) => d.source.y)
+        .attr("x2", (d: any) => d.target.x)
+        .attr("y2", (d: any) => d.target.y);
+      node.attr("transform", (d: any) => `translate(${d.x},${d.y})`);
+    });
+
+    return () => { simulation.stop(); };
+  }, [memData, containerRef]);
+
+  if (memLoading) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#9ca3af" }}>
+        Loading memory graph...
+      </div>
+    );
+  }
+
+  if (!memData || memData.nodes.length === 0) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#9ca3af" }}>
+        No memories stored yet. Interact with the assistant to build memory connections.
+      </div>
+    );
+  }
+
+  return <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />;
+}
+
+export default function GraphExplorer({ initialSearch, onSearchConsumed }: { initialSearch?: string | null; onSearchConsumed?: () => void } = {}) {
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [financialData, setFinancialData] = useState<FinancialFlowData | null>(
     null
@@ -205,6 +383,15 @@ export default function GraphExplorer() {
   useEffect(() => {
     fetchGraph();
   }, [fetchGraph]);
+
+  // Handle cross-linking from MemoryExplorer → Graph
+  useEffect(() => {
+    if (initialSearch) {
+      setSearchQuery(initialSearch);
+      setView("memory"); // Switch to memory view
+      onSearchConsumed?.();
+    }
+  }, [initialSearch, onSearchConsumed]);
 
   // When switching to financial view, auto-select the highest-importance entity if none selected
   useEffect(() => {
@@ -657,6 +844,15 @@ export default function GraphExplorer() {
           >
             Financial Flow
           </button>
+          <button
+            onClick={() => setView("memory")}
+            style={{
+              ...styles.toggleButton,
+              ...(view === "memory" ? styles.toggleActive : {}),
+            }}
+          >
+            Memory
+          </button>
         </div>
       </div>
 
@@ -706,6 +902,8 @@ export default function GraphExplorer() {
                 Loading financial flow data for {selectedEntity?.name}...
               </p>
             </div>
+          ) : view === "memory" ? (
+            <MemoryGraphView containerRef={containerRef} />
           ) : graphData && (graphData.nodes.length === 0 && view === "network") ? (
             <div style={styles.centered}>
               <p style={{ color: "#9ca3af" }}>
@@ -720,6 +918,26 @@ export default function GraphExplorer() {
             />
           )}
         </div>
+
+        {/* Temporal Slider — filter nodes by creation date */}
+        {view === "network" && graphData && graphData.nodes.length > 0 && (
+          <TemporalSlider
+            nodes={graphData.nodes}
+            onRangeChange={(since, until) => {
+              if (since && until) {
+                // Re-fetch with time range
+                apiFetch(`/api/osint/graph?since=${since}&until=${until}`)
+                  .then(r => r.json())
+                  .then(data => {
+                    if (data.nodes) setGraphData(data);
+                  })
+                  .catch(() => {});
+              } else {
+                fetchGraph();
+              }
+            }}
+          />
+        )}
 
         {/* Entity Detail Panel */}
         {selectedEntity && (

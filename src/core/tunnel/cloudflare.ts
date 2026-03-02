@@ -38,6 +38,7 @@ export class CloudflareTunnel implements TunnelProvider {
         // cloudflared outputs the URL on stderr
         const readStderr = async () => {
           if (!this.process?.stderr) return;
+          if (typeof this.process.stderr === "number") return;
 
           const reader = this.process.stderr.getReader();
           const decoder = new TextDecoder();
@@ -66,6 +67,7 @@ export class CloudflareTunnel implements TunnelProvider {
         // Also check stdout in case cloudflared version outputs there
         const readStdout = async () => {
           if (!this.process?.stdout) return;
+          if (typeof this.process.stdout === "number") return;
 
           const reader = this.process.stdout.getReader();
           const decoder = new TextDecoder();

@@ -16,6 +16,8 @@ import { generatePDF } from "./file-generation/pdf";
 import { generateSpreadsheet } from "./file-generation/spreadsheet";
 import { generateChart } from "./file-generation/charts";
 import { generateDiagram, generateStructuredDiagram } from "./file-generation/diagrams";
+import { registerDownload } from "../inputs/api/download-registry";
+import { basename } from "path";
 import { spawnAgent, getAgent, cancelAgent } from "../core/agents/agent-manager";
 import { renderMath, renderMathDocument, latexToSpeech } from "./rendering/math-renderer";
 import { highlightCode, renderCode } from "./rendering/code-highlighter";
@@ -361,8 +363,9 @@ function getGoogleServices(): GoogleServicesClient {
   return googleServicesClient;
 }
 
-// Helper: create an IMAP client for any local mailbox using Dovecot master user
-function createLocalImapClient(emailAddress: string): ImapClient {
+// Helper: create and connect an IMAP client for any mailbox using Dovecot master user.
+// Tries local Dovecot first (EMAIL_LOCAL_IMAP_*), falls back to remote (EMAIL_IMAP_*).
+async function connectImapWithFallback(emailAddress: string): Promise<ImapClient> {
   const masterUser = env.EMAIL_MASTER_USER;
   const masterPassword = env.EMAIL_MASTER_PASSWORD;
   if (!masterUser || !masterPassword) {
@@ -370,14 +373,49 @@ function createLocalImapClient(emailAddress: string): ImapClient {
       "Email master credentials not configured. Set EMAIL_MASTER_USER and EMAIL_MASTER_PASSWORD in .env"
     );
   }
-  return new ImapClient({
-    host: env.EMAIL_LOCAL_IMAP_HOST || "127.0.0.1",
-    port: env.EMAIL_LOCAL_IMAP_PORT || 993,
+  const authUser = `${emailAddress}*${masterUser}`;
+
+  // Try local Dovecot IMAP first
+  const localHost = env.EMAIL_LOCAL_IMAP_HOST || "127.0.0.1";
+  const localPort = env.EMAIL_LOCAL_IMAP_PORT || 993;
+
+  const localClient = new ImapClient({
+    host: localHost,
+    port: localPort,
     secure: true,
-    user: `${emailAddress}*${masterUser}`,
+    user: authUser,
     password: masterPassword,
     tls: { rejectUnauthorized: false },
   });
+
+  try {
+    await localClient.connect();
+    return localClient;
+  } catch (localErr: any) {
+    // Local IMAP unavailable — fall back to remote IMAP server
+    const remoteHost = env.EMAIL_IMAP_HOST;
+    const remotePort = env.EMAIL_IMAP_PORT || 993;
+
+    if (!remoteHost) {
+      throw localErr; // No remote configured, rethrow original error
+    }
+
+    console.log(
+      `[email] Local IMAP ${localHost}:${localPort} unavailable (${localErr.code || localErr.message}), falling back to ${remoteHost}:${remotePort}`
+    );
+
+    const remoteClient = new ImapClient({
+      host: remoteHost,
+      port: remotePort,
+      secure: true,
+      user: authUser,
+      password: masterPassword,
+      tls: { rejectUnauthorized: false },
+    });
+
+    await remoteClient.connect();
+    return remoteClient;
+  }
 }
 
 // Helper: create an SMTP client for sending from any local address
@@ -417,6 +455,25 @@ function formatEmailList(emails: EmailMessage[]): string {
       return line;
     })
     .join("\n\n");
+}
+
+// Helper: wrap file-generation tool results with a secure download URL
+function withDownloadUrl(result: { success: boolean; filePath?: string; url?: string; error?: string }) {
+  if (result.success && (result.filePath || result.url)) {
+    const file = result.filePath || result.url || "";
+    // Only register downloads for local file paths (not external URLs)
+    if (file.startsWith("/") || file.startsWith("C:") || file.includes("sentinel")) {
+      const token = registerDownload(file);
+      return {
+        success: true,
+        result: file,
+        downloadUrl: `/api/files/download/${token}`,
+        filename: basename(file),
+      };
+    }
+    return { success: true, result: file };
+  }
+  return { success: result.success, result: null, error: result.error };
 }
 
 // Define tools for Claude
@@ -2872,6 +2929,51 @@ export const TOOLS: Tool[] = [
       required: ["action"],
     },
   },
+  // ── FRED (Federal Reserve Economic Data) Tool ────────────────────────
+  {
+    name: "fred_economic_data",
+    description:
+      "Access 800,000+ economic time series from the Federal Reserve (FRED). Get GDP, inflation (CPI), unemployment, interest rates, housing data, consumer sentiment, and more. Includes ML-powered trend analysis and forecasting.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["dashboard", "series", "search", "forecast", "indicator"],
+          description: "Action: 'dashboard' key indicators, 'series' get data points, 'search' find series, 'forecast' predict values, 'indicator' single metric with trend",
+        },
+        series_id: { type: "string", description: "FRED series ID (e.g., 'GDP', 'CPIAUCSL', 'UNRATE', 'FEDFUNDS', 'DGS10')" },
+        query: { type: "string", description: "Search query for finding series" },
+        start_date: { type: "string", description: "Start date (YYYY-MM-DD)" },
+        end_date: { type: "string", description: "End date (YYYY-MM-DD)" },
+        periods_ahead: { type: "number", description: "Number of periods to forecast (default: 6)" },
+        limit: { type: "number", description: "Max results (default: 10)" },
+      },
+      required: ["action"],
+    },
+  },
+  // ── Finnhub (Financial Market Intelligence) Tool ────────────────────
+  {
+    name: "finnhub_market_data",
+    description:
+      "Real-time financial market intelligence from Finnhub. Get stock quotes, company news, analyst recommendations, earnings calendars, market sentiment analysis, economic calendars, and ML-powered price trend detection.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        action: {
+          type: "string",
+          enum: ["quote", "news", "sentiment", "recommendations", "earnings", "economic_calendar", "price_trend", "company_profile", "search"],
+          description: "Action to perform",
+        },
+        symbol: { type: "string", description: "Stock symbol (e.g., 'AAPL', 'TSLA', 'MSFT')" },
+        query: { type: "string", description: "Search query for symbol lookup" },
+        from: { type: "string", description: "Start date (YYYY-MM-DD)" },
+        to: { type: "string", description: "End date (YYYY-MM-DD)" },
+        days: { type: "number", description: "Number of days for trend analysis (default: 30)" },
+      },
+      required: ["action"],
+    },
+  },
   // ===== NEW TOOLS (v3.1.0) =====
   {
     name: "ocr_tesseract",
@@ -2940,6 +3042,18 @@ export const TOOLS: Tool[] = [
         n: { type: "number", description: "Number of images to generate (1-4, default: 1)" },
       },
       required: ["prompt"],
+    },
+  },
+  {
+    name: "parse_document",
+    description: "Parse and extract text from uploaded documents. Supports PDF, DOCX, TXT, MD, HTML, CSV, JSON, XML, YAML.",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        file_path: { type: "string", description: "Path to the document file" },
+        format: { type: "string", description: "Document format (auto-detected from extension if omitted). Options: pdf, docx, txt, md, html, csv, json, xml, yaml" },
+      },
+      required: ["file_path"],
     },
   },
   {
@@ -3256,11 +3370,7 @@ export async function executeTool(
             title: input.title as string | undefined,
           }
         );
-        return {
-          success: result.success,
-          result: result.filePath,
-          error: result.error,
-        };
+        return withDownloadUrl(result);
       }
 
       case "generate_spreadsheet": {
@@ -3272,11 +3382,7 @@ export async function executeTool(
             sheetName: input.sheet_name as string | undefined,
           }
         );
-        return {
-          success: result.success,
-          result: result.filePath,
-          error: result.error,
-        };
+        return withDownloadUrl(result);
       }
 
       case "generate_chart": {
@@ -3288,11 +3394,7 @@ export async function executeTool(
           input.title as string | undefined,
           input.filename as string | undefined
         );
-        return {
-          success: result.success,
-          result: result.filePath,
-          error: result.error,
-        };
+        return withDownloadUrl(result);
       }
 
       case "generate_diagram": {
@@ -3301,22 +3403,14 @@ export async function executeTool(
             input.mermaid_code as string,
             input.filename as string | undefined
           );
-          return {
-            success: result.success,
-            result: result.filePath,
-            error: result.error,
-          };
+          return withDownloadUrl(result);
         } else if (input.data) {
           const result = await generateStructuredDiagram(
             input.type as "flowchart" | "sequence" | "class" | "state" | "er" | "gantt" | "mindmap",
             input.data,
             input.filename as string | undefined
           );
-          return {
-            success: result.success,
-            result: result.filePath,
-            error: result.error,
-          };
+          return withDownloadUrl(result);
         }
         return { success: false, result: null, error: "Must provide mermaid_code or data" };
       }
@@ -3616,10 +3710,8 @@ export async function executeTool(
         const unreadOnly = (input.unread_only as boolean) || false;
         const limit = (input.limit as number) || 20;
 
-        const imap = createLocalImapClient(emailAddress);
+        const imap = await connectImapWithFallback(emailAddress);
         try {
-          await imap.connect();
-
           let emails: EmailMessage[];
           if (unreadOnly) {
             emails = await imap.searchEmails({ folder, seen: false, limit } as any);
@@ -3702,10 +3794,8 @@ export async function executeTool(
         const folder = (input.folder as string) || "INBOX";
         const limit = (input.limit as number) || 20;
 
-        const imap = createLocalImapClient(emailAddress);
+        const imap = await connectImapWithFallback(emailAddress);
         try {
-          await imap.connect();
-
           const searchOptions: Record<string, unknown> = { folder, limit };
           if (input.from) searchOptions.from = input.from as string;
           if (input.subject) searchOptions.subject = input.subject as string;
@@ -3749,10 +3839,9 @@ export async function executeTool(
         const folder = (input.folder as string) || "INBOX";
 
         // Fetch the original email via IMAP
-        const imap = createLocalImapClient(emailAddress);
+        const imap = await connectImapWithFallback(emailAddress);
         let originalEmail: EmailMessage | null = null;
         try {
-          await imap.connect();
           originalEmail = await imap.fetchEmail(emailUid, folder);
         } finally {
           await imap.disconnect();
@@ -6445,6 +6534,9 @@ export async function executeTool(
           binanceApiSecret: env.BINANCE_API_SECRET,
           binanceTestnet: env.BINANCE_TESTNET,
           requireConfirmation: env.EXCHANGE_REQUIRE_CONFIRMATION,
+          maxOrderSizeUsd: (env as any).EXCHANGE_MAX_TRADE_SIZE ?? 100,
+          maxDailySpendUsd: (env as any).EXCHANGE_MAX_DAILY_SPEND ?? 500,
+          agentTradingEnabled: (env as any).EXCHANGE_AGENT_TRADING_ENABLED ?? false,
         });
         const action = input.action as string;
         const exchange = (input.exchange as "coinbase" | "binance") ?? "binance";
@@ -6463,6 +6555,7 @@ export async function executeTool(
                 price: input.price as number | undefined,
                 stopPrice: input.stop_price as number | undefined,
                 confirmed: input.confirmed as boolean | undefined,
+                callerContext: input._callerContext as "human" | "agent" | "workflow" | undefined,
               }),
             };
           case "cancel_order":
@@ -6669,6 +6762,106 @@ export async function executeTool(
         }
       }
 
+      case "fred_economic_data": {
+        if (!env.FRED_API_KEY) {
+          return { success: false, result: null, error: "FRED_API_KEY not configured. Get one at https://fred.stlouisfed.org/docs/api/api_key.html" };
+        }
+        const { createFredClient, FRED_SERIES } = await import("../integrations/finance/fred");
+        const fredClient = createFredClient(env.FRED_API_KEY);
+        const action = input.action as string;
+
+        switch (action) {
+          case "dashboard": {
+            const dashboard = await fredClient.getEconomicDashboard();
+            return { success: true, result: dashboard };
+          }
+          case "series": {
+            if (!input.series_id) return { success: false, result: null, error: "'series_id' is required" };
+            const observations = await fredClient.getObservations(input.series_id as string, {
+              startDate: input.start_date as string | undefined,
+              endDate: input.end_date as string | undefined,
+              limit: input.limit as number | undefined,
+            });
+            const info = await fredClient.getSeriesInfo(input.series_id as string);
+            return { success: true, result: { series: info, observations } };
+          }
+          case "search": {
+            if (!input.query) return { success: false, result: null, error: "'query' is required" };
+            const results = await fredClient.search(input.query as string, (input.limit as number) ?? 10);
+            return { success: true, result: results };
+          }
+          case "forecast": {
+            if (!input.series_id) return { success: false, result: null, error: "'series_id' is required" };
+            const forecast = await fredClient.forecast(input.series_id as string, (input.periods_ahead as number) ?? 6);
+            return { success: true, result: forecast };
+          }
+          case "indicator": {
+            if (!input.series_id) return { success: false, result: null, error: "'series_id' is required" };
+            const indicator = await fredClient.getIndicator(input.series_id as string, input.series_id as string);
+            return { success: true, result: indicator };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown FRED action: ${action}. Use: dashboard, series, search, forecast, indicator` };
+        }
+      }
+
+      case "finnhub_market_data": {
+        if (!env.FINNHUB_API_KEY) {
+          return { success: false, result: null, error: "FINNHUB_API_KEY not configured. Get one at https://finnhub.io/dashboard" };
+        }
+        const { createFinnhubClient } = await import("../integrations/finance/finnhub");
+        const finnhubClient = createFinnhubClient(env.FINNHUB_API_KEY);
+        const action = input.action as string;
+
+        switch (action) {
+          case "quote": {
+            if (!input.symbol) return { success: false, result: null, error: "'symbol' is required" };
+            const quote = await finnhubClient.getQuote(input.symbol as string);
+            return { success: true, result: quote };
+          }
+          case "news": {
+            if (!input.symbol) return { success: false, result: null, error: "'symbol' is required" };
+            const news = await finnhubClient.getCompanyNews(input.symbol as string, input.from as string, input.to as string);
+            return { success: true, result: news.slice(0, 10) };
+          }
+          case "sentiment": {
+            if (!input.symbol) return { success: false, result: null, error: "'symbol' is required" };
+            const sentiment = await finnhubClient.getSentiment(input.symbol as string);
+            return { success: true, result: sentiment };
+          }
+          case "recommendations": {
+            if (!input.symbol) return { success: false, result: null, error: "'symbol' is required" };
+            const recs = await finnhubClient.getRecommendations(input.symbol as string);
+            return { success: true, result: recs.slice(0, 6) };
+          }
+          case "earnings": {
+            const earnings = await finnhubClient.getEarningsCalendar(input.from as string, input.to as string);
+            return { success: true, result: earnings.slice(0, 20) };
+          }
+          case "economic_calendar": {
+            const events = await finnhubClient.getEconomicCalendar(input.from as string, input.to as string);
+            return { success: true, result: events.slice(0, 20) };
+          }
+          case "price_trend": {
+            if (!input.symbol) return { success: false, result: null, error: "'symbol' is required" };
+            const trend = await finnhubClient.getPriceTrend(input.symbol as string, "D", (input.days as number) ?? 30);
+            return { success: true, result: trend };
+          }
+          case "company_profile": {
+            if (!input.symbol) return { success: false, result: null, error: "'symbol' is required" };
+            const profile = await finnhubClient.getCompanyProfile(input.symbol as string);
+            return { success: true, result: profile };
+          }
+          case "search": {
+            if (!input.query) return { success: false, result: null, error: "'query' is required" };
+            const results = await finnhubClient.symbolSearch(input.query as string);
+            return { success: true, result: results };
+          }
+          default:
+            return { success: false, result: null, error: `Unknown Finnhub action: ${action}. Use: quote, news, sentiment, recommendations, earnings, economic_calendar, price_trend, company_profile, search` };
+        }
+      }
+
       // ===== NEW TOOLS (v3.1.0) =====
 
       case "ocr_tesseract": {
@@ -6685,7 +6878,7 @@ export async function executeTool(
           format: input.format as any,
           orientation: input.orientation as any,
         });
-        return { success: result.success, result: result.filePath || result.error, error: result.error };
+        return withDownloadUrl({ success: result.success, filePath: result.filePath, error: result.error });
       }
 
       case "generate_word_document": {
@@ -6694,7 +6887,7 @@ export async function executeTool(
         const opts: any = { title: input.title as string };
         if (input.template) opts.template = input.template;
         const result = await generateWordDocument(elements as any[], input.filename as string, opts);
-        return { success: result.success, result: result.filePath || result.error, error: result.error };
+        return withDownloadUrl({ success: result.success, filePath: result.filePath, error: result.error });
       }
 
       case "generate_presentation": {
@@ -6703,7 +6896,7 @@ export async function executeTool(
         const result = await generatePresentation(slides, input.filename as string, {
           theme: input.theme as any,
         } as any);
-        return { success: result.success, result: result.filePath || result.error, error: result.error };
+        return withDownloadUrl({ success: result.success, filePath: result.filePath, error: result.error });
       }
 
       case "generate_image": {
@@ -6712,7 +6905,22 @@ export async function executeTool(
           size: input.size as any,
           n: input.n as number,
         });
-        return { success: result.success, result: result.url || result.filePath || result.error, error: result.error };
+        return withDownloadUrl({ success: result.success, filePath: result.url || result.filePath, error: result.error });
+      }
+
+      case "parse_document": {
+        const { parseDocument } = await import("../integrations/documents");
+        const result = await parseDocument(input.file_path as string, input.format as string | undefined);
+        const text = result.text || "";
+        return {
+          success: true,
+          result: {
+            text: text.substring(0, 50000),
+            metadata: result.metadata,
+            truncated: text.length > 50000,
+            totalLength: text.length,
+          },
+        };
       }
 
       case "key_rotation": {

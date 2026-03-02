@@ -157,11 +157,39 @@ export {
   type BacktestingConfig,
 } from "./backtesting";
 
+// FRED (Federal Reserve Economic Data) exports
+export {
+  FredClient,
+  createFredClient,
+  FRED_SERIES,
+  type FredConfig,
+  type FredSeries,
+  type FredObservation,
+  type FredSearchResult,
+  type EconomicIndicator,
+} from "./fred";
+
+// Finnhub (Financial Market Data) exports
+export {
+  FinnhubClient,
+  createFinnhubClient,
+  type FinnhubConfig,
+  type FinnhubQuote,
+  type CompanyNews,
+  type MarketSentiment,
+  type AnalystRecommendation,
+  type EarningsCalendarEntry,
+  type CompanyProfile,
+  type EconomicEvent,
+} from "./finnhub";
+
 /**
  * Main Finance class that combines all financial functionality
  */
 export interface FinanceConfig {
   alphaVantageApiKey?: string;
+  fredApiKey?: string;
+  finnhubApiKey?: string;
   cryptoOptions?: {
     timeout?: number;
     rateLimitDelay?: number;
@@ -192,6 +220,8 @@ import { DeFiClient } from "./defi";
 import { OnChainClient } from "./onchain";
 import { OrderBookClient } from "./orderbook";
 import { BacktestingEngine } from "./backtesting";
+import { FredClient } from "./fred";
+import { FinnhubClient } from "./finnhub";
 
 export class Finance {
   public readonly crypto: CryptoClient;
@@ -204,6 +234,8 @@ export class Finance {
   public readonly onchain?: OnChainClient;
   public readonly orderbook: OrderBookClient;
   public readonly backtesting: BacktestingEngine;
+  public readonly fred?: FredClient;
+  public readonly finnhub?: FinnhubClient;
 
   constructor(config: FinanceConfig = {}) {
     this.crypto = new CryptoClient(config.cryptoOptions);
@@ -242,6 +274,16 @@ export class Finance {
 
     // Backtesting (always available)
     this.backtesting = new BacktestingEngine(config.backtestingOptions);
+
+    // FRED (conditional on API key)
+    if (config.fredApiKey) {
+      this.fred = new FredClient({ apiKey: config.fredApiKey });
+    }
+
+    // Finnhub (conditional on API key)
+    if (config.finnhubApiKey) {
+      this.finnhub = new FinnhubClient({ apiKey: config.finnhubApiKey });
+    }
   }
 
   /**

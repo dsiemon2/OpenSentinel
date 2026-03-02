@@ -85,14 +85,14 @@
     <!-- What is OpenSentinel -->
     <div class="hub-section">
       <h2>What is OpenSentinel?</h2>
-      <p>OpenSentinel is a self-hosted AI agent operating system. It connects to your messaging platforms (Telegram, Discord, Slack, WhatsApp, and more), processes messages through Claude's AI brain, executes tools, remembers context across sessions via vector-based memory, and automates multi-step workflows. It runs on your infrastructure &mdash; your data never leaves your network.</p>
+      <p>OpenSentinel is a self-hosted AI agent operating system. It connects to your messaging platforms (Telegram, Discord, Slack, WhatsApp, and more), processes messages through Claude's AI brain with a full agentic RAG pipeline (tool pre-classification, memory middleware, pipeline orchestration), executes tools, remembers context across sessions via vector-based memory, and automates multi-step workflows. A real-time Brain Dashboard visualizes the AI's thinking process. File-generation tools provide secure download links. Image and document uploads are analyzed via Claude's vision and the built-in document parser. Five ML algorithms power intent classification, anomaly detection, and cost forecasting. It runs on your infrastructure &mdash; your data never leaves your network.</p>
 
       <div class="hub-arch"><pre>
 <span class="dim">  ┌──────────────┐</span>     <span class="dim">┌─────────────────────────────┐</span>     <span class="dim">┌──────────────┐</span>
 <span class="dim">  │</span> <span class="hl">  Telegram  </span> <span class="dim">│</span>     <span class="dim">│</span>    <span class="hl">OpenSentinel Core</span>        <span class="dim">│</span>     <span class="dim">│</span> <span class="cy">    Text    </span> <span class="dim">│</span>
 <span class="dim">  │</span> <span class="hl">  Discord   </span> <span class="dim">│</span>     <span class="dim">│</span>                             <span class="dim">│</span>     <span class="dim">│</span> <span class="cy">  Voice TTS </span> <span class="dim">│</span>
 <span class="dim">  │</span> <span class="hl">  Slack     </span> <span class="dim">│</span>     <span class="dim">│</span>  <span class="hl">Claude Brain</span>  <span class="cy">123 Tools</span>   <span class="dim">│</span>     <span class="dim">│</span> <span class="cy">  PDF/Word  </span> <span class="dim">│</span>
-<span class="dim">  │</span> <span class="hl">  WhatsApp  </span> <span class="dim">│────▶│</span>  <span class="hl">Memory / RAG</span>  <span class="cy">5 Agents</span>   <span class="dim">│────▶│</span> <span class="cy"> Excel/PPT  </span> <span class="dim">│</span>
+<span class="dim">  │</span> <span class="hl">  WhatsApp  </span> <span class="dim">│────▶│</span>  <span class="hl">Agentic RAG</span>   <span class="cy">5 Agents</span>   <span class="dim">│────▶│</span> <span class="cy"> Excel/PPT  </span> <span class="dim">│</span>
 <span class="dim">  │</span> <span class="hl">  Web / API </span> <span class="dim">│</span>     <span class="dim">│</span>  <span class="hl">Workflows</span>     <span class="cy">Plugins</span>    <span class="dim">│</span>     <span class="dim">│</span> <span class="cy">   Charts   </span> <span class="dim">│</span>
 <span class="dim">  │</span> <span class="hl">  Voice     </span> <span class="dim">│</span>     <span class="dim">│</span>  <span class="hl">Scheduler</span>     <span class="cy">MCP</span>        <span class="dim">│</span>     <span class="dim">│</span> <span class="cy"> AI Images  </span> <span class="dim">│</span>
 <span class="dim">  └──────────────┘</span>     <span class="dim">└──────────────┬──────────────┘</span>     <span class="dim">└──────────────┘</span>
@@ -111,8 +111,8 @@
       <div class="hub-caps">
         <div class="hub-cap">
           <div class="hub-cap-icon">&#x1F9E0;</div>
-          <h4>Persistent Memory</h4>
-          <p>pgvector RAG with importance scoring, semantic search, and memory consolidation. Remembers across all sessions.</p>
+          <h4>Agentic RAG Memory</h4>
+          <p>Full agentic RAG pipeline with tool pre-classification, memory middleware, pgvector, HyDE, re-ranking, and auto-extraction. Remembers across all sessions.</p>
         </div>
         <div class="hub-cap">
           <div class="hub-cap-icon">&#x26A1;</div>
@@ -135,9 +135,29 @@
           <p>2FA, encrypted vault, audit logging, GDPR compliance, command sandboxing, and plugin isolation.</p>
         </div>
         <div class="hub-cap">
+          <div class="hub-cap-icon">&#x1F4CA;</div>
+          <h4>Brain Dashboard</h4>
+          <p>Real-time pipeline visualization, terminal-style activity feed, agent panel, and score gauges. Watch the AI think.</p>
+        </div>
+        <div class="hub-cap">
           <div class="hub-cap-icon">&#x1F50C;</div>
           <h4>Plugins & MCP</h4>
           <p>Sandboxed plugin system with lifecycle management. Native Model Context Protocol server support.</p>
+        </div>
+        <div class="hub-cap">
+          <div class="hub-cap-icon">&#x1F4E5;</div>
+          <h4>File Downloads & Uploads</h4>
+          <p>Secure token-based file download UI for generated files. Upload images for vision analysis or documents for automatic parsing (PDF, DOCX, CSV, and more).</p>
+        </div>
+        <div class="hub-cap">
+          <div class="hub-cap-icon">&#x1F4C9;</div>
+          <h4>ML Algorithms</h4>
+          <p>5 built-in ML algorithms: Naive Bayes, Isolation Forest, K-Means, Markov Chain, Linear Regression. Powers intent parsing, anomaly detection, and cost forecasting.</p>
+        </div>
+        <div class="hub-cap">
+          <div class="hub-cap-icon">&#x1F4B9;</div>
+          <h4>Financial Data</h4>
+          <p>Finnhub for real-time stock quotes, news sentiment, and earnings. FRED for GDP, CPI, unemployment, and interest rates. Trend detection via ML.</p>
         </div>
       </div>
     </div>
@@ -200,6 +220,8 @@
         <a href="enterprise.html#multi-user" class="hub-nav-card"><span class="icon">&#x1F465;</span> Multi-User / SSO</a>
         <a href="enterprise.html#kubernetes" class="hub-nav-card"><span class="icon">&#x2638;&#xFE0F;</span> Kubernetes</a>
         <a href="enterprise.html#observability" class="hub-nav-card"><span class="icon">&#x1F4CA;</span> Observability</a>
+        <a href="tools.html#file-generation" class="hub-nav-card"><span class="icon">&#x1F4E5;</span> File Downloads & Uploads</a>
+        <a href="tools.html#ml" class="hub-nav-card"><span class="icon">&#x1F4C9;</span> ML Algorithms</a>
         <a href="sdk.html" class="hub-nav-card"><span class="icon">&#x1F517;</span> App Ecosystem SDK</a>
       </div>
     </div>

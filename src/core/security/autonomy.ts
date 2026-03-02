@@ -32,6 +32,7 @@ export const SUPERVISED_REQUIRE_APPROVAL: Set<string> = new Set([
   "send_email",
   "spawn_agent",
   "create_workflow",
+  "crypto_exchange",
 ]);
 
 export class AutonomyManager {

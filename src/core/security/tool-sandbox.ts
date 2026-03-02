@@ -27,6 +27,7 @@ const DANGEROUS_PATTERNS: Array<{ pattern: RegExp; name: string; severity: "bloc
   { pattern: /;\s*(rm|mkfs|dd|shutdown|reboot|halt|poweroff)/, name: "chain_dangerous", severity: "block" },
   { pattern: /\$\(.*rm\s/, name: "subshell_rm", severity: "block" },
   { pattern: /`.*rm\s/, name: "backtick_rm", severity: "block" },
+  { pattern: /"confirmed"\s*:\s*true/, name: "auto_confirm_trade", severity: "warn" },
 ];
 
 // Path traversal patterns
@@ -167,8 +168,7 @@ export class ToolSandbox {
           context.cancelReason = result.blockedReason || "Tool execution blocked by sandbox";
 
           try {
-            await audit.securityEvent(context.userId, {
-              type: "tool_sandbox_blocked",
+            await audit.error(context.userId, "tool_sandbox_blocked", result.blockedReason || "Blocked by sandbox", {
               toolName,
               reason: result.blockedReason,
               inputPreview: JSON.stringify(input).substring(0, 200),

@@ -515,7 +515,7 @@ export function matchesFilter(
       const str = `${addr.name} ${addr.address}`;
       return filter.from instanceof RegExp
         ? filter.from.test(str)
-        : str.toLowerCase().includes(filter.from.toLowerCase());
+        : str.toLowerCase().includes(filter.from!.toLowerCase());
     });
     if (!fromMatch) return false;
   }
@@ -526,7 +526,7 @@ export function matchesFilter(
       const str = `${addr.name} ${addr.address}`;
       return filter.to instanceof RegExp
         ? filter.to.test(str)
-        : str.toLowerCase().includes(filter.to.toLowerCase());
+        : str.toLowerCase().includes(filter.to!.toLowerCase());
     });
     if (!toMatch) return false;
   }

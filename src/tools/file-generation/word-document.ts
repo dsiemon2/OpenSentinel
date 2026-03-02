@@ -982,7 +982,7 @@ async function generateWithDocxLibrary(
 function getDocxAlignment(
   alignment: ParagraphAlignment | undefined,
   AlignmentType: { LEFT: unknown; CENTER: unknown; RIGHT: unknown; JUSTIFIED: unknown }
-): unknown {
+): any {
   switch (alignment) {
     case "left":
       return AlignmentType.LEFT;
@@ -1007,6 +1007,7 @@ async function generateRawDocx(
 
   try {
     // Try to use archiver for ZIP creation
+    // @ts-expect-error archiver has no type declarations
     const archiver = await import("archiver");
     const fs = await import("fs");
 

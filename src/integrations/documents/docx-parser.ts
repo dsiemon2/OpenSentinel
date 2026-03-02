@@ -56,7 +56,7 @@ export async function parseDOCX(
     buffer = input;
   }
 
-  const mammothOptions: mammoth.Options = {};
+  const mammothOptions: any = {};
 
   // Apply custom style mappings
   if (options.styleMap && options.styleMap.length > 0) {

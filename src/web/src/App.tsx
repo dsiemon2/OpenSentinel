@@ -8,8 +8,9 @@ import { isAuthRequired, apiFetch, clearStoredToken } from "./lib/api";
 const GraphExplorer = lazy(() => import("./components/GraphExplorer"));
 const Email = lazy(() => import("./components/Email"));
 const AuditLogViewer = lazy(() => import("./components/AuditLogViewer"));
+const Brain = lazy(() => import("./components/Brain"));
 
-type View = "chat" | "memories" | "graph" | "email" | "audit" | "settings";
+type View = "chat" | "memories" | "graph" | "brain" | "email" | "audit" | "settings";
 
 interface SystemStatus {
   status: string;
@@ -21,6 +22,7 @@ function App() {
   const [view, setView] = useState<View>("chat");
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [authState, setAuthState] = useState<"checking" | "required" | "authenticated">("checking");
+  const [graphSearch, setGraphSearch] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -110,6 +112,12 @@ function App() {
             Graph
           </div>
           <div
+            className={`nav-item ${view === "brain" ? "active" : ""}`}
+            onClick={() => setView("brain")}
+          >
+            Brain
+          </div>
+          <div
             className={`nav-item ${view === "email" ? "active" : ""}`}
             onClick={() => setView("email")}
           >
@@ -141,10 +149,22 @@ function App() {
 
       <main className="main">
         {view === "chat" && <Chat />}
-        {view === "memories" && <MemoryExplorer />}
+        {view === "memories" && (
+          <MemoryExplorer
+            onViewInGraph={(query) => {
+              setGraphSearch(query);
+              setView("graph");
+            }}
+          />
+        )}
         {view === "graph" && (
           <Suspense fallback={<div style={{ padding: 24 }}>Loading Graph Explorer...</div>}>
-            <GraphExplorer />
+            <GraphExplorer initialSearch={graphSearch} onSearchConsumed={() => setGraphSearch(null)} />
+          </Suspense>
+        )}
+        {view === "brain" && (
+          <Suspense fallback={<div style={{ padding: 24 }}>Loading Brain Dashboard...</div>}>
+            <Brain />
           </Suspense>
         )}
         {view === "email" && (

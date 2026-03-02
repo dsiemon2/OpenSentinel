@@ -1,8 +1,10 @@
 # OpenSentinel Architecture
 
-This document describes the internal architecture of OpenSentinel v3.1.1, covering data flow, core components, and the overall system design.
+This document describes the internal architecture of OpenSentinel v3.4.0, covering data flow, core components, and the overall system design.
 
 ---
+
+**Version:** 3.4.0
 
 ## High-Level Overview
 
@@ -194,6 +196,66 @@ As of v3.1.1, all 5 RAG enhancements are enabled by default. The pipeline degrad
 
 ---
 
+### Agentic RAG Pipeline (`src/core/brain/`)
+
+When `AGENTIC_PIPELINE_ENABLED=true`, the Brain upgrades from basic memory-then-LLM to a full agentic pipeline that pre-classifies tools, auto-searches memory, and pre-executes preparatory steps before the main LLM call.
+
+**Components:**
+
+| File | Purpose |
+|------|---------|
+| `tool-classifier.ts` | LLM-based tool routing — uses Haiku to classify queries into 18 tool categories |
+| `agentic-orchestrator.ts` | Master pipeline coordinator — runs memory + classification in parallel, then pre-execution |
+| `memory/memory-middleware.ts` | Auto-searches memories before AI calls; auto-extracts facts after responses |
+| `agents/agent-processor.ts` | BullMQ worker consuming `sentinel-agents` queue for sub-agent execution |
+
+**Pipeline flow:**
+
+```
+User Message
+  │
+  ├─ Agentic Orchestrator (parallel)
+  │   ├─ Memory Search (auto-search relevant memories)
+  │   └─ Tool Classification (Haiku pre-classifies into 18 categories)
+  │
+  ├─ Pre-Execution (run classified tools like web_search before main LLM)
+  │
+  ├─ Brain (main LLM call with enriched context + filtered tools)
+  │   └─ Tool Loop (execute tools, self-correct on failure)
+  │
+  └─ Memory Middleware (fire-and-forget fact extraction + dedup)
+```
+
+**Configuration (.env):**
+```
+AGENTIC_PIPELINE_ENABLED=true
+TOOL_CLASSIFIER_ENABLED=true
+TOOL_CLASSIFIER_TIMEOUT_MS=5000
+AUTO_MEMORY_EXTRACT_ENABLED=true
+AUTO_MEMORY_SEARCH_THRESHOLD=0.3
+AGENTIC_PRE_EXECUTION_ENABLED=true
+AGENT_PROCESSOR_ENABLED=true
+```
+
+---
+
+### Brain Telemetry (`src/core/observability/brain-telemetry.ts`)
+
+A singleton EventEmitter that provides real-time observability into the Brain pipeline. Decouples telemetry emission from consumption.
+
+**Key types:**
+- **BrainEventType**: 18 event types across pipeline stages (`pipeline_start`, `memory_search_complete`, `tool_start`, `agent_spawn`, etc.)
+- **BrainStatus**: State machine tracking `idle → thinking → executing_tools → streaming → idle`
+- **ActivityEntry**: Ring buffer of 500 entries with category, summary, and latency
+- **BrainScoreSnapshot**: Aggregated metrics (memory hit rate, tool success rate, pipeline latency, cost)
+
+**Consumers:**
+- Brain API endpoints (`/api/brain/*`) — 7 REST routes for dashboard data
+- WebSocket broadcast — real-time `brain_event` push to subscribed clients
+- Brain Dashboard (`src/web/src/components/Brain.tsx`) — full visualization UI
+
+---
+
 ### Scheduler (`src/core/scheduler.ts`)
 
 The Scheduler manages background tasks using BullMQ backed by Redis.
@@ -379,6 +441,7 @@ Each input channel follows the same pattern:
 | iMessage | `src/inputs/imessage/` | AppleScript or BlueBubbles |
 | Matrix | `src/inputs/matrix/` | matrix-js-sdk |
 | REST API | `src/inputs/api/server.ts` | Hono |
+| File Downloads | `src/inputs/api/download-registry.ts` | Token-based secure download (1h expiry) |
 | WebSocket | `src/inputs/websocket/` | Bun native WebSocket |
 | Voice | `src/inputs/voice/` | Wake word + VAD |
 | Triggers | `src/inputs/triggers/` | Shortcuts, Bluetooth, NFC, Geofence |
@@ -407,7 +470,8 @@ OpenSentinel provides 123 tools defined in `src/tools/index.ts`.
 | Files | `list_directory`, `read_file`, `write_file`, `search_files`, `apply_patch` |
 | Web | `web_search`, `browse_url`, `take_screenshot` |
 | Vision | `analyze_image`, `ocr_document`, `extract_document_data`, `screenshot_analyze` |
-| Generation | `generate_pdf`, `generate_spreadsheet`, `generate_chart`, `generate_diagram` |
+| Documents | `parse_document` (PDF, DOCX, TXT, MD, HTML, CSV, JSON, XML, YAML) |
+| Generation | `generate_pdf`, `generate_spreadsheet`, `generate_chart`, `generate_diagram`, `generate_word_document`, `generate_presentation`, `generate_image` |
 | Rendering | `render_math`, `render_math_document`, `render_code`, `render_markdown` |
 | Video | `summarize_video`, `video_info`, `extract_video_moments` |
 | Agents | `spawn_agent`, `check_agent`, `cancel_agent` |
@@ -424,14 +488,14 @@ External service adapters live in `src/integrations/`:
 
 | Integration | Directory | Features |
 |-------------|-----------|----------|
-| Email | `src/integrations/email/` | IMAP inbox monitoring, SMTP sending, template support |
+| Email | `src/integrations/email/` | IMAP inbox monitoring (with local/remote fallback via `connectImapWithFallback()`), SMTP sending, template support |
 | Twilio | `src/integrations/twilio/` | SMS sending/receiving, voice calls, webhook handler |
 | GitHub | `src/integrations/github/` | Code review, PR management, issue tracking, webhooks |
 | Notion | `src/integrations/notion/` | Page CRUD, database queries, content sync |
 | Spotify | `src/integrations/spotify/` | Playback control, search, playlist management |
 | Home Assistant | `src/integrations/homeassistant/` | Device control, state queries, automation triggers |
 | Cloud Storage | `src/integrations/cloud-storage/` | Google Drive and Dropbox file operations |
-| Finance | `src/integrations/finance/` | Crypto prices, stock quotes, currency conversion, portfolio tracking |
+| Finance | `src/integrations/finance/` | Crypto prices, stock quotes, currency conversion, portfolio tracking, Finnhub (real-time quotes, news sentiment, earnings, analyst recs), FRED (GDP, CPI, unemployment, interest rates) |
 | Documents | `src/integrations/documents/` | PDF parsing, DOCX parsing, text extraction, chunking, knowledge base |
 | Vision | `src/integrations/vision/` | Screen capture, webcam capture |
 
@@ -472,6 +536,8 @@ External service adapters live in `src/integrations/`:
 
 | Module | Purpose |
 |--------|---------|
+| `brain-telemetry.ts` | Real-time pipeline event emitter, status state machine, metric accumulators, ring buffer |
+| `cost-tracker.ts` | Per-tier cost tracking with daily/monthly estimates and trend analysis |
 | `metrics.ts` | Latency, token usage, tool duration tracking |
 | `alerting.ts` | Configurable alerts (error rate, latency, quota) |
 | `context-viewer.ts` | Debug view of full context sent to Claude |
@@ -584,8 +650,14 @@ opensentinel/
 |   +-- config/env.ts                      # Environment variable loader
 |   +-- core/
 |   |   +-- brain.ts                       # Claude API + tool execution loop
+|   |   +-- brain/                         # Agentic RAG pipeline
+|   |   |   +-- tool-classifier.ts         # LLM-based tool pre-classification (18 categories)
+|   |   |   +-- agentic-orchestrator.ts    # Pipeline coordinator (memory + classification + pre-exec)
+|   |   |   +-- router.ts                  # Model routing (Haiku/Sonnet/Opus)
+|   |   |   +-- reflection.ts             # Self-correction on tool failure
+|   |   |   +-- compaction.ts             # Context compaction for long conversations
 |   |   +-- memory.ts                      # Advanced RAG memory (pgvector + pipeline)
-|   |   +-- memory/                        # Advanced retrieval pipeline
+|   |   +-- memory/                        # Advanced retrieval pipeline + middleware
 |   |   |   +-- hybrid-search.ts           # Vector + keyword + graph + RRF
 |   |   |   +-- hyde.ts                    # Hypothetical Document Embeddings
 |   |   |   +-- reranker.ts               # LLM cross-encoder re-ranking
@@ -599,6 +671,7 @@ opensentinel/
 |   |   +-- agents/                        # Sub-agent system
 |   |   |   +-- agent-manager.ts           # Spawn, track, cancel agents
 |   |   |   +-- agent-worker.ts            # Agent execution loop
+|   |   |   +-- agent-processor.ts         # BullMQ worker for sub-agent queue
 |   |   |   +-- collaboration/             # Multi-agent coordination
 |   |   |   +-- specialized/               # Research, coding, writing, analysis
 |   |   +-- hooks/                         # Lifecycle hooks + SOUL
@@ -610,7 +683,8 @@ opensentinel/
 |   |   +-- evolution/                     # Evolution, achievements, modes
 |   |   +-- security/                      # 2FA, vault, audit, GDPR
 |   |   +-- enterprise/                    # Multi-user, SSO, quotas, K8s
-|   |   +-- observability/                 # Metrics, alerting, replay, debug
+|   |   +-- ml/                             # ML algorithms (Naive Bayes, Isolation Forest, K-Means, Markov Chain, Linear Regression)
+|   |   +-- observability/                 # Brain telemetry, metrics, alerting, replay, debug
 |   |   +-- plugins/                       # Plugin system
 |   |   +-- workflows/                     # Automation engine
 |   |   +-- mcp/                           # Model Context Protocol
@@ -626,6 +700,7 @@ opensentinel/
 |   |   +-- imessage/                      # AppleScript / BlueBubbles
 |   |   +-- matrix/                        # Matrix messaging bot
 |   |   +-- api/server.ts                  # Hono REST API
+|   |   +-- api/download-registry.ts       # Token-based file download system
 |   |   +-- websocket/                     # Bun native WebSocket
 |   |   +-- voice/                         # Wake word, VAD, diarization
 |   |   +-- triggers/                      # Shortcuts, BT, NFC, geofence
@@ -638,7 +713,7 @@ opensentinel/
 |   |   +-- spotify/                       # Spotify API
 |   |   +-- homeassistant/                 # Home Assistant
 |   |   +-- cloud-storage/                 # Google Drive, Dropbox
-|   |   +-- finance/                       # Crypto, stocks, currency
+|   |   +-- finance/                       # Crypto, stocks, currency, Finnhub, FRED
 |   |   +-- documents/                     # PDF, DOCX, text extraction
 |   |   +-- vision/                        # Screen + webcam capture
 |   +-- tools/
@@ -663,7 +738,7 @@ opensentinel/
 +-- plugins/                               # Plugin directory
 +-- docker/                                # Docker configs (init-db, nginx)
 +-- docker-compose.yml                     # Full stack orchestration
-+-- tests/                                 # Test suite (5600+ tests)
++-- tests/                                 # Test suite (6300+ tests)
 +-- docs/                                  # Documentation
 +-- package.json                           # NPM package (opensentinel)
 +-- drizzle.config.ts                      # Drizzle ORM configuration

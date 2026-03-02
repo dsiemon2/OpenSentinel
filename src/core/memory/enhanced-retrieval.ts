@@ -129,7 +129,8 @@ export async function enhancedRetrieve(
         // Step 4 — Multi-step gap filling (on cached + re-ranked results)
         if (env.MULTISTEP_RAG_ENABLED) {
           console.log("[EnhancedRetrieval] Multi-step retrieval on cached results...");
-          rankedResults = await multiStepRetrieve(effectiveQuery, rankedResults, { userId });
+          const multiStepResult = await multiStepRetrieve(effectiveQuery, rankedResults, { userId });
+          rankedResults = multiStepResult.results;
           steps++;
         }
 
@@ -195,7 +196,8 @@ export async function enhancedRetrieve(
     // ------------------------------------------------------------------
     if (env.MULTISTEP_RAG_ENABLED) {
       console.log("[EnhancedRetrieval] Multi-step retrieval enabled, filling gaps...");
-      rankedResults = await multiStepRetrieve(effectiveQuery, rankedResults, { userId });
+      const multiStepResult = await multiStepRetrieve(effectiveQuery, rankedResults, { userId });
+      rankedResults = multiStepResult.results;
       steps++;
     }
 

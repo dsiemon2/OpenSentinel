@@ -19,12 +19,31 @@ import {
 } from "./protocol";
 import { chat, streamChat, chatWithTools, streamChatWithTools } from "../../core/brain";
 import type { Message } from "../../core/brain";
+import { brainTelemetry, type BrainEvent } from "../../core/observability/brain-telemetry";
 
 // ============================================
 // CONNECTION MANAGEMENT
 // ============================================
 
 const connections = new Map<ServerWebSocket<ConnectionState>, ConnectionState>();
+const brainSubscribers = new Set<ServerWebSocket<ConnectionState>>();
+
+// Global brain event broadcast — wire up once at module scope
+brainTelemetry.on("brain_event", (event: BrainEvent) => {
+  if (brainSubscribers.size === 0) return;
+  const payload = JSON.stringify({
+    type: "brain_event",
+    id: "brain",
+    payload: event,
+  });
+  for (const ws of brainSubscribers) {
+    try {
+      ws.send(payload);
+    } catch {
+      brainSubscribers.delete(ws);
+    }
+  }
+});
 
 function createConnectionState(): ConnectionState {
   return {
@@ -163,6 +182,7 @@ export const websocketHandlers = {
       console.log(`[WebSocket] Client disconnected: ${state.id} (${code}: ${reason})`);
     }
     connections.delete(ws);
+    brainSubscribers.delete(ws);
   },
 
   async message(ws: ServerWebSocket<ConnectionState>, message: string | Buffer) {
@@ -193,6 +213,17 @@ export const websocketHandlers = {
         break;
       case "cancel":
         handleCancel(ws, msg);
+        break;
+      case "subscribe_brain":
+        brainSubscribers.add(ws);
+        ws.send(JSON.stringify({
+          type: "brain_status",
+          id: msg.id,
+          payload: brainTelemetry.getStatus(),
+        }));
+        break;
+      case "unsubscribe_brain":
+        brainSubscribers.delete(ws);
         break;
       default:
         ws.send(createServerMessage("error", msg.id, { error: `Unknown message type: ${msg.type}` }));

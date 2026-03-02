@@ -2,10 +2,11 @@
  * Cost Tracker — Multi-model token cost tracking
  *
  * Tracks per-request token costs using MODEL_TIERS pricing from brain/router.ts.
- * Replaces hardcoded Sonnet pricing in alerting.ts.
+ * Uses Linear Regression (Algorithm #1) for cost forecasting instead of naive projection.
  */
 
 import { MODEL_TIERS, type ModelTier } from "../brain/router";
+import { LinearRegression } from "../ml/linear-regression";
 
 export interface CostRecord {
   tier: string;
@@ -99,19 +100,80 @@ export class CostTracker {
   }
 
   /**
-   * Get estimated monthly cost based on recent usage
+   * Get estimated monthly cost using Linear Regression forecasting.
+   * Fits a regression on daily cost totals from the last 14 days, then projects 30 days.
    */
   getEstimatedMonthlyCost(): number {
     if (this.records.length < 2) return 0;
 
     const now = Date.now();
-    const oneDayAgo = now - 86400000;
-    const recentRecords = this.records.filter((r) => r.timestamp >= oneDayAgo);
+    const dailyCosts = this.getDailyCostHistory(14);
 
-    if (recentRecords.length === 0) return 0;
+    if (dailyCosts.length < 2) {
+      // Fallback: simple projection if not enough daily data
+      const oneDayAgo = now - 86400000;
+      const recentRecords = this.records.filter((r) => r.timestamp >= oneDayAgo);
+      if (recentRecords.length === 0) return 0;
+      const dailyCost = recentRecords.reduce((sum, r) => sum + r.cost, 0);
+      return dailyCost * 30;
+    }
 
-    const dailyCost = recentRecords.reduce((sum, r) => sum + r.cost, 0);
-    return dailyCost * 30; // Simple projection
+    // Use Linear Regression to forecast the next 30 days
+    const predictions = LinearRegression.forecast(dailyCosts, 30);
+    // Sum all predicted daily costs (clamped to 0 — cost can't go negative)
+    return predictions.reduce((sum, p) => sum + Math.max(0, p.value), 0);
+  }
+
+  /**
+   * Detect spending trend: up, down, or flat.
+   */
+  getCostTrend(): { direction: "up" | "down" | "flat"; strength: number; dailyChange: number } {
+    const dailyCosts = this.getDailyCostHistory(14);
+    if (dailyCosts.length < 3) {
+      return { direction: "flat", strength: 0, dailyChange: 0 };
+    }
+    const trend = LinearRegression.detectTrend(dailyCosts);
+    return {
+      direction: trend.direction,
+      strength: trend.strength,
+      dailyChange: trend.slopePerUnit,
+    };
+  }
+
+  /**
+   * Get forecast with confidence intervals for the next N days.
+   */
+  getForecast(daysAhead: number = 7): Array<{ day: number; predicted: number; lower: number; upper: number }> {
+    const dailyCosts = this.getDailyCostHistory(14);
+    if (dailyCosts.length < 2) return [];
+
+    const predictions = LinearRegression.forecast(dailyCosts, daysAhead);
+    return predictions.map((p, i) => ({
+      day: i + 1,
+      predicted: Math.max(0, p.value),
+      lower: Math.max(0, p.lower95),
+      upper: Math.max(0, p.upper95),
+    }));
+  }
+
+  /**
+   * Get daily cost totals for the last N days.
+   */
+  private getDailyCostHistory(days: number): number[] {
+    const now = Date.now();
+    const msPerDay = 86400000;
+    const dailyCosts: number[] = [];
+
+    for (let d = days - 1; d >= 0; d--) {
+      const dayStart = now - (d + 1) * msPerDay;
+      const dayEnd = now - d * msPerDay;
+      const dayCost = this.records
+        .filter((r) => r.timestamp >= dayStart && r.timestamp < dayEnd)
+        .reduce((sum, r) => sum + r.cost, 0);
+      dailyCosts.push(dayCost);
+    }
+
+    return dailyCosts;
   }
 
   /**

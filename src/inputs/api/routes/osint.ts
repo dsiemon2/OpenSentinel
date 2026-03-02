@@ -16,6 +16,7 @@ import {
   resolveEntity,
   type EntityCandidate,
 } from "../../../core/intelligence/entity-resolution";
+import { brainTelemetry } from "../../../core/observability/brain-telemetry";
 
 // Lazy-init the public records facade (avoid startup cost if OSINT is disabled)
 let _publicRecords: ReturnType<typeof createPublicRecords> | null = null;
@@ -43,11 +44,29 @@ osint.use("*", async (c, next) => {
 
 osint.get("/graph", async (c) => {
   try {
+    const graphStart = Date.now();
     const userId = c.req.query("userId") || "system";
     const limit = Math.min(parseInt(c.req.query("limit") || "200", 10), 1000);
+    const since = c.req.query("since"); // ISO date string for temporal filtering
+    const until = c.req.query("until"); // ISO date string for temporal filtering
+
+    brainTelemetry.emitEvent({
+      type: "tool_start", timestamp: graphStart,
+      requestId: `osint-graph-${graphStart}`,
+      data: { toolName: "osint_graph_load", since, until, limit },
+    });
+
+    // Build conditions for temporal filtering
+    const conditions = [];
+    if (since) {
+      conditions.push(sql`${graphEntities.createdAt} >= ${new Date(since)}`);
+    }
+    if (until) {
+      conditions.push(sql`${graphEntities.createdAt} <= ${new Date(until)}`);
+    }
 
     // Fetch entities
-    const entities = await db
+    const query = db
       .select({
         id: graphEntities.id,
         name: graphEntities.name,
@@ -56,10 +75,13 @@ osint.get("/graph", async (c) => {
         description: graphEntities.description,
         attributes: graphEntities.attributes,
         aliases: graphEntities.aliases,
+        createdAt: graphEntities.createdAt,
       })
-      .from(graphEntities)
-      .orderBy(desc(graphEntities.importance))
-      .limit(limit);
+      .from(graphEntities);
+
+    const entities = conditions.length > 0
+      ? await query.where(and(...conditions)).orderBy(desc(graphEntities.importance)).limit(limit)
+      : await query.orderBy(desc(graphEntities.importance)).limit(limit);
 
     const entityIds = entities.map((e) => e.id);
 
@@ -83,6 +105,12 @@ osint.get("/graph", async (c) => {
           sql`${graphRelationships.targetEntityId} = ANY(${sql`ARRAY[${sql.join(entityIds.map(id => sql`${id}`), sql`, `)}]::uuid[]`})`
         )
       );
+
+    brainTelemetry.emitEvent({
+      type: "tool_complete", timestamp: Date.now(),
+      requestId: `osint-graph-${graphStart}`,
+      data: { toolName: "osint_graph_load", success: true, latencyMs: Date.now() - graphStart, nodeCount: entities.length, edgeCount: relationships.length },
+    });
 
     return c.json({
       nodes: entities,
@@ -304,6 +332,13 @@ osint.get("/search", async (c) => {
       return c.json({ error: "Query parameter 'q' is required" }, 400);
     }
 
+    const searchStart = Date.now();
+    brainTelemetry.emitEvent({
+      type: "tool_start", timestamp: searchStart,
+      requestId: `osint-search-${searchStart}`,
+      data: { toolName: "osint_search", query: q, entityType: type },
+    });
+
     // 1. Local DB search
     let query = db
       .select()
@@ -369,9 +404,20 @@ osint.get("/search", async (c) => {
         );
     }
 
+    brainTelemetry.emitEvent({
+      type: "tool_complete", timestamp: Date.now(),
+      requestId: `osint-search-${searchStart}`,
+      data: { toolName: "osint_search", success: true, latencyMs: Date.now() - searchStart, resultCount: results.length, externalSearched },
+    });
+
     return c.json({ results, edges, total: results.length, externalSearched });
   } catch (error) {
     console.error("[OSINT API] /search error:", error);
+    brainTelemetry.emitEvent({
+      type: "tool_complete", timestamp: Date.now(),
+      requestId: `osint-search-${Date.now()}`,
+      data: { toolName: "osint_search", success: false },
+    });
     return c.json({ error: "Search failed" }, 500);
   }
 });
@@ -403,14 +449,25 @@ osint.post("/enrich", async (c) => {
       return c.json({ error: "Entity not found" }, 404);
     }
 
+    const enrichStart = Date.now();
+    const entityName = (entity[0] as any).name || body.entityId;
+    brainTelemetry.emitEvent({
+      type: "tool_start", timestamp: enrichStart,
+      requestId: `osint-enrich-${enrichStart}`,
+      data: { toolName: "osint_enrich", entityId: body.entityId, entityName, sources: body.sources, depth: body.depth ?? 1 },
+    });
+
     // Dynamic import — the enrichment pipeline may not be built yet
     const { enrichEntity } = await import(
       "../../../core/intelligence/enrichment-pipeline"
     );
 
-    const result = await enrichEntity(body.entityId, {
-      sources: body.sources,
-      depth: body.depth ?? 1,
+    const result = await enrichEntity(body.entityId, body.sources, body.depth ?? 1);
+
+    brainTelemetry.emitEvent({
+      type: "tool_complete", timestamp: Date.now(),
+      requestId: `osint-enrich-${enrichStart}`,
+      data: { toolName: "osint_enrich", success: true, latencyMs: Date.now() - enrichStart, entityName, newEntities: result?.newEntitiesCreated, newRelationships: result?.newRelationshipsCreated },
     });
 
     return c.json({ success: true, result });
@@ -420,6 +477,11 @@ osint.post("/enrich", async (c) => {
       return c.json({ error: "Enrichment pipeline is not available" }, 501);
     }
     console.error("[OSINT API] /enrich error:", error);
+    brainTelemetry.emitEvent({
+      type: "tool_complete", timestamp: Date.now(),
+      requestId: `osint-enrich-${Date.now()}`,
+      data: { toolName: "osint_enrich", success: false, error: error?.message },
+    });
     return c.json({ error: "Enrichment failed" }, 500);
   }
 });

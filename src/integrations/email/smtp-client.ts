@@ -192,7 +192,7 @@ export class SmtpClient {
           normal: "normal",
           low: "low",
         };
-        mailOptions.priority = priorityMap[options.priority];
+        mailOptions.priority = priorityMap[options.priority] as "normal" | "low" | "high";
       }
 
       // Add attachments
@@ -212,8 +212,8 @@ export class SmtpClient {
       return {
         success: true,
         messageId: result.messageId,
-        accepted: (result.accepted || []).map(a => String(a)),
-        rejected: (result.rejected || []).map(r => String(r)),
+        accepted: (result.accepted || []).map((a: any) => String(a)),
+        rejected: (result.rejected || []).map((r: any) => String(r)),
       };
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err);

@@ -191,6 +191,11 @@ export const AGENT_TOOL_PERMISSIONS: Record<AgentType, string[]> = {
     "browse_url",
     "list_directory",
     "search_files",
+    "fred_economic_data",
+    "finnhub_market_data",
+    "crypto_price",
+    "stock_price",
+    "currency_exchange",
   ],
   osint: [
     "web_search",

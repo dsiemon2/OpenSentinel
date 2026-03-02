@@ -85,6 +85,7 @@ export class ZaloBot {
 
     // Use Hono for the webhook server (consistent with project)
     const { Hono } = await import("hono");
+    // @ts-expect-error @hono/node-server may not have type declarations
     const { serve } = await import("@hono/node-server");
 
     const app = new Hono();

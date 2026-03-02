@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
 import { apiFetch, getWebSocketUrl } from "../lib/api";
 
 interface ChatMessage {
@@ -308,11 +309,34 @@ export default function Chat() {
       return;
     }
 
-    // Build content including attachment info
+    // Split attachments into images and documents
+    const imageAttachments = attachments.filter((a) => a.type.startsWith("image/"));
+    const docAttachments = attachments.filter((a) => !a.type.startsWith("image/"));
+
+    // Build content — images are sent as data to the LLM, docs are uploaded first
     let content = userMessage;
-    if (attachments.length > 0) {
-      const info = attachments.map((a) => `[Attached: ${a.name} (${a.type})]`).join("\n");
-      content = `${info}\n\n${userMessage}`;
+    const messageAttachments: { name: string; type: string; data: string }[] = [];
+
+    // Convert image attachments to base64 payloads for vision
+    for (const img of imageAttachments) {
+      const base64 = img.dataUrl.replace(/^data:[^;]+;base64,/, "");
+      messageAttachments.push({ name: img.name, type: img.type, data: base64 });
+    }
+
+    // Upload document attachments to server, prepend file info to content
+    for (const doc of docAttachments) {
+      try {
+        const blob = dataUrlToBlob(doc.dataUrl);
+        const formData = new FormData();
+        formData.append("file", blob, doc.name);
+        const res = await apiFetch("/api/files/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.filePath) {
+          content = `[Uploaded document: ${doc.name} at ${data.filePath}]\n${content}`;
+        }
+      } catch {
+        content = `[Failed to upload: ${doc.name}]\n${content}`;
+      }
     }
 
     const userMsg: ChatMessage = {
@@ -324,11 +348,19 @@ export default function Chat() {
     setAttachments([]);
     setLoading(true);
 
-    // Build API message history
-    const apiMessages = [...messages, { role: "user" as const, content }].map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
+    // Build API message history with attachment data for vision
+    const currentMsg: { role: string; content: string; attachments?: { name: string; type: string; data: string }[] } = {
+      role: "user" as const,
+      content,
+    };
+    if (messageAttachments.length > 0) {
+      currentMsg.attachments = messageAttachments;
+    }
+
+    const apiMessages = [
+      ...messages.map((m) => ({ role: m.role, content: m.content })),
+      currentMsg,
+    ];
 
     // Prefer WebSocket streaming; fall back to REST
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -376,6 +408,16 @@ export default function Chat() {
       }
     }
   };
+
+  /** Convert a data URL to a Blob for FormData upload */
+  function dataUrlToBlob(dataUrl: string): Blob {
+    const [header, b64] = dataUrl.split(",");
+    const mime = header.match(/:(.*?);/)?.[1] || "application/octet-stream";
+    const bytes = atob(b64);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -504,6 +546,29 @@ export default function Chat() {
     }
   };
 
+  // Custom markdown components — render download links as styled buttons
+  const markdownComponents: Components = {
+    a: ({ href, children, ...props }) => {
+      if (href && href.startsWith("/api/files/download/")) {
+        return (
+          <a
+            href={href}
+            className="download-link"
+            download
+            {...props}
+          >
+            {children}
+          </a>
+        );
+      }
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+          {children}
+        </a>
+      );
+    },
+  };
+
   return (
     <div
       className={`chat-container ${isDragging ? "dragging" : ""}`}
@@ -581,9 +646,19 @@ export default function Chat() {
           <div key={i} className={`message ${msg.role}`}>
             {msg.attachments && msg.attachments.length > 0 && (
               <div className="msg-attachments">
-                {msg.attachments.map((a, j) => (
-                  <span key={j} className="attachment-badge">{a.name}</span>
-                ))}
+                {msg.attachments.map((a, j) =>
+                  a.type.startsWith("image/") ? (
+                    <img
+                      key={j}
+                      src={a.dataUrl}
+                      alt={a.name}
+                      className="attachment-preview"
+                      title={a.name}
+                    />
+                  ) : (
+                    <span key={j} className="attachment-badge">{a.name}</span>
+                  )
+                )}
               </div>
             )}
             {msg.toolsUsed && msg.toolsUsed.length > 0 && (
@@ -591,7 +666,7 @@ export default function Chat() {
                 Tools: {[...new Set(msg.toolsUsed)].join(", ")}
               </div>
             )}
-            <ReactMarkdown>{msg.content}</ReactMarkdown>
+            <ReactMarkdown components={markdownComponents}>{msg.content}</ReactMarkdown>
             {msg.role === "assistant" && !msg.streaming && msg.content && (
               <button
                 className="speak-btn"

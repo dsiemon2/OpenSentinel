@@ -229,7 +229,7 @@ export async function runSecurityScan(
 
   // Network checks
   if (networkAudit.unexpectedPorts.length > 0) {
-    if (status !== "critical") status = "warning";
+    if ((status as string) !== "critical") status = "warning";
     recommendations.push(
       `Unexpected open ports: ${networkAudit.unexpectedPorts.join(", ")}. Verify these are intentional.`
     );
@@ -238,7 +238,7 @@ export async function runSecurityScan(
   // File integrity checks
   const fileIssues = fileIntegrity.filter((f) => f.issue);
   if (fileIssues.length > 0) {
-    if (status !== "critical") status = "warning";
+    if ((status as string) !== "critical") status = "warning";
     for (const f of fileIssues) {
       recommendations.push(`${f.file}: ${f.issue}`);
     }

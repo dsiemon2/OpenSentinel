@@ -136,13 +136,13 @@ function pageToSearchResult(page: PageObjectResponse): SearchResultPage {
       page.icon?.type === "emoji"
         ? page.icon.emoji
         : page.icon?.type === "external"
-          ? page.icon.external.url
+          ? page.icon.external?.url
           : undefined,
     cover:
       page.cover?.type === "external"
-        ? page.cover.external.url
+        ? page.cover.external?.url
         : page.cover?.type === "file"
-          ? page.cover.file.url
+          ? page.cover.file?.url
           : undefined,
     parent,
   };
@@ -175,13 +175,13 @@ function databaseToSearchResult(
       database.icon?.type === "emoji"
         ? database.icon.emoji
         : database.icon?.type === "external"
-          ? database.icon.external.url
+          ? database.icon.external?.url
           : undefined,
     cover:
       database.cover?.type === "external"
-        ? database.cover.external.url
+        ? database.cover.external?.url
         : database.cover?.type === "file"
-          ? database.cover.file.url
+          ? database.cover.file?.url
           : undefined,
     parent,
   };

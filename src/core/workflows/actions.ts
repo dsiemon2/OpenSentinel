@@ -3,6 +3,7 @@
  */
 
 import { executeTool } from "../../tools";
+import { riskEngine } from "../intelligence/risk-engine";
 import type { TriggerContext } from "./triggers";
 
 // ============================================
@@ -392,9 +393,30 @@ export class ActionExecutor {
     action: RunToolAction,
     context: ExecutionContext
   ): Promise<unknown> {
-    const input = this.substituteObjectVariables(action.tool.input, context);
+    const input = this.substituteObjectVariables(action.tool.input, context) as Record<string, unknown>;
 
-    const result = await executeTool(action.tool.name, input as Record<string, unknown>);
+    // Risk engine gate: evaluate before executing any tool from a workflow
+    const riskDecision = await riskEngine.evaluate({
+      action: "workflow_tool_execute",
+      toolName: action.tool.name,
+      input,
+      metadata: { workflowId: context.workflowId, executionId: context.executionId },
+    });
+
+    if (!riskDecision.allowed) {
+      const failedChecks = riskDecision.checks
+        .filter((c) => !c.passed)
+        .map((c) => c.message)
+        .join("; ");
+      throw new Error(`[RiskEngine] Workflow tool blocked: ${failedChecks}`);
+    }
+
+    // Inject caller context for financial tools
+    if (action.tool.name === "crypto_exchange") {
+      input._callerContext = "workflow";
+    }
+
+    const result = await executeTool(action.tool.name, input);
 
     if (!result.success) {
       throw new Error(result.error || `Tool ${action.tool.name} failed`);
@@ -668,11 +690,11 @@ export function createSendMessageAction(
   options?: Partial<BaseAction>
 ): SendMessageAction {
   return {
+    ...options,
     id,
     type: "send_message",
     name,
     message,
-    ...options,
   };
 }
 
@@ -683,11 +705,11 @@ export function createHttpRequestAction(
   options?: Partial<BaseAction>
 ): HttpRequestAction {
   return {
+    ...options,
     id,
     type: "http_request",
     name,
     request,
-    ...options,
   };
 }
 
@@ -698,11 +720,11 @@ export function createRunToolAction(
   options?: Partial<BaseAction>
 ): RunToolAction {
   return {
+    ...options,
     id,
     type: "run_tool",
     name,
     tool,
-    ...options,
   };
 }
 
@@ -713,11 +735,11 @@ export function createSendEmailAction(
   options?: Partial<BaseAction>
 ): SendEmailAction {
   return {
+    ...options,
     id,
     type: "send_email",
     name,
     email,
-    ...options,
   };
 }
 
@@ -728,11 +750,11 @@ export function createSetVariableAction(
   options?: Partial<BaseAction>
 ): SetVariableAction {
   return {
+    ...options,
     id,
     type: "set_variable",
     name,
     variable,
-    ...options,
   };
 }
 
@@ -743,11 +765,11 @@ export function createDelayAction(
   options?: Partial<BaseAction>
 ): DelayAction {
   return {
+    ...options,
     id,
     type: "delay",
     name,
     delay: { milliseconds },
-    ...options,
   };
 }
 
@@ -758,11 +780,11 @@ export function createLogAction(
   options?: Partial<BaseAction>
 ): LogAction {
   return {
+    ...options,
     id,
     type: "log",
     name,
     log,
-    ...options,
   };
 }
 
@@ -773,11 +795,11 @@ export function createTransformAction(
   options?: Partial<BaseAction>
 ): TransformAction {
   return {
+    ...options,
     id,
     type: "transform",
     name,
     transform,
-    ...options,
   };
 }
 
@@ -788,6 +810,7 @@ export function createParallelAction(
   options?: Partial<BaseAction> & { waitAll?: boolean }
 ): ParallelAction {
   return {
+    ...options,
     id,
     type: "parallel",
     name,
@@ -795,7 +818,6 @@ export function createParallelAction(
       actions,
       waitAll: options?.waitAll,
     },
-    ...options,
   };
 }
 
@@ -806,11 +828,11 @@ export function createSequenceAction(
   options?: Partial<BaseAction>
 ): SequenceAction {
   return {
+    ...options,
     id,
     type: "sequence",
     name,
     sequence: { actions },
-    ...options,
   };
 }
 

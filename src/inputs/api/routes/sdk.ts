@@ -3,6 +3,13 @@ import { executeTool, TOOLS } from "../../../tools";
 import { chatWithTools, type Message, type ChatOptions } from "../../../core/brain";
 import { prioritizeTools, getAppProfile } from "../../../core/app-profiles";
 import { storeMemory, searchMemories } from "../../../core/memory";
+import { env } from "../../../config/env";
+
+type SdkEnv = {
+  Variables: {
+    sdkApp: RegisteredApp;
+  };
+};
 
 // In-memory app registry (production would use DB)
 interface RegisteredApp {
@@ -45,7 +52,7 @@ async function sdkAuth(c: any, next: any) {
   await next();
 }
 
-const sdkRoutes = new Hono();
+const sdkRoutes = new Hono<SdkEnv>();
 
 // Registration endpoint (no auth required)
 sdkRoutes.post("/register", async (c) => {
@@ -60,15 +67,14 @@ sdkRoutes.post("/register", async (c) => {
       return c.json({ error: "name and type are required" }, 400);
     }
 
-    // Check if app already registered
+    // Check if app already registered — do not re-expose API key
     const existing = Array.from(registeredApps.values()).find(
       (a) => a.name === body.name && a.type === body.type
     );
     if (existing) {
       return c.json({
         id: existing.id,
-        apiKey: existing.apiKey,
-        message: "App already registered",
+        message: "App already registered. Use your existing API key; it is not re-sent for security.",
       });
     }
 
@@ -194,26 +200,45 @@ sdkRoutes.post("/notify", async (c) => {
       try {
         switch (ch) {
           case "telegram": {
-            const { sendTelegramMessage } = await import("../../telegram");
-            await sendTelegramMessage(fullMessage);
+            const { Bot } = await import("grammy");
+            const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
+            await bot.api.sendMessage(env.TELEGRAM_CHAT_ID, fullMessage);
             sent.push("telegram");
             break;
           }
           case "discord": {
-            const { sendDiscordMessage } = await import("../../discord");
-            await sendDiscordMessage(fullMessage);
+            const { createDiscordBot } = await import("../../discord");
+            const discord = createDiscordBot({
+              token: env.DISCORD_BOT_TOKEN || "",
+              clientId: env.DISCORD_CLIENT_ID || "",
+            });
+            if (body.recipient) {
+              await discord.sendMessage(body.recipient, fullMessage);
+            }
             sent.push("discord");
             break;
           }
           case "slack": {
-            const { sendSlackMessage } = await import("../../slack");
-            await sendSlackMessage(fullMessage);
+            const { createSlackBot } = await import("../../slack");
+            const slack = createSlackBot({
+              token: env.SLACK_BOT_TOKEN || "",
+              signingSecret: env.SLACK_SIGNING_SECRET || "",
+            });
+            if (body.recipient) {
+              await slack.sendMessage(body.recipient, fullMessage);
+            }
             sent.push("slack");
             break;
           }
           case "email": {
-            const { sendEmail } = await import("../../../integrations/email");
-            await sendEmail({
+            const { SmtpClient } = await import("../../../integrations/email");
+            const smtp = new SmtpClient({
+              host: env.EMAIL_SMTP_HOST || "localhost",
+              port: env.EMAIL_SMTP_PORT || 587,
+              secure: env.EMAIL_SMTP_SECURE || false,
+              auth: { user: env.EMAIL_USER || "", pass: env.EMAIL_PASSWORD || "" },
+            });
+            await smtp.send({
               to: body.recipient || "",
               subject: `${app.name} Notification`,
               text: body.message,
