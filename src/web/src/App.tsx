@@ -3,14 +3,34 @@ import Chat from "./components/Chat";
 import MemoryExplorer from "./components/MemoryExplorer";
 import Settings from "./components/Settings";
 import GatewayAuth from "./components/GatewayAuth";
+import GlobalSearch from "./components/GlobalSearch";
 import { isAuthRequired, apiFetch, clearStoredToken } from "./lib/api";
 
 const GraphExplorer = lazy(() => import("./components/GraphExplorer"));
 const Email = lazy(() => import("./components/Email"));
 const AuditLogViewer = lazy(() => import("./components/AuditLogViewer"));
 const Brain = lazy(() => import("./components/Brain"));
+const Overview = lazy(() => import("./components/Overview"));
+const Activity = lazy(() => import("./components/Activity"));
+const Tokens = lazy(() => import("./components/Tokens"));
+const AgentCosts = lazy(() => import("./components/AgentCosts"));
+const Agents = lazy(() => import("./components/Agents"));
+const Sessions = lazy(() => import("./components/Sessions"));
+const Tasks = lazy(() => import("./components/Tasks"));
+const Cron = lazy(() => import("./components/Cron"));
+const Webhooks = lazy(() => import("./components/Webhooks"));
+const Alerts = lazy(() => import("./components/Alerts"));
+const GitHub = lazy(() => import("./components/GitHub"));
+const Users = lazy(() => import("./components/Users"));
+const MCPs = lazy(() => import("./components/MCPs"));
+const Bots = lazy(() => import("./components/Bots"));
 
-type View = "chat" | "memories" | "graph" | "brain" | "email" | "audit" | "settings";
+type View =
+  | "overview" | "chat" | "agents" | "tasks" | "sessions"
+  | "activity" | "brain" | "audit" | "tokens" | "costs" | "memories"
+  | "cron" | "webhooks" | "alerts" | "github"
+  | "users" | "settings" | "email" | "graph"
+  | "mcps" | "bots";
 
 interface SystemStatus {
   status: string;
@@ -18,8 +38,67 @@ interface SystemStatus {
   uptime: number;
 }
 
+interface NavSection {
+  label: string;
+  items: Array<{ view: View; label: string }>;
+}
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    label: "MAIN",
+    items: [
+      { view: "overview", label: "Overview" },
+      { view: "chat", label: "Chat" },
+      { view: "graph", label: "Graph" },
+      { view: "agents", label: "Agents" },
+      { view: "bots", label: "Bots" },
+      { view: "tasks", label: "Tasks" },
+      { view: "sessions", label: "Sessions" },
+    ],
+  },
+  {
+    label: "OBSERVE",
+    items: [
+      { view: "activity", label: "Activity" },
+      { view: "brain", label: "Brain" },
+      { view: "audit", label: "Logs" },
+      { view: "tokens", label: "Tokens" },
+      { view: "costs", label: "Agent Costs" },
+      { view: "memories", label: "Memory" },
+    ],
+  },
+  {
+    label: "AUTOMATE",
+    items: [
+      { view: "cron", label: "Cron" },
+      { view: "webhooks", label: "Webhooks" },
+      { view: "alerts", label: "Alerts" },
+      { view: "github", label: "GitHub" },
+    ],
+  },
+  {
+    label: "ADMIN",
+    items: [
+      { view: "mcps", label: "MCPs" },
+      { view: "users", label: "Users" },
+      { view: "settings", label: "Settings" },
+      { view: "email", label: "Email" },
+    ],
+  },
+];
+
+function LazyPage({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<div style={{ padding: 24, color: "var(--text-secondary)" }}>
+      <div className="loading"><div className="spinner" /> Loading...</div>
+    </div>}>
+      {children}
+    </Suspense>
+  );
+}
+
 function App() {
-  const [view, setView] = useState<View>("chat");
+  const [view, setView] = useState<View>("overview");
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [authState, setAuthState] = useState<"checking" | "required" | "authenticated">("checking");
   const [graphSearch, setGraphSearch] = useState<string | null>(null);
@@ -92,62 +171,42 @@ function App() {
           <span>Open</span>Sentinel
         </div>
 
+        <GlobalSearch setView={setView} />
+
         <nav>
-          <div
-            className={`nav-item ${view === "chat" ? "active" : ""}`}
-            onClick={() => setView("chat")}
-          >
-            Chat
-          </div>
-          <div
-            className={`nav-item ${view === "memories" ? "active" : ""}`}
-            onClick={() => setView("memories")}
-          >
-            Memories
-          </div>
-          <div
-            className={`nav-item ${view === "graph" ? "active" : ""}`}
-            onClick={() => setView("graph")}
-          >
-            Graph
-          </div>
-          <div
-            className={`nav-item ${view === "brain" ? "active" : ""}`}
-            onClick={() => setView("brain")}
-          >
-            Brain
-          </div>
-          <div
-            className={`nav-item ${view === "email" ? "active" : ""}`}
-            onClick={() => setView("email")}
-          >
-            Email
-          </div>
-          <div
-            className={`nav-item ${view === "audit" ? "active" : ""}`}
-            onClick={() => setView("audit")}
-          >
-            Audit Log
-          </div>
-          <div
-            className={`nav-item ${view === "settings" ? "active" : ""}`}
-            onClick={() => setView("settings")}
-          >
-            Settings
-          </div>
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.label}>
+              <div className="nav-section-label">{section.label}</div>
+              {section.items.map((item) => (
+                <div
+                  key={item.view}
+                  className={`nav-item ${view === item.view ? "active" : ""}`}
+                  onClick={() => setView(item.view)}
+                >
+                  {item.label}
+                </div>
+              ))}
+            </div>
+          ))}
         </nav>
 
-        <div style={{ marginTop: "auto" }}>
+        <div style={{ marginTop: "auto", flexShrink: 0 }}>
           <div className="status">
             <span
               className={`status-dot ${status?.status === "online" ? "" : "offline"}`}
             />
             {status?.status === "online" ? "Online" : "Offline"}
+            {status?.version && (
+              <span style={{ marginLeft: "auto", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+                v{status.version}
+              </span>
+            )}
           </div>
         </div>
       </aside>
 
       <main className="main">
+        {view === "overview" && <LazyPage><Overview setView={setView} /></LazyPage>}
         {view === "chat" && <Chat />}
         {view === "memories" && (
           <MemoryExplorer
@@ -158,26 +217,27 @@ function App() {
           />
         )}
         {view === "graph" && (
-          <Suspense fallback={<div style={{ padding: 24 }}>Loading Graph Explorer...</div>}>
+          <LazyPage>
             <GraphExplorer initialSearch={graphSearch} onSearchConsumed={() => setGraphSearch(null)} />
-          </Suspense>
+          </LazyPage>
         )}
-        {view === "brain" && (
-          <Suspense fallback={<div style={{ padding: 24 }}>Loading Brain Dashboard...</div>}>
-            <Brain />
-          </Suspense>
-        )}
-        {view === "email" && (
-          <Suspense fallback={<div style={{ padding: 24 }}>Loading Email...</div>}>
-            <Email />
-          </Suspense>
-        )}
-        {view === "audit" && (
-          <Suspense fallback={<div style={{ padding: 24 }}>Loading Audit Logs...</div>}>
-            <AuditLogViewer />
-          </Suspense>
-        )}
+        {view === "brain" && <LazyPage><Brain /></LazyPage>}
+        {view === "email" && <LazyPage><Email /></LazyPage>}
+        {view === "audit" && <LazyPage><AuditLogViewer /></LazyPage>}
         {view === "settings" && <Settings />}
+        {view === "activity" && <LazyPage><Activity /></LazyPage>}
+        {view === "tokens" && <LazyPage><Tokens /></LazyPage>}
+        {view === "costs" && <LazyPage><AgentCosts /></LazyPage>}
+        {view === "agents" && <LazyPage><Agents /></LazyPage>}
+        {view === "sessions" && <LazyPage><Sessions /></LazyPage>}
+        {view === "tasks" && <LazyPage><Tasks /></LazyPage>}
+        {view === "cron" && <LazyPage><Cron /></LazyPage>}
+        {view === "webhooks" && <LazyPage><Webhooks /></LazyPage>}
+        {view === "alerts" && <LazyPage><Alerts /></LazyPage>}
+        {view === "github" && <LazyPage><GitHub /></LazyPage>}
+        {view === "users" && <LazyPage><Users /></LazyPage>}
+        {view === "mcps" && <LazyPage><MCPs /></LazyPage>}
+        {view === "bots" && <LazyPage><Bots /></LazyPage>}
       </main>
     </div>
   );

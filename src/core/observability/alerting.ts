@@ -138,6 +138,48 @@ let channelConfig: AlertChannelConfig = {
 };
 
 /**
+ * Load alert history from database on startup
+ */
+let historyLoaded = false;
+export async function loadAlertHistoryFromDb(): Promise<void> {
+  if (historyLoaded) return;
+  try {
+    const rows = await db
+      .select()
+      .from(errorLogs)
+      .where(eq(errorLogs.source, "alerting"))
+      .orderBy(desc(errorLogs.createdAt))
+      .limit(500);
+
+    for (const row of rows.reverse()) {
+      // Parse the alert type and severity from stored fields
+      const alertType = (row.errorType?.replace("Alert:", "") || "system") as AlertType;
+      const severity = (row.errorCode || "info") as AlertSeverity;
+      const [title, ...msgParts] = (row.message || "").split(": ");
+      const alert: Alert = {
+        id: String(row.id),
+        type: alertType,
+        severity,
+        title: title || "Alert",
+        message: msgParts.join(": ") || row.message || "",
+        source: "alert_rule",
+        timestamp: new Date(row.createdAt),
+        metadata: (row.context || {}) as Record<string, unknown>,
+        acknowledged: false,
+        resolved: true, // historical alerts are resolved
+      };
+      alertHistory.push(alert);
+    }
+    historyLoaded = true;
+    if (alertHistory.length > 0) {
+      console.log(`[Alerting] Loaded ${alertHistory.length} historical alerts from DB`);
+    }
+  } catch {
+    // DB may not be available yet
+  }
+}
+
+/**
  * Initialize default alert rules
  */
 export function initializeDefaultRules(): void {
@@ -467,6 +509,18 @@ export function getActiveAlerts(type?: AlertType, severity?: AlertSeverity): Ale
  */
 export function getAlertHistory(limit: number = 100): Alert[] {
   return alertHistory.slice(-limit).reverse();
+}
+
+/**
+ * Clear alert history (in-memory + DB)
+ */
+export function clearAlertHistory(): void {
+  alertHistory.length = 0;
+  activeAlerts.clear();
+  // Also clear from DB (fire-and-forget)
+  db.delete(errorLogs)
+    .where(eq(errorLogs.source, "alerting"))
+    .catch(() => {});
 }
 
 /**

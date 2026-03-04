@@ -179,6 +179,25 @@ export async function getUserAgents(
   return Promise.all(agents.map((a) => getAgent(a.id) as Promise<Agent>));
 }
 
+// Get all agents (no userId filter)
+export async function getAllAgents(
+  status?: AgentStatus,
+  limit: number = 50
+): Promise<Agent[]> {
+  let query;
+  if (status) {
+    query = db
+      .select()
+      .from(subAgents)
+      .where(eq(subAgents.status, status));
+  } else {
+    query = db.select().from(subAgents);
+  }
+
+  const agents = await query.orderBy(desc(subAgents.createdAt)).limit(limit);
+  return Promise.all(agents.map((a) => getAgent(a.id) as Promise<Agent>));
+}
+
 // Update agent status
 export async function updateAgentStatus(
   agentId: string,
@@ -329,6 +348,7 @@ export default {
   spawnAgent,
   getAgent,
   getUserAgents,
+  getAllAgents,
   updateAgentStatus,
   addAgentMessage,
   addAgentProgress,

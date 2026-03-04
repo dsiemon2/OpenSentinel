@@ -12,16 +12,81 @@ interface SystemStatus {
   };
 }
 
+interface ServiceStatus {
+  name: string;
+  status: "checking" | "connected" | "disconnected" | "error";
+  detail?: string;
+}
+
 export default function Settings() {
   const [status, setStatus] = useState<SystemStatus | null>(null);
   const [useTools, setUseTools] = useState(true);
+  const [services, setServices] = useState<ServiceStatus[]>([
+    { name: "API Server", status: "checking" },
+    { name: "PostgreSQL", status: "checking" },
+    { name: "Redis", status: "checking" },
+    { name: "Email (IMAP)", status: "checking" },
+  ]);
 
   useEffect(() => {
+    // Fetch system status
     apiFetch("/api/system/status")
       .then((r) => r.json())
-      .then(setStatus)
-      .catch(console.error);
+      .then((data) => {
+        setStatus(data);
+        // API server is reachable
+        updateService("API Server", "connected", `v${data.version}`);
+      })
+      .catch(() => {
+        updateService("API Server", "error", "Unreachable");
+      });
+
+    // Check DB via metrics overview (hits the database)
+    apiFetch("/api/metrics/overview")
+      .then((r) => {
+        if (r.ok) {
+          updateService("PostgreSQL", "connected");
+        } else {
+          updateService("PostgreSQL", "error", `HTTP ${r.status}`);
+        }
+      })
+      .catch(() => {
+        updateService("PostgreSQL", "disconnected", "Cannot reach DB");
+      });
+
+    // Check Redis via scheduler stats (uses BullMQ/Redis)
+    apiFetch("/api/scheduler/stats")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && (data.waiting !== undefined || data.tasks)) {
+          updateService("Redis", "connected");
+        } else {
+          updateService("Redis", "disconnected", "No stats returned");
+        }
+      })
+      .catch(() => {
+        updateService("Redis", "disconnected", "Cannot reach Redis");
+      });
+
+    // Check Email via folders endpoint
+    apiFetch("/api/email/folders?email_address=test@check")
+      .then((r) => {
+        if (r.status === 503) {
+          updateService("Email (IMAP)", "disconnected", "Not configured");
+        } else if (r.status === 500) {
+          updateService("Email (IMAP)", "error", "Connection failed");
+        } else {
+          updateService("Email (IMAP)", "connected");
+        }
+      })
+      .catch(() => {
+        updateService("Email (IMAP)", "disconnected", "Not available");
+      });
   }, []);
+
+  const updateService = (name: string, status: ServiceStatus["status"], detail?: string) => {
+    setServices(prev => prev.map(s => s.name === name ? { ...s, status, detail } : s));
+  };
 
   const formatUptime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -31,6 +96,24 @@ export default function Settings() {
 
   const formatBytes = (bytes: number) => {
     return (bytes / 1024 / 1024).toFixed(1) + " MB";
+  };
+
+  const statusColor = (s: ServiceStatus["status"]) => {
+    switch (s) {
+      case "connected": return "var(--success)";
+      case "disconnected": return "#f59e0b";
+      case "error": return "#ef4444";
+      default: return "var(--text-secondary)";
+    }
+  };
+
+  const statusLabel = (s: ServiceStatus["status"]) => {
+    switch (s) {
+      case "connected": return "Connected";
+      case "disconnected": return "Disconnected";
+      case "error": return "Error";
+      default: return "Checking...";
+    }
   };
 
   return (
@@ -93,18 +176,26 @@ export default function Settings() {
 
       <div className="setting-group">
         <h3>Connected Services</h3>
-        <div className="setting-row">
-          <span>Telegram Bot</span>
-          <span style={{ color: "var(--success)" }}>Connected</span>
-        </div>
-        <div className="setting-row">
-          <span>PostgreSQL</span>
-          <span style={{ color: "var(--success)" }}>Connected</span>
-        </div>
-        <div className="setting-row">
-          <span>Redis</span>
-          <span style={{ color: "var(--success)" }}>Connected</span>
-        </div>
+        {services.map(service => (
+          <div className="setting-row" key={service.name}>
+            <span>{service.name}</span>
+            <span style={{ color: statusColor(service.status), display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{
+                display: "inline-block",
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: statusColor(service.status),
+              }} />
+              {statusLabel(service.status)}
+              {service.detail && (
+                <span style={{ fontSize: 11, color: "var(--text-secondary)", marginLeft: 4 }}>
+                  ({service.detail})
+                </span>
+              )}
+            </span>
+          </div>
+        ))}
       </div>
 
       <div className="setting-group">

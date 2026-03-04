@@ -427,9 +427,163 @@ app.route("/api/sdk", sdkRoutes);
 import adminRouter from "./routes/admin";
 app.route("/api/admin", adminRouter);
 
+// ===== Dashboard Audit Logs (no admin auth required) =====
+app.get("/api/audit-logs", async (c) => {
+  try {
+    const { queryAuditLogs } = await import("../../core/security/audit-logger");
+    const url = new URL(c.req.url);
+    const options: Record<string, unknown> = {};
+    const userId = url.searchParams.get("userId");
+    if (userId) options.userId = userId;
+    const action = url.searchParams.get("action");
+    if (action) options.action = action;
+    const resource = url.searchParams.get("resource");
+    if (resource) options.resource = resource;
+    const startDate = url.searchParams.get("startDate");
+    if (startDate) options.startDate = new Date(startDate);
+    const endDate = url.searchParams.get("endDate");
+    if (endDate) options.endDate = new Date(endDate);
+    const limit = url.searchParams.get("limit");
+    if (limit) options.limit = parseInt(limit);
+    const offset = url.searchParams.get("offset");
+    if (offset) options.offset = parseInt(offset);
+    const logs = await queryAuditLogs(options as any);
+    return c.json({ success: true, logs });
+  } catch (err: any) {
+    return c.json({ success: false, error: err?.message || "Failed to query audit logs", logs: [] });
+  }
+});
+
+app.get("/api/audit-logs/integrity", async (c) => {
+  try {
+    const { getAuditChainIntegrity } = await import("../../core/security/audit-logger");
+    const integrity = await getAuditChainIntegrity();
+    return c.json({ success: true, ...integrity });
+  } catch (err: any) {
+    return c.json({ success: false, error: err?.message, chainValid: false, totalEntries: 0, lastSequence: 0 });
+  }
+});
+
+// ===== Clear History Endpoints =====
+
+// DELETE /api/audit-logs — Clear all audit logs
+app.delete("/api/audit-logs", async (c) => {
+  try {
+    const { auditLogs } = await import("../../db/schema");
+    await db.delete(auditLogs);
+    return c.json({ success: true });
+  } catch (err: any) {
+    return c.json({ error: err?.message || "Failed to clear audit logs" }, 500);
+  }
+});
+
+// DELETE /api/conversations — Clear all sessions/conversations
+app.delete("/api/conversations", async (c) => {
+  try {
+    await db.delete(messages);
+    await db.delete(conversations);
+    return c.json({ success: true });
+  } catch (err: any) {
+    return c.json({ error: err?.message || "Failed to clear sessions" }, 500);
+  }
+});
+
+// DELETE /api/conversations/:id — Delete a single conversation and its messages
+app.delete("/api/conversations/:id", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const convo = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, id))
+      .limit(1);
+
+    if (convo.length === 0) {
+      return c.json({ error: "Conversation not found" }, 404);
+    }
+
+    await db.delete(messages).where(eq(messages.conversationId, id));
+    await db.delete(conversations).where(eq(conversations.id, id));
+    return c.json({ success: true, id });
+  } catch (err: any) {
+    return c.json({ error: err?.message || "Failed to delete conversation" }, 500);
+  }
+});
+
 // ===== Brain Dashboard API (Telemetry, Pipeline, Agents) =====
 import brainRouter from "./routes/brain";
 app.route("/api/brain", brainRouter);
+
+// ===== Scheduler API (Cron Jobs) =====
+import schedulerRouter from "./routes/scheduler";
+app.route("/api/scheduler", schedulerRouter);
+
+// ===== Alerts API =====
+import alertsRouter from "./routes/alerts";
+app.route("/api/alerts", alertsRouter);
+
+// ===== Webhooks API =====
+import webhooksRouter from "./routes/webhooks";
+app.route("/api/webhooks", webhooksRouter);
+
+// ===== GitHub API =====
+import githubRouter from "./routes/github";
+app.route("/api/github", githubRouter);
+
+// ===== Metrics API (authenticated routes for external use) =====
+import metricsRouter from "./routes/metrics";
+app.route("/api/metrics", metricsRouter);
+
+// ===== Metrics Overview (dashboard-accessible, no API key required) =====
+app.get("/api/metrics/overview", async (c) => {
+  try {
+    const { getMetricAggregates } = await import("../../core/observability/metrics");
+    const { getErrorStats } = await import("../../core/observability/error-tracker");
+    const now = new Date();
+    const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const [latencyDay, inputDay, outputDay, errorsDay, inputWeek, outputWeek] = await Promise.allSettled([
+      getMetricAggregates("response_latency" as any, dayAgo, now),
+      getMetricAggregates("token_usage_input" as any, dayAgo, now),
+      getMetricAggregates("token_usage_output" as any, dayAgo, now),
+      getErrorStats(dayAgo, now),
+      getMetricAggregates("token_usage_input" as any, weekAgo, now),
+      getMetricAggregates("token_usage_output" as any, weekAgo, now),
+    ]);
+
+    const val = (r: PromiseSettledResult<any>, key: string) =>
+      r.status === "fulfilled" ? (r.value?.[key] ?? 0) : 0;
+
+    return c.json({
+      last24h: {
+        inputTokens: val(inputDay, "sum"),
+        outputTokens: val(outputDay, "sum"),
+        requests: val(latencyDay, "count"),
+        avgLatencyMs: val(latencyDay, "avg"),
+        errors: errorsDay.status === "fulfilled" ? (errorsDay.value?.total ?? 0) : 0,
+      },
+      last7d: {
+        inputTokens: val(inputWeek, "sum"),
+        outputTokens: val(outputWeek, "sum"),
+      },
+    });
+  } catch {
+    return c.json({ last24h: {}, last7d: {} });
+  }
+});
+
+// ===== MCP Servers API =====
+import mcpRouter from "./routes/mcp";
+app.route("/api/mcp", mcpRouter);
+
+// ===== Bots API =====
+import botsRouter from "./routes/bots";
+app.route("/api/bots", botsRouter);
+
+// ===== Users API =====
+import usersRouter from "./routes/users";
+app.route("/api/users", usersRouter);
 
 // ===== Incident Response API =====
 
@@ -548,20 +702,11 @@ app.post("/api/tts", async (c) => {
 // ===== System API =====
 
 app.get("/api/system/status", async (c) => {
-  // Only expose detailed stats to authenticated requests (Bearer token)
-  const authHeader = c.req.header("Authorization");
-  if (authHeader?.startsWith("Bearer ")) {
-    return c.json({
-      status: "online",
-      version: "3.0.0",
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-    });
-  }
-  // Public: only expose status and version (no runtime details)
   return c.json({
     status: "online",
-    version: "3.0.0",
+    version: "3.4.0",
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
   });
 });
 

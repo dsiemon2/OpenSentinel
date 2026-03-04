@@ -401,6 +401,10 @@ class BrainTelemetry extends EventEmitter {
     return this.activityBuffer.slice(start);
   }
 
+  clearActivity(): void {
+    this.activityBuffer = [];
+  }
+
   getScores(): BrainScoreSnapshot {
     const summary = costTracker.getCostSummary();
     const trend = costTracker.getCostTrend();

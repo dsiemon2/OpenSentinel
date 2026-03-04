@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2026-03-04
+
+### Added
+- **Dashboard Full CRUD**: All 24 dashboard pages now have complete Create, Read, Update, Delete operations
+  - MemoryExplorer: Create, Edit, Delete memory entries with modals
+  - Users: Edit (name, role) and Delete with confirmation
+  - Cron: Edit modal for custom job name and cron pattern
+  - Webhooks: Edit modal (name, description, trigger type)
+  - Alerts: Rule Edit/Delete with modals
+  - Sessions: Per-session Delete button with confirmation
+  - Settings: Real-time connectivity checks for API, PostgreSQL, Redis, and Email
+- **4 New Backend Endpoints**:
+  - `DELETE /api/conversations/:id` — delete single conversation with messages
+  - `PUT /api/webhooks/:id` — update webhook name, description, trigger config
+  - `DELETE /api/alerts/rules/:id` — remove specific alert rule
+  - `PUT /api/alerts/rules/:id` — update alert rule config
+  - `PUT /api/scheduler/jobs/:key` — update scheduled job (delete + recreate)
+- **6 New Test Files**: bots-routes (18 tests), mcp-routes (9 tests), email-routes, metrics-routes (19 tests), dashboard-cross (cross-functionality), alerts-routes additions
+- **5 Updated Test Files**: webhooks-routes (full rewrite), alerts-routes (+rule CRUD), scheduler-routes (+edit), users-routes (+delete), brain-routes (+seed/clear)
+
+### Changed
+- Test count: 6,300+ → 6,400+ across 187 test files
+- Version bump: 3.2.0 → 3.5.0
+- All dashboard components now have consistent CRUD patterns with modal dialogs
+- Settings page uses real API health checks instead of hardcoded status
+
 ## [Unreleased]
 
 ### Added
@@ -372,7 +398,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Desktop app (Electron)
 - Browser extension (Chrome/Firefox)
 
-[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/dsiemon2/OpenSentinel/compare/v3.5.0...HEAD
+[3.5.0]: https://github.com/dsiemon2/OpenSentinel/compare/v3.1.0...v3.5.0
 [3.1.0]: https://github.com/dsiemon2/OpenSentinel/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.9.0...v3.0.0
 [2.9.0]: https://github.com/dsiemon2/OpenSentinel/compare/v2.8.0...v2.9.0

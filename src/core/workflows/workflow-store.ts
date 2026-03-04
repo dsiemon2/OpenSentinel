@@ -88,6 +88,59 @@ export type NewDbWorkflowExecution = typeof workflowExecutions.$inferInsert;
 // ============================================
 
 export class WorkflowStore {
+  private static tableReady = false;
+
+  /**
+   * Ensure the workflows and workflow_executions tables exist
+   */
+  private async ensureTables(): Promise<void> {
+    if (WorkflowStore.tableReady) return;
+    try {
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS workflows (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          name TEXT NOT NULL,
+          description TEXT,
+          user_id UUID,
+          status TEXT NOT NULL,
+          triggers JSONB NOT NULL DEFAULT '[]'::jsonb,
+          steps JSONB NOT NULL DEFAULT '[]'::jsonb,
+          variables JSONB,
+          metadata JSONB,
+          on_error JSONB,
+          rate_limit JSONB,
+          tags JSONB,
+          last_executed_at TIMESTAMP,
+          last_execution_id UUID,
+          last_execution_status TEXT,
+          execution_count INTEGER DEFAULT 0,
+          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+        )
+      `);
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS workflow_executions (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          workflow_id UUID NOT NULL REFERENCES workflows(id) ON DELETE CASCADE,
+          workflow_name TEXT NOT NULL,
+          status TEXT NOT NULL,
+          trigger_context JSONB NOT NULL DEFAULT '{}'::jsonb,
+          step_results JSONB NOT NULL DEFAULT '[]'::jsonb,
+          variables JSONB,
+          error TEXT,
+          duration_ms INTEGER,
+          started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          completed_at TIMESTAMP
+        )
+      `);
+      await db.execute(sql`CREATE INDEX IF NOT EXISTS workflows_user_idx ON workflows(user_id)`);
+      await db.execute(sql`CREATE INDEX IF NOT EXISTS workflows_status_idx ON workflows(status)`);
+      WorkflowStore.tableReady = true;
+    } catch {
+      // Tables may already exist or DB may not be available
+    }
+  }
+
   // ============================================
   // WORKFLOW CRUD
   // ============================================
@@ -96,6 +149,7 @@ export class WorkflowStore {
    * Create a new workflow
    */
   async createWorkflow(workflow: Workflow): Promise<DbWorkflow> {
+    await this.ensureTables();
     const [created] = await db
       .insert(workflows)
       .values({
@@ -124,6 +178,7 @@ export class WorkflowStore {
    * Get a workflow by ID
    */
   async getWorkflow(workflowId: string): Promise<DbWorkflow | null> {
+    await this.ensureTables();
     const [workflow] = await db
       .select()
       .from(workflows)
@@ -137,6 +192,7 @@ export class WorkflowStore {
    * Get all workflows
    */
   async getAllWorkflows(): Promise<DbWorkflow[]> {
+    await this.ensureTables();
     return db
       .select()
       .from(workflows)
@@ -184,6 +240,7 @@ export class WorkflowStore {
     workflowId: string,
     updates: Partial<Omit<Workflow, "id" | "createdAt">>
   ): Promise<DbWorkflow | null> {
+    await this.ensureTables();
     const updateData: Record<string, unknown> = {
       updatedAt: new Date(),
     };
@@ -227,6 +284,7 @@ export class WorkflowStore {
    * Delete a workflow
    */
   async deleteWorkflow(workflowId: string): Promise<boolean> {
+    await this.ensureTables();
     const result = await db
       .delete(workflows)
       .where(eq(workflows.id, workflowId)) as unknown as { rowCount: number };

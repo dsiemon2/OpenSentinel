@@ -20,6 +20,7 @@ import {
 import { chat, streamChat, chatWithTools, streamChatWithTools } from "../../core/brain";
 import type { Message } from "../../core/brain";
 import { brainTelemetry, type BrainEvent } from "../../core/observability/brain-telemetry";
+import { audit } from "../../core/security/audit-logger";
 
 // ============================================
 // CONNECTION MANAGEMENT
@@ -96,19 +97,52 @@ async function handleChatWithTools(
 ): Promise<void> {
   const { id, payload } = msg;
   const messages = payload.messages || [];
+  const userId = payload.userId || "web:default";
 
   if (messages.length === 0) {
     ws.send(createServerMessage("error", id, { error: "No messages provided" }));
     return;
   }
 
+  // Persist conversation and user message to database
+  let conversationId: string | null = null;
+  try {
+    const { db } = await import("../../db");
+    const { conversations, messages: messagesTable } = await import("../../db/schema");
+
+    // Create or reuse conversation
+    const [conv] = await db.insert(conversations).values({
+      title: (messages[messages.length - 1]?.content || "Web Chat").slice(0, 100),
+      source: "web",
+      metadata: { wsConnectionId: id, userId },
+    }).returning({ id: conversations.id });
+    conversationId = conv.id;
+
+    // Save user message
+    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user");
+    if (lastUserMsg) {
+      await db.insert(messagesTable).values({
+        conversationId: conv.id,
+        role: "user",
+        content: lastUserMsg.content,
+      });
+    }
+
+    // Audit log
+    audit.toolUse(userId, "chat_message", { conversationId: conv.id, source: "web", messageLength: lastUserMsg?.content?.length || 0 }, true).catch(() => {});
+  } catch (err) {
+    console.warn("[WebSocket] Failed to persist conversation:", err);
+  }
+
   try {
     // Use streaming generator for real-time events
-    const stream = streamChatWithTools(messages, payload.userId);
+    const stream = streamChatWithTools(messages, userId);
+    let fullContent = "";
 
     for await (const event of stream) {
       switch (event.type) {
         case "chunk":
+          fullContent += event.data.text || "";
           ws.send(createServerMessage("chunk", id, { text: event.data.text }));
           break;
         case "tool_start":
@@ -132,6 +166,24 @@ async function handleChatWithTools(
             },
             toolsUsed: event.data.toolsUsed,
           }));
+          fullContent = event.data.content || fullContent;
+
+          // Save assistant response to database
+          if (conversationId) {
+            try {
+              const { db } = await import("../../db");
+              const { messages: messagesTable, conversations } = await import("../../db/schema");
+              const { eq } = await import("drizzle-orm");
+              await db.insert(messagesTable).values({
+                conversationId,
+                role: "assistant",
+                content: fullContent,
+                tokenCount: (event.data.inputTokens || 0) + (event.data.outputTokens || 0),
+                metadata: { toolsUsed: event.data.toolsUsed, inputTokens: event.data.inputTokens, outputTokens: event.data.outputTokens },
+              });
+              await db.update(conversations).set({ updatedAt: new Date() }).where(eq(conversations.id, conversationId));
+            } catch {}
+          }
           break;
         case "error":
           ws.send(createServerMessage("error", id, { error: event.data.error }));

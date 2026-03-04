@@ -2,7 +2,7 @@
 
 ## Overview
 
-OpenSentinel v3.4.0 has a comprehensive test suite with **6,300+ tests** across **190+ test files**. Tests cover the core brain, agentic RAG pipeline, all input channels, integrations, tools, brain telemetry, ML algorithms, finance data providers, and utility modules.
+OpenSentinel v3.5.0 has a comprehensive test suite with **6,400+ tests** across **187 test files**. Tests cover the core brain, agentic RAG pipeline, all input channels, integrations, tools, brain telemetry, ML algorithms, finance data providers, dashboard route CRUD operations, cross-functionality, and utility modules.
 
 ## Test Framework
 

@@ -1,10 +1,11 @@
 # OpenSentinel — Complete Feature Reference
 
-> **Version 3.4.0** | March 2026
-> Self-hosted AI assistant powered by Claude with 300+ features, 123 tools, 15 MCP servers, 25 built-in skills, and 6,100+ tests.
+> **Version 3.5.0** | March 2026
+> Self-hosted AI assistant powered by Claude with 300+ features, 123 tools, 15 MCP servers, 25 built-in skills, and 6,400+ tests.
 > Intelligent model routing, self-correcting reasoning, and context compaction built in.
 > Full Agentic RAG pipeline: tool pre-classification, memory middleware, pipeline orchestrator, and Brain telemetry dashboard.
 > Advanced RAG pipeline with all 5 enhancements enabled by default.
+> 24 dashboard pages with full CRUD operations, real-time connectivity monitoring, and cross-functionality testing.
 > Talk to it via Telegram, Discord, Slack, Web, Voice, or API — it does the rest.
 
 ---

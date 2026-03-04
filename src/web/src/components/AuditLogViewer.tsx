@@ -52,6 +52,8 @@ export default function AuditLogViewer() {
     totalEntries: number;
     lastSequence: number;
   } | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const limit = 50;
 
@@ -68,7 +70,7 @@ export default function AuditLogViewer() {
       if (filters.startDate) params.set("startDate", filters.startDate);
       if (filters.endDate) params.set("endDate", filters.endDate);
 
-      const res = await apiFetch(`/api/admin/audit-logs?${params.toString()}`);
+      const res = await apiFetch(`/api/audit-logs?${params.toString()}`);
       const data = await res.json();
 
       if (data.success) {
@@ -86,7 +88,7 @@ export default function AuditLogViewer() {
 
   const fetchIntegrity = async () => {
     try {
-      const res = await apiFetch("/api/admin/audit-logs/integrity");
+      const res = await apiFetch("/api/audit-logs/integrity");
       const data = await res.json();
       if (data.success) {
         setIntegrity({
@@ -114,6 +116,17 @@ export default function AuditLogViewer() {
     fetchLogs(0);
   };
 
+  const handleClearHistory = async () => {
+    setClearing(true);
+    try {
+      await apiFetch("/api/audit-logs", { method: "DELETE" });
+      setLogs([]);
+      setShowConfirm(false);
+      await fetchIntegrity();
+    } catch {}
+    setClearing(false);
+  };
+
   const formatDate = (iso: string) => {
     const d = new Date(iso);
     return d.toLocaleString();
@@ -134,6 +147,13 @@ export default function AuditLogViewer() {
             Chain: {integrity.chainValid ? "Valid" : "Invalid"} | {integrity.totalEntries} entries
           </span>
         )}
+        <button
+          className="btn-secondary"
+          style={{ marginLeft: "auto", fontSize: 12, padding: "4px 12px", color: "#ef4444" }}
+          onClick={() => setShowConfirm(true)}
+        >
+          Clear History
+        </button>
       </div>
 
       {/* Filters */}
@@ -260,6 +280,29 @@ export default function AuditLogViewer() {
           Next
         </button>
       </div>
+
+      {/* Confirm Clear Dialog */}
+      {showConfirm && (
+        <div className="modal-overlay" onClick={() => setShowConfirm(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>Clear Audit Log History</h3>
+            <p style={{ fontSize: 14, color: "var(--text-secondary)", margin: "12px 0" }}>
+              Are you sure you want to delete all audit log entries? This action cannot be undone.
+            </p>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setShowConfirm(false)}>Cancel</button>
+              <button
+                className="btn-primary"
+                style={{ background: "#ef4444" }}
+                onClick={handleClearHistory}
+                disabled={clearing}
+              >
+                {clearing ? "Clearing..." : "Yes, Clear All"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

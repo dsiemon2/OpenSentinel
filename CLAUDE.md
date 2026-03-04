@@ -40,7 +40,7 @@ Deployment is handled via manual `rsync`/`scp` to the production server, followe
 
 ## Testing
 
-OpenSentinel uses **Bun's native test runner** (`bun:test`) with 170 test files and 5,800+ tests.
+OpenSentinel uses **Bun's native test runner** (`bun:test`) with 187 test files and 6,400+ tests.
 
 ```bash
 # Run all tests
@@ -206,7 +206,7 @@ OpenSentinel includes full SEO configuration for search engine visibility:
 - Favicon source files are generated via Python PIL (dark theme: `rgb(30, 41, 59)`, accent: `rgb(99, 102, 241)`)
 
 ---
-*Last Updated: 2026-03-02*
+*Last Updated: 2026-03-04*
 
 
 ## Workflow Orchestration

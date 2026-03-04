@@ -1,7 +1,7 @@
 import { env } from "./config/env";
 import { createBot } from "./inputs/telegram/bot";
 import { app } from "./inputs/api/server";
-import { startWorker, stopWorker } from "./core/scheduler";
+import { startWorker, stopWorker, initializeScheduler } from "./core/scheduler";
 import { DiscordBot } from "./inputs/discord";
 import { SlackBot } from "./inputs/slack";
 import { WhatsAppBot } from "./inputs/whatsapp";
@@ -46,9 +46,9 @@ export async function main() {
     console.log("[Telegram] No bot token configured, skipping");
   }
 
-  // Start scheduler worker
+  // Start scheduler with recurring jobs
   try {
-    startWorker(async (task) => {
+    await initializeScheduler(async (task) => {
       console.log(`[Scheduler] Executing task: ${task.type}`);
       if (task.chatId && task.message && bot) {
         try {
@@ -60,6 +60,24 @@ export async function main() {
     });
   } catch (err) {
     console.warn("[Scheduler] Could not start worker (Redis may be unavailable):", err);
+  }
+
+  // Load historical cost data from database
+  try {
+    const { costTracker } = await import("./core/observability/cost-tracker");
+    await costTracker.loadFromDb();
+  } catch (err) {
+    console.warn("[CostTracker] Could not load historical data:", err);
+  }
+
+  // Initialize alerting system with default rules + load alert history from DB
+  try {
+    const { startAlertingSystem, loadAlertHistoryFromDb } = await import("./core/observability/alerting");
+    await loadAlertHistoryFromDb();
+    startAlertingSystem(60000);
+    console.log("[Alerting] System started with default rules");
+  } catch (err) {
+    console.warn("[Alerting] Could not start alerting system:", err);
   }
 
   // Initialize MCP (Model Context Protocol) servers in background (non-blocking)

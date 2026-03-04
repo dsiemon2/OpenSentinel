@@ -17,6 +17,7 @@ import {
   type EntityCandidate,
 } from "../../../core/intelligence/entity-resolution";
 import { brainTelemetry } from "../../../core/observability/brain-telemetry";
+import { audit } from "../../../core/security/audit-logger";
 
 // Lazy-init the public records facade (avoid startup cost if OSINT is disabled)
 let _publicRecords: ReturnType<typeof createPublicRecords> | null = null;
@@ -404,20 +405,25 @@ osint.get("/search", async (c) => {
         );
     }
 
+    const searchLatency = Date.now() - searchStart;
     brainTelemetry.emitEvent({
       type: "tool_complete", timestamp: Date.now(),
       requestId: `osint-search-${searchStart}`,
-      data: { toolName: "osint_search", success: true, latencyMs: Date.now() - searchStart, resultCount: results.length, externalSearched },
+      data: { toolName: "osint_search", success: true, latencyMs: searchLatency, resultCount: results.length, externalSearched },
     });
 
+    // Audit log the search
+    audit.toolUse("web:dashboard", "osint_search", { query: q, entityType: type, resultCount: results.length, externalSearched, latencyMs: searchLatency }, true).catch(() => {});
+
     return c.json({ results, edges, total: results.length, externalSearched });
-  } catch (error) {
+  } catch (error: any) {
     console.error("[OSINT API] /search error:", error);
     brainTelemetry.emitEvent({
       type: "tool_complete", timestamp: Date.now(),
       requestId: `osint-search-${Date.now()}`,
       data: { toolName: "osint_search", success: false },
     });
+    audit.toolUse("web:dashboard", "osint_search", { query: c.req.query("q"), error: error?.message }, false).catch(() => {});
     return c.json({ error: "Search failed" }, 500);
   }
 });
@@ -464,11 +470,15 @@ osint.post("/enrich", async (c) => {
 
     const result = await enrichEntity(body.entityId, body.sources, body.depth ?? 1);
 
+    const enrichLatency = Date.now() - enrichStart;
     brainTelemetry.emitEvent({
       type: "tool_complete", timestamp: Date.now(),
       requestId: `osint-enrich-${enrichStart}`,
-      data: { toolName: "osint_enrich", success: true, latencyMs: Date.now() - enrichStart, entityName, newEntities: result?.newEntitiesCreated, newRelationships: result?.newRelationshipsCreated },
+      data: { toolName: "osint_enrich", success: true, latencyMs: enrichLatency, entityName, newEntities: result?.newEntitiesCreated, newRelationships: result?.newRelationshipsCreated },
     });
+
+    // Audit log the enrichment
+    audit.toolUse("web:dashboard", "osint_enrich", { entityId: body.entityId, entityName, sources: body.sources, depth: body.depth, newEntities: result?.newEntitiesCreated, newRelationships: result?.newRelationshipsCreated, latencyMs: enrichLatency }, true).catch(() => {});
 
     return c.json({ success: true, result });
   } catch (error: any) {
@@ -482,6 +492,7 @@ osint.post("/enrich", async (c) => {
       requestId: `osint-enrich-${Date.now()}`,
       data: { toolName: "osint_enrich", success: false, error: error?.message },
     });
+    audit.toolUse("web:dashboard", "osint_enrich", { error: error?.message }, false).catch(() => {});
     return c.json({ error: "Enrichment failed" }, 500);
   }
 });

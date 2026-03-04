@@ -28,6 +28,42 @@ export interface CostSummary {
 export class CostTracker {
   private records: CostRecord[] = [];
   private maxRecords = 10000; // Keep last 10K records in memory
+  private dbLoaded = false;
+
+  /**
+   * Load historical cost records from the database on startup
+   */
+  async loadFromDb(): Promise<void> {
+    if (this.dbLoaded) return;
+    try {
+      const { db } = await import("../../db");
+      const { metrics } = await import("../../db/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      const rows = await db
+        .select()
+        .from(metrics)
+        .where(eq(metrics.name, "token_cost"))
+        .orderBy(desc(metrics.timestamp))
+        .limit(this.maxRecords);
+
+      for (const row of rows.reverse()) {
+        const tags = (row.tags || {}) as Record<string, string>;
+        this.records.push({
+          tier: tags.tier || "balanced",
+          inputTokens: parseInt(tags.inputTokens || "0"),
+          outputTokens: parseInt(tags.outputTokens || "0"),
+          cost: (row.value || 0) / 1_000_000, // stored as micro-dollars
+          timestamp: new Date(row.timestamp).getTime(),
+        });
+      }
+      this.dbLoaded = true;
+      if (this.records.length > 0) {
+        console.log(`[CostTracker] Loaded ${this.records.length} historical records from DB`);
+      }
+    } catch {
+      // DB may not be available yet
+    }
+  }
 
   /**
    * Record token usage for a request
@@ -54,7 +90,29 @@ export class CostTracker {
       this.records = this.records.slice(-this.maxRecords);
     }
 
+    // Persist to database (fire-and-forget)
+    this.persistRecord(record).catch(() => {});
+
     return record;
+  }
+
+  private async persistRecord(record: CostRecord): Promise<void> {
+    try {
+      const { db } = await import("../../db");
+      const { metrics } = await import("../../db/schema");
+      await db.insert(metrics).values({
+        name: "token_cost",
+        value: Math.round(record.cost * 1_000_000), // store as micro-dollars for integer precision
+        unit: "microdollars",
+        tags: {
+          tier: record.tier,
+          inputTokens: String(record.inputTokens),
+          outputTokens: String(record.outputTokens),
+        },
+      });
+    } catch {
+      // Silently fail — in-memory still works
+    }
   }
 
   /**
