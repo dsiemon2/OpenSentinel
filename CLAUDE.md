@@ -1,7 +1,7 @@
 # CLAUDE.md - AI Assistant Instructions
 
 ## Project Overview
-OpenSentinel is a self-hosted personal AI assistant powered by Claude, with Telegram, Discord, Slack, and web interfaces. It includes 300+ features including smart home control, productivity integrations, and workflow automation.
+OpenSentinel is a self-hosted personal AI assistant with multi-model LLM support (9 providers: Anthropic Claude, OpenAI GPT, xAI Grok, Google Gemini, Groq, Mistral, OpenRouter, Ollama, custom endpoints). Interfaces: Telegram, Discord, Slack, Matrix, Web Dashboard, Desktop App, Browser Extension. It includes 300+ features including smart home control, productivity integrations, and workflow automation.
 
 ## API Keys & Credentials
 All credentials are stored in `.env` (not committed to git). See `.env.example` for the required variables.

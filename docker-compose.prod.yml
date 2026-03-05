@@ -1,28 +1,42 @@
-# OpenSentinel Docker Compose Configuration (OPTIONAL)
+# OpenSentinel Production Docker Compose
+# Hardened configuration with TLS, resource limits, non-root, and log rotation.
 #
-# Docker is optional. The recommended install is:
-#   npm install -g opensentinel && opensentinel setup
+# Usage:
+#   cp .env.example .env && edit .env
+#   mkdir -p docker/ssl && # add fullchain.pem + privkey.pem
+#   docker compose -f docker-compose.prod.yml up -d
 #
-# Use Docker Compose for containerized deployments:
-#   docker-compose up -d
-
-version: "3.8"
+# TLS / Let's Encrypt:
+#   # Install certbot on the host (not inside Docker):
+#   sudo apt install certbot
+#   sudo certbot certonly --standalone -d your-domain.com
+#   # Copy certs into the docker/ssl directory:
+#   cp /etc/letsencrypt/live/your-domain.com/fullchain.pem docker/ssl/
+#   cp /etc/letsencrypt/live/your-domain.com/privkey.pem docker/ssl/
+#   # Renewal cron (runs twice daily):
+#   echo "0 */12 * * * certbot renew --quiet && cp /etc/letsencrypt/live/your-domain.com/*.pem /path/to/OpenSentinel/docker/ssl/ && docker compose -f docker-compose.prod.yml restart nginx" | sudo tee /etc/cron.d/certbot-renew
 
 services:
+  # ──────────────────────────────────────────────
   # Main OpenSentinel application
+  # ──────────────────────────────────────────────
   opensentinel:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: opensentinel
-    restart: unless-stopped
-    ports:
-      - "8030:8030"
+    restart: always
+    user: "1000:1000"
+    read_only: true
+    tmpfs:
+      - /tmp:size=100M
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=8030
-      - DATABASE_URL=postgresql://opensentinel:${DB_PASSWORD}@postgres:5432/opensentinel
-      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://opensentinel:${DB_PASSWORD:-opensentinel}@postgres:5432/opensentinel
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
@@ -72,6 +86,8 @@ services:
       - GATEWAY_TOKEN=${GATEWAY_TOKEN}
       - ENCRYPTION_MASTER_KEY=${ENCRYPTION_MASTER_KEY}
       - AUDIT_SIGNING_KEY=${AUDIT_SIGNING_KEY}
+    ports:
+      - "8030:8030"
     volumes:
       - opensentinel_data:/app/data
       - opensentinel_logs:/app/logs
@@ -87,16 +103,37 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+        reservations:
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
+  # ──────────────────────────────────────────────
   # PostgreSQL with pgvector
+  # ──────────────────────────────────────────────
   postgres:
     image: pgvector/pgvector:pg16
     container_name: opensentinel-postgres
-    restart: unless-stopped
+    restart: always
+    shm_size: 128mb
     environment:
       - POSTGRES_USER=opensentinel
-      - POSTGRES_PASSWORD=opensentinel
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-opensentinel}
       - POSTGRES_DB=opensentinel
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -110,13 +147,27 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
+  # ──────────────────────────────────────────────
   # Redis for caching and job queues
+  # ──────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: opensentinel-redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy noeviction
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy noeviction --requirepass ${REDIS_PASSWORD:-changeme}
     volumes:
       - redis_data:/data
     ports:
@@ -124,42 +175,30 @@ services:
     networks:
       - opensentinel-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
 
-  # Neo4j for OSINT knowledge graph (optional)
-  neo4j:
-    image: neo4j:5-community
-    container_name: opensentinel-neo4j
-    restart: unless-stopped
-    environment:
-      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-changeme}
-      - NEO4J_PLUGINS=["apoc"]
-      - NEO4J_dbms_memory_heap_initial__size=256m
-      - NEO4J_dbms_memory_heap_max__size=512m
-    volumes:
-      - neo4j_data:/data
-      - neo4j_logs:/logs
-    ports:
-      - "127.0.0.1:7474:7474"
-      - "127.0.0.1:7687:7687"
-    networks:
-      - opensentinel-network
-    healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "${NEO4J_PASSWORD:-changeme}", "RETURN 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    profiles:
-      - osint
-
-  # Nginx reverse proxy (optional, for production)
+  # ──────────────────────────────────────────────
+  # Nginx reverse proxy with TLS
+  # ──────────────────────────────────────────────
   nginx:
     image: nginx:alpine
     container_name: opensentinel-nginx
-    restart: unless-stopped
+    restart: always
     ports:
       - "80:80"
       - "443:443"
@@ -170,8 +209,18 @@ services:
       - opensentinel
     networks:
       - opensentinel-network
-    profiles:
-      - production
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   opensentinel-network:
@@ -185,8 +234,4 @@ volumes:
   opensentinel_data:
     driver: local
   opensentinel_logs:
-    driver: local
-  neo4j_data:
-    driver: local
-  neo4j_logs:
     driver: local

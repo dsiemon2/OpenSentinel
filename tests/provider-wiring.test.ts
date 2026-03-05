@@ -46,16 +46,39 @@ describe("LLM Provider Registration Wiring", () => {
     expect(indexSource).toContain("setDefault");
   });
 
-  test("all 8 providers are registered in initializeProviders", () => {
-    // Anthropic, OpenAI, OpenRouter, Groq, Mistral, Gemini, Custom, Ollama
+  test("all 9 providers are registered in initializeProviders", () => {
+    // Anthropic, OpenAI, OpenRouter, Groq, Mistral, Gemini, xAI, Custom, Ollama
     expect(indexSource).toContain("AnthropicProvider");
     expect(indexSource).toContain("GeminiProvider");
     expect(indexSource).toContain("OllamaProvider");
     expect(indexSource).toContain("OPENROUTER_API_KEY");
     expect(indexSource).toContain("GROQ_API_KEY");
     expect(indexSource).toContain("MISTRAL_API_KEY");
+    expect(indexSource).toContain("XAI_API_KEY");
     expect(indexSource).toContain("OPENAI_COMPATIBLE_BASE_URL");
     expect(indexSource).toContain("OPENAI_LLM_ENABLED");
+  });
+
+  test("xAI (Grok) provider is registered when XAI_API_KEY is set", () => {
+    expect(indexSource).toContain("XAI_API_KEY");
+    expect(indexSource).toContain('id: "xai"');
+    expect(indexSource).toContain('name: "xAI (Grok)"');
+    expect(indexSource).toContain("https://api.x.ai/v1");
+    expect(indexSource).toContain('Registered provider: xAI (Grok)');
+  });
+
+  test("XAI_API_KEY exists in env schema", () => {
+    expect(envSource).toContain("XAI_API_KEY");
+  });
+
+  test("XAI_DEFAULT_MODEL exists in env schema with correct default", () => {
+    expect(envSource).toContain("XAI_DEFAULT_MODEL");
+    expect(envSource).toContain("grok-2");
+  });
+
+  test("xAI provider uses grok-2 as default model", () => {
+    expect(indexSource).toContain('XAI_DEFAULT_MODEL');
+    expect(indexSource).toContain('"grok-2"');
   });
 });
 
@@ -265,6 +288,43 @@ describe(".env.example completeness", () => {
 
   test("references AI Studio for Gemini key", () => {
     expect(envExample).toContain("aistudio.google.com");
+  });
+
+  test("documents XAI_API_KEY", () => {
+    expect(envExample).toContain("XAI_API_KEY");
+  });
+
+  test("documents XAI_DEFAULT_MODEL", () => {
+    expect(envExample).toContain("XAI_DEFAULT_MODEL");
+  });
+
+  test("documents LLM_PROVIDER with all available options", () => {
+    expect(envExample).toContain("LLM_PROVIDER");
+    expect(envExample).toContain("anthropic");
+    expect(envExample).toContain("openai");
+    expect(envExample).toContain("xai");
+    expect(envExample).toContain("gemini");
+    expect(envExample).toContain("groq");
+    expect(envExample).toContain("mistral");
+    expect(envExample).toContain("ollama");
+  });
+
+  test("documents OLLAMA_ENABLED and OLLAMA_BASE_URL", () => {
+    expect(envExample).toContain("OLLAMA_ENABLED");
+    expect(envExample).toContain("OLLAMA_BASE_URL");
+    expect(envExample).toContain("OLLAMA_DEFAULT_MODEL");
+  });
+
+  test("documents GROQ_API_KEY", () => {
+    expect(envExample).toContain("GROQ_API_KEY");
+  });
+
+  test("documents MISTRAL_API_KEY", () => {
+    expect(envExample).toContain("MISTRAL_API_KEY");
+  });
+
+  test("documents OPENROUTER_API_KEY", () => {
+    expect(envExample).toContain("OPENROUTER_API_KEY");
   });
 });
 
@@ -497,5 +557,64 @@ describe("Cross-file wiring consistency", () => {
     // Both use generateEmbedding(text: string): Promise<number[]>
     expect(embSource).toContain("async function generateEmbedding(text: string): Promise<number[]>");
     expect(memSource).toContain("async function generateEmbedding(text: string): Promise<number[]>");
+  });
+
+  test("xAI provider uses correct API base URL", () => {
+    const indexSource = readFileSync("src/core/providers/index.ts", "utf-8");
+    expect(indexSource).toContain("https://api.x.ai/v1");
+  });
+
+  test("xAI env default model matches provider index default", () => {
+    const indexSource = readFileSync("src/core/providers/index.ts", "utf-8");
+    expect(envSource).toContain("grok-2");
+    expect(indexSource).toContain("grok-2");
+  });
+});
+
+// ============================================
+// 11. Docker Compose Provider Wiring
+// ============================================
+
+describe("Docker Compose LLM provider env passthrough", () => {
+  const composeSource = readFileSync("docker-compose.yml", "utf-8");
+
+  test("passes LLM_PROVIDER to container", () => {
+    expect(composeSource).toContain("LLM_PROVIDER");
+  });
+
+  test("passes XAI_API_KEY to container", () => {
+    expect(composeSource).toContain("XAI_API_KEY");
+  });
+
+  test("passes OPENAI_LLM_ENABLED to container", () => {
+    expect(composeSource).toContain("OPENAI_LLM_ENABLED");
+  });
+
+  test("passes GEMINI_API_KEY to container", () => {
+    expect(composeSource).toContain("GEMINI_API_KEY");
+  });
+
+  test("passes GROQ_API_KEY to container", () => {
+    expect(composeSource).toContain("GROQ_API_KEY");
+  });
+
+  test("passes MISTRAL_API_KEY to container", () => {
+    expect(composeSource).toContain("MISTRAL_API_KEY");
+  });
+
+  test("passes OPENROUTER_API_KEY to container", () => {
+    expect(composeSource).toContain("OPENROUTER_API_KEY");
+  });
+
+  test("passes OLLAMA_ENABLED to container", () => {
+    expect(composeSource).toContain("OLLAMA_ENABLED");
+  });
+
+  test("passes GATEWAY_TOKEN to container", () => {
+    expect(composeSource).toContain("GATEWAY_TOKEN");
+  });
+
+  test("passes ENCRYPTION_MASTER_KEY to container", () => {
+    expect(composeSource).toContain("ENCRYPTION_MASTER_KEY");
   });
 });

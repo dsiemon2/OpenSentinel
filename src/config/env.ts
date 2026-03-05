@@ -161,6 +161,10 @@ const envSchema = z.object({
   OPENAI_COMPATIBLE_BASE_URL: z.string().optional(),
   OPENAI_COMPATIBLE_MODEL: z.string().optional(),
 
+  // xAI (Grok)
+  XAI_API_KEY: z.string().optional(),
+  XAI_DEFAULT_MODEL: z.string().optional().default("grok-2"),
+
   // Google Gemini (optional)
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_DEFAULT_MODEL: z.string().optional().default("gemini-2.0-flash"),

@@ -102,6 +102,22 @@ export async function initializeProviders(): Promise<void> {
     console.log("[LLM] Registered provider: Google Gemini");
   }
 
+  // Register xAI (Grok) if configured
+  if ((env as any).XAI_API_KEY) {
+    providerRegistry.register(
+      new OpenAICompatibleProvider({
+        id: "xai",
+        name: "xAI (Grok)",
+        type: "openai-compatible",
+        apiKey: (env as any).XAI_API_KEY,
+        baseUrl: "https://api.x.ai/v1",
+        defaultModel: (env as any).XAI_DEFAULT_MODEL || "grok-2",
+        enabled: true,
+      })
+    );
+    console.log("[LLM] Registered provider: xAI (Grok)");
+  }
+
   // Register generic OpenAI-compatible endpoint if configured
   if ((env as any).OPENAI_COMPATIBLE_BASE_URL) {
     providerRegistry.register(

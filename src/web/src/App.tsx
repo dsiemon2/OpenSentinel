@@ -24,13 +24,14 @@ const GitHub = lazy(() => import("./components/GitHub"));
 const Users = lazy(() => import("./components/Users"));
 const MCPs = lazy(() => import("./components/MCPs"));
 const Bots = lazy(() => import("./components/Bots"));
+const Enterprise = lazy(() => import("./components/Enterprise"));
 
 type View =
   | "overview" | "chat" | "agents" | "tasks" | "sessions"
   | "activity" | "brain" | "audit" | "tokens" | "costs" | "memories"
   | "cron" | "webhooks" | "alerts" | "github"
   | "users" | "settings" | "email" | "graph"
-  | "mcps" | "bots";
+  | "mcps" | "bots" | "enterprise";
 
 interface SystemStatus {
   status: string;
@@ -81,6 +82,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { view: "mcps", label: "MCPs" },
       { view: "users", label: "Users" },
+      { view: "enterprise", label: "Enterprise" },
       { view: "settings", label: "Settings" },
       { view: "email", label: "Email" },
     ],
@@ -238,6 +240,7 @@ function App() {
         {view === "users" && <LazyPage><Users /></LazyPage>}
         {view === "mcps" && <LazyPage><MCPs /></LazyPage>}
         {view === "bots" && <LazyPage><Bots /></LazyPage>}
+        {view === "enterprise" && <LazyPage><Enterprise /></LazyPage>}
       </main>
     </div>
   );
