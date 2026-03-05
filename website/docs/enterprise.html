@@ -86,6 +86,9 @@
         <a href="enterprise.html#observability" class="sidebar-link"><span class="ico">&#x1F50D;</span> Observability</a>
         <a href="enterprise.html#kubernetes" class="sidebar-link"><span class="ico">&#x2638;</span> Kubernetes</a>
         <a href="enterprise.html#docker" class="sidebar-link"><span class="ico">&#x1F433;</span> Docker</a>
+        <a href="enterprise.html#soc2" class="sidebar-link"><span class="ico">&#x2705;</span> SOC 2 Readiness</a>
+        <a href="enterprise.html#comparison" class="sidebar-link"><span class="ico">&#x1F4CA;</span> Competitive Comparison</a>
+        <a href="enterprise.html#pricing" class="sidebar-link"><span class="ico">&#x1F4B0;</span> Support &amp; Pricing</a>
       </div>
 
       <div class="sidebar-group">
@@ -110,7 +113,7 @@
 
       <div class="content">
         <h1>Enterprise</h1>
-        <p class="lead">OpenSentinel is built for teams and organizations. Multi-user, SSO, audit logging, GDPR compliance, and Kubernetes deployment.</p>
+        <p class="lead">OpenSentinel is built for teams and organizations. SOC 2-ready security controls, multi-user, SSO, audit logging, GDPR compliance, production-hardened Docker, and Kubernetes deployment.</p>
 
 
         <!-- ========== Overview ========== -->
@@ -417,7 +420,7 @@
 
         <!-- ========== Docker ========== -->
         <h2 id="docker">Docker Deployment</h2>
-        <p>The simplest way to deploy OpenSentinel in production. The included <code>docker-compose.yml</code> bundles everything you need: the application, PostgreSQL with pgvector, and Redis.</p>
+        <p>The simplest way to deploy OpenSentinel in production. Two Docker Compose files are included: <code>docker-compose.yml</code> for development and <code>docker-compose.prod.yml</code> for hardened production deployment.</p>
 
         <h3>Production Setup</h3>
         <div class="codeblock">
@@ -446,10 +449,116 @@
           </tbody>
         </table>
 
+        <h3>Production Hardening (docker-compose.prod.yml)</h3>
+        <p>The production Docker Compose file includes enterprise-grade security hardening:</p>
+        <ul>
+          <li><strong>Non-root execution</strong> &mdash; all containers run as <code>user: "1000:1000"</code></li>
+          <li><strong>Read-only filesystem</strong> &mdash; application container uses <code>read_only: true</code> with tmpfs for /tmp</li>
+          <li><strong>Capability dropping</strong> &mdash; <code>cap_drop: ALL</code> with only <code>NET_BIND_SERVICE</code> added back</li>
+          <li><strong>No privilege escalation</strong> &mdash; <code>no-new-privileges:true</code> on all containers</li>
+          <li><strong>Resource limits</strong> &mdash; CPU and memory limits on every service</li>
+          <li><strong>Log rotation</strong> &mdash; json-file driver with max-size and max-file limits</li>
+          <li><strong>Redis authentication</strong> &mdash; <code>requirepass</code> enforced</li>
+          <li><strong>TLS via Nginx</strong> &mdash; Let's Encrypt SSL with automated renewal</li>
+          <li><strong>Health checks</strong> &mdash; liveness probes on all services</li>
+        </ul>
+
+        <div class="codeblock">
+          <div class="codeblock-header"><span class="codeblock-lang">Terminal</span><button class="codeblock-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="cc"># Production deployment</span>
+<span class="cp">$</span> cp .env.example .env && nano .env
+<span class="cp">$</span> mkdir -p docker/ssl  <span class="cc"># Add fullchain.pem + privkey.pem</span>
+<span class="cp">$</span> docker compose -f docker-compose.prod.yml up -d</code></pre>
+        </div>
+
         <div class="callout callout-warn">
           <span class="callout-ico">&#x26A0;&#xFE0F;</span>
           <div><strong>Production checklist.</strong> Before deploying to production: change default database passwords, enable SSL/TLS, configure proper backups, set up a reverse proxy (nginx/Caddy) for HTTPS, and restrict network access to ports 5445 and 6379.</div>
         </div>
+
+
+        <!-- ========== SOC 2 Readiness ========== -->
+        <h2 id="soc2">SOC 2 Readiness</h2>
+        <p>OpenSentinel's security controls map directly to the SOC 2 Trust Service Criteria. The following table shows coverage across all control categories.</p>
+
+        <table>
+          <thead><tr><th>SOC 2 Category</th><th>OpenSentinel Controls</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>CC1 &mdash; Control Environment</strong></td><td>RBAC, per-platform allowlists, HMAC-signed audit logs</td><td>Ready</td></tr>
+            <tr><td><strong>CC2 &mdash; Communication</strong></td><td>Structured audit logging, anomaly alerting, Prometheus metrics</td><td>Ready</td></tr>
+            <tr><td><strong>CC3 &mdash; Risk Assessment</strong></td><td>Anomaly detection, prompt injection guard, cost tracking</td><td>Ready</td></tr>
+            <tr><td><strong>CC4 &mdash; Monitoring</strong></td><td>Prometheus metrics, anomaly detection, error tracking</td><td>Ready</td></tr>
+            <tr><td><strong>CC5 &mdash; Control Activities</strong></td><td>Rate limiting, tool sandboxing, AES-256 encryption, non-root containers</td><td>Ready</td></tr>
+            <tr><td><strong>CC6 &mdash; Access Controls</strong></td><td>TOTP 2FA, gateway tokens, SSO, RBAC, per-platform allowlists</td><td>Ready</td></tr>
+            <tr><td><strong>CC7 &mdash; System Operations</strong></td><td>Health checks, circuit breaker, request tracing, alerting</td><td>Ready</td></tr>
+            <tr><td><strong>CC8 &mdash; Change Management</strong></td><td>Audit logging of all configuration changes</td><td>Ready</td></tr>
+            <tr><td><strong>CC9 &mdash; Risk Mitigation</strong></td><td>Full security stack, self-hosted (no third-party data sharing)</td><td>Ready</td></tr>
+            <tr><td><strong>Confidentiality</strong></td><td>Field-level encryption, encrypted vault, GDPR deletion tools</td><td>Ready</td></tr>
+            <tr><td><strong>Privacy</strong></td><td>Audit trail, tool sandboxing, RBAC, PostgreSQL ACID compliance</td><td>Ready</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-tip">
+          <span class="callout-ico">&#x1F4A1;</span>
+          <div><strong>Full SOC 2 mapping.</strong> For the complete criteria-by-criteria mapping, see <a href="https://github.com/dsiemon2/OpenSentinel/blob/main/docs/enterprise-security.md">docs/enterprise-security.md</a> in the repository.</div>
+        </div>
+
+
+        <!-- ========== Competitive Comparison ========== -->
+        <h2 id="comparison">Competitive Comparison</h2>
+        <p>OpenSentinel is the only self-hosted AI assistant with enterprise-grade security controls. Here's how it compares:</p>
+
+        <table>
+          <thead><tr><th>Security Feature</th><th>OpenSentinel</th><th>OpenClaw</th><th>ZeroClaw</th><th>PicoClaw</th><th>Leon</th><th>PyGPT</th></tr></thead>
+          <tbody>
+            <tr><td>Database storage</td><td>PostgreSQL 16</td><td>File-based</td><td>File-based</td><td>File-based</td><td>File-based</td><td>File-based</td></tr>
+            <tr><td>Field encryption (AES-256)</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+            <tr><td>Encrypted vault</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+            <tr><td>TOTP / 2FA</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+            <tr><td>RBAC + SSO</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+            <tr><td>Tamper-proof audit logs</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+            <tr><td>GDPR tools</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+            <tr><td>Prompt injection guard</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+            <tr><td>Prometheus metrics</td><td>Yes</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td></tr>
+            <tr><td>LLM providers</td><td>9</td><td>10+</td><td>3</td><td>4</td><td>1</td><td>8</td></tr>
+          </tbody>
+        </table>
+
+
+        <!-- ========== Support & Pricing ========== -->
+        <h2 id="pricing">Support &amp; Pricing</h2>
+        <p>OpenSentinel is 100% open source under the MIT license. All features are included in the free community edition.</p>
+
+        <table>
+          <thead><tr><th>Feature</th><th>Community (Free)</th><th>Enterprise</th></tr></thead>
+          <tbody>
+            <tr><td>All features &amp; integrations</td><td>Included</td><td>Included</td></tr>
+            <tr><td>9 LLM providers</td><td>Included</td><td>Included</td></tr>
+            <tr><td>GitHub Issues support</td><td>Best-effort</td><td>Priority (24h SLA)</td></tr>
+            <tr><td>Security patch notifications</td><td>Public release</td><td>Pre-release notification</td></tr>
+            <tr><td>Deployment assistance</td><td>Documentation</td><td>Hands-on setup support</td></tr>
+            <tr><td>Custom integrations</td><td>Not included</td><td>Available (scoped)</td></tr>
+            <tr><td>SOC 2 compliance guidance</td><td>Documentation</td><td>Assisted mapping</td></tr>
+            <tr><td>Dedicated channel</td><td>Not included</td><td>Private Slack/email</td></tr>
+            <tr><td>SLA for critical bugs</td><td>Not included</td><td>48h fix commitment</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-info">
+          <span class="callout-ico">&#x26A1;</span>
+          <div><strong>Community cost.</strong> Free. You pay only for AI provider API usage ($5&ndash;30/month typical) and your own hosting.</div>
+        </div>
+
+        <p><strong>Enterprise contact:</strong> enterprise@opensentinel.ai</p>
+
+        <h3>Managed Hosting (Coming Soon)</h3>
+        <ul>
+          <li>Fully managed PostgreSQL, Redis, and application hosting</li>
+          <li>Automatic updates and security patches</li>
+          <li>Daily backups with point-in-time recovery</li>
+          <li>Custom domain with TLS</li>
+          <li>Uptime monitoring and alerting</li>
+        </ul>
 
 
         <!-- ========== Page Nav ========== -->
