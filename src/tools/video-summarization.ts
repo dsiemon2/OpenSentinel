@@ -9,9 +9,13 @@ import { spawn } from "child_process";
 import { tmpdir } from "os";
 import { randomUUID } from "crypto";
 
-const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY,
-});
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+  }
+  return _openai;
+}
 
 // Supported video formats
 const SUPPORTED_VIDEO_FORMATS = [".mp4", ".avi", ".mkv", ".mov", ".webm", ".m4v", ".flv", ".wmv"];
@@ -245,7 +249,7 @@ async function transcribeAudio(
     const uint8Array = new Uint8Array(audioBuffer);
     const file = new File([uint8Array], "audio.mp3", { type: "audio/mpeg" });
 
-    const response = await openai.audio.transcriptions.create({
+    const response = await getOpenAI().audio.transcriptions.create({
       file,
       model: "whisper-1",
       language: language || "en",
