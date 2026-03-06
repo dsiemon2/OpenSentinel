@@ -166,6 +166,7 @@ mock.module("../src/core/observability/brain-telemetry", () => ({
 mock.module("../src/core/observability/cost-tracker", () => ({
   ...realCostTracker,
   costTracker: {
+    ...realCostTracker.costTracker,
     getCostSummary: () => ({ totalCost: 0 }),
     getCostTrend: () => ({ direction: "flat", strength: 0 }),
     getEstimatedMonthlyCost: () => 0,
