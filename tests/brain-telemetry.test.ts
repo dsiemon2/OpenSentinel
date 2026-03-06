@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, mock } from "bun:test";
+import * as realCostTracker from "../src/core/observability/cost-tracker";
 
 // Mock cost-tracker before importing brain-telemetry
 mock.module("../src/core/observability/cost-tracker", () => ({
+  ...realCostTracker,
   costTracker: {
     getCostSummary: () => ({
       totalCost: 0.05,

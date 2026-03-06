@@ -1,5 +1,8 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
+import * as realMetrics from "../src/core/observability/metrics";
+import * as realErrorTracker from "../src/core/observability/error-tracker";
+import * as realRateLimiter from "../src/core/security/rate-limiter";
 
 // ============================================
 // Metrics Routes — API Tests
@@ -43,6 +46,7 @@ const mockErrorStats = {
 };
 
 mock.module("../src/core/observability/metrics", () => ({
+  ...realMetrics,
   recordMetric: async (data: any) => {
     recordedMetrics.push(data);
   },
@@ -58,6 +62,7 @@ mock.module("../src/core/observability/metrics", () => ({
 }));
 
 mock.module("../src/core/observability/error-tracker", () => ({
+  ...realErrorTracker,
   getRecentErrors: async (_limit?: number, _category?: string) => {
     return mockRecentErrors;
   },
@@ -67,6 +72,7 @@ mock.module("../src/core/observability/error-tracker", () => ({
 }));
 
 mock.module("../src/core/security/rate-limiter", () => ({
+  ...realRateLimiter,
   checkRateLimit: async (_key: string, _endpoint: string) => {
     return { allowed: true };
   },

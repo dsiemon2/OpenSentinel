@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
+import * as realWorkflowStore from "../src/core/workflows/workflow-store";
 
 // ============================================
 // Webhooks Routes — API Tests
@@ -60,6 +61,7 @@ let updatedWorkflows: Array<{ id: string; updates: any }> = [];
 let getAllWorkflowsOverride: (() => any[]) | null = null;
 
 mock.module("../src/core/workflows/workflow-store", () => ({
+  ...realWorkflowStore,
   WorkflowStore: class {
     async getAllWorkflows() {
       if (getAllWorkflowsOverride) return getAllWorkflowsOverride();

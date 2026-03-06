@@ -1,4 +1,7 @@
 import { describe, test, expect, beforeEach, mock } from "bun:test";
+import * as realBrain from "../src/core/brain";
+import * as realStt from "../src/outputs/stt";
+import * as realTts from "../src/outputs/tts";
 
 // ============================================================
 // Mock chatWithTools BEFORE importing handlers.
@@ -9,16 +12,19 @@ import { describe, test, expect, beforeEach, mock } from "bun:test";
 let mockChatWithTools: (...args: any[]) => Promise<any>;
 
 mock.module("../src/core/brain", () => ({
+  ...realBrain,
   chatWithTools: async (...args: any[]) => mockChatWithTools(...args),
   chat: async () => ({ content: "mock", inputTokens: 0, outputTokens: 0 }),
   SYSTEM_PROMPT: "test",
 }));
 
 mock.module("../src/outputs/stt", () => ({
+  ...realStt,
   transcribeAudio: async () => "transcribed voice text",
 }));
 
 mock.module("../src/outputs/tts", () => ({
+  ...realTts,
   textToSpeech: async () => Buffer.from("fake-audio-data"),
 }));
 

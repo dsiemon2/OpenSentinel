@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll, mock } from "bun:test";
 import { Hono } from "hono";
+import { env as realEnv } from "../src/config/env";
 
 // ============================================
 // GitHub Routes — API Tests
@@ -91,6 +92,7 @@ const mockPRs = [
 
 mock.module("../src/config/env", () => ({
   env: {
+    ...realEnv,
     GITHUB_TOKEN: "ghp_test_token_123",
   },
 }));

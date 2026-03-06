@@ -1,4 +1,7 @@
 import { describe, test, expect, mock, beforeEach } from "bun:test";
+import * as realSessionManager from "../src/core/security/session-manager";
+import * as realApiKeyManager from "../src/core/security/api-key-manager";
+import * as realAuditLogger from "../src/core/security/audit-logger";
 
 // ---------------------------------------------------------------------------
 // Mock the security modules so we never hit the database
@@ -18,15 +21,18 @@ const mockHasPermission = mock(
 const mockLogAudit = mock(() => Promise.resolve("mock-id"));
 
 mock.module("../src/core/security/session-manager", () => ({
+  ...realSessionManager,
   validateSession: mockValidateSession,
 }));
 
 mock.module("../src/core/security/api-key-manager", () => ({
+  ...realApiKeyManager,
   validateApiKey: mockValidateApiKey,
   hasPermission: mockHasPermission,
 }));
 
 mock.module("../src/core/security/audit-logger", () => ({
+  ...realAuditLogger,
   logAudit: mockLogAudit,
 }));
 

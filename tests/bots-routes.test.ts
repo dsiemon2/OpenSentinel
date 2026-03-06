@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
 import * as realFs from "fs";
+import { env as realEnv } from "../src/config/env";
 
 // ============================================
 // Bots Routes — API Tests
@@ -52,6 +53,7 @@ mock.module("fs", () => ({
 
 mock.module("../src/config/env", () => ({
   env: {
+    ...realEnv,
     TELEGRAM_BOT_TOKEN: "123456:ABC-DEF1234ghIkl-zyx57W2v",
     TELEGRAM_CHAT_ID: "-1001234567890",
     DISCORD_BOT_TOKEN: "MTIzNDU2Nzg5MDEyMzQ1Njc4.AbCdEf.ghijklmnopqrstuvwxyz1234",

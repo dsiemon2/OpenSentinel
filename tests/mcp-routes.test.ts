@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
+import * as realTools from "../src/tools";
 
 // ============================================
 // MCP Routes — API Tests
@@ -46,6 +47,7 @@ const mockServerStates = [
 ];
 
 mock.module("../src/tools", () => ({
+  ...realTools,
   getMCPRegistry: () => {
     if (!mockRegistryEnabled) return null;
     return {

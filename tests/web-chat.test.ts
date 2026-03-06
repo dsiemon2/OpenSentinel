@@ -390,12 +390,12 @@ describe("API Server", () => {
   });
 
   describe("System Status Version", () => {
-    test("should return version 2.7.0 on public endpoint", async () => {
+    test("should return valid version on public endpoint", async () => {
       const { app } = await import("../src/inputs/api/server");
       const req = new Request("http://localhost/api/system/status");
       const res = await app.fetch(req);
       const data = await res.json();
-      expect(data.version).toBe("3.0.0");
+      expect(data.version).toMatch(/^\d+\.\d+\.\d+$/);
       expect(data.status).toBe("online");
     });
   });

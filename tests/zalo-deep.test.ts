@@ -1,8 +1,10 @@
 import { describe, test, expect, beforeEach, mock, spyOn } from "bun:test";
 import { createHmac } from "crypto";
+import * as realBrain from "../src/core/brain";
 
 // Mock chatWithTools before importing ZaloBot
 mock.module("../src/core/brain", () => ({
+  ...realBrain,
   chatWithTools: async () => ({ content: "Mocked AI response" }),
 }));
 

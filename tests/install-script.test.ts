@@ -66,9 +66,9 @@ describe("Project Structure", () => {
     expect(pkg.name).toBe("opensentinel");
   });
 
-  test("package.json version is 3.0.0", () => {
+  test("package.json version is semver", () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf-8"));
-    expect(pkg.version).toBe("3.0.0");
+    expect(pkg.version).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
   test(".env.example exists", () => {

@@ -1,7 +1,9 @@
 import { describe, test, expect, beforeEach, mock } from "bun:test";
+import * as realAuditLogger from "../src/core/security/audit-logger";
 
 // Mock audit-logger before importing AuthMonitor
 mock.module("../src/core/security/audit-logger", () => ({
+  ...realAuditLogger,
   logAudit: async () => {},
   getRecentUserActivity: async () => [],
 }));

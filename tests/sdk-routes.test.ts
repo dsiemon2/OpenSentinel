@@ -1,5 +1,11 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
+import * as realBrain from "../src/core/brain";
+import * as realMemory from "../src/core/memory";
+import * as realDiscord from "../src/inputs/discord";
+import * as realSlack from "../src/inputs/slack";
+import * as realEmail from "../src/integrations/email";
+import * as realTools from "../src/tools";
 
 // ============================================
 // SDK Routes — Comprehensive API Tests
@@ -14,6 +20,7 @@ import { Hono } from "hono";
 // ---------------------------------------------------------------
 
 mock.module("../src/core/brain", () => ({
+  ...realBrain,
   chatWithTools: async (
     messages: any[],
     userId: string,
@@ -57,6 +64,7 @@ const mockSearchResults = [
 ];
 
 mock.module("../src/core/memory", () => ({
+  ...realMemory,
   storeMemory: async (data: any) => ({ ...mockStoredMemory, ...data }),
   searchMemories: async (query: string, userId?: string, limit?: number) =>
     mockSearchResults,
@@ -68,19 +76,23 @@ mock.module("../src/inputs/telegram", () => ({
 }));
 
 mock.module("../src/inputs/discord", () => ({
+  ...realDiscord,
   sendDiscordMessage: async (msg: string) => {},
 }));
 
 mock.module("../src/inputs/slack", () => ({
+  ...realSlack,
   sendSlackMessage: async (msg: string) => {},
 }));
 
 mock.module("../src/integrations/email", () => ({
+  ...realEmail,
   sendEmail: async (opts: any) => {},
 }));
 
 // Mock tools — provide a small set for testing
 mock.module("../src/tools", () => ({
+  ...realTools,
   TOOLS: [
     { name: "get_time", description: "Get the current time" },
     { name: "read_file", description: "Read a file from disk" },

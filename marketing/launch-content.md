@@ -347,4 +347,4 @@ Best,
 
 ---
 
-*Generated for OpenSentinel v3.6.0 launch. All content should be reviewed and personalized before use.*
+*Generated for OpenSentinel v3.6.1 launch. All content should be reviewed and personalized before use.*

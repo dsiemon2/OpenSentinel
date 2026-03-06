@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll, mock } from "bun:test";
 import { Hono } from "hono";
+import * as realScheduler from "../src/core/scheduler";
 
 // ============================================
 // Scheduler Routes — API Tests
@@ -28,6 +29,7 @@ let removedKeys: string[] = [];
 let createdJobs: Array<{ name: string; task: any; pattern: string }> = [];
 
 mock.module("../src/core/scheduler", () => ({
+  ...realScheduler,
   taskQueue: {
     getRepeatableJobs: async () => mockRepeatableJobs,
     removeRepeatableByKey: async (key: string) => {

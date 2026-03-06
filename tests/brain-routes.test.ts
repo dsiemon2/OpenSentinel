@@ -1,5 +1,11 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
+import * as realBrainTelemetry from "../src/core/observability/brain-telemetry";
+import * as realCostTracker from "../src/core/observability/cost-tracker";
+import * as realMemory from "../src/core/memory";
+import * as realAgentManager from "../src/core/agents/agent-manager";
+import * as realDb from "../src/db";
+import * as realDbSchema from "../src/db/schema";
 
 // ============================================
 // Brain Routes — API Tests
@@ -54,6 +60,7 @@ const mockAgents = [
 let spawnedAgents: any[] = [];
 
 mock.module("../src/core/observability/brain-telemetry", () => ({
+  ...realBrainTelemetry,
   brainTelemetry: {
     getStatus: () => mockStatus,
     getActivity: (limit: number) => mockActivity.slice(0, limit),
@@ -64,6 +71,7 @@ mock.module("../src/core/observability/brain-telemetry", () => ({
 }));
 
 mock.module("../src/core/observability/cost-tracker", () => ({
+  ...realCostTracker,
   costTracker: {
     getCostSummary: () => mockScores.costSummary,
     getCostTrend: () => ({ direction: "flat", strength: 0, dailyChange: 0 }),
@@ -75,10 +83,12 @@ mock.module("../src/core/observability/cost-tracker", () => ({
 }));
 
 mock.module("../src/core/memory", () => ({
+  ...realMemory,
   searchMemories: async () => [],
 }));
 
 mock.module("../src/core/agents/agent-manager", () => ({
+  ...realAgentManager,
   spawnAgent: async (opts: any) => {
     const agent = { id: `agent-${Date.now()}`, ...opts, status: "running", tokensUsed: 0 };
     spawnedAgents.push(agent);
@@ -89,6 +99,7 @@ mock.module("../src/core/agents/agent-manager", () => ({
 }));
 
 mock.module("../src/db", () => ({
+  ...realDb,
   db: {
     select: () => ({ from: () => ({ limit: () => [{ id: "usr-1", name: "System" }] }) }),
     insert: () => ({ values: (v: any) => ({ returning: () => [{ id: `seed-${Date.now()}`, ...v }] }) }),
@@ -97,6 +108,7 @@ mock.module("../src/db", () => ({
 }));
 
 mock.module("../src/db/schema", () => ({
+  ...realDbSchema,
   users: {},
   subAgents: { status: "status" },
   agentProgress: {},

@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
+import { env as realEnv } from "../src/config/env";
 
 // ============================================
 // Email Routes — API Tests
@@ -67,6 +68,7 @@ let smtpActions: string[] = [];
 
 mock.module("../src/config/env", () => ({
   env: {
+    ...realEnv,
     EMAIL_MASTER_USER: "masteruser",
     EMAIL_MASTER_PASSWORD: "masterpass",
     EMAIL_LOCAL_IMAP_HOST: "127.0.0.1",

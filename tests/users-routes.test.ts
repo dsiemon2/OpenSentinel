@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
+import * as realMultiUser from "../src/core/enterprise/multi-user";
 
 // ============================================
 // Users Routes — API Tests
@@ -47,6 +48,7 @@ let reactivatedUsers: string[] = [];
 let deletedUsers: string[] = [];
 
 mock.module("../src/core/enterprise/multi-user", () => ({
+  ...realMultiUser,
   searchUsers: async (query: any) => mockUsers,
   createUser: async (data: any) => {
     const user = { id: `usr-${Date.now()}`, ...data, status: "active", createdAt: new Date().toISOString() };

@@ -1,5 +1,14 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
+import * as realWorkflowStore from "../src/core/workflows/workflow-store";
+import * as realAlerting from "../src/core/observability/alerting";
+import * as realMultiUser from "../src/core/enterprise/multi-user";
+import * as realBrainTelemetry from "../src/core/observability/brain-telemetry";
+import * as realCostTracker from "../src/core/observability/cost-tracker";
+import * as realMemory from "../src/core/memory";
+import * as realAgentManager from "../src/core/agents/agent-manager";
+import * as realDb from "../src/db";
+import * as realDbSchema from "../src/db/schema";
 
 // ============================================
 // Dashboard Cross-Functionality Tests
@@ -22,6 +31,7 @@ let userStore: any[] = [];
 // ---------------------------------------------------------------
 
 mock.module("../src/core/workflows/workflow-store", () => ({
+  ...realWorkflowStore,
   WorkflowStore: class {
     async getAllWorkflows() {
       return workflowStore;
@@ -49,6 +59,7 @@ mock.module("../src/core/workflows/workflow-store", () => ({
 }));
 
 mock.module("../src/core/observability/alerting", () => ({
+  ...realAlerting,
   getActiveAlerts: () => alertActiveStore,
   getAlertHistory: (limit?: number) => alertHistoryStore.slice(0, limit || 50),
   acknowledgeAlert: (id: string, by: string) => {
@@ -96,6 +107,7 @@ mock.module("../src/core/observability/alerting", () => ({
 }));
 
 mock.module("../src/core/enterprise/multi-user", () => ({
+  ...realMultiUser,
   searchUsers: async (_query: any) => userStore,
   createUser: async (data: any) => {
     const user = {
@@ -131,6 +143,7 @@ mock.module("../src/core/enterprise/multi-user", () => ({
 }));
 
 mock.module("../src/core/observability/brain-telemetry", () => ({
+  ...realBrainTelemetry,
   brainTelemetry: {
     getStatus: () => ({
       state: "idle",
@@ -151,6 +164,7 @@ mock.module("../src/core/observability/brain-telemetry", () => ({
 }));
 
 mock.module("../src/core/observability/cost-tracker", () => ({
+  ...realCostTracker,
   costTracker: {
     getCostSummary: () => ({ totalCost: 0 }),
     getCostTrend: () => ({ direction: "flat", strength: 0 }),
@@ -161,10 +175,12 @@ mock.module("../src/core/observability/cost-tracker", () => ({
 }));
 
 mock.module("../src/core/memory", () => ({
+  ...realMemory,
   searchMemories: async () => [],
 }));
 
 mock.module("../src/core/agents/agent-manager", () => ({
+  ...realAgentManager,
   spawnAgent: async (opts: any) => {
     const agent = {
       id: `agent-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -187,6 +203,7 @@ mock.module("../src/core/agents/agent-manager", () => ({
 
 // Mock db + schema for brain routes that use direct DB access
 mock.module("../src/db", () => ({
+  ...realDb,
   db: {
     select: () => ({
       from: () => ({
@@ -208,6 +225,7 @@ mock.module("../src/db", () => ({
 }));
 
 mock.module("../src/db/schema", () => ({
+  ...realDbSchema,
   users: {},
   subAgents: { status: "status" },
   agentProgress: {},

@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
+import * as realAlerting from "../src/core/observability/alerting";
 
 // ============================================
 // Alerts Routes — API Tests
@@ -56,6 +57,7 @@ let resolvedAlerts: Array<{ id: string; by: string }> = [];
 let addedRules: any[] = [];
 
 mock.module("../src/core/observability/alerting", () => ({
+  ...realAlerting,
   getActiveAlerts: () => mockActiveAlerts,
   getAlertHistory: (limit?: number) => mockAlertHistory.slice(0, limit),
   acknowledgeAlert: (id: string, by: string) => {
