@@ -61,6 +61,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run tests
+        timeout-minutes: 5
         run: bun test
         env:
           DATABASE_URL: postgres://opensentinel:opensentinel@localhost:5445/opensentinel
