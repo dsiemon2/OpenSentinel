@@ -8,7 +8,7 @@
 
 A self-hosted personal AI assistant powered by Claude, with JARVIS-like capabilities.
 
-**Website**: [opensentinel.ai](https://opensentinel.ai) | **Dashboard**: [app.opensentinel.ai](https://app.opensentinel.ai)
+**Website**: [opensentinel.ai](https://opensentinel.ai) | **Docs**: [docs.opensentinel.ai](https://docs.opensentinel.ai) | **Dashboard**: [app.opensentinel.ai](https://app.opensentinel.ai)
 
 ## What is OpenSentinel?
 

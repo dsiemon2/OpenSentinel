@@ -1,6 +1,6 @@
 {
   "name": "opensentinel",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "description": "Self-hosted personal AI assistant powered by Claude with Telegram, Discord, Slack, WhatsApp, Signal, iMessage, and web interfaces",
   "type": "module",
   "main": "./dist/lib.js",
@@ -45,6 +45,15 @@
     "self-hosted"
   ],
   "license": "MIT",
+  "author": "OpenSentinel Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dsiemon2/OpenSentinel.git"
+  },
+  "homepage": "https://opensentinel.ai",
+  "bugs": {
+    "url": "https://github.com/dsiemon2/OpenSentinel/issues"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@notionhq/client": "^5.11.0",

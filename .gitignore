@@ -19,3 +19,10 @@ tmp_*.py
 .env.docker
 .env.staging
 .env.production
+
+# Debug/temp files
+_t*.ts
+*.tmp
+
+# Personal branding artifacts
+GoGreen-Sentinel.png

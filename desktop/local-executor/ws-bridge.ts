@@ -21,7 +21,7 @@ import type {
 // ─── Types ───────────────────────────────────────────────
 
 export interface BridgeConfig {
-  /** WebSocket URL, e.g. "ws://YOUR_SERVER_IP:8030/ws" or "wss://app.opensentinel.ai/ws" */
+  /** WebSocket URL, e.g. "ws://your-server:8030/ws" or "wss://app.opensentinel.ai/ws" */
   url: string;
   /** Local executor instance */
   executor: ILocalExecutor;

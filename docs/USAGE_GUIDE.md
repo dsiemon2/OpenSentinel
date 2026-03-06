@@ -527,7 +527,7 @@ Start monitoring "OpenSentinel" mentions
 ```
 
 ```
-Monitor "Acme Coffee Coffee" with keywords "coffee", "roaster", "example"
+Monitor "Acme Coffee Co" with keywords "coffee", "roaster", "acmecoffee"
 ```
 Adds additional tracking keywords.
 

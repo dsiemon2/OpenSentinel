@@ -1584,7 +1584,7 @@ OpenSentinel serves as the central AI hub for an entire application ecosystem. A
 
 **Products Ecosystem:**
 - Boomer AI (voice assistant for seniors)
-- CoffeeAI Coffee (coffee shop voice assistant)
+- Coffee Shop AI (coffee shop voice assistant)
 - Salon Digital Assistant (salon voice receptionist)
 - Soup Cookoff Assistant (event voice assistant)
 - NaggingWife AI (reminder assistant)
