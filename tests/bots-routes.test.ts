@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll, beforeEach, mock } from "bun:test";
 import { Hono } from "hono";
+import * as realFs from "fs";
 
 // ============================================
 // Bots Routes — API Tests
@@ -23,15 +24,30 @@ SLACK_SIGNING_SECRET=
 let writtenContent = "";
 let writtenPath = "";
 
+// Only intercept .env file operations; pass through everything else
+// so other test files that use readFileSync for real files still work.
 mock.module("fs", () => ({
-  readFileSync: (path: string, _encoding: string) => {
-    return mockEnvFileContent;
+  ...realFs,
+  readFileSync: (path: string, encoding: string) => {
+    if (typeof path === "string" && path.endsWith(".env")) {
+      return mockEnvFileContent;
+    }
+    return realFs.readFileSync(path, encoding as any);
   },
-  writeFileSync: (path: string, content: string, _encoding: string) => {
-    writtenPath = path;
-    writtenContent = content;
+  writeFileSync: (path: string, content: string, encoding: string) => {
+    if (typeof path === "string" && path.endsWith(".env")) {
+      writtenPath = path;
+      writtenContent = content;
+      return;
+    }
+    return realFs.writeFileSync(path, content, encoding as any);
   },
-  existsSync: (_path: string) => true,
+  existsSync: (path: string) => {
+    if (typeof path === "string" && path.endsWith(".env")) {
+      return true;
+    }
+    return realFs.existsSync(path);
+  },
 }));
 
 mock.module("../src/config/env", () => ({

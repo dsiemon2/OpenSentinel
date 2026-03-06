@@ -1,20 +1,67 @@
 # OpenSentinel
 
 [![CI](https://github.com/dsiemon2/OpenSentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/dsiemon2/OpenSentinel/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/version-3.6.1-blue)](https://github.com/dsiemon2/OpenSentinel/releases)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-runtime-f9f1e1?logo=bun&logoColor=black)](https://bun.sh/)
 [![Docker](https://img.shields.io/badge/Docker-compose-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Tests](https://img.shields.io/badge/tests-6%2C400%2B-brightgreen)](https://github.com/dsiemon2/OpenSentinel/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/dsiemon2/OpenSentinel?style=social)](https://github.com/dsiemon2/OpenSentinel/stargazers)
 
-A self-hosted personal AI assistant powered by Claude, with JARVIS-like capabilities.
+**Your self-hosted AI assistant: 9 LLM providers, 300+ tools, 7 channels, smart home, OSINT, finance, and more.**
 
 **Website**: [opensentinel.ai](https://opensentinel.ai) | **Docs**: [docs.opensentinel.ai](https://docs.opensentinel.ai) | **Dashboard**: [app.opensentinel.ai](https://app.opensentinel.ai)
 
-## What is OpenSentinel?
+<!-- Screenshots - replace with actual images
+## Screenshots
 
-OpenSentinel is your own personal AI assistant that runs on your infrastructure. Think of it like having Jarvis from Iron Man -- you can talk to it, ask questions, and it can take actions on your behalf. It connects to Telegram, Discord, Slack, a web dashboard, and a REST API, all backed by Claude as the reasoning engine.
+| Web Dashboard | Telegram Chat | Brain Dashboard |
+|:---:|:---:|:---:|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Telegram](docs/screenshots/telegram.png) | ![Brain](docs/screenshots/brain-dashboard.png) |
 
-## Features
+> To add screenshots: create `docs/screenshots/`, capture each view at 1200x800, save as PNG.
+-->
+
+---
+
+## Table of Contents
+
+- [Why OpenSentinel?](#why-opensentinel)
+- [Key Features](#key-features)
+- [Quick Start](#quick-start)
+- [How to Use](#how-to-use)
+- [Architecture](#architecture)
+- [Comparison](#comparison)
+- [Contributing](#contributing)
+- [Community](#community)
+
+---
+
+## Why OpenSentinel?
+
+OpenSentinel is a self-hosted personal AI assistant that runs on your infrastructure. Think JARVIS from Iron Man — talk to it via Telegram, Discord, Slack, or a web dashboard, and it takes action: controls your smart home, monitors your finances, searches public records, generates documents, and more.
+
+Unlike chat-only interfaces, OpenSentinel is a **full-stack AI platform** with 124 tools, sub-agents, workflow automation, RAG memory, and enterprise security — all self-hosted.
+
+**How it works**: You send a message (text, voice, or API call) → the Brain routes it to the right LLM provider → tools execute actions → you get a response with results.
+
+## Key Features
+
+| Category | Highlights |
+|----------|-----------|
+| **LLM Providers** | Anthropic Claude, OpenAI, xAI Grok, Google Gemini, Groq, Mistral, OpenRouter, Ollama, custom endpoints |
+| **Channels** | Telegram, Discord, Slack, Matrix, Web Dashboard, Desktop App (Electron), Browser Extension |
+| **Smart Home** | Home Assistant device control, automation triggers |
+| **Finance** | Crypto trading (Coinbase/Binance), stocks, DeFi, Finnhub, FRED macroeconomic data |
+| **OSINT** | FEC, SEC EDGAR, IRS 990, USASpending, OpenCorporates, entity resolution, graph explorer |
+| **Productivity** | GitHub, Notion, Email (IMAP/SMTP), Google Drive, Dropbox, Spotify |
+| **Voice** | Wake word detection, VAD, speaker diarization, ElevenLabs TTS |
+| **Security** | AES-256-GCM encryption, 2FA, RBAC, SSO (SAML/OAuth/OIDC), audit logging, GDPR tools |
+| **AI** | Sub-agents, RAG memory (HyDE, re-ranking, graph RAG), ML pipeline, workflow automation |
+
+<details>
+<summary><strong>Full Feature List (300+ features)</strong></summary>
 
 ### Core Capabilities
 - Answer questions and have conversations
@@ -36,18 +83,11 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Noise cancellation
 - Voice note summarization
 
-### Communication Platforms
-- Telegram bot with voice support
-- Discord bot with slash commands and voice channels
-- Slack bot with app mentions and threads
-- Matrix bot with mentions and DMs
-- Web dashboard
-- REST API
-
 ### Multi-Provider LLM
 - Anthropic Claude (default)
 - Google Gemini (1M context, vision, tool use)
 - OpenRouter, Groq, Mistral, OpenAI
+- xAI Grok
 - HuggingFace Inference API (text embeddings)
 - Ollama (local/offline models)
 - Any OpenAI-compatible endpoint
@@ -83,7 +123,7 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Charts and diagrams
 - AI image generation (DALL-E)
 - Secure file download UI with token-based access (1-hour expiry)
-- Document parsing from uploads (`parse_document` — PDF, DOCX, TXT, MD, HTML, CSV, JSON, XML, YAML)
+- Document parsing from uploads (PDF, DOCX, TXT, MD, HTML, CSV, JSON, XML, YAML)
 
 ### Personality System
 - 15 domain expert modes (coding, legal, medical, finance, etc.)
@@ -92,14 +132,13 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Verbosity and humor controls
 
 ### Security
-- **Gateway token auth** (optional, disabled by default for self-hosted)
-- **AES-256-GCM field encryption** for data at rest
-- **Tamper-proof audit logs** with HMAC-SHA256 chain integrity
-- **Incident response system** with automated detection and escalation
+- Gateway token auth (optional, disabled by default for self-hosted)
+- AES-256-GCM field encryption for data at rest
+- Tamper-proof audit logs with HMAC-SHA256 chain integrity
+- Incident response system with automated detection and escalation
 - 2FA for sensitive operations (DB-persisted, encrypted secrets)
 - Biometric verification
 - Memory vault (encrypted storage)
-- Audit logging
 - GDPR compliance tools
 - Rate limiting
 - Autonomy levels (readonly/supervised/autonomous)
@@ -123,24 +162,21 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - Prometheus metrics export (GET /metrics)
 
 ### Integrations
-- **Email**: IMAP/SMTP with AI inbox summarization + web email client (read, compose, attachments) + automatic local/remote IMAP fallback
+- **Email**: IMAP/SMTP with AI inbox summarization + web email client (read, compose, attachments)
 - **SMS/Phone**: Twilio for calls and texts
 - **GitHub**: Repos, issues, PRs, AI code review
 - **Notion**: Pages, databases, search, sync
 - **Home Assistant**: Smart home device control
 - **Spotify**: Playback, playlists, search
 - **Cloud Storage**: Google Drive, Dropbox
-- **Finance**: Crypto, stocks, currency, portfolio tracking, exchange trading (Coinbase/Binance), DeFi data, on-chain analytics, order books, backtesting, Finnhub (real-time quotes, news sentiment, analyst recs, earnings), FRED (GDP, CPI, unemployment, interest rates)
+- **Finance**: Crypto, stocks, currency, portfolio tracking, exchange trading, DeFi, Finnhub, FRED
 
 ### OSINT & Public Records
-- **Graph Explorer**: D3.js force-directed knowledge graph visualization
-- **External API Search**: Auto-queries FEC, OpenCorporates when entities aren't in local DB
-- **Entity Resolution**: Jaro-Winkler fuzzy matching, exact/identifier/fuzzy/new resolution pipeline
-- **Public Records Clients**: FEC, SEC EDGAR, IRS 990, USASpending, OpenCorporates
-- **Rate Limiting**: Per-service sliding-window rate limiter for API compliance
-
-### Infrastructure
-- Built-in tunnels (Cloudflare, ngrok, localtunnel)
+- Graph Explorer: D3.js force-directed knowledge graph visualization
+- External API Search: Auto-queries FEC, OpenCorporates when entities aren't in local DB
+- Entity Resolution: Jaro-Winkler fuzzy matching pipeline
+- Public Records Clients: FEC, SEC EDGAR, IRS 990, USASpending, OpenCorporates
+- Rate Limiting: Per-service sliding-window rate limiter for API compliance
 
 ### Vision & Documents
 - Screen capture and webcam analysis
@@ -157,47 +193,42 @@ OpenSentinel is your own personal AI assistant that runs on your infrastructure.
 - **Electron Desktop App**: System tray, global hotkeys (Ctrl+Shift+M chat, Ctrl+Shift+O OpenSentinel)
 - **Browser Extension**: Chrome/Firefox popup chat, context menu
 
+### Infrastructure
+- Built-in tunnels (Cloudflare, ngrok, localtunnel)
+- Docker Compose (dev + hardened production config)
+
+</details>
+
 ## Quick Start
+
+### Docker (Fastest)
+
+```bash
+git clone https://github.com/dsiemon2/OpenSentinel.git
+cd OpenSentinel
+cp .env.example .env   # Add your API keys (at minimum ANTHROPIC_API_KEY)
+docker compose up -d   # Starts PostgreSQL + Redis
+bun install
+bun run db:migrate
+cd src/web && bun install && bun run build && cd ../..
+bun run start
+```
+
+Open [http://localhost:8030](http://localhost:8030) — no auth required by default (self-hosted).
+
+### Supported Platforms
+
+| Platform | Status |
+|----------|--------|
+| Linux (Ubuntu/Debian) | Recommended |
+| macOS | Supported |
+| Windows (WSL2) | Supported |
+| Docker | Supported |
 
 ### Prerequisites
 - [Bun](https://bun.sh) runtime
 - [Docker](https://docker.com) for PostgreSQL and Redis
-- API keys (Claude at minimum; see `.env.example` for all options)
-
-### Installation
-
-1. **Clone and install dependencies**
-   ```bash
-   git clone https://github.com/dsiemon2/OpenSentinel.git
-   cd OpenSentinel
-   bun install
-   ```
-
-2. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys
-   ```
-
-3. **Start database services**
-   ```bash
-   docker compose up -d
-   ```
-
-4. **Run database migrations**
-   ```bash
-   bun run db:migrate
-   ```
-
-5. **Build the web dashboard**
-   ```bash
-   cd src/web && bun install && bun run build && cd ../..
-   ```
-
-6. **Start OpenSentinel**
-   ```bash
-   bun run start
-   ```
+- API keys (Claude at minimum; see `.env.example` for all providers)
 
 ## How to Use
 
@@ -219,7 +250,7 @@ curl -X POST http://localhost:8030/api/ask \
   -d '{"message": "Hello, what can you do?"}'
 ```
 
-## Commands (Telegram)
+### Telegram Commands
 
 | Command | Description |
 |---------|-------------|
@@ -248,13 +279,14 @@ curl -X POST http://localhost:8030/api/ask \
 │  Device Triggers     │                     │                    │
 │  Calendar            │                     │                    │
 ├─────────────────────────────────────────────────────────────────┤
-│  Providers: Anthropic, OpenRouter, Groq, Mistral, Ollama       │
+│  Providers: Anthropic, OpenAI, xAI, Gemini, Groq, Mistral,     │
+│             OpenRouter, Ollama, Custom                          │
 ├─────────────────────────────────────────────────────────────────┤
 │  Tools: Shell, Files, Browser, Search, OCR, Screenshots,       │
-│         Video, Image Analysis, File Generation                  │
+│         Video, Image Analysis, File Generation (124 tools)      │
 ├─────────────────────────────────────────────────────────────────┤
 │  Intelligence: Predictive, Relationship Graph, Temporal,       │
-│                Multi-lingual, Domain Experts                    │
+│                Multi-lingual, Domain Experts, ML Pipeline       │
 ├─────────────────────────────────────────────────────────────────┤
 │  Security: 2FA, Biometric, Vault, Audit, GDPR, Rate Limiting   │
 ├─────────────────────────────────────────────────────────────────┤
@@ -263,6 +295,25 @@ curl -X POST http://localhost:8030/api/ask \
 │  Data: PostgreSQL + pgvector │ Redis (Cache/Queue)             │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+## Comparison
+
+| Feature | OpenSentinel | Open WebUI | Khoj | Leon AI |
+|---------|:---:|:---:|:---:|:---:|
+| LLM Providers | 9 | 3 | 3 | 1 |
+| Chat Channels | 7 | 1 | 2 | 1 |
+| Built-in Tools | 124 | ~20 | ~10 | ~30 |
+| Smart Home | Home Assistant | - | - | - |
+| Finance/Trading | Coinbase, Binance, Finnhub, FRED | - | - | - |
+| OSINT/Public Records | FEC, SEC, IRS, OpenCorporates | - | - | - |
+| Voice (Wake Word) | Yes | - | - | Yes |
+| RAG Memory | HyDE, Graph RAG, Re-ranking | Basic | Yes | - |
+| Sub-Agents | Yes | - | Yes | - |
+| Workflow Automation | IFTTT-like | - | - | - |
+| Enterprise SSO | SAML, OAuth, OIDC | LDAP | - | - |
+| Desktop App | Electron | - | - | - |
+| Browser Extension | Chrome/Firefox | - | Chrome | - |
+| Test Coverage | 6,400+ tests | Unknown | Unknown | Unknown |
 
 ## Project Structure
 
@@ -278,14 +329,12 @@ src/
 │   ├── agents/                 # Sub-agent system
 │   ├── enterprise/             # Multi-user, SSO, quotas
 │   ├── intelligence/           # Predictive, relationship, temporal
-│   ├── evolution/              # Evolution, achievements, modes
-│   ├── ml/                     # ML algorithms (Naive Bayes, Isolation Forest, K-Means, Markov Chain, Linear Regression)
+│   ├── ml/                     # ML algorithms (Naive Bayes, Isolation Forest, K-Means)
 │   ├── observability/          # Metrics, replay, alerting
 │   ├── personality/            # Personas, mood, domain experts
 │   ├── plugins/                # Plugin system
 │   ├── providers/              # Multi-LLM provider abstraction
 │   ├── security/               # 2FA, vault, GDPR, audit
-│   ├── tunnel/                 # Built-in tunnel support
 │   └── workflows/              # Automation engine
 ├── inputs/
 │   ├── telegram/               # Telegram bot
@@ -298,24 +347,16 @@ src/
 │   └── voice/                  # Wake word, VAD, diarization
 ├── integrations/
 │   ├── email/                  # IMAP/SMTP email
-│   ├── twilio/                 # SMS/Phone calls
 │   ├── github/                 # GitHub API
 │   ├── notion/                 # Notion API
 │   ├── homeassistant/          # Home Assistant
 │   ├── spotify/                # Spotify API
-│   ├── cloud-storage/          # Google Drive, Dropbox
 │   ├── finance/                # Crypto, stocks, currency
-│   ├── public-records/         # FEC, SEC, IRS 990, USASpending, OpenCorporates
-│   ├── documents/              # Document ingestion
+│   ├── public-records/         # FEC, SEC, IRS 990, OpenCorporates
 │   └── vision/                 # Screen/webcam capture
-├── tools/
-│   ├── file-generation/        # PDF, Word, Excel, PPT, images
-│   └── rendering/              # Math, code, markdown
-├── outputs/
-│   ├── stt.ts                  # Speech-to-text
-│   └── tts.ts                  # Text-to-speech
-├── db/
-│   └── schema.ts               # Drizzle ORM schema
+├── tools/                      # 124 tool implementations
+├── outputs/                    # STT, TTS
+├── db/                         # Database schema
 └── web/                        # React dashboard
 
 desktop/                        # Electron desktop app
@@ -358,6 +399,7 @@ Found a bug or have a feature request? [Open an issue](https://github.com/dsiemo
 - **GitHub Issues**: [Report bugs and request features](https://github.com/dsiemon2/OpenSentinel/issues)
 - **GitHub Discussions**: [Ask questions and share ideas](https://github.com/dsiemon2/OpenSentinel/discussions)
 - **Website**: [opensentinel.ai](https://opensentinel.ai)
+- **Docs**: [docs.opensentinel.ai](https://docs.opensentinel.ai)
 
 ## License
 
