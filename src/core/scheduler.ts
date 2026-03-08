@@ -25,14 +25,14 @@ function getConnection(): Redis {
 
 function getTaskQueue(): Queue {
   if (!_taskQueue) {
-    _taskQueue = new Queue("sentinel-tasks", { connection: getConnection() });
+    _taskQueue = new Queue("sentinel-tasks", { connection: getConnection() as any });
   }
   return _taskQueue;
 }
 
 function getMaintenanceQueue(): Queue {
   if (!_maintenanceQueue) {
-    _maintenanceQueue = new Queue("sentinel-maintenance", { connection: getConnection() });
+    _maintenanceQueue = new Queue("sentinel-maintenance", { connection: getConnection() as any });
   }
   return _maintenanceQueue;
 }
@@ -121,7 +121,7 @@ export function startWorker(
       console.log(`[Scheduler] Processing task: ${job.name}`);
       await onTask(job.data);
     },
-    { connection: getConnection() }
+    { connection: getConnection() as any }
   );
 
   worker.on("completed", (job) => {
@@ -177,7 +177,7 @@ export function startMaintenanceWorker(): void {
           console.log(`[Maintenance] Unknown task type: ${job.data.type}`);
       }
     },
-    { connection: getConnection() }
+    { connection: getConnection() as any }
   );
 
   maintenanceWorker.on("completed", (job) => {
