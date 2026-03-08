@@ -1579,7 +1579,7 @@ OpenSentinel serves as the central AI hub for an entire application ecosystem. A
 | DocGen AI | Legal Documents | Python FastAPI | Python SDK |
 | EcomFlow | E-commerce | Electron/React/TS | TypeScript SDK |
 | PolyMarketAI | Trading | Python FastAPI | Python SDK |
-| GoGreen Sourcing | Procurement | Next.js 15/TS | TypeScript SDK |
+| GreenSource | Procurement | Next.js 15/TS | TypeScript SDK |
 | TimeSheetAI | Timesheets | Next.js 15/TS | TypeScript SDK |
 
 **Products Ecosystem:**
@@ -1599,7 +1599,7 @@ OpenSentinel serves as the central AI hub for an entire application ecosystem. A
 - EverythingBeer (beer discovery)
 - Real Estate AI (property management)
 - Maximus Pet Store (e-commerce)
-- GoGreen Paperless (business website)
+- GreenSource Paperless (business website)
 - Soup Cookoff Mobile (mobile app)
 
 ### Cross-App Intelligence

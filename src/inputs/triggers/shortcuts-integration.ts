@@ -111,7 +111,8 @@ export function generateShortcutApiKey(): { key: string; prefix: string } {
 }
 
 export function hashApiKey(key: string): string {
-  return createHmac("sha256", "sentinel-shortcuts-secret")
+  const hmacKey = process.env.ENCRYPTION_MASTER_KEY || "sentinel-shortcuts-secret";
+  return createHmac("sha256", hmacKey)
     .update(key)
     .digest("hex");
 }

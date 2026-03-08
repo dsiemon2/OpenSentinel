@@ -1,6 +1,6 @@
 /**
  * Immutable Audit Trail
- * Ported from GoGreenSourcingAI
+ * Immutable Audit Trail
  *
  * Features:
  * - Append-only audit log

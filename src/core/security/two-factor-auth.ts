@@ -184,7 +184,8 @@ function generateRecoveryCodes(): string[] {
  * Hash a recovery code for storage
  */
 function hashRecoveryCode(code: string): string {
-  return createHmac("sha256", "sentinel-recovery")
+  const key = process.env.ENCRYPTION_MASTER_KEY || "sentinel-recovery";
+  return createHmac("sha256", key)
     .update(code.replace(/-/g, "").toUpperCase())
     .digest("hex");
 }

@@ -1,6 +1,6 @@
 /**
  * Graph RAG - Multi-hop Entity Graph Traversal
- * Ported from GoGreen-DOC-AI (Python) to TypeScript
+ * Graph RAG - TypeScript implementation
  *
  * Features:
  * - Entity extraction and relationship mapping

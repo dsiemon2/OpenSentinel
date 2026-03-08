@@ -8,7 +8,7 @@ OpenSentinel operates in a rapidly growing market of self-hosted personal AI ass
 
 ## Competitor Landscape
 
-### 1. OpenClaw (formerly Clawdbot / Moltbot)
+### 1. OpenClaw
 
 | Attribute | Details |
 |---|---|

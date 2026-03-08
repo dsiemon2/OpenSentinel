@@ -1,6 +1,6 @@
 /**
  * AES-256-GCM Encryption Utilities
- * Ported from GoGreen-Workflow-Hub
+ * AES-256-GCM Encryption Utilities
  *
  * Drop-in credential encryption/decryption:
  * - AES-256-GCM authenticated encryption

@@ -9,19 +9,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/dsiemon2/OpenSentinel?style=social)](https://github.com/dsiemon2/OpenSentinel/stargazers)
 
-**Your self-hosted AI assistant: 9 LLM providers, 300+ tools, 7 channels, smart home, OSINT, finance, and more.**
+**Your self-hosted AI assistant: 9 LLM providers, 300+ features, 124 tools, 10+ channels, smart home, OSINT, finance, and more.**
 
 **Website**: [opensentinel.ai](https://opensentinel.ai) | **Docs**: [docs.opensentinel.ai](https://docs.opensentinel.ai) | **Dashboard**: [app.opensentinel.ai](https://app.opensentinel.ai)
 
-<!-- Screenshots - replace with actual images
-## Screenshots
-
-| Web Dashboard | Telegram Chat | Brain Dashboard |
-|:---:|:---:|:---:|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Telegram](docs/screenshots/telegram.png) | ![Brain](docs/screenshots/brain-dashboard.png) |
-
-> To add screenshots: create `docs/screenshots/`, capture each view at 1200x800, save as PNG.
--->
 
 ---
 
@@ -51,7 +42,7 @@ Unlike chat-only interfaces, OpenSentinel is a **full-stack AI platform** with 1
 | Category | Highlights |
 |----------|-----------|
 | **LLM Providers** | Anthropic Claude, OpenAI, xAI Grok, Google Gemini, Groq, Mistral, OpenRouter, Ollama, custom endpoints |
-| **Channels** | Telegram, Discord, Slack, Matrix, Web Dashboard, Desktop App (Electron), Browser Extension |
+| **Channels** | Telegram, Discord, Slack, Matrix, WhatsApp, Signal, iMessage, Zalo, Web Dashboard, Desktop App (Electron), Browser Extension |
 | **Smart Home** | Home Assistant device control, automation triggers |
 | **Finance** | Crypto trading (Coinbase/Binance), stocks, DeFi, Finnhub, FRED macroeconomic data |
 | **OSINT** | FEC, SEC EDGAR, IRS 990, USASpending, OpenCorporates, entity resolution, graph explorer |
@@ -301,7 +292,7 @@ curl -X POST http://localhost:8030/api/ask \
 | Feature | OpenSentinel | Open WebUI | Khoj | Leon AI |
 |---------|:---:|:---:|:---:|:---:|
 | LLM Providers | 9 | 3 | 3 | 1 |
-| Chat Channels | 7 | 1 | 2 | 1 |
+| Chat Channels | 11 | 1 | 2 | 1 |
 | Built-in Tools | 124 | ~20 | ~10 | ~30 |
 | Smart Home | Home Assistant | - | - | - |
 | Finance/Trading | Coinbase, Binance, Finnhub, FRED | - | - | - |

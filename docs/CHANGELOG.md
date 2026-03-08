@@ -74,7 +74,7 @@ All notable changes to OpenSentinel are documented here.
 ### Changed
 - Renamed entire "Molt" system to "Evolution" (directories, types, variables, docs)
 - Discord bot renamed from "MoltBot" to "OpenSentinel"
-- Git remote renamed from GoGreen-Moltbot to OpenSentinel
+- Git remote renamed to OpenSentinel
 - `moltModes` schema variable renamed to `evolutionModes` (DB table name preserved)
 - `MoltMode`/`NewMoltMode` types renamed to `EvolutionMode`/`NewEvolutionMode`
 - Version bumped to 2.7.0
@@ -89,8 +89,8 @@ All notable changes to OpenSentinel are documented here.
   - TypeScript SDK (`src/sdk/index.ts`): `OpenSentinelClient` with chat, notify, memory, tools, agent methods
   - Python SDK (`sdk/python/opensentinel_sdk.py`): Zero-dependency client for FastAPI/Django apps
   - SDK API routes (`src/inputs/api/routes/sdk.ts`): 9 endpoints for app registration, chat, notifications, memory, tools, agents
-- **30+ App Integrations**: OpenSentinel SDK integrated into entire GoGreen ecosystem
-  - Main apps: TutorAI, DocGen AI, EcomFlow, PolyMarketAI, GoGreen Sourcing, TimeSheetAI
+- **30+ App Integrations**: OpenSentinel SDK integrated into entire app ecosystem
+  - Main apps: TutorAI, DocGen AI, EcomFlow, PolyMarketAI, GreenSource, TimeSheetAI
   - Products ecosystem: 20+ apps including voice assistants, sales training, recruiting, e-commerce, workflow automation
 - Cross-app memory sharing via pgvector (app-specific or cross-app search)
 - App registration with auto-generated API keys

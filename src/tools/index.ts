@@ -2122,7 +2122,7 @@ export const TOOLS: Tool[] = [
     },
   },
 
-  // ===== Approval Engine (from GoGreenSourcingAI) =====
+  // ===== Approval Engine =====
   {
     name: "approval_workflow",
     description:
@@ -2180,7 +2180,7 @@ export const TOOLS: Tool[] = [
     },
   },
 
-  // ===== Graph RAG (from GoGreen-DOC-AI) =====
+  // ===== Graph RAG =====
   {
     name: "graph_rag",
     description:
@@ -2309,7 +2309,7 @@ export const TOOLS: Tool[] = [
     },
   },
 
-  // ===== Audit Trail (from GoGreenSourcingAI) =====
+  // ===== Audit Trail =====
   {
     name: "audit_trail",
     description:

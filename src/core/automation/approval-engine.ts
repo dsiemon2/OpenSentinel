@@ -1,6 +1,6 @@
 /**
  * Approval Workflow Engine
- * Ported from GoGreenSourcingAI - generalized for OpenSentinel
+ * Approval Workflow Engine for OpenSentinel
  *
  * Multi-step approval chains with configurable rules:
  * - Submit entities for approval based on rules

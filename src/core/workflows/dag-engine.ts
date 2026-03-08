@@ -1,6 +1,6 @@
 /**
  * DAG Workflow Engine
- * Ported from GoGreen-Workflow-Hub
+ * DAG Workflow Engine
  *
  * Features:
  * - Directed Acyclic Graph workflow execution

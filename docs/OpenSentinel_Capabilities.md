@@ -1,6 +1,6 @@
 # OpenSentinel - Personal AI Assistant
 
-![OpenSentinel](GoGreen-OpenSentinel.png)
+![OpenSentinel](OpenSentinel.png)
 
 **Category:** AI Assistant
 **Version:** 3.1.1
@@ -301,6 +301,6 @@ Providers are automatically registered from environment variables. Per-request p
 
 ---
 
-**GoGreen Paperless Initiative**
+**OpenSentinel Project**
 OpenSentinel - Personal AI Assistant
 Version 3.1.1 | February 2026

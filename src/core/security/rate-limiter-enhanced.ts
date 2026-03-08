@@ -1,6 +1,6 @@
 /**
  * Enhanced Token Bucket Rate Limiter
- * Ported from GoGreenSourcingAI - zero dependencies
+ * Enhanced Rate Limiter - zero dependencies
  *
  * Features:
  * - Token bucket algorithm with configurable refill
