@@ -235,11 +235,11 @@ function MemoryGraphView({ containerRef }: { containerRef: React.RefObject<HTMLD
 
     simulation.on("tick", () => {
       link
-        .attr("x1", (d: any) => d.source.x)
-        .attr("y1", (d: any) => d.source.y)
-        .attr("x2", (d: any) => d.target.x)
-        .attr("y2", (d: any) => d.target.y);
-      node.attr("transform", (d: any) => `translate(${d.x},${d.y})`);
+        .attr("x1", (d: any) => d.source.x || 0)
+        .attr("y1", (d: any) => d.source.y || 0)
+        .attr("x2", (d: any) => d.target.x || 0)
+        .attr("y2", (d: any) => d.target.y || 0);
+      node.attr("transform", (d: any) => `translate(${d.x || 0},${d.y || 0})`);
     });
 
     return () => { simulation.stop(); };
@@ -416,14 +416,24 @@ export default function GraphExplorer({ initialSearch, onSearchConsumed }: { ini
     svg.selectAll("*").remove();
 
     const container = containerRef.current;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+    const width = container.clientWidth || 800;
+    const height = container.clientHeight || 600;
 
     svg.attr("width", width).attr("height", height);
 
     // Deep-copy nodes/edges so d3 can mutate them
     const nodes: GraphNode[] = graphData.nodes.map((n) => ({ ...n }));
-    const edges: GraphEdge[] = graphData.edges.map((e) => ({ ...e }));
+    // Filter out self-referencing edges and deduplicate (these cause force divergence)
+    const seen = new Set<string>();
+    const edges: GraphEdge[] = graphData.edges
+      .filter((e) => e.source !== e.target)
+      .filter((e) => {
+        const key = [e.source, e.target].sort().join("-");
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .map((e) => ({ ...e }));
 
     // Zoom group
     const g = svg.append("g");
@@ -433,29 +443,40 @@ export default function GraphExplorer({ initialSearch, onSearchConsumed }: { ini
       .scaleExtent([0.1, 8])
       .on("zoom", (event) => {
         g.attr("transform", event.transform);
+        // Show edge labels only when zoomed in enough
+        g.selectAll(".link-labels text").attr("opacity", event.transform.k > 1.5 ? 0.7 : 0);
       });
 
     svg.call(zoom);
 
-    // Build simulation
+    const pad = 50;
+
+    // Remove orphan nodes entirely — they add clutter with no connections
+    const connectedIds = new Set<string>();
+    edges.forEach((e) => { connectedIds.add(e.source as unknown as string); connectedIds.add(e.target as unknown as string); });
+    const simNodes = nodes.filter((n) => connectedIds.has(n.id));
+
+    // Build simulation with only connected nodes — uses full viewport
     const simulation = d3
-      .forceSimulation<GraphNode>(nodes)
+      .forceSimulation<GraphNode>(simNodes)
       .force(
         "link",
         d3
           .forceLink<GraphNode, GraphEdge>(edges)
           .id((d) => d.id)
-          .distance(120)
+          .distance(130)
           .strength((d) =>
             typeof d.strength === "number" ? (d.strength / 100) * 0.5 : 0.3
           )
       )
-      .force("charge", d3.forceManyBody().strength(-300))
+      .force("charge", d3.forceManyBody().strength(-400).distanceMax(500))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force(
         "collide",
-        d3.forceCollide<GraphNode>().radius((d) => nodeRadius(d) + 8)
-      );
+        d3.forceCollide<GraphNode>().radius((d) => nodeRadius(d) + 18)
+      )
+      .force("x", d3.forceX<GraphNode>(width / 2).strength(0.03))
+      .force("y", d3.forceY<GraphNode>(height / 2).strength(0.03));
 
     simulationRef.current = simulation as unknown as d3.Simulation<
       GraphNode,
@@ -474,7 +495,7 @@ export default function GraphExplorer({ initialSearch, onSearchConsumed }: { ini
       .attr("stroke-opacity", 0.6)
       .attr("stroke-width", (d) => Math.max(1, ((d.strength || 30) / 100) * 4));
 
-    // Draw edge labels
+    // Draw edge labels (hidden by default, shown on zoom in)
     const linkLabel = g
       .append("g")
       .attr("class", "link-labels")
@@ -487,14 +508,14 @@ export default function GraphExplorer({ initialSearch, onSearchConsumed }: { ini
       .attr("font-size", 9)
       .attr("text-anchor", "middle")
       .attr("pointer-events", "none")
-      .attr("opacity", 0.7);
+      .attr("opacity", 0);
 
     // Draw nodes
     const node = g
       .append("g")
       .attr("class", "nodes")
       .selectAll<SVGGElement, GraphNode>("g")
-      .data(nodes)
+      .data(simNodes)
       .enter()
       .append("g")
       .attr("cursor", "pointer")
@@ -510,15 +531,16 @@ export default function GraphExplorer({ initialSearch, onSearchConsumed }: { ini
       .attr("stroke", "#1f2937")
       .attr("stroke-width", 2);
 
-    // Node labels
+    // Node labels — all visible, low-importance ones are smaller and dimmer
     node
       .append("text")
-      .text((d) => truncateLabel(d.name, 18))
+      .text((d) => truncateLabel(d.name || d.id.slice(0, 8), (d.importance ?? 0) >= 20 ? 18 : 14))
       .attr("text-anchor", "middle")
-      .attr("dy", (d) => nodeRadius(d) + 14)
-      .attr("fill", "#d1d5db")
-      .attr("font-size", 11)
-      .attr("pointer-events", "none");
+      .attr("dy", (d) => nodeRadius(d) + 12)
+      .attr("fill", (d) => (d.importance ?? 0) >= 20 ? "#d1d5db" : "#6b7280")
+      .attr("font-size", (d) => (d.importance ?? 0) >= 20 ? 11 : 9)
+      .attr("pointer-events", "none")
+      .attr("class", "node-label");
 
     // Drag behaviour
     const drag = d3
@@ -540,34 +562,72 @@ export default function GraphExplorer({ initialSearch, onSearchConsumed }: { ini
 
     node.call(drag);
 
-    // Tick
+    // Tick — soft clamp to keep nodes in viewport
     simulation.on("tick", () => {
-      link
-        .attr("x1", (d) => ((d.source as GraphNode).x ?? 0))
-        .attr("y1", (d) => ((d.source as GraphNode).y ?? 0))
-        .attr("x2", (d) => ((d.target as GraphNode).x ?? 0))
-        .attr("y2", (d) => ((d.target as GraphNode).y ?? 0));
+      simNodes.forEach((d) => {
+        d.x = Math.max(pad, Math.min(width - pad, d.x!));
+        d.y = Math.max(pad, Math.min(height - pad, d.y!));
+      });
 
-      node.attr("transform", (d) => `translate(${d.x ?? 0},${d.y ?? 0})`);
+      link
+        .attr("x1", (d) => (d.source as GraphNode).x!)
+        .attr("y1", (d) => (d.source as GraphNode).y!)
+        .attr("x2", (d) => (d.target as GraphNode).x!)
+        .attr("y2", (d) => (d.target as GraphNode).y!);
+
+      node.attr("transform", (d) => `translate(${d.x},${d.y})`);
 
       linkLabel
-        .attr("x", (d) => (((d.source as GraphNode).x ?? 0) + ((d.target as GraphNode).x ?? 0)) / 2)
-        .attr("y", (d) => (((d.source as GraphNode).y ?? 0) + ((d.target as GraphNode).y ?? 0)) / 2 - 4);
+        .attr("x", (d) => ((d.source as GraphNode).x! + (d.target as GraphNode).x!) / 2)
+        .attr("y", (d) => ((d.source as GraphNode).y! + (d.target as GraphNode).y!) / 2 - 4);
+    });
+
+    // Zoom-to-fit after simulation settles
+    simulation.on("end", () => {
+      const xs = simNodes.map((d) => d.x!);
+      const ys = simNodes.map((d) => d.y!);
+      const x0 = Math.min(...xs) - pad;
+      const y0 = Math.min(...ys) - pad;
+      const x1 = Math.max(...xs) + pad;
+      const y1 = Math.max(...ys) + pad;
+      const bw = x1 - x0;
+      const bh = y1 - y0;
+      if (bw <= 0 || bh <= 0) return;
+      const scale = Math.min(width / bw, height / bh) * 0.95;
+      const tx = (width - bw * scale) / 2 - x0 * scale;
+      const ty = (height - bh * scale) / 2 - y0 * scale;
+      svg.transition().duration(500).call(
+        zoom.transform,
+        d3.zoomIdentity.translate(tx, ty).scale(scale)
+      );
     });
   }, [graphData]);
 
   // Re-render force graph when data or view changes
   useEffect(() => {
-    if (view === "network") {
-      // Small delay to ensure the SVG container is mounted
-      const timeout = setTimeout(() => renderForceGraph(), 50);
-      return () => {
-        clearTimeout(timeout);
-        if (simulationRef.current) {
-          (simulationRef.current as { stop?: () => void }).stop?.();
-        }
-      };
-    }
+    if (view !== "network") return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Wait for container to have real dimensions before rendering
+    const tryRender = () => {
+      if (container.clientWidth > 0 && container.clientHeight > 0) {
+        renderForceGraph();
+      }
+    };
+
+    tryRender();
+
+    const ro = new ResizeObserver(() => tryRender());
+    ro.observe(container);
+
+    return () => {
+      ro.disconnect();
+      if (simulationRef.current) {
+        (simulationRef.current as { stop?: () => void }).stop?.();
+      }
+    };
   }, [view, renderForceGraph]);
 
   // ------ Sankey / Financial Flow Rendering ------
@@ -914,7 +974,7 @@ export default function GraphExplorer({ initialSearch, onSearchConsumed }: { ini
           ) : (
             <svg
               ref={svgRef}
-              style={{ width: "100%", height: "100%", display: "block" }}
+              style={{ width: "100%", height: "calc(100vh - 120px)", display: "block" }}
             />
           )}
         </div>
