@@ -3,7 +3,7 @@
 ![OpenSentinel](OpenSentinel.png)
 
 **Category:** AI Assistant
-**Version:** 3.1.1
+**Version:** 3.6.1
 **Status:** Production Ready
 **Date:** February 2026
 
@@ -192,7 +192,7 @@ Providers are automatically registered from environment variables. Per-request p
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    OPENSENTINEL v3.1.1                          │
+│                    OPENSENTINEL v3.6.1                          │
 ├─────────────────────────────────────────────────────────────────┤
 │  Inputs              │  Core               │  Outputs           │
 │  ──────              │  ────               │  ───────           │
@@ -297,10 +297,10 @@ Providers are automatically registered from environment variables. Per-request p
 | Sub-Agents | 5 |
 | Source Files | 349 |
 | Lines of Code | ~52,000 |
-| Unit Tests | 5,800+ |
+| Unit Tests | 6,400+ |
 
 ---
 
 **OpenSentinel Project**
 OpenSentinel - Personal AI Assistant
-Version 3.1.1 | February 2026
+Version 3.6.1 | March 2026

@@ -149,6 +149,27 @@ email.use("*", async (c, next) => {
 });
 
 // ---------------------------------------------------------------------------
+// GET /accounts — list all configured email accounts
+// ---------------------------------------------------------------------------
+
+email.get("/accounts", async (c) => {
+  const accounts: string[] = [];
+
+  // Primary configured email
+  if (env.EMAIL_USER) accounts.push(env.EMAIL_USER);
+
+  // Additional accounts from EMAIL_ACCOUNTS env var (comma-separated)
+  const extra = process.env.EMAIL_ACCOUNTS;
+  if (extra) {
+    for (const addr of extra.split(",").map((a) => a.trim()).filter(Boolean)) {
+      if (!accounts.includes(addr)) accounts.push(addr);
+    }
+  }
+
+  return c.json({ accounts });
+});
+
+// ---------------------------------------------------------------------------
 // GET /folders — list all mail folders
 // ---------------------------------------------------------------------------
 

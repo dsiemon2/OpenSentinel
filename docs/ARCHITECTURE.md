@@ -1,10 +1,10 @@
 # OpenSentinel Architecture
 
-This document describes the internal architecture of OpenSentinel v3.4.0, covering data flow, core components, and the overall system design.
+This document describes the internal architecture of OpenSentinel v3.6.1, covering data flow, core components, and the overall system design.
 
 ---
 
-**Version:** 3.4.0
+**Version:** 3.6.1
 
 ## High-Level Overview
 
@@ -451,7 +451,7 @@ Each input channel follows the same pattern:
 
 ## Tool System
 
-OpenSentinel provides 123 tools defined in `src/tools/index.ts`.
+OpenSentinel provides 124 tools defined in `src/tools/index.ts`.
 
 **How tools work:**
 

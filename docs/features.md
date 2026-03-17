@@ -1,6 +1,6 @@
 # OpenSentinel Features
 
-**Status: ALL FEATURES IMPLEMENTED** (v3.1.1)
+**Status: ALL FEATURES IMPLEMENTED** (v3.6.1)
 
 ## Input Methods
 

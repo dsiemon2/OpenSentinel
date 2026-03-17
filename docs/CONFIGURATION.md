@@ -1,6 +1,6 @@
 # Configuration Reference
 
-This document provides a complete reference for all environment variables used by OpenSentinel v3.1.1. Configuration is managed through environment variables, validated at startup using Zod schemas defined in `src/config/env.ts`.
+This document provides a complete reference for all environment variables used by OpenSentinel v3.6.1. Configuration is managed through environment variables, validated at startup using Zod schemas defined in `src/config/env.ts`.
 
 ## Table of Contents
 

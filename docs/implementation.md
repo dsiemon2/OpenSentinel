@@ -1,6 +1,6 @@
 # OpenSentinel Technical Implementation
 
-**Status: COMPLETE** (v3.1.1)
+**Status: COMPLETE** (v3.6.1)
 
 ## Architecture Overview
 

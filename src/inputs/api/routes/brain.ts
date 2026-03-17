@@ -62,7 +62,12 @@ brainRouter.get("/memory-graph", async (c) => {
 
   try {
     // Get recent memories as graph nodes
-    const memories = await searchMemories("", undefined, limit);
+    let memories: Awaited<ReturnType<typeof searchMemories>> = [];
+    try {
+      memories = await searchMemories("*", undefined, limit);
+    } catch {
+      // No memories or search failed — continue with empty list
+    }
     const nodes: Array<{
       id: string;
       name: string;

@@ -79,6 +79,7 @@ export default function Email() {
   const [folders, setFolders] = useState<FolderInfo[]>([]);
   const [currentFolder, setCurrentFolder] = useState("INBOX");
   const [emailAddress, setEmailAddress] = useState("");
+  const [accounts, setAccounts] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -92,6 +93,24 @@ export default function Email() {
   const [replyTo, setReplyTo] = useState<SerializedEmail | null>(null);
   const [sending, setSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch available accounts on mount
+  useEffect(() => {
+    apiFetch("/api/email/accounts").then(async (res) => {
+      if (res.ok) {
+        const d = await res.json();
+        const accts = d.accounts || [];
+        setAccounts(accts);
+        if (accts.length > 0 && !emailAddress) {
+          setEmailAddress(accts[0]);
+        }
+        // Auto-connect if accounts are available
+        if (accts.length > 0) {
+          setConnected(true);
+        }
+      }
+    }).catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const enc = encodeURIComponent;
 
@@ -226,7 +245,7 @@ export default function Email() {
 
   useEffect(() => {
     if (connected && emailAddress) { fetchFolders(); fetchEmails(); }
-  }, [connected, currentFolder]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [connected, currentFolder, emailAddress]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ------ Handlers ------
 
@@ -285,12 +304,19 @@ export default function Email() {
         <div style={S.connectCard}>
           <h2 style={{ color: "var(--text-primary)", margin: 0 }}>Email</h2>
           <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.9rem" }}>
-            Enter your email address to connect
+            {accounts.length > 0 ? "Select an account or enter an address" : "Enter your email address to connect"}
           </p>
-          <input type="email" placeholder="you@example.com" value={emailAddress}
-            onChange={e => setEmailAddress(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleConnect()}
-            style={{ ...S.input, maxWidth: 360 }} />
+          {accounts.length > 0 ? (
+            <select value={emailAddress} onChange={e => setEmailAddress(e.target.value)}
+              style={{ ...S.input, maxWidth: 360 }}>
+              {accounts.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          ) : (
+            <input type="email" placeholder="you@example.com" value={emailAddress}
+              onChange={e => setEmailAddress(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleConnect()}
+              style={{ ...S.input, maxWidth: 360 }} />
+          )}
           <button onClick={handleConnect} style={{ ...S.btn, ...S.btnPrimary }}
             disabled={!emailAddress.trim()}>Connect</button>
         </div>
@@ -345,7 +371,7 @@ export default function Email() {
 
           <div style={{ backgroundColor: "var(--bg-secondary)", borderRadius: 12, padding: "1rem", marginBottom: "1rem" }}>
             {selectedEmail.html ? (
-              <iframe srcDoc={selectedEmail.html} sandbox="allow-same-origin" title="Email body"
+              <iframe srcDoc={`<base target="_blank">${selectedEmail.html}`} sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox" title="Email body"
                 style={{ ...S.bodyFrame, background: "white" }} />
             ) : (
               <pre style={{ whiteSpace: "pre-wrap", color: "var(--text-primary)", margin: 0,
@@ -482,6 +508,16 @@ export default function Email() {
 
         {/* Email List */}
         <div style={S.emailListContainer}>
+          {accounts.length > 1 && (
+            <div style={{ marginBottom: "0.5rem" }}>
+              <select value={emailAddress} onChange={e => {
+                setEmailAddress(e.target.value);
+                setConnected(true);
+              }} style={{ ...S.input, maxWidth: 320, fontSize: "0.85rem" }}>
+                {accounts.map(a => <option key={a} value={a}>{a}</option>)}
+              </select>
+            </div>
+          )}
           <div style={S.toolbar}>
             <input type="text" placeholder="Search emails..." value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}

@@ -28,6 +28,21 @@
 
 ---
 
+### Market Readiness (v3.6.1)
+- [x] Scrub git history of sensitive files (DNS records, DKIM keys, server IPs)
+- [x] Replace all personal domain/IP references across codebase
+- [x] Delete 8 sensitive internal docs from repo
+- [x] Create SECURITY.md, CODE_OF_CONDUCT.md
+- [x] Fix 50+ dead website links
+- [x] Create og-image.svg for social sharing
+- [x] Overhaul README: TOC, comparison table, feature highlights, badges
+- [x] Fix test pollution: mock.module() leaking across 187 test files (1218 → 20 failures)
+- [x] Add db:migrate step to CI
+- [x] Add 5-minute timeout to CI test step
+- [x] Lazy-init OpenAI in video-summarization.ts
+- [x] Create marketing content: X thread, Reddit, HN, GitHub Discussions, influencer outreach
+- [x] Deploy all changes to production
+
 ## In Progress
 
 (none)

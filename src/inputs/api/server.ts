@@ -530,11 +530,8 @@ app.route("/api/webhooks", webhooksRouter);
 import githubRouter from "./routes/github";
 app.route("/api/github", githubRouter);
 
-// ===== Metrics API (authenticated routes for external use) =====
-import metricsRouter from "./routes/metrics";
-app.route("/api/metrics", metricsRouter);
-
 // ===== Metrics Overview (dashboard-accessible, no API key required) =====
+// Must be registered BEFORE metricsRouter to avoid its requireApiKey middleware
 app.get("/api/metrics/overview", async (c) => {
   try {
     const { getMetricAggregates } = await import("../../core/observability/metrics");
@@ -572,6 +569,10 @@ app.get("/api/metrics/overview", async (c) => {
     return c.json({ last24h: {}, last7d: {} });
   }
 });
+
+// ===== Metrics API (authenticated routes for external use) =====
+import metricsRouter from "./routes/metrics";
+app.route("/api/metrics", metricsRouter);
 
 // ===== MCP Servers API =====
 import mcpRouter from "./routes/mcp";
@@ -704,7 +705,7 @@ app.post("/api/tts", async (c) => {
 app.get("/api/system/status", async (c) => {
   return c.json({
     status: "online",
-    version: "3.4.0",
+    version: "3.6.1",
     uptime: process.uptime(),
     memory: process.memoryUsage(),
   });

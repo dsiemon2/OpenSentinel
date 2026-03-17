@@ -99,31 +99,57 @@ cd extension && bun install && bun run build
 src/
 ├── index.ts                    # Entry point
 ├── config/env.ts               # Environment config
+├── commands/                   # CLI commands (start, dev, etc.)
 ├── core/
 │   ├── brain.ts                # Claude API + tool execution
 │   ├── memory.ts               # RAG memory system
 │   ├── scheduler.ts            # BullMQ task scheduler
+│   ├── logger.ts               # Structured JSON logger
+│   ├── adapters/               # LLM provider adapters
 │   ├── agents/                 # Sub-agent system
+│   ├── automation/             # Automation rules
+│   ├── brain/                  # Brain subsystem modules
+│   ├── embeddings/             # Embedding generation
 │   ├── enterprise/             # Multi-user, SSO, quotas
-│   ├── intelligence/           # Predictive, relationship, temporal, entity resolution
+│   ├── events/                 # Event system
 │   ├── evolution/              # Evolution, achievements, modes
-│   ├── observability/          # Metrics, replay, alerting
+│   ├── gateway/                # API gateway auth
+│   ├── hooks/                  # Lifecycle hooks
+│   ├── hub/                    # Integration hub
+│   ├── intelligence/           # Predictive, relationship, temporal, entity resolution
+│   ├── mcp/                    # Model Context Protocol servers
+│   ├── memory/                 # Memory subsystem
+│   ├── ml/                     # ML algorithms (IsolationForest, MarkovChain, KMeans)
+│   ├── nodes/                  # Workflow nodes
+│   ├── observability/          # Metrics, replay, alerting, cost tracking
+│   ├── permissions/            # Permission system
 │   ├── personality/            # Personas, mood, domain experts
 │   ├── plugins/                # Plugin system
+│   ├── providers/              # Multi-model LLM providers
 │   ├── security/               # 2FA, vault, GDPR, audit
+│   ├── skills/                 # Skill definitions
+│   ├── sync/                   # Data sync
+│   ├── tunnel/                 # Tunnel/proxy support
 │   └── workflows/              # Automation engine
 ├── inputs/
+│   ├── api/                    # REST API + Web Dashboard
 │   ├── telegram/               # Telegram bot
 │   ├── discord/                # Discord bot
 │   ├── slack/                  # Slack bot
-│   ├── api/                    # REST API
+│   ├── matrix/                 # Matrix bot
 │   ├── calendar/               # Google, Outlook, iCal
-│   ├── triggers/               # Shortcuts, Bluetooth, NFC, Geofence
-│   └── voice/                  # Wake word, VAD, diarization
+│   ├── imessage/               # iMessage bridge
+│   ├── signal/                 # Signal messenger
+│   ├── voice/                  # Wake word, VAD, diarization
+│   ├── websocket/              # WebSocket server
+│   ├── whatsapp/               # WhatsApp bridge
+│   ├── zalo/                   # Zalo messenger
+│   └── triggers/               # Shortcuts, Bluetooth, NFC, Geofence
 ├── integrations/
 │   ├── email/                  # IMAP/SMTP email
 │   ├── twilio/                 # SMS/Phone calls
 │   ├── github/                 # GitHub API
+│   ├── google/                 # Google services (Calendar, Drive, Gmail)
 │   ├── notion/                 # Notion API
 │   ├── homeassistant/          # Home Assistant
 │   ├── spotify/                # Spotify API
@@ -131,15 +157,18 @@ src/
 │   ├── finance/                # Crypto, stocks, currency
 │   ├── public-records/         # FEC, SEC, IRS 990, USASpending, OpenCorporates
 │   ├── documents/              # Document ingestion
+│   ├── neo4j/                  # Graph database
 │   └── vision/                 # Screen/webcam capture
-├── tools/                      # Tool implementations
+├── tools/                      # 124 tool implementations
 ├── outputs/                    # STT, TTS
-├── db/                         # Database schema
+├── sdk/                        # SDK for external integrations
+├── utils/                      # Shared utilities
+├── db/                         # Database schema + migrations
 └── web/                        # React dashboard
 
 desktop/                        # Electron desktop app
 extension/                      # Browser extension
-tests/                          # 170 test files, 5,800+ tests
+tests/                          # 187 test files, 6,400+ tests
 ```
 
 ## Discord Setup (IMPORTANT)
@@ -206,7 +235,7 @@ OpenSentinel includes full SEO configuration for search engine visibility:
 - Favicon source files are generated via Python PIL (dark theme: `rgb(30, 41, 59)`, accent: `rgb(99, 102, 241)`)
 
 ---
-*Last Updated: 2026-03-04*
+*Last Updated: 2026-03-17*
 
 
 ## Workflow Orchestration
